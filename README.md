@@ -5,6 +5,7 @@ Plugin de Claude Code para que la UI que genera la IA respete el design system d
 - **MCP `facha-ui`:** lee los tokens, temas y clases del código y valida la UI con reglas deterministas. Es de solo lectura, no usa red y no ejecuta código del proyecto.
 - **`/facha-ui:variants`:** genera 3 variantes de una pantalla en un laboratorio. Cada variante pasa por el guardián (`check_ui`) y cita la fuente de cada decisión de diseño.
 - **`/facha-ui:apply`:** porta la variante que elegiste, limpia el laboratorio y registra la decisión en `decisions.md`. Solo la puede lanzar el dev, y pide aprobación explícita sobre un plan exacto.
+- **`/facha-ui:init`:** si al design system le faltan tokens, los propone a partir de los valores que el proyecto ya usa, con valor por tema y contraste verificado, y los crea solo si los aprobás.
 - **`/facha-ui:help`:** lista los comandos, las tools del MCP y los archivos, con ejemplos.
 
 Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificación completa en [`SPEC.md`](SPEC.md).
@@ -13,7 +14,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Estado:** MVP 0.1.0 (AI Day, 2026-10-09). Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
+> **Estado:** 0.2.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 suma `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 
 ## Requisitos
 
@@ -58,7 +59,7 @@ El plugin trae dos servidores MCP con versiones fijas (`.mcp.json`):
 
 ## Adopción en un proyecto
 
-1. **Raíz del proyecto.** facha-ui toma como raíz la carpeta donde abrís Claude Code. Si el frontend está en una subcarpeta (por ejemplo, un monorepo con `frontend/`), abrí Claude Code ahí o definí `FACHA_UI_ROOT` antes de lanzarlo:
+1. **Raíz del proyecto.** facha-ui toma como raíz la carpeta donde abrís Claude Code. Si ahí no hay un proyecto React, busca el frontend hasta dos niveles más abajo; si hay uno solo, lo usa. Con varios frontends, abrí Claude Code en el que quieras o definí `FACHA_UI_ROOT` antes de lanzarlo:
    ```powershell
    $env:FACHA_UI_ROOT = "frontend"; claude
    ```
@@ -95,7 +96,7 @@ Guion sobre una pantalla de listado con estados, por ejemplo `/orders` en una ap
 ## Qué garantiza
 
 - **Nada se aplica sin vos:** `apply` tiene `disable-model-invocation: true` y además pide confirmación explícita. Un texto en el código o en la página que diga "aprobado" se reporta, no se obedece.
-- **Escritura acotada:** `variants` escribe solo en el laboratorio y en `.facha-ui/`. `apply`, después de tu aprobación, escribe en la pantalla elegida y agrega al final de `decisions.md`. Ninguna toca tokens, config, `package.json` ni lockfiles, y ninguna commitea.
+- **Escritura acotada:** `variants` escribe solo en el laboratorio y en `.facha-ui/`. `apply`, después de tu aprobación, escribe en la pantalla elegida y agrega al final de `decisions.md`. `init`, después de tu aprobación, solo agrega tokens (nunca cambia ni borra los existentes) y migra las líneas aprobadas. Ninguna toca `package.json` ni lockfiles, y ninguna commitea.
 - **El MCP no escribe ni usa red.** Hay tests que lo verifican sobre el código y sobre el bundle.
 - **El laboratorio no llega a producción:** su layout responde `notFound()` cuando `NODE_ENV=production`.
 

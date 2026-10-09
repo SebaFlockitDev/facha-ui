@@ -564,6 +564,7 @@ facha-ui/
 ├── skills/
 │   ├── variants/SKILL.md         # + templates/ de andamiaje por framework
 │   ├── apply/SKILL.md
+│   ├── init/SKILL.md             # propone y crea tokens desde el uso (0.2.0)
 │   └── help/SKILL.md             # referencia de comandos, tools y archivos
 ├── mcp/                          # paquete facha-ui-mcp (Node + TS)
 │   ├── src/
@@ -704,7 +705,7 @@ Solo el MCP. Las skills son de Claude Code; para otros clientes, el README docum
 - `check_ui` y `audit_project` siguen funcionando con las reglas que no dependen de tokens: `tailwind-arbitrary-value`, `color-literal` e `inline-style`. Si el equipo decide que el tema por defecto de Tailwind **es** su sistema, `tailwind.useDefaultTheme: true` lo formaliza.
 - `variants` **se niega a generar** y explica las dos salidas: definir los tokens mínimos a mano siguiendo el contrato, o esperar a `init`.
 
-**Contrato de `init`** (fuera de alcance hoy; se especifica para que el MVP no lo bloquee):
+**Contrato de `init`** (implementado en 0.2.0, ver §7.10; la tabla es el contrato original):
 
 | | |
 |---|---|
@@ -758,7 +759,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 
 | ID | Criterio | Verificación |
 |---|---|---|
-| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui` y `audit_project`, con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
+| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project` y `scan_styles` (desde 0.2.0), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
 | MCP-2 | **Solo lectura:** las 3 tools y los 4 recursos funcionan sobre un fixture con permisos de solo lectura, y el árbol queda idéntico (hash) después de correrlos | [auto] |
 | MCP-3 | **Sin red ni procesos:** el bundle no referencia `child_process`, `net`, `http`, `https`, `dgram`, `fetch` ni APIs de escritura de `fs` | [auto] análisis del bundle + ESLint |
 | MCP-4 | **Determinismo:** dos ejecuciones con la misma entrada producen JSON idéntico byte a byte | [auto] |
@@ -1000,6 +1001,33 @@ Prompt: [`docs/prompts/03-variants.md`](docs/prompts/03-variants.md).
 
 - Commits chicos y convencionales al terminar cada tarea (T0..T4).
 - Al terminar T1 se frena y se muestran las 3 pruebas antes de seguir.
+
+### 7.10 Versión 0.2.0: mejoras de la primera prueba real
+
+Salen de usar el plugin instalado desde GitHub sobre el proyecto de prueba.
+
+- **Descubrimiento del frontend (vuelve parte de §2.0.2):**
+  - la raíz se resuelve así: `FACHA_UI_ROOT`, después la carpeta abierta si es un proyecto (tiene `facha-ui.config.json` o un `package.json` con React o Next), y si no, una búsqueda hasta 2 niveles abajo que ignora `node_modules` y las carpetas ocultas;
+  - las carpetas con config ganan sobre los `package.json`;
+  - con un candidato, lo usa y lo informa en `assumptions`;
+  - con varios, las tools devuelven `MULTIPLE_PROJECTS` con `candidates`. El servidor arranca igual, para que el error llegue a Claude en lugar de un "connection closed".
+- **Capturas en su lugar:**
+  - Playwright MCP resuelve los nombres explícitos contra el workspace, no contra `--output-dir`. Por eso `get_design_system` informa `project.workspacePath` y `project.screenshotsDir`, relativo al workspace, y la skill guarda `<screenshotsDir>/<slug>/<x>-desktop-<tema>.png` sin mover archivos;
+  - `--output-dir` pasa a `.facha-ui/playwright/`, para que los archivos automáticos (logs de consola) no se mezclen con las capturas.
+- **Escritura visible:** `variants`, `apply` e `init` escriben solo con Write/Edit, un archivo por vez. En la prueba, un `mkdir` + heredoc por shell esquivó la vista previa de cada archivo.
+- **`scan_styles` (tool nueva, solo lectura, determinista):**
+  - inventaria los `color-literal` del proyecto;
+  - los que coinciden con un token existente van a `existing`, para migrar sin crear tokens;
+  - el resto se agrupa por parte (fondo, texto, borde) y por significado. El significado sale de las palabras del selector sin pseudo-clases (estados, `on-accent`, `hover`) o de los tokens de estado que usa la misma regla;
+  - **valores por tema:** el tema por defecto toma el literal en uso. Los otros temas reusan un valor que el proyecto ya declara (`html.dark .x`) o lo derivan. Los tintes de fondo y borde mantienen el tono con una luminosidad relativa a la superficie del tema; el texto ajusta su luminosidad hasta `minRatio` contra su propio fondo (el par de la misma regla, el fondo de la regla o el acento). Los colores translúcidos (overlays) no cambian;
+  - cada valor dice su `origin` y su `method`;
+  - cuando el fondo del texto no se conoce, no inventa un contraste: lo informa;
+  - escalas de tamaños de letra y radios, solo si faltan, fusionando valores casi iguales (±0.5 px en letras, ±1 px en radios);
+  - plan de migración por archivo, con el mayor impacto primero.
+- **`/facha-ui:init`:** solo invocable por el dev. Propone sin escribir, pide aprobación con motivo y alcance (solo tokens, o tokens + migración), agrega los tokens a los bloques de tema sin tocar los existentes, valida con `get_design_system`, `audit_project` y `check_ui`, y registra `dec-<fecha>-init`.
+- **`variants`:** las brechas citan propuestas concretas de `scan_styles` y sugieren `/facha-ui:init`.
+- **Versión:** 0.2.0 en `plugin.json`, el paquete y el servidor, para que las instalaciones existentes reciban la actualización.
+- **Tests nuevos:** descubrimiento (directo, uno, preferencia por config, varios con `MULTIPLE_PROJECTS`, explícito, carpetas ignoradas), `scan_styles` (existentes, propuesta con valor dark derivado, contraste derivado ≥ `minRatio`, plan que cubre todos los literales, determinismo) y el frontmatter de `init`. MCP-2 (solo lectura) incluye `scan_styles`.
 
 ---
 

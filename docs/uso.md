@@ -25,7 +25,7 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 | Node ≥ 20 | Corre el MCP de facha-ui y Playwright MCP |
 | Git | `apply` lo usa para saber si la pantalla cambió desde el run |
 | Google Chrome (o `npx playwright install chromium`) | Capturas de las variantes |
-| Proyecto Next.js con App Router | Único framework soportado en 0.1.0 |
+| Proyecto Next.js con App Router | Único framework soportado por ahora |
 | Tokens como CSS custom properties (`--panel`, `--text`, …) | Con o sin Tailwind 4 |
 
 ---
@@ -71,7 +71,7 @@ claude --plugin-dir "C:\ruta\a\facha-ui"
 2. Corré `/mcp`. Tienen que aparecer dos servidores conectados:
    - `plugin:facha-ui:facha-ui`, el guardián;
    - `plugin:facha-ui:playwright`, para las capturas. La primera vez tarda un poco más, porque descarga `@playwright/mcp@0.0.83`.
-3. Corré `/facha-ui:help`. Tiene que mostrar los comandos, las tools y los archivos del plugin. También podés pedir una sola sección: `/facha-ui:help variants`, `apply`, `tools` o `files`.
+3. Corré `/facha-ui:help`. Tiene que mostrar los comandos, las tools y los archivos del plugin. También podés pedir una sola sección: `/facha-ui:help variants`, `apply`, `init`, `tools` o `files`.
 4. Preguntale a Claude: *"¿qué design system tiene este proyecto?"*. Tiene que llamar a `get_design_system` y responder con los tokens, los temas y lo que falta.
 
 Si algo de esto falla, mirá [Problemas frecuentes](#9-problemas-frecuentes).
@@ -85,9 +85,10 @@ Si algo de esto falla, mirá [Problemas frecuentes](#9-problemas-frecuentes).
 facha-ui trabaja sobre la carpeta donde está el `package.json` del frontend. La resuelve en este orden:
 
 1. la variable `FACHA_UI_ROOT` (absoluta, o relativa a la carpeta donde abriste Claude Code);
-2. la carpeta donde abriste Claude Code.
+2. la carpeta donde abriste Claude Code, si es un proyecto (tiene `facha-ui.config.json` o un `package.json` con React);
+3. si no, la busca sola hasta dos niveles más abajo, ignorando `node_modules` y carpetas ocultas. Si hay un solo frontend, lo usa y te lo avisa ("Project discovered at frontend/"). Si hay varios, las tools responden `MULTIPLE_PROJECTS` con la lista para que elijas.
 
-En un monorepo, abrí Claude Code en el frontend o definí la variable antes de lanzarlo:
+En un monorepo con un solo frontend no hace falta nada. Con varios, abrí Claude Code en el que quieras o definí la variable antes de lanzarlo:
 
 ```powershell
 $env:FACHA_UI_ROOT = "frontend"; claude
@@ -134,7 +135,7 @@ app/lab/
 .facha-ui/
 ```
 
-El laboratorio igual devuelve 404 en producción, pero no conviene que llegue a `main`.
+El laboratorio igual devuelve 404 en producción, pero no conviene que llegue a `main`. Si abrís Claude Code en la raíz de un monorepo, Playwright deja sus archivos automáticos en `.facha-ui/playwright/` de esa carpeta: ignorala también en el `.gitignore` de la raíz.
 
 ---
 
@@ -148,12 +149,35 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | *"¿Qué color uso para X?"* | `get_design_system` | El token, o la aclaración de que no existe y cuál es la alternativa |
 | *"Revisá `app/orders/page.tsx`"* | `check_ui` | Violaciones con archivo:línea, severidad y sugerencia de token |
 | *"¿Cuántas violaciones tiene el proyecto?"* | `audit_project` | Totales por severidad, por regla y por archivo |
+| *"¿Qué tokens le faltan a este proyecto?"* | `scan_styles` | Propuesta de tokens a partir de los valores en uso, con valor por tema, contraste y plan de migración |
 
 `status` puede tener tres valores:
 
 - **`ok`:** el proyecto cumple el contrato mínimo.
 - **`partial`:** faltan roles opcionales. `variants` funciona igual y avisa lo que falta.
 - **`missing`:** no hay tokens. `variants` se niega a generar, porque sin tokens la IA solo podría inventar.
+
+### 5.1 Si faltan tokens: `/facha-ui:init`
+
+Cuando el design system no existe o le faltan roles, como los colores de estado, `/facha-ui:init` te ayuda a crearlos **sin inventar**:
+
+```text
+/facha-ui:init
+```
+
+1. **Releva lo que ya usás.** La tool `scan_styles` encuentra los colores escritos a mano y los agrupa por uso (fondo, texto, borde) y por significado (estado, texto sobre acento, hover), según los selectores donde aparecen. Con `/facha-ui:init scales` también propone escalas de tamaños de letra y radios, fusionando valores casi iguales.
+2. **Te propone tokens.** Cada propuesta trae:
+   - un nombre;
+   - el valor del tema por defecto, que es el que ya está en uso;
+   - el valor de cada tema extra: lo que el proyecto ya declara o, si no hay, uno derivado con contraste verificado, con la explicación de cómo se obtuvo;
+   - el contraste;
+   - los lugares donde se usa.
+
+   Los colores que ya coinciden con un token existente se migran a ese token, sin crear uno nuevo.
+3. **Vos decidís.** Podés crear todo o una parte, cambiar nombres o valores, y elegir si además se reemplazan los literales. Aprobás con un motivo, igual que en `apply`.
+4. **Escribe y valida.** Agrega los tokens a tu archivo de tokens (nunca cambia ni borra los existentes), migra las líneas aprobadas, compara `audit_project` antes y después, y registra la decisión en `decisions.md`. No commitea.
+
+Desde ese momento, `get_design_system` devuelve los tokens nuevos y `variants` los usa.
 
 ---
 
@@ -253,7 +277,7 @@ Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede 
 
 ### 7.4 Descartar sin aplicar
 
-La versión 0.1.0 no tiene `--discard`. Tenés dos formas:
+`apply` todavía no tiene `--discard`. Tenés dos formas:
 
 - volver a correr `/facha-ui:variants` sobre la misma pantalla y aceptar descartar el run anterior cuando lo pregunte;
 - borrar a mano `app/lab/<slug>/` y `.facha-ui/runs/<slug>.json`.
@@ -276,10 +300,11 @@ Atajos útiles:
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
 | `/mcp` muestra `facha-ui` desconectado | Node < 20, o el plugin no está instalado | `node --version`; reinstalá el plugin |
-| `PROJECT_NOT_FOUND` o tokens vacíos | Claude Code se abrió en una carpeta que no es el frontend | Abrilo en el frontend o usá `FACHA_UI_ROOT` (paso 4.1) |
+| `PROJECT_NOT_FOUND` o tokens vacíos | Claude Code se abrió en una carpeta que no contiene el frontend | Abrilo en el frontend o usá `FACHA_UI_ROOT` (paso 4.1) |
+| `MULTIPLE_PROJECTS` | Hay más de un frontend debajo de la carpeta abierta | Abrí Claude Code en el que quieras o usá `FACHA_UI_ROOT` (paso 4.1) |
 | `CONFIG_INVALID` | Clave mal escrita o valor inválido en la config | El error indica el campo exacto. `preview.baseUrl` tiene que ser loopback |
 | `PATH_OUTSIDE_PROJECT` | Le pediste revisar un archivo fuera del frontend | Usá rutas dentro de la raíz del proyecto |
-| `variants` no genera (`status: missing`) | El proyecto no tiene tokens | Definí los roles mínimos (superficie, texto, borde, acento) como CSS custom properties |
+| `variants` no genera (`status: missing`) | El proyecto no tiene tokens | Corré `/facha-ui:init` para proponerlos desde los valores en uso (paso 5.1) |
 | Las capturas no salen | Chrome no está instalado, o el dev server no está levantado | Instalá Chrome o `npx playwright install chromium`; levantá la app; si no, usá las URLs que lista la skill |
 | La captura muestra el login | La app pide sesión | Poné `preview.auth: "manual"` e iniciá sesión vos en la ventana de Playwright |
 | `?theme=dark` no cambia nada | El tema se define con `@media (prefers-color-scheme)` | No se puede forzar desde la página: usá la emulación de color del navegador |
@@ -294,18 +319,21 @@ Atajos útiles:
 |---|---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
-| `/facha-ui:help [variants\|apply\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
+| `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
+| `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
 
 | Tool MCP | Hace |
 |---|---|
 | `get_design_system` | Lee tokens, temas, clases, cobertura, brechas, contraste, guidelines y decisiones |
 | `check_ui` | Valida un archivo o una carpeta |
 | `audit_project` | Audita todo el proyecto (sin el lab) |
+| `scan_styles` | Propone tokens a partir de los valores que el proyecto ya usa (no escribe) |
 
 | Archivo | Qué es |
 |---|---|
 | `facha-ui.config.json` | Config del proyecto |
 | `app/lab/<slug>/<x>/page.tsx` | Variantes (solo en desarrollo) |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas |
-| `.facha-ui/screenshots/` | Capturas por variante y tema |
+| `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
+| `.facha-ui/playwright/` | Archivos automáticos de Playwright, como los logs de consola (en la carpeta donde abriste Claude Code) |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas |
