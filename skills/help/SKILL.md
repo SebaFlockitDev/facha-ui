@@ -25,8 +25,10 @@ Show the reference below to the developer. Rules:
 |---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Ajusta una variante que te gustó (por ejemplo, agregar o mover algo), con historial de revisiones |
+| `/facha-ui:variants <slug> live [stop]` | Modo en vivo: pedís los cambios desde un panel en el navegador y los ves al instante |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
 | `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
+| `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
 | `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Esta ayuda |
 
 **Flujo en 4 pasos**
@@ -55,6 +57,10 @@ Show the reference below to the developer. Rules:
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
 - **Ajustar una variante:** `/facha-ui:variants orders b "agregá un contador al lado del título"`, o pedíselo en la misma conversación. Cambia esa variante y nada más, avisa brechas antes de tocar, vuelve a pasar el guardián, saca capturas nuevas y guarda cada ajuste como revisión (r1, r2…) con tu pedido. Si preferís conservar la original, pedí el ajuste "como variante nueva" (b2).
+- **Modo en vivo:** `/facha-ui:variants orders live`. En cada variante aparece un panel **facha-ui** abajo a la derecha: escribís el cambio, Claude lo aplica como revisión y la página se recarga sola. "Elegir esta variante" no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code. Dura 2 horas o hasta `/facha-ui:variants orders live stop`. Necesita la sesión de Claude Code abierta y la app corriendo.
+  - **⌖ Señalar:** hacés clic en hasta 3 elementos y los nombrás [1], [2], [3] en el pedido; Claude sabe qué componente los dibuja.
+  - **Paleta:** probás con un clic paletas predefinidas o tu color sobre toda la app, solo en tu navegador, con el contraste y los conflictos (y su solución) a la vista. *Proponer* la guarda para `/facha-ui:init palette`.
+  - El panel se arrastra, se ajusta de tamaño, se minimiza (–) o se oculta (×; Alt+Shift+F lo trae).
 
 ### apply
 
@@ -77,6 +83,7 @@ Show the reference below to the developer. Rules:
 
 ```text
 /facha-ui:init [colors|scales|all]
+/facha-ui:init palette <archivo>
 ```
 
 - Para cuando el design system no existe o le faltan roles, como los colores de estado.
@@ -89,6 +96,7 @@ Show the reference below to the developer. Rules:
 - Creás todo o una parte, y elegís si migrar los literales. Aprobás con un motivo.
 - Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
   Nunca cambia ni borra tokens existentes. No commitea.
+- **Paleta:** `/facha-ui:init palette <archivo>` adopta una paleta propuesta desde el panel en vivo. Muestra cada token antes y después, el contraste y los conflictos con su solución; cambia solo esos valores después de tu aprobación y registra la decisión.
 
 ### tools
 

@@ -153,6 +153,8 @@ app/lab/
 .facha-ui/
 ```
 
+Si preferís versionar los runs (`.facha-ui/runs/`) para que el equipo vea el historial, ignorá al menos `.facha-ui/live/` (tiene el token de la sesión del panel en vivo), `.facha-ui/screenshots/` y `.facha-ui/playwright/`. El plugin en sí nunca entra en tu repo: Claude Code lo instala en `~/.claude/plugins`. Si `.facha-ui/live/` no está ignorado, `/facha-ui:variants` te avisa.
+
 El laboratorio igual devuelve 404 en producción, pero no conviene que llegue a `main`. Si abrís Claude Code en la raíz de un monorepo, Playwright deja sus archivos automáticos en `.facha-ui/playwright/` de esa carpeta: ignorala también en el `.gitignore` de la raíz.
 
 ---
@@ -213,6 +215,14 @@ Cuando el design system no existe o le faltan roles, como los colores de estado,
 4. **Escribe y valida.** Agrega los tokens a tu archivo de tokens (nunca cambia ni borra los existentes), migra las líneas aprobadas, compara `audit_project` antes y después, y registra la decisión en `decisions.md`. No commitea.
 
 Desde ese momento, `get_design_system` devuelve los tokens nuevos y `variants` los usa.
+
+**Adoptar una paleta** probada en el panel en vivo (6.6):
+
+```text
+/facha-ui:init palette .facha-ui/proposals/palette-20261009-1937-azul-confianza.json
+```
+
+Verifica que la propuesta siga vigente, te muestra cada token antes y después, el contraste por tema y los conflictos con su solución (por ejemplo, colores escritos a mano que quedarían con el color anterior y conviene convertir en tokens). Cambia solo esos valores, después de tu aprobación y con el motivo, y registra la decisión.
 
 ---
 
@@ -296,6 +306,20 @@ Podés ajustar las veces que quieras. Cuando la apliques, `apply` registra en `d
 
 Si preferís **conservar la original** para comparar, pedí el ajuste *"como variante nueva"*: se crea `b2` a partir de la B y se ajusta la copia.
 
+### 6.6 Modo en vivo: ajustar desde el navegador
+
+```text
+/facha-ui:variants orders live
+```
+
+En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la app corriendo y esta sesión de Claude Code abierta; dura 2 horas o hasta `/facha-ui:variants orders live stop`.
+
+- **Pedir un cambio:** lo escribís en el panel y tocás *Pedir cambio* (o Ctrl+Enter). Claude lo aplica como revisión, con las mismas reglas que en 6.5, y la página se actualiza sola. El panel muestra el estado: en cola, aplicando, listo, necesita tu decisión o no se pudo. Si falta un valor en el design system, te lo pregunta ahí mismo con las opciones.
+- **⌖ Señalar:** en lugar de describir "el botón de abajo", hacé clic en él. Queda como `[1]` (hasta 3) y lo nombrás en el texto: *"mové [1] arriba de la tabla"*. Mientras señalás, la página no reacciona a los clics; ↑ elige el contenedor que lo envuelve, ↓ vuelve, Esc cancela. Claude recibe qué elemento es y qué componente lo dibuja.
+- **Paleta:** probá otra paleta sobre toda la app con un clic (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) o con tu propio color. Es solo una vista previa en tu navegador. El panel te muestra el contraste y, antes de que propongas, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "pagado", y qué paletas no tienen ese problema. *Proponer esta paleta* la guarda en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1).
+- **Elegir esta variante** no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code, como siempre.
+- **El panel:** se arrastra por el título (doble clic lo vuelve a la esquina), se ajusta de tamaño desde la esquina inferior derecha, **–** lo minimiza a una pastilla abajo a la derecha y **×** lo oculta (vuelve al recargar o con Alt+Shift+F). No aparece en las capturas automáticas.
+
 ---
 
 ## 7. Aplicar una variante
@@ -374,8 +398,10 @@ Atajos útiles:
 |---|---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Vos, o Claude cuando pedís un cambio en una variante | Solo esa variante, el run y sus capturas |
+| `/facha-ui:variants <slug> live [stop]` | Vos | Lo mismo que un ajuste, más el panel del lab y `.facha-ui/live/`; las paletas propuestas en `.facha-ui/proposals/` |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
+| `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
 | `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
 
 | Tool MCP | Hace |
@@ -391,5 +417,7 @@ Atajos útiles:
 | `app/lab/<slug>/<x>/page.tsx` | Variantes (solo en desarrollo) |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
+| `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos, estados y la base de la paleta. No lo versiones |
+| `.facha-ui/proposals/` | Paletas propuestas desde el panel |
 | `.facha-ui/playwright/` | Archivos automáticos de Playwright, como los logs de consola (en la carpeta donde abriste Claude Code) |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas |

@@ -742,9 +742,10 @@ Solo el MCP. Las skills son de Claude Code; para otros clientes, el README docum
 - La aprobación vale para una variante y un run concretos; si el plan cambia, se vuelve a pedir.
 
 **S4. Las skills escriben solo donde corresponde.**
-- `variants`: únicamente `lab.dir/<slug>/`, el andamiaje del lab y `.facha-ui/`.
+- `variants`: únicamente `lab.dir/<slug>/`, el andamiaje del lab (incluido el panel en vivo y su endpoint) y `.facha-ui/`.
 - `apply`, después de la aprobación: los archivos de la pantalla destino, la limpieza del lab y `memory.decisionsFile` (solo para agregar).
-- Ninguna skill toca archivos de tokens, la config, `package.json`, `.gitignore` ni lockfiles. Tampoco instala dependencias ni hace commits o push.
+- `init`, después de la aprobación: agrega tokens y migra las líneas aprobadas. En modo `palette`, cambia solo los valores de los tokens de la propuesta aprobada. Es la única skill que toca el archivo de tokens.
+- Ninguna skill toca la config existente, `package.json`, `.gitignore` ni lockfiles. Tampoco instala dependencias ni hace commits o push.
 - No se pre-aprueba `Write`, `Edit` ni `Bash`: rigen los permisos de Claude Code.
 
 **S5. Navegación acotada.**
@@ -753,6 +754,12 @@ Solo el MCP. Las skills son de Claude Code; para otros clientes, el README docum
 - facha-ui no guarda ni maneja credenciales. El perfil del navegador es efímero (`--isolated`).
 
 **S6. El laboratorio no llega a producción.** En Next, el layout del lab hace `notFound()` en producción; en Vite, el lab no está en el entry de build. En ambos casos el lab está en `.gitignore` y `apply` lo limpia.
+
+**S6b. Modo en vivo.** El panel del lab habla con un endpoint que existe solo en desarrollo (404 en producción) y se borra con el lab.
+- Acepta pedidos solo del origen del lab (host y `Origin` iguales a `preview.baseUrl`, `Sec-Fetch-Site: same-origin`), solo como JSON (fuerza un preflight CORS que otro sitio no pasa) y solo con el token de la sesión, comparado en tiempo constante.
+- Valida cada campo: elementos señalados (campos conocidos, largos acotados, sin caracteres de control) y paletas (solo tokens y temas que existen, valores sin llaves, punto y coma, comillas ni `url()`).
+- El panel no aplica nada: elegir una variante prepara `/facha-ui:apply` y una paleta queda como propuesta para `/facha-ui:init palette`, ambas con aprobación en la conversación. Lo que llega del panel es un pedido del dev, pero sigue sujeto a todas las reglas: un pedido de aplicar, borrar o salir del alcance se rechaza.
+- `.facha-ui/live/` guarda el token de la sesión: `variants` avisa si no está en `.gitignore`.
 
 **S7. Cadena de suministro.** Versiones exactas en `.mcp.json` y `package.json`, lockfile commiteado y bundle construido en CI desde un tag. `run-pinned.mjs` rechaza especificadores sin versión exacta.
 
@@ -1087,6 +1094,21 @@ Pedido del dev: "si nos gusta una variante pero queremos agregarle o modificarle
 - **Fuente nueva `request`:** para las decisiones de estructura que el dev pidió. Los valores visuales siguen limitados a `token`, `class`, `rule` o `decision`.
 - **`apply`:** muestra las revisiones en el plan, agrega `**Ajustes pedidos:**` a la entrada de `decisions.md`, toma los precedentes de las decisiones actuales y trata lo pedido explícitamente (`request`) como precedente fuerte. Al limpiar, conserva las capturas de todas las revisiones de la variante elegida.
 - **Tests:** el contrato queda fijado en las skills (sintaxis, pasos R1–R7, esquema de `revisions`, fuente `request`, `Ajustes pedidos` en `apply` y el comando en `help`).
+
+### 7.15 Versión 0.7.0: modo en vivo, señalar elementos y paletas
+
+Pedido del dev: ver los cambios en tiempo real sobre la variante que le gusta, pedirlos desde la misma pantalla y aprobar desde ahí; después, poder señalar un elemento en lugar de describirlo, y probar paletas de colores para toda la app.
+
+- **Modo en vivo** (`/facha-ui:variants <slug> live [stop]`): el lab muestra un panel flotante. El dev escribe el cambio, Claude lo aplica como revisión (R1–R7) y Next recarga la página. El panel muestra el estado de cada pedido (en cola, aplicando, listo, necesita tu decisión, no se pudo). Dura 2 horas.
+- **Cómo llega el pedido a Claude:** el endpoint del lab (`<lab.dir>/facha-live/`) agrega cada pedido a `.facha-ui/live/requests.jsonl`; `scripts/live-watch.mjs`, lanzado con la tool Monitor de Claude Code, lo imprime y despierta a la sesión. Al reiniciarse, reimprime los pedidos sin estado final, así no se pierde ninguno. El estado vuelve al panel por `.facha-ui/live/status.json`.
+- **Elegir no aplica:** "Elegir esta variante" pide confirmar con `/facha-ui:apply` en Claude Code, con el plan y el motivo de siempre.
+- **Panel:** Shadow DOM con estilos propios (no usa ni afecta el design system), se oculta en navegadores automatizados (las capturas salen limpias), se arrastra por el título, se ajusta de tamaño, se minimiza a una pastilla fija abajo a la derecha y se oculta (Alt+Shift+F lo trae). Posición, tamaño y paleta se recuerdan en el navegador. El historial se pliega: solo se ve el último pedido.
+- **Señalar** (hasta 3 elementos, `[1]`–`[3]` en el texto): el pedido lleva etiqueta, texto, clases, una ruta CSS, la posición y el componente de React que dibuja el elemento (en desarrollo; con Webpack también el archivo). Mientras se señala, la página no reacciona a los clics; ↑ y ↓ eligen el contenedor. Si el elemento está fuera de la variante (por ejemplo, el shell de la app), la skill lo dice en R2 y ofrece lo que sí puede hacer. Después de aplicar, dice qué pasó con cada elemento.
+- **Paleta:** `scripts/palette-base.mjs` arma `.facha-ui/live/palette.json` desde `get_design_system` (temas, tokens de color y colores escritos a mano). El panel recalcula en OKLCH la familia de la marca y los neutros teñidos, conservando la luminosidad de cada token, y sobreescribe los tokens solo en ese navegador. Hay 5 paletas predefinidas (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) y "tu color". Acento y estados no cambian.
+- **Conflictos con solución** (pedido del dev: "no nos limitamos a los problemas, damos soluciones"): antes de proponer, el panel muestra el contraste WCAG por tema y lo que la paleta rompería, cada cosa con su salida: estados que se confundirían con la marca (ΔE OKLab×100 < 10) → paletas sin conflictos o una señal que no sea solo color (WCAG 1.4.1); contraste que baja → otro tono u otra paleta; colores escritos a mano que no siguen la paleta → tokens con `/facha-ui:init colors`.
+- **Proponer y adoptar:** la propuesta queda en `.facha-ui/proposals/palette-*.json` (L6). Solo `/facha-ui:init palette <archivo>` cambia los tokens: verifica que la propuesta no esté vieja, muestra el plan con contraste antes y después y los conflictos con su solución, pide aprobación y motivo, valida con `health` y `audit_project` y registra `dec-<fecha>-palette`.
+- **Commits accidentales:** el plugin vive fuera del repo; lo que genera sí queda en el proyecto. `variants` avisa si `.facha-ui/live/` (que tiene el token de la sesión) no está en `.gitignore`, sin editarlo.
+- **Tests:** endpoint (origen, host, token, JSON, producción, validación de pedidos, elementos señalados y paletas, inyección de CSS), watcher (reimpresión, elementos, paletas, fin de sesión) y `palette-base.mjs` sobre un fixture.
 
 ---
 

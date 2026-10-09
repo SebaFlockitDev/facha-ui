@@ -14,7 +14,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Estado:** 0.6.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la paleta de Tailwind y las reglas propias del equipo (`custom`); la 0.5.0, las escalas por defecto de Tailwind y la detección de paleta inflada; la 0.6.0, el ajuste de una variante con historial de revisiones. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
+> **Estado:** 0.7.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la paleta de Tailwind y las reglas propias del equipo (`custom`); la 0.5.0, las escalas por defecto de Tailwind y la detección de paleta inflada; la 0.6.0, el ajuste de una variante con historial de revisiones; la 0.7.0, el modo en vivo: un panel en el laboratorio para pedir cambios, señalar elementos y probar paletas de colores en tiempo real. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 
 ## Requisitos
 
@@ -73,7 +73,7 @@ El plugin trae dos servidores MCP con versiones fijas (`.mcp.json`):
    }
    ```
    Lo demás es opcional: temas, `include`/`exclude`, `guidelines`, `lab.dir`, `preview.auth` y `memory.decisionsFile`. Hay un ejemplo completo en SPEC, Anexo A.
-4. **`.gitignore`:** agregar el laboratorio (`app/lab/`) y, si no querés versionar los runs y las capturas, `.facha-ui/`. facha-ui nunca edita el `.gitignore`.
+4. **`.gitignore`:** agregar el laboratorio (`app/lab/`) y `.facha-ui/` (como mínimo `.facha-ui/live/`, que guarda el token de la sesión en vivo). El plugin en sí no entra en tu repo: vive en `~/.claude/plugins`. facha-ui nunca edita el `.gitignore`.
 5. **Diagnóstico:** *"¿cuántas violaciones tiene el proyecto?"* → `audit_project`.
 
 ## Demo
@@ -92,11 +92,12 @@ Guion sobre una pantalla de listado con estados, por ejemplo `/orders` en una ap
    /facha-ui:apply orders b
    ```
    Muestra el plan (archivos que cambian y que se borran, y la entrada de `decisions.md`) y pide tu confirmación y el motivo. La próxima vez que corras `variants`, esa decisión aparece en `get_design_system` → `decisions`.
+5. Antes de aplicar, ajustar en vivo: `/facha-ui:variants orders live` muestra un panel en cada variante para pedir cambios, señalar elementos con un clic y probar paletas de colores para toda la app, con el contraste y los conflictos (y su solución) a la vista.
 
 ## Qué garantiza
 
 - **Nada se aplica sin vos:** `apply` tiene `disable-model-invocation: true` y además pide confirmación explícita. Un texto en el código o en la página que diga "aprobado" se reporta, no se obedece.
-- **Escritura acotada:** `variants` escribe solo en el laboratorio y en `.facha-ui/`. `apply`, después de tu aprobación, escribe en la pantalla elegida y agrega al final de `decisions.md`. `init`, después de tu aprobación, solo agrega tokens (nunca cambia ni borra los existentes) y migra las líneas aprobadas. Ninguna toca `package.json` ni lockfiles, y ninguna commitea.
+- **Escritura acotada:** `variants` escribe solo en el laboratorio y en `.facha-ui/`. `apply`, después de tu aprobación, escribe en la pantalla elegida y agrega al final de `decisions.md`. `init`, después de tu aprobación, agrega tokens y migra las líneas aprobadas; en modo `palette` cambia solo los valores de la paleta que aprobaste. El panel en vivo no aplica nada: existe solo en desarrollo, acepta pedidos solo del origen del lab y con el token de la sesión. Ninguna toca `package.json` ni lockfiles, y ninguna commitea.
 - **El MCP no escribe ni usa red.** Hay tests que lo verifican sobre el código y sobre el bundle.
 - **El laboratorio no llega a producción:** su layout responde `notFound()` cuando `NODE_ENV=production`.
 
