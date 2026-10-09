@@ -157,6 +157,20 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 - **`partial`:** faltan roles opcionales. `variants` funciona igual y avisa lo que falta.
 - **`missing`:** no hay tokens. `variants` se niega a generar, porque sin tokens la IA solo podría inventar.
 
+**Qué revisa el guardián** (`check_ui` y `audit_project`):
+
+| Regla | Severidad | Detecta |
+|---|---|---|
+| `color-literal` | error | Colores escritos a mano en vez de tokens |
+| `tailwind-arbitrary-value` | error (warning para tamaños de layout; info si el valor es un token) | Valores sueltos como `text-[13px]` |
+| `unknown-token` | error | `var(--x)` de un token que no existe |
+| `inline-style` | info | `style={{…}}`: falta una clase o un patrón |
+| `theme-contrast` | error si el fondo es conocido, warning si no | Un texto que no llega a 4.5:1 contra su fondo en algún tema. Sugiere un token legible en todos los temas |
+| `class-contrast` | igual que la anterior | Una clase del CSS cuyo color de texto falla, marcada en cada componente que la usa |
+| `non-text-contrast` | warning | Bordes de campos y botones, anillos de foco e íconos por debajo de 3:1 (WCAG 1.4.11) |
+
+Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste y los **estados que se confunden por color**, también simulando deuteranopía y protanopía. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
+
 ### 5.1 Si faltan tokens: `/facha-ui:init`
 
 Cuando el design system no existe o le faltan roles, como los colores de estado, `/facha-ui:init` te ayuda a crearlos **sin inventar**:

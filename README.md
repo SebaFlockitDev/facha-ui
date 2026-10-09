@@ -2,7 +2,7 @@
 
 Plugin de Claude Code para que la UI que genera la IA respete el design system de **tu** proyecto.
 
-- **MCP `facha-ui`:** lee los tokens, temas y clases del código y valida la UI con reglas deterministas. Es de solo lectura, no usa red y no ejecuta código del proyecto.
+- **MCP `facha-ui`:** lee los tokens, temas y clases del código y valida la UI con reglas deterministas, incluido el contraste de cada texto, borde, foco e ícono en cada tema y los estados que se confunden por color (también con daltonismo simulado). Es de solo lectura, no usa red y no ejecuta código del proyecto.
 - **`/facha-ui:variants`:** genera 3 variantes de una pantalla en un laboratorio. Cada variante pasa por el guardián (`check_ui`) y cita la fuente de cada decisión de diseño.
 - **`/facha-ui:apply`:** porta la variante que elegiste, limpia el laboratorio y registra la decisión en `decisions.md`. Solo la puede lanzar el dev, y pide aprobación explícita sobre un plan exacto.
 - **`/facha-ui:init`:** si al design system le faltan tokens, los propone a partir de los valores que el proyecto ya usa, con valor por tema y contraste verificado, y los crea solo si los aprobás.
@@ -14,7 +14,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Estado:** 0.2.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 suma `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
+> **Estado:** 0.3.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0 suma reglas de calidad visual medibles: contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 
 ## Requisitos
 

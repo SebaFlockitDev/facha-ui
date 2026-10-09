@@ -125,7 +125,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `rules` | `Record<RuleId, Severity \| {severity, options}>` | ver §2.a.4 | Severidad por regla (`off`, `info`, `warning`, `error`) |
 | `allow.literals` | `string[]` | `["transparent","currentColor","inherit","none"]` (siempre incluidos) | Literales de color aceptados |
 | `custom` | `CustomRule[]` | `[]` | Reglas declarativas extra (ver §2.a.4). No se ejecuta código del proyecto |
-| `contrast` | `{ surfaces: string[], minRatio: number }` | `surfaces`: tokens con rol `surface`; `minRatio`: 4.5 | Base para `theme-contrast` |
+| `contrast` | `{ surfaces: string[], minRatio: number, nonTextMinRatio: number, statusMinDeltaE: number }` | `surfaces`: tokens con rol `surface`; `minRatio`: 4.5; `nonTextMinRatio`: 3; `statusMinDeltaE`: 10 | Base para `theme-contrast`, `class-contrast`, `non-text-contrast` y `status-confusable` (desde 0.3.0). Declarar `surfaces` hace que los contrastes medidos contra ellas sean `error` |
 | `suggest.maxDeltaE` | `number` | `2.0` (ΔE OKLab×100) | Distancia máxima para sugerir un token "cercano" |
 | `guidelines` | `string[]` | `[]` | Reglas en lenguaje natural para la IA (no verificables; se citan como fuente) |
 | `lab.dir` | `string` | `app/lab` (next) / `facha-lab` (vite) | Directorio del laboratorio de variantes |
@@ -341,9 +341,11 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `tailwind-palette-color` | error | Utilidades de la paleta por defecto (`text-gray-500`, `bg-white`, `border-slate-200`…) que no están mapeadas a tokens, salvo `useDefaultTheme: true` | `text-gray-500` en una tarjeta |
 | `tailwind-default-scale` | warning | Escalas por defecto no mapeadas a tokens para radio, sombra, tamaño de fuente, tracking y leading (`rounded-lg`, `shadow-md`, `text-sm`, `tracking-wide`). El espaciado y el sizing se aceptan por defecto (`allowDefaultScale`) | `rounded-lg`, `tracking-wide` |
 | `inline-style` | info | `style={{…}}`: señal de un patrón que falta. Si contiene un literal, ese literal se reporta además como `color-literal` (error) | `style={{ color: "var(--color-primary)" }}` en links |
-| `theme-contrast` | warning | Un token usado como `color` que cumple `contrast.minRatio` contra las superficies en el tema por defecto pero **no** en otro tema. Si la misma regla CSS fija el fondo, se usa ese par (con composición alfa) | `color: var(--color-title)` → 1,2:1 en dark; `color: var(--color-primary)` → 3,1:1 en dark |
+| `theme-contrast` | error si el fondo es conocido, warning si no (desde 0.3.0, §7.11) | Un color de texto (`color` en CSS o `style={{}}`) que no llega a `contrast.minRatio` en algún tema. Si la misma regla CSS fija el fondo, se usa ese par (con composición alfa); si no, el peor caso contra las superficies. Sugiere un token legible en todos los temas, de la misma familia de rol | `color: var(--color-title)` → 1,2:1 en dark; `color: var(--color-primary)` → 3,1:1 en dark |
+| `class-contrast` | igual que `theme-contrast` (desde 0.3.0) | Una clase cuya regla CSS fija un color de texto que falla en algún tema, reportada donde el componente la usa | `className="numeric"` con `.table .numeric { color: var(--color-title) }` |
+| `non-text-contrast` | warning (desde 0.3.0) | WCAG 1.4.11: bordes y outlines de partes interactivas, anillos de foco e íconos SVG por debajo de `contrast.nonTextMinRatio` (3:1) | `.field input { border: 1px solid var(--color-border) }` → 1,2:1 |
 
-**Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`.
+**Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas.
 
 **Reglas extra declarativas (`custom`)** en el MVP. No se ejecuta código del proyecto:
 
@@ -589,7 +591,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -835,7 +837,6 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 |---|---|
 | Adapter de framework `vite-react` (lab en `facha-lab/`) | §2.b.4 |
 | Reglas `tailwind-palette-color` y `tailwind-default-scale` | §2.a.4 |
-| `theme-contrast` por uso (en el MVP solo hay `health` token a token) | §2.a.4 |
 | Reglas declarativas `custom` | §2.a.4 |
 | Directivas `facha-ui-ignore-next-line` | §2.a.4 |
 | Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
@@ -891,7 +892,7 @@ El SPEC v0.1 (§1–§6) está aprobado como **visión**. Esta sección define e
 ### 7.2 Excluido hoy (pasa al roadmap)
 
 - `vite-react`;
-- reglas `tailwind-palette-color`, `tailwind-default-scale`, `theme-contrast` por uso y `custom`;
+- reglas `tailwind-palette-color`, `tailwind-default-scale` y `custom` (`theme-contrast` por uso llegó en 0.3.0, §7.11);
 - directivas `facha-ui-ignore`;
 - resources `decisions` y `config`;
 - `outputSchema`;
@@ -1028,6 +1029,21 @@ Salen de usar el plugin instalado desde GitHub sobre el proyecto de prueba.
 - **`variants`:** las brechas citan propuestas concretas de `scan_styles` y sugieren `/facha-ui:init`.
 - **Versión:** 0.2.0 en `plugin.json`, el paquete y el servidor, para que las instalaciones existentes reciban la actualización.
 - **Tests nuevos:** descubrimiento (directo, uno, preferencia por config, varios con `MULTIPLE_PROJECTS`, explícito, carpetas ignoradas), `scan_styles` (existentes, propuesta con valor dark derivado, contraste derivado ≥ `minRatio`, plan que cubre todos los literales, determinismo) y el frontmatter de `init`. MCP-2 (solo lectura) incluye `scan_styles`.
+
+### 7.11 Versión 0.3.0: calidad visual medible
+
+Criterio: lo que se puede medir lo valida el guardián; lo que es gusto lo sugiere la IA y nunca bloquea. Todo se mide con los tokens y el CSS del proyecto.
+
+- **`theme-contrast` por uso:** cada `color` de CSS o de `style={{}}` se mide contra su fondo real en cada tema: el de la misma regla si lo declara, o el peor caso contra las superficies.
+  - **Severidad según certeza:** `error` cuando el fondo es conocido (el de la regla, o `contrast.surfaces` declarado por el equipo); `warning` cuando las superficies se autodetectaron. Cambia la visión, que lo definía como warning, porque la prueba real mostró que un texto ilegible en dark tiene que bloquear la variante.
+  - **Sin adivinar:** no se mide si el fondo es un degradado, una imagen o un overlay translúcido; tampoco el texto que sería invisible en el tema por defecto contra las superficies (está sobre otro fondo, como una barra lateral oscura). Si una regla tiene override para un tema (`html.dark .x { color }`), la regla base no se mide en ese tema.
+  - **Sugerencia:** un token legible en todos los temas sobre ese fondo, primero de la misma familia de rol (texto con texto, acento con acento). Un color de estado nunca cae en un color de otra familia: si no hay token, es una brecha y se menciona `/facha-ui:init`.
+- **`class-contrast`:** la lección de la prueba. Una clase cuya regla CSS fija un color de texto que falla (por ejemplo `.table .numeric` con un token que en dark da 1,05:1) se reporta en cada TSX que la usa, con la regla de origen. Se mapean las clases del último selector compuesto, sin estados (`:hover`).
+- **`non-text-contrast` (WCAG 1.4.11, 3:1, warning):** bordes y outlines de partes interactivas (inputs, botones, campos, `[role]`), anillos de foco (`:focus`, `:focus-visible`) e íconos SVG (`fill`, `stroke`). Es heurístico (no todo borde es un componente), por eso warning.
+- **`status-confusable` (en `health`):** compara estados distintos (tokens `status.*` y clases cuyo selector indica un estado) por la mayor diferencia entre las partes que comparten (texto, fondo), con visión normal y con deuteranopía y protanopía simuladas (culori). Umbral `contrast.statusMinDeltaE` (ΔE OKLab × 100, por defecto 10, calibrado con la prueba: verde vs. naranja da 22 normal pero 8,2 y 7,2 con deuteranopía y protanopía). Es informativo: con etiqueta de texto no hay falla WCAG, pero conviene sumar un ícono o separar en luminosidad.
+- **En la prueba real:** 18 errores nuevos de contraste (título invisible en dark en el shell, montos de tablas, etiquetas con `--text-faint`, textos de estado a 4,42 y 4,48:1), 3 warnings de bordes de inputs y foco, y 4 pares de estados confundibles (uno con colores idénticos: inactivo y pendiente). Ningún falso positivo en la barra lateral oscura.
+- **`variants`:** el paso de brechas cita `class-contrast`/`theme-contrast` y `status-confusable`, y el bucle del guardián usa la sugerencia de contraste o reporta la brecha.
+- **Tests:** fixture `next-visual` con positivos y negativos de cada regla (pares legibles, overrides de tema, overlays translúcidos, texto sobre fondos desconocidos, foco legible), severidad con superficies autodetectadas, reglas apagadas por config y `status-confusable`.
 
 ---
 
