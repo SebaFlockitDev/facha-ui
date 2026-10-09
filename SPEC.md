@@ -434,6 +434,7 @@ allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_syste
    - **decisiones de diseño con su fuente**;
    - trade-offs.
    Cierra con la comparación y el comando para aplicar: `/facha-ui:apply <slug> <a|b|c>`. **No aplica nada.**
+9. **Ajustar una variante (desde 0.6.0, §7.14).** Con `/facha-ui:variants <slug> <a|b|c> "<cambio>"`, o pidiéndolo en la conversación, se ajusta esa variante en su lugar: brechas antes de tocar, cambio mínimo, guardián, capturas nuevas y una revisión (`r<n>`) en el run con el pedido textual. "Como variante nueva" crea `<x>2`.
 
 #### 2.b.3 Citas de fuente (obligatorias)
 
@@ -448,6 +449,7 @@ Cada decisión de diseño se registra con una fuente de alguno de estos tipos:
 | `pattern` | Patrón observado en el proyecto | "tabla de datos como en `app/customers/page.tsx`" |
 | `decision` | Decisión previa en `decisions.md` | `dec-2026-10-20-orders` |
 | `objective` | Elección estructural derivada del objetivo del dev | "prioriza lo que espera revisión" |
+| `request` | Elección estructural que el dev pidió al ajustar una variante (desde 0.6.0) | `r1`: "poné los filtros arriba de la tabla" |
 
 Los valores visuales solo aceptan `token`, `class`, `rule` o `decision`. `objective` vale únicamente para decisiones estructurales (orden, agrupación, layout).
 
@@ -490,7 +492,10 @@ Validado contra `schema/run.schema.json` (publicado en el repo):
         { "decision": "Tarjeta sobre --color-panel con .card",
           "source": { "type": "class", "ref": ".card", "evidence": "styles/theme.css:136" } }
       ],
-      "tradeoffs": ["…"]
+      "tradeoffs": ["…"],
+      "revision": 1,                        // ajustes pedidos por el dev (desde 0.6.0)
+      "revisions": [ { "n": 1, "request": "…", "summary": "…", "decisionsAdded": [], "decisionsRemoved": [],
+                       "attempts": [], "finalCheck": {}, "screenshots": [] } ]
     }
   ],
   "applied": null                             // lo completa apply: { variant, reason, at, decisionId }
@@ -591,7 +596,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1071,6 +1076,17 @@ Criterio: lo que se puede medir lo valida el guardián; lo que es gusto lo sugie
   - `near-duplicate-steps`: tamaños de letra a ±0,5 px y radios a ±1 px usados en clases de componentes, agrupados (la misma consolidación que propone `scan_styles`).
 - **En la prueba real:** 3 warnings de escalas por defecto (`tracking-wide` y `rounded-lg` en un modal; el único radio del proyecto es de 12 px), un par de tokens casi idénticos (dos tintes que en dark son el mismo color), dos pares de tintes escritos a mano y cuatro grupos de pasos casi iguales (letras de 10,5/11, 12,5/13 y 13,5/14 px; radios de 8 y 9 px).
 - **Tests:** escalas con y sin mapeo, variantes, `/leading`, lo aceptado por defecto, `allowDefaultScale`, sugerencias (clase tipográfica cercana, radio exacto, lista de radios y de sombras) y los tres tipos de paleta inflada, incluido que no se reporten tokens que difieren en algún tema.
+
+### 7.14 Versión 0.6.0: ajustar una variante con historial
+
+Pedido del dev: "si nos gusta una variante pero queremos agregarle o modificarle algo, ¿se lo podemos pedir?". Antes funcionaba en la misma conversación, pero el run no registraba el cambio, no se rehacían las capturas, en una sesión nueva no había forma de retomarlo y `apply` describía la variante original.
+
+- **Invocación:** `/facha-ui:variants <slug> <a|b|c> "<cambio>"` (se distingue de un run nuevo porque la segunda palabra es una sola letra de variante), o un pedido en lenguaje natural sobre una variante después de un run.
+- **En su lugar, con historial** (decisión del dev): la variante cambia y cada ajuste queda como `revisions[]` en el run con el pedido textual, un resumen, las decisiones agregadas y quitadas, los intentos del guardián y las capturas. `decisions` refleja siempre el estado actual. "Como variante nueva" crea `<x>2` a partir de la variante y ajusta la copia.
+- **Mismas garantías que al generar:** brechas antes de tocar nada (no se inventa el valor que pide el cambio), escritura solo en esa variante (el código compartido se toca solo si el dev acepta que cambian las otras), guardián con hasta 3 intentos, capturas nuevas por revisión (`<x>-r<n>-desktop-<tema>.png`) sin borrar las anteriores.
+- **Fuente nueva `request`:** para las decisiones de estructura que el dev pidió. Los valores visuales siguen limitados a `token`, `class`, `rule` o `decision`.
+- **`apply`:** muestra las revisiones en el plan, agrega `**Ajustes pedidos:**` a la entrada de `decisions.md`, toma los precedentes de las decisiones actuales y trata lo pedido explícitamente (`request`) como precedente fuerte. Al limpiar, conserva las capturas de todas las revisiones de la variante elegida.
+- **Tests:** el contrato queda fijado en las skills (sintaxis, pasos R1–R7, esquema de `revisions`, fuente `request`, `Ajustes pedidos` en `apply` y el comando en `help`).
 
 ---
 

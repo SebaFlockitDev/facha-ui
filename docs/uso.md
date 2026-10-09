@@ -274,7 +274,27 @@ Revisá siempre el tema oscuro (`?theme=dark`). En la variante B en dark, el bad
 
 ![Variante B en tema oscuro](img/variante-b-dark.png)
 
-Si no te convence ninguna, podés pedir ajustes en la misma conversación ("en la B, el resumen va arriba de los filtros"). La skill los valida de nuevo con el guardián.
+### 6.5 Ajustar una variante
+
+Si te gusta una variante pero querés agregarle o cambiarle algo, pedíselo. Hay dos formas:
+
+```text
+/facha-ui:variants orders b "agregá un contador de pendientes al lado del título"
+```
+
+O en la misma conversación, en lenguaje natural: *"en la B, poné los filtros arriba de la tabla"*. El comando sirve también en una sesión nueva, porque retoma el run guardado.
+
+Qué hace:
+
+1. **Retoma el run** y la variante. Si el run ya se aplicó o se descartó, te lo dice.
+2. **Avisa brechas antes de tocar nada.** Si el cambio pide un valor que el design system no tiene ("ponelo en rojo" sin token de peligro), te lo dice con las opciones existentes, en lugar de inventarlo.
+3. **Cambia solo esa variante,** con las mismas reglas que al generarla. Si el cambio tocaría el código compartido (`_shared/`), te pregunta, porque cambiaría también las otras variantes.
+4. **Vuelve a pasar el guardián** (hasta 3 intentos) y **saca capturas nuevas** de esa variante, sin borrar las anteriores.
+5. **Guarda el ajuste como revisión** (`r1`, `r2`…) en el run: tu pedido textual, qué cambió, las decisiones nuevas con su fuente (`request` para lo que pediste), los intentos y las capturas.
+
+Podés ajustar las veces que quieras. Cuando la apliques, `apply` registra en `decisions.md` la versión final y los ajustes que pediste: lo que pediste explícitamente queda como precedente fuerte para las próximas variantes.
+
+Si preferís **conservar la original** para comparar, pedí el ajuste *"como variante nueva"*: se crea `b2` a partir de la B y se ajusta la copia.
 
 ---
 
@@ -353,6 +373,7 @@ Atajos útiles:
 | Comando | Quién lo invoca | Escribe |
 |---|---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
+| `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Vos, o Claude cuando pedís un cambio en una variante | Solo esa variante, el run y sus capturas |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
 | `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
@@ -368,7 +389,7 @@ Atajos útiles:
 |---|---|
 | `facha-ui.config.json` | Config del proyecto |
 | `app/lab/<slug>/<x>/page.tsx` | Variantes (solo en desarrollo) |
-| `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas |
+| `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
 | `.facha-ui/playwright/` | Archivos automáticos de Playwright, como los logs de consola (en la carpeta donde abriste Claude Code) |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas |
