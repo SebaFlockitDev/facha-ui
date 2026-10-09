@@ -1,6 +1,6 @@
 # Guía de uso del plugin facha-ui
 
-Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalación hasta aplicar una variante. Para qué es y qué garantiza: [README](../README.md). Detalle técnico: [SPEC](../SPEC.md).
+Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalación hasta aplicar una variante. La idea central: generás con IA variantes de un componente o de una pantalla, y facha-ui las ajusta hasta que respetan los tokens y las reglas del design system de tu equipo; si ese design system falta o está incompleto, te ayuda a armarlo. Para qué es y qué garantiza: [README](../README.md). Detalle técnico: [SPEC](../SPEC.md).
 
 **Resumen del flujo:**
 
@@ -9,7 +9,8 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 3. Preparar el proyecto (raíz, config, `.gitignore`).
 4. Diagnosticar el design system y las violaciones. Si faltan tokens, `/facha-ui:init` los propone desde lo que ya usás.
 5. `/facha-ui:variants <pantalla> "<objetivo>"` → revisar las 3 variantes.
-6. `/facha-ui:apply <slug> <a|b|c>` → aprobar el plan → revisar y commitear vos.
+6. Ajustar la que te gusta, si hace falta: `/facha-ui:variants <slug> <a|b|c> "<cambio>"`, o en vivo desde el navegador con `/facha-ui:variants <slug> live` (señalar elementos, probar paletas → `/facha-ui:init palette`).
+7. `/facha-ui:apply <slug> <a|b|c>` → aprobar el plan → revisar y commitear vos.
 
 ![Flujo de facha-ui: vos pedís variantes, get_design_system lee el design system, la IA escribe 3 variantes en el laboratorio, check_ui las valida, Playwright las captura, vos elegís con apply y la decisión queda en decisions.md](img/flujo.svg)
 
@@ -253,12 +254,12 @@ Ejemplo:
 
 1. **Preflight:** lee el design system. Si no hay tokens, si el framework no es Next o si ya hay un run sin aplicar de esa pantalla, frena y te pregunta.
 2. **Línea base:** lee la pantalla y sus dependencias, y corre `check_ui` sobre el original.
-3. **Brechas, antes de generar:** si el objetivo necesita algo que no tiene token (p. ej. un color de estado), te lo dice con evidencia y explica cómo lo van a resolver las variantes con tokens existentes. Crear tokens es una decisión del equipo; la skill nunca lo hace.
+3. **Brechas, antes de generar:** si el objetivo necesita algo que no tiene token (p. ej. un color de estado), te lo dice con evidencia y explica cómo lo van a resolver las variantes con tokens existentes. Crear tokens es una decisión del equipo; la skill nunca lo hace (para eso está `/facha-ui:init`, ver 5.1).
 4. **Tres hipótesis distintas:**
    - **A, conservadora:** misma estructura, con el objetivo resuelto y la línea base corregida;
    - **B, jerarquía:** reorganiza la información según el objetivo;
    - **C, patrón alternativo:** otro patrón armado con piezas existentes.
-5. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje (`app/lab/layout.tsx` y `lab-theme.tsx`). Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
+5. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje: `app/lab/layout.tsx`, `lab-theme.tsx`, el panel del modo en vivo (`lab-panel.tsx`) y su endpoint (`facha-live/`), que solo existe en desarrollo. Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
 6. **Guardián:** cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Si no lo logra, queda como `failed` y no se puede aplicar.
 7. **Capturas:** en light y en cada tema extra, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
 8. **Presentación:** para cada variante, hipótesis, resultado del guardián, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
@@ -312,11 +313,11 @@ Si preferís **conservar la original** para comparar, pedí el ajuste *"como var
 /facha-ui:variants orders live
 ```
 
-En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la app corriendo y esta sesión de Claude Code abierta; dura 2 horas o hasta `/facha-ui:variants orders live stop`.
+En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la app corriendo y esta sesión de Claude Code abierta: Claude escucha los pedidos con la tool Monitor. Dura 2 horas o hasta `/facha-ui:variants orders live stop`; si cerrás la sesión, los pedidos quedan en cola hasta que vuelvas a activar el modo en vivo.
 
 - **Pedir un cambio:** lo escribís en el panel y tocás *Pedir cambio* (o Ctrl+Enter). Claude lo aplica como revisión, con las mismas reglas que en 6.5, y la página se actualiza sola. El panel muestra el estado: en cola, aplicando, listo, necesita tu decisión o no se pudo. Si falta un valor en el design system, te lo pregunta ahí mismo con las opciones.
 - **⌖ Señalar:** en lugar de describir "el botón de abajo", hacé clic en él. Queda como `[1]` (hasta 3) y lo nombrás en el texto: *"mové [1] arriba de la tabla"*. Mientras señalás, la página no reacciona a los clics; ↑ elige el contenedor que lo envuelve, ↓ vuelve, Esc cancela. Claude recibe qué elemento es y qué componente lo dibuja.
-- **Paleta:** probá otra paleta sobre toda la app con un clic (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) o con tu propio color. Es solo una vista previa en tu navegador. El panel te muestra el contraste y, antes de que propongas, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "pagado", y qué paletas no tienen ese problema. *Proponer esta paleta* la guarda en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1).
+- **Paleta:** probá otra paleta sobre toda la app con un clic (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) o con tu propio color. Es solo una vista previa en tu navegador. El panel te muestra el contraste y, antes de que propongas, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "entregado", y qué paletas no tienen ese problema. *Proponer esta paleta* la guarda en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1).
 - **Elegir esta variante** no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code, como siempre.
 - **El panel:** se arrastra por el título (doble clic lo vuelve a la esquina), se ajusta de tamaño desde la esquina inferior derecha, **–** lo minimiza a una pastilla abajo a la derecha y **×** lo oculta (vuelve al recargar o con Alt+Shift+F). No aparece en las capturas automáticas.
 
@@ -340,11 +341,11 @@ Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede 
    - git dice si la pantalla original tiene cambios sin commitear o cambió después del run.
 2. **Plan exacto:**
    - archivos que cambian (con resumen del diff) y archivos que se crean;
-   - archivos que se borran (el lab de esa pantalla y las capturas descartadas);
+   - archivos que se borran (el lab de esa pantalla, las capturas descartadas y `.facha-ui/live/` si el modo en vivo era de esa pantalla);
    - la entrada completa que se agrega a `decisions.md`.
 3. **Tu aprobación y el motivo.** Respondé nombrando la variante y diciendo por qué, por ejemplo: *"Sí, aplicá la B: deja lo urgente arriba sin esconder la tabla"*. Una respuesta ambigua ("ok", "dale") se repregunta. Si el plan cambia, te lo vuelve a mostrar.
 4. **Aplicación y validación:** porta la variante a la pantalla real y corre `check_ui`. No puede haber errores nuevos respecto de la línea base. Si los hay, no limpia nada y te ofrece revertir.
-5. **Limpieza:** borra el lab de esa pantalla, las capturas descartadas y el andamiaje si no quedan otros runs.
+5. **Limpieza:** si el modo en vivo está activo, primero lo apaga. Borra el lab de esa pantalla, las capturas descartadas, `.facha-ui/live/` y, si no quedan otros runs, el andamiaje (`layout.tsx`, `lab-theme.tsx`, `lab-panel.tsx`, `facha-live/`).
 6. **Memoria:** agrega la decisión al final de `decisions.md` (por ejemplo, `dec-2026-10-20-orders`) y marca el run como `applied`.
 
 ![Sesión de /facha-ui:apply: verificaciones, plan exacto con la entrada de decisions.md, aprobación con motivo y resultado](img/terminal-apply.png)
@@ -371,6 +372,8 @@ Atajos útiles:
 
 - *"Corré check_ui sobre lo que cambiaste"*: antes de commitear.
 - *"Auditá el proyecto y mostrame los 5 archivos con más errores"*: para planificar una limpieza.
+- *"Ajustá la B en vivo"*: activa el panel para pedir cambios mientras mirás la variante.
+- *"Quiero probar otra paleta para la app"*: el panel en vivo, pestaña **Paleta**.
 
 ---
 
@@ -389,6 +392,10 @@ Atajos útiles:
 | `?theme=dark` no cambia nada | El tema se define con `@media (prefers-color-scheme)` | No se puede forzar desde la página: usá la emulación de color del navegador |
 | `/lab/...` da 404 | La app corre en modo producción | El lab solo existe con `npm run dev` |
 | `apply` dice que la pantalla cambió | Hubo commits o cambios en el original después del run | Confirmá explícitamente o generá un run nuevo |
+| El panel en vivo no aparece | El modo en vivo no está activo o venció (2 h), o lo ocultaste con × | `/facha-ui:variants <slug> live`; Alt+Shift+F lo vuelve a mostrar |
+| Los pedidos quedan "En cola" | La sesión de Claude Code se cerró o dejó de escuchar | Volvé a correr `/facha-ui:variants <slug> live`: retoma los pedidos pendientes |
+| El panel dice `forbidden` | La sesión en vivo se reinició y la página tiene el token anterior | Recargá la página |
+| `init palette` dice que la propuesta está vieja | Los tokens cambiaron después de proponerla | Volvé a probarla y proponela desde el panel |
 
 ---
 
@@ -415,6 +422,9 @@ Atajos útiles:
 |---|---|
 | `facha-ui.config.json` | Config del proyecto |
 | `app/lab/<slug>/<x>/page.tsx` | Variantes (solo en desarrollo) |
+| `app/lab/<slug>/_shared/` | Código compartido entre las variantes de esa pantalla |
+| `app/lab/layout.tsx`, `lab-theme.tsx` | Andamiaje del lab: 404 en producción y temas con `?theme=` |
+| `app/lab/lab-panel.tsx`, `app/lab/facha-live/` | Panel y endpoint del modo en vivo (solo en desarrollo) |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
 | `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos, estados y la base de la paleta. No lo versiones |

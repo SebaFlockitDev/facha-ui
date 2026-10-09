@@ -21,6 +21,8 @@ Show the reference below to the developer. Rules:
 
 ## facha-ui · comandos
 
+Generás con IA variantes de una pantalla o de un componente, y facha-ui las ajusta hasta que respetan los tokens y las reglas de tu design system. Si el design system falta o está incompleto, te ayuda a armarlo.
+
 | Comando | Para qué |
 |---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
@@ -37,6 +39,8 @@ Show the reference below to the developer. Rules:
 2. `/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"`
 3. Mirá las variantes en `http://localhost:3000/lab/orders/<a|b|c>` (y con `?theme=dark`).
 4. `/facha-ui:apply orders b` → revisá el plan, aprobalo con el motivo y commiteá vos.
+
+Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/facha-ui:variants orders live`.
 
 ### variants
 
@@ -95,7 +99,7 @@ Show the reference below to the developer. Rules:
   declara o los deriva con contraste verificado, y te dice cómo.
 - Creás todo o una parte, y elegís si migrar los literales. Aprobás con un motivo.
 - Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
-  Nunca cambia ni borra tokens existentes. No commitea.
+  Nunca cambia ni borra tokens existentes (salvo los valores que aprobás en modo `palette`). No commitea.
 - **Paleta:** `/facha-ui:init palette <archivo>` adopta una paleta propuesta desde el panel en vivo. Muestra cada token antes y después, el contraste y los conflictos con su solución; cambia solo esos valores después de tu aprobación y registra la decisión.
 
 ### tools
@@ -117,6 +121,8 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `app/lab/<slug>/<a\|b\|c>/` | Variantes. Existen solo en desarrollo; `apply` las borra |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones con fuente, brechas |
 | `.facha-ui/screenshots/` | Capturas por variante y tema |
+| `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos y estados. No lo versiones |
+| `.facha-ui/proposals/` | Paletas propuestas desde el panel en vivo |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas; la próxima corrida las cita |
 
 Guía completa: https://github.com/SebaFlockitDev/facha-ui/blob/main/docs/uso.md

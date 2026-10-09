@@ -2,6 +2,8 @@
 
 Plugin de Claude Code que trabaja como un diseñador UI senior dentro de tu proyecto: arma o completa tu design system, diseña pantallas con él, te deja ajustarlas y probar paletas en vivo, valida cada resultado con reglas objetivas y no aplica nada sin tu aprobación.
 
+En su núcleo es un **optimizador de UI con el design system**: generás con IA variantes de un componente o de una pantalla, y facha-ui las ajusta hasta que respetan los tokens y las reglas de tu equipo. Todo lo demás se construye sobre esa base.
+
 **Desde cero o sobre lo que ya tenés**
 - **Sin design system:** `/facha-ui:init` lo arma a partir de los colores, tamaños y radios que tu código ya usa, con un valor por tema y contraste verificado. Te propone; vos aprobás.
 - **Con design system:** el MCP `facha-ui` lo lee del código (tokens, temas, clases, decisiones) y es la única fuente de valores visuales: la IA no inventa colores ni tamaños.
@@ -96,12 +98,12 @@ Guion sobre una pantalla de listado con estados, por ejemplo `/orders` en una ap
    ```
    Antes de generar, la skill avisa las brechas: por ejemplo, que no hay tokens de estado y que el badge "pendiente" usa colores literales. Después escribe las variantes A, B y C en `app/lab/orders/`, las valida con `check_ui` (hasta 3 intentos cada una) y saca capturas en light y dark.
 3. Revisar las variantes en `http://localhost:3000/lab/orders/<a|b|c>` (agregá `?theme=dark` para el tema oscuro) y el run en `.facha-ui/runs/orders.json`, con hipótesis, intentos, decisiones con fuente y trade-offs.
-4. Aplicar la elegida:
+4. Ajustar la que te gusta, si hace falta: `/facha-ui:variants orders b "<cambio>"`, o en vivo con `/facha-ui:variants orders live`, que muestra un panel en cada variante para pedir cambios, señalar elementos con un clic y probar paletas de colores para toda la app, con el contraste y los conflictos (y su solución) a la vista.
+5. Aplicar la elegida:
    ```text
    /facha-ui:apply orders b
    ```
    Muestra el plan (archivos que cambian y que se borran, y la entrada de `decisions.md`) y pide tu confirmación y el motivo. La próxima vez que corras `variants`, esa decisión aparece en `get_design_system` → `decisions`.
-5. Antes de aplicar, ajustar en vivo: `/facha-ui:variants orders live` muestra un panel en cada variante para pedir cambios, señalar elementos con un clic y probar paletas de colores para toda la app, con el contraste y los conflictos (y su solución) a la vista.
 
 ## Qué garantiza
 
