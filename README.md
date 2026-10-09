@@ -5,6 +5,7 @@ Plugin de Claude Code para que la UI que genera la IA respete el design system d
 - **MCP `facha-ui`:** lee los tokens, temas y clases del código y valida la UI con reglas deterministas. Es de solo lectura, no usa red y no ejecuta código del proyecto.
 - **`/facha-ui:variants`:** genera 3 variantes de una pantalla en un laboratorio. Cada variante pasa por el guardián (`check_ui`) y cita la fuente de cada decisión de diseño.
 - **`/facha-ui:apply`:** porta la variante que elegiste, limpia el laboratorio y registra la decisión en `decisions.md`. Solo la puede lanzar el dev, y pide aprobación explícita sobre un plan exacto.
+- **`/facha-ui:help`:** lista los comandos, las tools del MCP y los archivos, con ejemplos.
 
 Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificación completa en [`SPEC.md`](SPEC.md).
 

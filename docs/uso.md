@@ -71,7 +71,7 @@ claude --plugin-dir "C:\ruta\a\facha-ui"
 2. Corré `/mcp`. Tienen que aparecer dos servidores conectados:
    - `plugin:facha-ui:facha-ui`, el guardián;
    - `plugin:facha-ui:playwright`, para las capturas. La primera vez tarda un poco más, porque descarga `@playwright/mcp@0.0.83`.
-3. Escribí `/facha-ui:` y tiene que aparecer `variants`. Si escribís `/facha-ui:apply` entero, también funciona: está oculta para el modelo, no para vos.
+3. Corré `/facha-ui:help`. Tiene que mostrar los comandos, las tools y los archivos del plugin. También podés pedir una sola sección: `/facha-ui:help variants`, `apply`, `tools` o `files`.
 4. Preguntale a Claude: *"¿qué design system tiene este proyecto?"*. Tiene que llamar a `get_design_system` y responder con los tokens, los temas y lo que falta.
 
 Si algo de esto falla, mirá [Problemas frecuentes](#9-problemas-frecuentes).
@@ -294,6 +294,7 @@ Atajos útiles:
 |---|---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
+| `/facha-ui:help [variants\|apply\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
 
 | Tool MCP | Hace |
 |---|---|

@@ -563,7 +563,8 @@ facha-ui/
 ├── .mcp.json                     # facha-ui MCP + Playwright MCP, versiones fijas
 ├── skills/
 │   ├── variants/SKILL.md         # + templates/ de andamiaje por framework
-│   └── apply/SKILL.md
+│   ├── apply/SKILL.md
+│   └── help/SKILL.md             # referencia de comandos, tools y archivos
 ├── mcp/                          # paquete facha-ui-mcp (Node + TS)
 │   ├── src/
 │   │   ├── server.ts             # stdio, registro de tools/resources, instructions
@@ -773,7 +774,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 
 | ID | Criterio | Verificación |
 |---|---|---|
-| PLG-1 | `claude plugin validate .` pasa; el plugin se instala desde GitHub con los comandos de §3.2 y expone `/facha-ui:variants` y `/facha-ui:apply` | [manual] |
+| PLG-1 | `claude plugin validate .` pasa; el plugin se instala desde GitHub con los comandos de §3.2 y expone `/facha-ui:variants`, `/facha-ui:apply` y `/facha-ui:help` | [manual] |
 | PLG-2 | `.mcp.json` no contiene especificadores sin versión exacta; `run-pinned.mjs` rechaza `@latest` y funciona en Windows y en macOS/Linux | [auto] + [manual] Windows |
 | VAR-1 | `variants` crea exactamente `lab.dir/<slug>/{a,b,c}` (más `_shared/` opcional y el andamiaje). `git status --porcelain` antes y después muestra cambios **solo** en el lab y en `.facha-ui/` | [manual] guion |
 | VAR-2 | Cada variante termina `valid` con `check_ui` = 0 errores, o `failed` después de exactamente 3 intentos registrados en `attempts` | [auto] validación del run JSON + [manual] |
@@ -986,6 +987,7 @@ Prompt: [`docs/prompts/03-variants.md`](docs/prompts/03-variants.md).
 - **Bundle con esbuild (cambio respecto de §7.2):** la salida de `tsc` necesita `node_modules` en runtime, y un plugin instalado desde GitHub no los tiene. Por eso `npm run build` genera un único `mcp/dist/facha-ui-mcp.js` (ESM, node20, dependencias incluidas) y **se commitea**: es la única excepción a `mcp/dist/` en el `.gitignore`. Pesa unos 2,2 MB sin minificar, para poder auditarlo. Un test verifica que existe y que solo carga los módulos `fs`, `path`, `url`, `process` y `module` de Node. No hay CI: rehacer el bundle antes de commitear es parte del flujo de desarrollo (README).
 - **`run-pinned.mjs` sin shell:** ejecuta el `npx-cli.js` que npm instala junto a `node`, con el mismo `node`. Con `shell: true` en Windows, las rutas con espacios (`C:\Users\Nombre Apellido\…`) se partían en varios argumentos. Si no encuentra `npx-cli.js`, usa `npx` sin shell (instalaciones Unix no estándar). Rechaza rangos, tags y nombres sin versión.
 - **Repositorio:** `SebaFlockitDev/facha-ui` en GitHub. `plugin.json` declara `repository` y `homepage`.
+- **`/facha-ui:help`:** skill solo invocable por el dev y sin tools: muestra la referencia de comandos, tools y archivos (o una sección, con `variants`, `apply`, `tools` o `files`). Un test verifica que lista todas las skills del plugin.
 - **Playwright:** la skill `variants` solo puede usar navegar, redimensionar, esperar, snapshot, captura y cerrar. Nunca `browser_evaluate`, `browser_run_code_unsafe` ni interacciones.
 - **Verificado:**
   - `claude plugin validate` pasa sobre el marketplace y sobre el plugin;

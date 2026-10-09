@@ -43,3 +43,17 @@ describe("MCP-3 · committed bundle", () => {
     expect([...builtins].filter((b) => !allowed.includes(b))).toEqual([]);
   });
 });
+
+describe("help skill", () => {
+  it("is developer-only and pre-approves no tools", () => {
+    const text = fs.readFileSync(path.join(REPO, "skills", "help", "SKILL.md"), "utf8");
+    const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+    expect(frontmatter).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+    expect(frontmatter).not.toMatch(/^allowed-tools:/m);
+  });
+
+  it("lists every skill the plugin ships", () => {
+    const text = fs.readFileSync(path.join(REPO, "skills", "help", "SKILL.md"), "utf8");
+    for (const skill of fs.readdirSync(path.join(REPO, "skills"))) expect(text, skill).toContain(`/facha-ui:${skill}`);
+  });
+});
