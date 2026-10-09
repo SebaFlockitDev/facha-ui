@@ -54,6 +54,7 @@ describe("MCP-2 · read-only", () => {
         ["check_ui", { path: "." }],
         ["check_ui", { path: "app/page.tsx" }],
         ["audit_project", {}],
+        ["scan_styles", {}],
       ] as const) {
         const r = await h.call(name, args);
         expect(r.isError, `${name} failed: ${r.content[0]?.text}`).toBeFalsy();

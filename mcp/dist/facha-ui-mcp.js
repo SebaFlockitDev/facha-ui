@@ -5135,9 +5135,9 @@ var require_utils2 = __commonJS({
       let output2 = "";
       for (let i = 0; i < input2.length; i++) {
         if (input2[i] === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            const normalizedHex = hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            const normalizedHex = hex5.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (decodeUnreserved && isUnreserved(decoded)) {
               output2 += decoded;
@@ -5157,9 +5157,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            const normalizedHex = hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            const normalizedHex = hex5.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (decoded !== "." && isUnreserved(decoded)) {
               output2 += decoded;
@@ -5199,9 +5199,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            output2 += "%" + hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            output2 += "%" + hex5.toUpperCase();
             i += 2;
             continue;
           }
@@ -5237,9 +5237,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            output2 += "%" + hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            output2 += "%" + hex5.toUpperCase();
             i += 2;
             continue;
           }
@@ -5284,9 +5284,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            const normalizedHex = hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            const normalizedHex = hex5.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (isUnreserved(decoded)) {
               output2 += decoded;
@@ -5324,9 +5324,9 @@ var require_utils2 = __commonJS({
       let output2 = "";
       for (let i = 0; i < input2.length; i++) {
         if (input2[i] === "%" && i + 2 < input2.length) {
-          const hex4 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex4)) {
-            output2 += "%" + hex4.toUpperCase();
+          const hex5 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex5)) {
+            output2 += "%" + hex5.toUpperCase();
             i += 2;
             continue;
           }
@@ -16490,8 +16490,8 @@ function base64urlToUint8Array(base64url3) {
 function uint8ArrayToBase64url(bytes) {
   return uint8ArrayToBase64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
-function hexToUint8Array(hex4) {
-  const cleanHex = hex4.replace(/^0x/, "");
+function hexToUint8Array(hex5) {
+  const cleanHex = hex5.replace(/^0x/, "");
   if (cleanHex.length % 2 !== 0) {
     throw new Error("Invalid hex string length");
   }
@@ -36642,16 +36642,55 @@ function isInside(root2, candidate) {
   const r2 = path2.relative(root2, candidate);
   return r2 === "" || !r2.startsWith("..") && !path2.isAbsolute(r2);
 }
-function resolveRoot(opts) {
+var DISCOVERY_DEPTH = 2;
+function projectTier(dir) {
+  if (fs2.existsSync(path2.join(dir, CONFIG_FILE))) return 2;
+  const pkg = readPackageJson(dir);
+  const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
+  return "react" in deps || "next" in deps ? 1 : 0;
+}
+function discoverCandidates(base) {
+  const found = [];
+  const visit2 = (dir, depth) => {
+    if (depth > DISCOVERY_DEPTH) return;
+    let entries;
+    try {
+      entries = fs2.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e4 of entries) {
+      if (!e4.isDirectory() || e4.isSymbolicLink() || e4.name.startsWith(".") || ALWAYS_IGNORED_DIRS.has(e4.name)) continue;
+      const abs2 = path2.join(dir, e4.name);
+      const tier = projectTier(abs2);
+      if (tier > 0) found.push({ dir: abs2, tier });
+      else visit2(abs2, depth + 1);
+    }
+  };
+  visit2(base, 1);
+  const best = Math.max(0, ...found.map((f3) => f3.tier));
+  return found.filter((f3) => f3.tier === best).map((f3) => f3.dir).sort();
+}
+function resolveWorkspace(opts) {
   const env = opts.env ?? process.env;
   const cwd = opts.cwd ?? process.cwd();
   const isUsable = (v) => !!v && !v.includes("${");
   const base = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
-  const chosen = isUsable(env.FACHA_UI_ROOT) ? path2.resolve(base, env.FACHA_UI_ROOT) : base;
-  if (!fs2.existsSync(chosen) || !fs2.statSync(chosen).isDirectory()) {
-    throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${chosen}`);
+  const existingDir = (p4) => {
+    if (!fs2.existsSync(p4) || !fs2.statSync(p4).isDirectory()) {
+      throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${p4}`);
+    }
+    return fs2.realpathSync(p4);
+  };
+  const workspaceRoot = existingDir(base);
+  if (isUsable(env.FACHA_UI_ROOT)) {
+    return { workspaceRoot, root: existingDir(path2.resolve(base, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
   }
-  return fs2.realpathSync(chosen);
+  if (projectTier(workspaceRoot) > 0) return { workspaceRoot, root: workspaceRoot, mode: "direct", candidates: [] };
+  const found = discoverCandidates(workspaceRoot);
+  const candidates = found.map((d) => toPosix(path2.relative(workspaceRoot, d)));
+  if (found.length === 1) return { workspaceRoot, root: fs2.realpathSync(found[0]), mode: "discovered", candidates };
+  return { workspaceRoot, root: workspaceRoot, mode: found.length > 1 ? "ambiguous" : "none", candidates };
 }
 function readPackageJson(root2) {
   try {
@@ -36660,7 +36699,7 @@ function readPackageJson(root2) {
     return null;
   }
 }
-function openProject(root2) {
+function openProject(root2, ws) {
   const loaded = loadConfig(root2);
   const pkg = readPackageJson(root2);
   const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
@@ -36668,6 +36707,12 @@ function openProject(root2) {
   const frameworkDetected = "next" in deps && fs2.existsSync(path2.join(root2, "app")) ? "next-app" : "unknown";
   const labDir = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
   const assumptions = [...loaded.assumptions];
+  const workspacePath = ws ? toPosix(path2.relative(ws.workspaceRoot, root2)) || "." : ".";
+  if (ws?.mode === "discovered") {
+    assumptions.push(
+      `Project discovered at ${workspacePath}/ (the only frontend found below the workspace). Set FACHA_UI_ROOT to choose another folder.`
+    );
+  }
   if (loaded.config.framework === "auto") {
     assumptions.push(
       frameworkDetected === "next-app" ? "Framework autodetected: next-app (package.json depends on next and an app/ directory exists)." : "Framework not detected as next-app; the lab route may not work."
@@ -36681,7 +36726,8 @@ function openProject(root2) {
     exclude: loaded.config.exclude ?? [],
     labDir,
     hasTailwind,
-    frameworkDetected
+    frameworkDetected,
+    workspacePath
   };
 }
 function walk(dir, out = []) {
@@ -63009,8 +63055,8 @@ function toPx(value) {
   if (m[2] === "rem" || m[2] === "em") return n * 16;
   return n;
 }
-function createContext(root2) {
-  const project = openProject(root2);
+function createContext(root2, ws) {
+  const project = openProject(root2, ws);
   const tokens = loadTokens(project);
   const cssRoots = new Map(tokens.parsed);
   for (const abs2 of listProjectFiles(project)) {
@@ -63823,7 +63869,9 @@ function getDesignSystem(ctx, sections = SECTIONS) {
       },
       tokenSources: ctx.tokens.sources,
       themes: ctx.tokens.themes,
+      workspacePath: ctx.project.workspacePath,
       lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir) },
+      screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
       decisionsFile: ctx.project.config.memory.decisionsFile
     };
@@ -63851,8 +63899,366 @@ function readDeps(root2) {
   }
 }
 
+// src/propose.ts
+var toOklch = converter_default("oklch");
+var WHERE_LIMIT = 12;
+var KINDS = [
+  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
+  ["warning", /warn|pending|review|caution|attention/],
+  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
+  ["info", /info|sent|notice|hint/],
+  ["neutral", /inactive|neutral|archiv/]
+];
+function partOf(property) {
+  const p4 = (property ?? "").toLowerCase();
+  if (["color", "fill", "stroke", "caret-color", "text-decoration-color"].includes(p4)) return "fg";
+  if (p4.startsWith("background")) return "bg";
+  if (p4.startsWith("border") || p4.startsWith("outline")) return "border";
+  return "other";
+}
+var PART_SUFFIX = { bg: "bg", fg: "fg", border: "border", other: "color" };
+function withoutPseudo(selector) {
+  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
+}
+function stemOf(selector) {
+  const cls = selector ? withoutPseudo(selector).match(/\.([A-Za-z][\w-]*)/)?.[1] : void 0;
+  if (!cls) return "color";
+  return cls.replace(/_/g, "-").replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+function kindOf(selector) {
+  const t = withoutPseudo(selector).toLowerCase();
+  for (const [kind, re] of KINDS) if (re.test(t)) return kind;
+  return null;
+}
+function hex4(c2) {
+  return toHex(c2).toLowerCase();
+}
+function oklch2(l, c2, h) {
+  return { mode: "oklch", l: Math.min(1, Math.max(0, l)), c: Math.max(0, c2), h: h ?? 0 };
+}
+function consolidate(values, tolerance) {
+  const steps = [];
+  for (const [v, uses] of [...values].sort(([a], [b]) => a - b)) {
+    const last = steps[steps.length - 1];
+    if (last && v - last.merged[0] <= tolerance) {
+      last.merged.push(v);
+      last.uses.push(...uses);
+      const countOf = (x) => values.find(([y]) => y === x)[1].length;
+      if (countOf(v) > countOf(last.value)) last.value = v;
+    } else steps.push({ value: v, merged: [v], uses: [...uses] });
+  }
+  return steps;
+}
+function scanStyles(ctx) {
+  const themes = ctx.tokens.themes;
+  const defaultTheme2 = themes[0]?.name ?? "light";
+  const minRatio = ctx.project.config.contrast?.minRatio ?? 4.5;
+  const cov = coverage(ctx);
+  const surfaceName = ctx.project.config.contrast?.surfaces?.[0] ?? ctx.tokens.tokens.find((t) => t.role === "surface.raised")?.name ?? ctx.tokens.tokens.find((t) => t.role === "surface.base")?.name ?? null;
+  const surfaceIn = (theme) => (surfaceName ? tokenColor(ctx.tokens, surfaceName, theme) : void 0) ?? parseColor(theme === defaultTheme2 ? "#ffffff" : "#111111");
+  const accentName = ctx.tokens.tokens.find((t) => t.role === "accent.primary")?.name ?? null;
+  const colorOfValue = (raw, theme) => {
+    if (!raw) return void 0;
+    const v = raw.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/);
+    if (v) return tokenColor(ctx.tokens, v[1], theme);
+    return parseColor(raw);
+  };
+  const themeScope = (selector) => {
+    if (!selector) return { theme: null, base: null };
+    for (const th of themes.slice(1)) {
+      const prefix2 = th.selector.trim() + " ";
+      if (selector.startsWith(prefix2)) return { theme: th.name, base: selector.slice(prefix2.length).trim() };
+    }
+    return { theme: null, base: selector };
+  };
+  const scan = scanFiles(ctx, listProjectFiles(ctx.project));
+  const declAt = /* @__PURE__ */ new Map();
+  for (const u of scan.usages) if (u.kind === "decl") declAt.set(`${u.file}:${u.line}`, u);
+  const existing = /* @__PURE__ */ new Map();
+  const groups = /* @__PURE__ */ new Map();
+  const themed = [];
+  let total = 0;
+  for (const v of scan.violations) {
+    if (v.rule !== "color-literal") continue;
+    const c2 = parseColor(v.found);
+    if (!c2) continue;
+    total++;
+    const decl2 = declAt.get(`${v.file}:${v.line}`);
+    const occ = {
+      file: v.file,
+      line: v.line,
+      column: v.column,
+      found: v.found,
+      property: v.property,
+      selector: decl2?.selector ?? null,
+      siblingBackground: decl2?.siblingBackground ?? null
+    };
+    if (v.suggestion.match !== "none" && v.suggestion.value) {
+      const key2 = `${hex4(c2)}|${v.suggestion.value}`;
+      const e4 = existing.get(key2) ?? { value: hex4(c2), use: v.suggestion.value, match: v.suggestion.match, source: v.suggestion.source, occurrences: [] };
+      e4.occurrences.push(occ);
+      existing.set(key2, e4);
+      continue;
+    }
+    const part = partOf(v.property);
+    const { theme, base } = themeScope(occ.selector);
+    if (theme) {
+      themed.push({ theme, part, base, hex: hex4(c2), occ });
+      continue;
+    }
+    const key = `${part}|${hex4(c2)}`;
+    const g = groups.get(key) ?? { part, hex: hex4(c2), color: c2, occurrences: [], selectors: /* @__PURE__ */ new Set(), themeValues: /* @__PURE__ */ new Map() };
+    g.occurrences.push(occ);
+    if (base) g.selectors.add(base);
+    groups.set(key, g);
+  }
+  for (const t of themed) {
+    const g = [...groups.values()].find((x) => x.part === t.part && x.selectors.has(t.base));
+    if (!g) continue;
+    const tv = g.themeValues.get(t.theme) ?? { hex: t.hex, occurrences: [] };
+    tv.occurrences.push(t.occ);
+    g.themeValues.set(t.theme, tv);
+  }
+  const statusRoleOf = (selector) => {
+    const cc = ctx.componentClasses.find((x) => x.selector === selector);
+    for (const name of cc?.tokens ?? []) {
+      const role = ctx.tokens.byName.get(name)?.role ?? "";
+      if (role.startsWith("status.")) return role.slice("status.".length).replace("other", "neutral");
+    }
+    return null;
+  };
+  const sorted = [...groups.values()].sort(
+    (a, b) => b.occurrences.length - a.occurrences.length || (a.part < b.part ? -1 : a.part > b.part ? 1 : a.hex < b.hex ? -1 : 1)
+  );
+  const proposals = sorted.map((g) => {
+    const sels = [...g.selectors].sort();
+    const votes = /* @__PURE__ */ new Map();
+    for (const s of sels) {
+      const k4 = kindOf(s) ?? statusRoleOf(s);
+      if (k4) votes.set(k4, (votes.get(k4) ?? 0) + 1);
+    }
+    const kind = [...votes.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]?.[0] ?? null;
+    const stem = stemOf(sels[0] ?? null);
+    const hover = sels.length > 0 && sels.every((s) => s.includes(":hover"));
+    const translucent = alphaOf(g.color) < 1;
+    const onAccent = g.part === "fg" && !kind && !translucent && (toOklch(g.color)?.l ?? 0) > 0.95 && sels.some((s) => /primary|accent|brand|cta|(^|[-.])on-/.test(withoutPseudo(s)));
+    let role;
+    let name;
+    const suffix = hover ? "-hover" : "";
+    if (onAccent) {
+      role = "on-accent";
+      name = "--on-accent";
+    } else if (kind) {
+      role = kind === "neutral" ? "status.other" : `status.${kind}`;
+      name = `--status-${kind}-${PART_SUFFIX[g.part]}${suffix}`;
+    } else {
+      role = g.part === "fg" ? "text" : g.part === "bg" ? "surface" : g.part === "border" ? "border.default" : "generic";
+      name = `--${stem}-${PART_SUFFIX[g.part]}${suffix}`;
+    }
+    return { g, sels, kind, stem, role, name, translucent, onAccent, values: {}, contrast: {}, bgNote: null };
+  });
+  const seen = /* @__PURE__ */ new Map();
+  for (const p4 of proposals) seen.set(p4.name, (seen.get(p4.name) ?? 0) + 1);
+  const taken = new Set(ctx.tokens.byName.keys());
+  for (const p4 of proposals) {
+    if ((seen.get(p4.name) ?? 0) > 1 && p4.kind) {
+      p4.name = `--status-${p4.stem.replace(/^(chip|badge|tag|pill|label)-/, "")}-${PART_SUFFIX[p4.g.part]}${p4.name.endsWith("-hover") ? "-hover" : ""}`;
+    }
+    let candidate = p4.name;
+    for (let i = 2; taken.has(candidate); i++) candidate = `${p4.name}-${i}`;
+    p4.name = candidate;
+    taken.add(candidate);
+  }
+  const deriveSurfaceLike = (c2, theme, delta) => {
+    const s = toOklch(surfaceIn(theme));
+    const o = toOklch(c2);
+    const dark = s.l < 0.5;
+    return parseColor(formatHex(oklch2(s.l + (dark ? delta : -delta / 2), Math.max(o.c ?? 0, 0.05), o.h)));
+  };
+  const readableOn = (c2, bg) => {
+    if (contrast2(c2, bg) >= minRatio) return c2;
+    const o = toOklch(c2);
+    const dir = toOklch(bg).l < 0.5 ? 1 : -1;
+    for (let step = 1; step <= 100; step++) {
+      const cand = parseColor(formatHex(oklch2(o.l + dir * step * 0.01, o.c ?? 0, o.h)));
+      if (contrast2(cand, bg) >= minRatio) return cand;
+    }
+    return parseColor(dir > 0 ? "#ffffff" : "#000000");
+  };
+  const backgroundFor = (p4) => {
+    const pair = proposals.find((q) => q.g.part === "bg" && q !== p4 && !q.translucent && [...q.g.selectors].some((s) => p4.g.selectors.has(s)));
+    if (pair) return { name: pair.name, colorIn: (th) => parseColor(pair.values[th]?.value ?? pair.g.hex) };
+    const sibling = p4.g.occurrences.map((o) => o.siblingBackground).find((s) => {
+      const c2 = colorOfValue(s, defaultTheme2);
+      return !!c2 && alphaOf(c2) === 1;
+    }) ?? null;
+    if (sibling) {
+      const tokenName = sibling.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
+      return { name: tokenName ?? sibling.trim(), colorIn: (th) => colorOfValue(sibling, th) };
+    }
+    if (p4.onAccent && accentName) return { name: accentName, colorIn: (th) => tokenColor(ctx.tokens, accentName, th) };
+    return null;
+  };
+  const order = [...proposals].sort((a, b) => (a.g.part === "fg" ? 1 : 0) - (b.g.part === "fg" ? 1 : 0));
+  for (const p4 of order) {
+    const g = p4.g;
+    const bg = g.part === "fg" ? backgroundFor(p4) : null;
+    for (const th of themes) {
+      if (th.name === defaultTheme2) {
+        p4.values[th.name] = { value: g.hex, origin: "in-use" };
+        continue;
+      }
+      const declared = g.themeValues.get(th.name);
+      if (declared) {
+        const at = declared.occurrences[0];
+        p4.values[th.name] = { value: declared.hex, origin: "in-use", method: `declared for ${th.name} in ${at.file}:${at.line}` };
+        continue;
+      }
+      if (p4.translucent) {
+        p4.values[th.name] = { value: g.hex, origin: "in-use", method: "translucent overlay: same value in every theme" };
+        continue;
+      }
+      const isTint = contrast2(g.color, surfaceIn(defaultTheme2)) < 1.6;
+      if ((g.part === "bg" || g.part === "border") && isTint) {
+        p4.values[th.name] = {
+          value: hex4(deriveSurfaceLike(g.color, th.name, g.part === "border" ? 0.16 : p4.name.endsWith("-hover") ? 0.13 : 0.08)),
+          origin: "derived",
+          method: `same hue as the ${defaultTheme2} tint, lightness relative to ${surfaceName ?? "the surface"} in ${th.name}`
+        };
+      } else if (g.part === "fg" && bg?.colorIn(th.name)) {
+        const out = readableOn(g.color, bg.colorIn(th.name));
+        const same = hex4(out) === g.hex;
+        p4.values[th.name] = {
+          value: hex4(out),
+          origin: same ? "in-use" : "derived",
+          method: same ? `already reaches ${minRatio}:1 on ${bg.name} in ${th.name}` : `same hue, lightness adjusted to reach ${minRatio}:1 on ${bg.name} in ${th.name}`
+        };
+      } else {
+        p4.values[th.name] = {
+          value: g.hex,
+          origin: "in-use",
+          method: g.part === "fg" ? "background not known from the rule: kept as is; check it in the captures" : "solid color kept in every theme"
+        };
+      }
+    }
+    if (g.part === "fg") {
+      if (!bg) p4.bgNote = "Background not known from the rule (it may come from a parent); contrast not measured.";
+      for (const th of themes) {
+        const b = bg?.colorIn(th.name);
+        if (!b) continue;
+        const ratio = round2(contrast2(parseColor(p4.values[th.name].value), b, surfaceIn(th.name)), 2);
+        p4.contrast[th.name] = { against: bg.name, ratio, ok: ratio >= minRatio };
+      }
+    }
+  }
+  const where = (occ) => {
+    const list2 = occ.map((o) => `${o.file}:${o.line}${o.selector ? ` (${o.selector})` : ""}`);
+    return { where: list2.slice(0, WHERE_LIMIT), more: Math.max(0, list2.length - WHERE_LIMIT) };
+  };
+  const occurrencesOf = (p4) => [...p4.g.occurrences, ...[...p4.g.themeValues.values()].flatMap((t) => t.occurrences)];
+  const tokenProposals = proposals.map((p4) => {
+    const all = occurrencesOf(p4);
+    const failsNow = p4.contrast[defaultTheme2] && !p4.contrast[defaultTheme2].ok;
+    return {
+      name: p4.name,
+      role: p4.role,
+      part: p4.g.part,
+      values: p4.values,
+      ...Object.keys(p4.contrast).length ? { contrast: p4.contrast } : {},
+      occurrences: all.length,
+      evidence: `${p4.g.hex} used ${p4.g.occurrences.length} time(s)${p4.sels.length ? ` in ${p4.sels.slice(0, 4).join(", ")}${p4.sels.length > 4 ? ", \u2026" : ""}` : ""}.`,
+      ...p4.bgNote ? { note: p4.bgNote } : failsNow ? { note: `The value in use already fails ${minRatio}:1 in ${defaultTheme2} (${p4.contrast[defaultTheme2].ratio}:1): the team may want to adjust it while creating the token.` } : {},
+      ...where(all)
+    };
+  });
+  const scaleProposals = [];
+  const describe3 = (sels) => {
+    const u = [...new Set(sels)];
+    return `${u.slice(0, 4).join(", ")}${u.length > 4 ? ", \u2026" : ""}`;
+  };
+  if (cov.missing.includes("typography.scale")) {
+    const steps = consolidate([...ctx.fontSizeUses.entries()], 0.5);
+    const ladder = ["3xs", "2xs", "xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl", "5xl"];
+    const baseIdx = steps.reduce((best, s, i) => Math.abs(s.value - 14) < Math.abs(steps[best].value - 14) ? i : best, 0);
+    steps.forEach((s, i) => {
+      const step = ladder[4 + (i - baseIdx)] ?? `${round2(s.value, 2)}px`.replace(".", "_");
+      scaleProposals.push({
+        name: `--font-size-${step}`,
+        role: "font-size",
+        value: `${round2(s.value, 2)}px`,
+        merges: s.merged.filter((m) => m !== s.value).map((m) => `${round2(m, 2)}px`),
+        occurrences: s.uses.length,
+        evidence: `font-size used in ${describe3(s.uses)}.`
+      });
+    });
+  }
+  if (cov.missing.includes("radius.scale")) {
+    const radii = /* @__PURE__ */ new Map();
+    for (const cc of ctx.componentClasses) {
+      for (const d of cc.decls) {
+        if (!/radius/.test(d.prop) || d.value.includes("var(")) continue;
+        const m = d.value.trim().match(/^([\d.]+)px$/);
+        if (m) radii.set(Number(m[1]), [...radii.get(Number(m[1])) ?? [], cc.selector]);
+      }
+    }
+    const names = ["sm", "md", "lg", "xl", "2xl", "3xl"];
+    let i = 0;
+    for (const s of consolidate([...radii.entries()], 1)) {
+      scaleProposals.push({
+        name: s.value >= 999 ? "--radius-full" : `--radius-${names[i++] ?? `${s.value}px`}`,
+        role: "radius",
+        value: `${s.value}px`,
+        merges: s.merged.filter((m) => m !== s.value).map((m) => `${m}px`),
+        occurrences: s.uses.length,
+        evidence: `border-radius used in ${describe3(s.uses)}.`
+      });
+    }
+  }
+  const plan = /* @__PURE__ */ new Map();
+  const add = (o, use, kind) => {
+    const f3 = plan.get(o.file) ?? { file: o.file, replacements: [] };
+    f3.replacements.push({ line: o.line, found: o.found, use, kind });
+    plan.set(o.file, f3);
+  };
+  for (const e4 of existing.values()) for (const o of e4.occurrences) add(o, e4.use, "existing");
+  for (const p4 of proposals) for (const o of occurrencesOf(p4)) add(o, `var(${p4.name})`, "proposed");
+  const migrationPlan = [...plan.values()].map((f3) => ({ ...f3, count: f3.replacements.length, replacements: f3.replacements.sort((a, b) => a.line - b.line || (a.found < b.found ? -1 : 1)) })).sort((a, b) => b.count - a.count || (a.file < b.file ? -1 : 1));
+  const existingOut = [...existing.values()].sort((a, b) => b.occurrences.length - a.occurrences.length || (a.value < b.value ? -1 : 1)).map((e4) => ({ value: e4.value, use: e4.use, match: e4.match, source: e4.source, occurrences: e4.occurrences.length, ...where(e4.occurrences) }));
+  const existingScale = (role) => ctx.tokens.tokens.filter((t) => t.role === role).map((t) => `${t.name}: ${t.values[defaultTheme2]}`);
+  const notes = [
+    "Proposals only: scan_styles never writes. Names follow the role and the selectors where the value is used; the team decides the final names.",
+    "Default-theme values are the literals in use. Other themes reuse a value the project already declares for that theme, or are derived (see `method`).",
+    "Literals that already match an existing token are listed under `existing`: migrate them, do not create new tokens."
+  ];
+  if (existingScale("radius").length && scaleProposals.some((s) => s.role === "radius")) {
+    notes.push(`Existing radius token(s) to keep in the scale: ${existingScale("radius").join(", ")}.`);
+  }
+  if (existingScale("font-size").length && scaleProposals.some((s) => s.role === "font-size")) {
+    notes.push(`Existing font-size token(s) to keep in the scale: ${existingScale("font-size").join(", ")}.`);
+  }
+  return {
+    status: cov.status,
+    missingRoles: cov.missing,
+    themes: themes.map((t) => t.name),
+    referenceSurface: surfaceName,
+    minRatio,
+    summary: {
+      colorLiterals: total,
+      coveredByExistingTokens: existingOut.reduce((n, e4) => n + e4.occurrences, 0),
+      tokenProposals: tokenProposals.length,
+      scaleProposals: scaleProposals.length,
+      filesToMigrate: migrationPlan.length
+    },
+    existing: existingOut,
+    proposals: tokenProposals,
+    scales: scaleProposals,
+    migrationPlan,
+    notes
+  };
+}
+
 // src/server.ts
-var VERSION = "0.1.0";
+var VERSION = "0.2.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
@@ -63866,7 +64272,10 @@ var DESCRIPTIONS = {
 **Returns:** every violation with file, line, column, rule id, severity, the exact value found, the CSS property involved, whether it breaks a theme, and a suggested token or class when one exists (\`match\`: exact | nearest | none). Values that cannot be resolved statically (dynamic class names) are listed under \`unresolved\`. Read-only.`,
   audit_project: `Scans every file matched by the project's include/exclude globs (the lab directory is always excluded) and returns violation totals per severity, per rule and per file, plus the files with the most violations and design-system health findings.
 **When to use:** to answer "how many violations does the project have?", to prioritise clean-up, or to compare before and after a change. For violation details of a file, call \`check_ui\` on it.
-**Returns:** JSON with \`totals\`, \`byRule\`, \`byFile\` (sorted by errors desc), \`top\`, \`unresolved\`, \`ignored\`, \`health\`, \`filesScanned\`. Read-only.`
+**Returns:** JSON with \`totals\`, \`byRule\`, \`byFile\` (sorted by errors desc), \`top\`, \`unresolved\`, \`ignored\`, \`health\`, \`filesScanned\`. Read-only.`,
+  scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
+**When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review \u2014 this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
+**Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`
 };
 var READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 var severity2 = external_exports.enum(["info", "warning", "error"]);
@@ -63881,7 +64290,17 @@ function fail(e4) {
 }
 function createServer(opts) {
   const server = new McpServer({ name: "facha-ui", version: VERSION }, { instructions: INSTRUCTIONS });
-  const context = () => createContext(opts.root);
+  const context = () => {
+    const ws = opts.workspace;
+    if (ws?.mode === "ambiguous") {
+      throw new FachaError(
+        "MULTIPLE_PROJECTS",
+        `Several frontend projects were found below the workspace: ${ws.candidates.join(", ")}. Open Claude Code in one of them, or set FACHA_UI_ROOT to its folder.`,
+        { candidates: ws.candidates }
+      );
+    }
+    return createContext(opts.root, ws);
+  };
   server.registerTool(
     "get_design_system",
     {
@@ -63949,6 +64368,27 @@ function createServer(opts) {
       }
     }
   );
+  server.registerTool(
+    "scan_styles",
+    {
+      title: "Scan styles",
+      description: DESCRIPTIONS.scan_styles,
+      inputSchema: {},
+      annotations: { title: "Scan styles", ...READ_ONLY }
+    },
+    async () => {
+      try {
+        const data = scanStyles(context());
+        const s = data.summary;
+        return ok(
+          `${s.colorLiterals} color literal(s): ${s.coveredByExistingTokens} match existing tokens, ${s.tokenProposals} token proposal(s), ${s.scaleProposals} scale proposal(s), ${s.filesToMigrate} file(s) to migrate.`,
+          data
+        );
+      } catch (e4) {
+        return fail(e4);
+      }
+    }
+  );
   server.registerResource(
     "tokens",
     "facha-ui://design-system/tokens",
@@ -63988,8 +64428,9 @@ async function main() {
 `);
     return;
   }
-  const root2 = resolveRoot({ argRoot: argValue(argv, "--root") });
-  const server = createServer({ root: root2 });
+  const workspace = resolveWorkspace({ argRoot: argValue(argv, "--root") });
+  const root2 = workspace.root;
+  const server = createServer({ root: root2, workspace });
   await server.connect(new StdioServerTransport());
   process.stderr.write(`facha-ui-mcp ${VERSION} ready \xB7 root: ${root2}
 `);

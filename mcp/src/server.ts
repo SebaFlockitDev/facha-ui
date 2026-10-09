@@ -3,9 +3,11 @@ import { z } from "zod";
 import { auditProject, checkUi } from "./check.js";
 import { createContext, type Context } from "./context.js";
 import { getDesignSystem, health, rulesInfo, SECTIONS } from "./design-system.js";
+import { scanStyles } from "./propose.js";
+import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -24,6 +26,9 @@ export const DESCRIPTIONS = {
   audit_project: `Scans every file matched by the project's include/exclude globs (the lab directory is always excluded) and returns violation totals per severity, per rule and per file, plus the files with the most violations and design-system health findings.
 **When to use:** to answer "how many violations does the project have?", to prioritise clean-up, or to compare before and after a change. For violation details of a file, call \`check_ui\` on it.
 **Returns:** JSON with \`totals\`, \`byRule\`, \`byFile\` (sorted by errors desc), \`top\`, \`unresolved\`, \`ignored\`, \`health\`, \`filesScanned\`. Read-only.`,
+  scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
+**When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review — this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
+**Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
 } as const;
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
@@ -46,12 +51,24 @@ function fail(e: unknown): ToolResult {
 export interface ServerOptions {
   /** Absolute project root. */
   root: string;
+  /** How the root was resolved; without it the root is also the workspace. */
+  workspace?: Workspace;
 }
 
 /** Builds the MCP server. The project is re-read on every call so results reflect the current files. */
 export function createServer(opts: ServerOptions): McpServer {
   const server = new McpServer({ name: "facha-ui", version: VERSION }, { instructions: INSTRUCTIONS });
-  const context = (): Context => createContext(opts.root);
+  const context = (): Context => {
+    const ws = opts.workspace;
+    if (ws?.mode === "ambiguous") {
+      throw new FachaError(
+        "MULTIPLE_PROJECTS",
+        `Several frontend projects were found below the workspace: ${ws.candidates.join(", ")}. Open Claude Code in one of them, or set FACHA_UI_ROOT to its folder.`,
+        { candidates: ws.candidates },
+      );
+    }
+    return createContext(opts.root, ws);
+  };
 
   server.registerTool(
     "get_design_system",
@@ -116,6 +133,28 @@ export function createServer(opts: ServerOptions): McpServer {
         return ok(
           `${t.all} violation(s) in ${result.filesWithViolations} of ${result.filesScanned} file(s): ${t.error} error(s), ${t.warning} warning(s), ${t.info} info.`,
           result,
+        );
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "scan_styles",
+    {
+      title: "Scan styles",
+      description: DESCRIPTIONS.scan_styles,
+      inputSchema: {},
+      annotations: { title: "Scan styles", ...READ_ONLY },
+    },
+    async () => {
+      try {
+        const data = scanStyles(context());
+        const s = data.summary;
+        return ok(
+          `${s.colorLiterals} color literal(s): ${s.coveredByExistingTokens} match existing tokens, ${s.tokenProposals} token proposal(s), ${s.scaleProposals} scale proposal(s), ${s.filesToMigrate} file(s) to migrate.`,
+          data,
         );
       } catch (e) {
         return fail(e);

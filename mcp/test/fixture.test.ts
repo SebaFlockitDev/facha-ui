@@ -15,9 +15,9 @@ afterAll(async () => {
 const brief = (v: any) => `${v.file}:${v.line}:${v.column} ${v.rule} ${v.severity} ${v.found} → ${v.suggestion.match} ${v.suggestion.value ?? "-"}`;
 
 describe("MCP-1 · server surface", () => {
-  it("lists exactly the 3 read-only tools and the 2 MVP resources", async () => {
+  it("lists exactly the 4 read-only tools and the 2 MVP resources", async () => {
     const { tools } = await h.client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["audit_project", "check_ui", "get_design_system"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["audit_project", "check_ui", "get_design_system", "scan_styles"]);
     for (const t of tools) {
       expect(t.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
       expect(t.description).toContain("**When to use:**");

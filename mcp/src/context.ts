@@ -4,7 +4,7 @@ import { findColorLiterals } from "./color.js";
 import { extractCss } from "./sources/css.js";
 import { extractJsx } from "./sources/jsx.js";
 import type { Usage } from "./sources/usage.js";
-import { listProjectFiles, openProject, readSource, rel, type Project } from "./project.js";
+import { listProjectFiles, openProject, readSource, rel, type Project, type Workspace } from "./project.js";
 import { loadTokens, selectorContext, themeForSelector, type TokenSet } from "./tokens.js";
 import type { Skipped } from "./types.js";
 
@@ -45,8 +45,8 @@ export function toPx(value: string): number | null {
   return n;
 }
 
-export function createContext(root: string): Context {
-  const project = openProject(root);
+export function createContext(root: string, ws?: Workspace): Context {
+  const project = openProject(root, ws);
   const tokens = loadTokens(project);
   const cssRoots = new Map<string, Root>(tokens.parsed);
   for (const abs of listProjectFiles(project)) {

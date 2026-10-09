@@ -248,7 +248,9 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
       },
       tokenSources: ctx.tokens.sources,
       themes: ctx.tokens.themes,
+      workspacePath: ctx.project.workspacePath,
       lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir) },
+      screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
       decisionsFile: ctx.project.config.memory.decisionsFile,
     };

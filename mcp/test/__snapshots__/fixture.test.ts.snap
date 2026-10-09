@@ -246,6 +246,7 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "baseUrl": "http://localhost:3000",
     },
     "root": "next-tw4-cssvars",
+    "screenshotsDir": ".facha-ui/screenshots",
     "tailwind": {
       "detected": true,
       "themeMapped": false,
@@ -266,6 +267,7 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
     "tokenSources": [
       "app/globals.css",
     ],
+    "workspacePath": ".",
   },
   "rules": [
     {

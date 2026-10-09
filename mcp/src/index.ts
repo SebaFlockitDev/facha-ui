@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { resolveRoot } from "./project.js";
+import { resolveWorkspace } from "./project.js";
 import { createServer, VERSION } from "./server.js";
 
 function argValue(argv: string[], name: string): string | undefined {
@@ -16,8 +16,9 @@ async function main() {
     process.stderr.write(`facha-ui-mcp ${VERSION}\n`);
     return;
   }
-  const root = resolveRoot({ argRoot: argValue(argv, "--root") });
-  const server = createServer({ root });
+  const workspace = resolveWorkspace({ argRoot: argValue(argv, "--root") });
+  const root = workspace.root;
+  const server = createServer({ root, workspace });
   await server.connect(new StdioServerTransport());
   // stdout belongs to the MCP protocol: diagnostics go to stderr.
   process.stderr.write(`facha-ui-mcp ${VERSION} ready · root: ${root}\n`);

@@ -57,3 +57,14 @@ describe("help skill", () => {
     for (const skill of fs.readdirSync(path.join(REPO, "skills"))) expect(text, skill).toContain(`/facha-ui:${skill}`);
   });
 });
+
+describe("init skill", () => {
+  it("is developer-only and pre-approves no write tools", () => {
+    const text = fs.readFileSync(path.join(REPO, "skills", "init", "SKILL.md"), "utf8");
+    const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+    expect(frontmatter).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.filter((t) => /^(Write|Edit|Bash|MultiEdit|NotebookEdit)\b/.test(t))).toEqual([]);
+    expect(allowed).toContain("mcp__plugin_facha-ui_facha-ui__scan_styles");
+  });
+});

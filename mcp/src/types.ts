@@ -86,6 +86,7 @@ export class FachaError extends Error {
     public code:
       | "CONFIG_INVALID"
       | "PROJECT_NOT_FOUND"
+      | "MULTIPLE_PROJECTS"
       | "PATH_OUTSIDE_PROJECT"
       | "PATH_NOT_FOUND"
       | "UNSUPPORTED_FILE",
