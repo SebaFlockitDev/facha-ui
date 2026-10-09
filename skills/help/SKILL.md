@@ -1,7 +1,7 @@
 ---
 name: help
 description: Lists the facha-ui commands, MCP tools and files, with examples. Only shows text; it never reads or changes the project.
-argument-hint: "[variants|apply|tools|files]"
+argument-hint: "[variants|apply|init|tools|files]"
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 Show the reference below to the developer. Rules:
 
 - **Do not call any tool** and do not read or write files: this command only shows text.
-- If `$ARGUMENTS` is `variants`, `apply`, `tools` or `files`, show only that section,
+- If `$ARGUMENTS` is `variants`, `apply`, `init`, `tools` or `files`, show only that section,
   plus the last line ("Guía completa…").
   With no argument (or an unknown one), show everything.
 - Show it in the developer's language. The text below is in Spanish; translate it if
@@ -25,7 +25,8 @@ Show the reference below to the developer. Rules:
 |---|---|
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
-| `/facha-ui:help [variants\|apply\|tools\|files]` | Esta ayuda |
+| `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
+| `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Esta ayuda |
 
 **Flujo en 4 pasos**
 
@@ -70,6 +71,23 @@ Show the reference below to the developer. Rules:
 - Valida que no haya errores nuevos, limpia el laboratorio y registra la decisión.
   No commitea.
 
+### init
+
+```text
+/facha-ui:init [colors|scales|all]
+```
+
+- Para cuando el design system no existe o le faltan roles, como los colores de estado.
+- Solo lo podés lanzar vos. Primero propone, sin escribir nada:
+  - tokens con su valor por tema y su contraste, sacados de los colores que el proyecto ya usa;
+  - escalas de tamaños y radios;
+  - un plan para reemplazar los literales.
+- Los valores son los que ya están en uso. Para los otros temas, reusa lo que el proyecto ya
+  declara o los deriva con contraste verificado, y te dice cómo.
+- Creás todo o una parte, y elegís si migrar los literales. Aprobás con un motivo.
+- Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
+  Nunca cambia ni borra tokens existentes. No commitea.
+
 ### tools
 
 Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alcanza con pedírselo a Claude.
@@ -79,6 +97,7 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `get_design_system` | "¿Qué design system tiene este proyecto?" · "¿Qué color uso para X?" | Tokens por tema, clases, roles que faltan, literales sin token, contraste por tema, guidelines y decisiones |
 | `check_ui` | "Revisá `app/orders/page.tsx`" · "Corré check_ui sobre lo que cambiaste" | Violaciones con archivo:línea, severidad y token sugerido |
 | `audit_project` | "¿Cuántas violaciones tiene el proyecto?" | Totales por severidad, regla y archivo |
+| `scan_styles` | "¿Qué tokens le faltan a este proyecto?" | Propuesta de tokens desde los valores en uso, con valor por tema, contraste y plan de migración |
 
 ### files
 

@@ -47,6 +47,8 @@ variant yourself, not even "the obvious one".
    Nothing else. Never touch token files, global CSS, `facha-ui.config.json`,
    `package.json`, lockfiles or `.gitignore`. Never install dependencies, commit, push,
    stash or reset.
+
+   Create and modify files only with the Write and Edit tools, never with shell commands.
 5. **Shell commands** (`Bash` is not pre-approved; the developer sees each one):
    - read-only git to inspect state: `git status --porcelain -- <file>` and
      `git log -1 --format=%cI -- <file>`;
