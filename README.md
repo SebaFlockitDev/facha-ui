@@ -8,7 +8,9 @@ Plugin de Claude Code para que la UI que genera la IA respete el design system d
 
 Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificación completa en [`SPEC.md`](SPEC.md).
 
-**Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md).
+![Flujo de facha-ui](docs/img/flujo.svg)
+
+**Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
 > **Estado:** MVP 0.1.0 (AI Day, 2026-10-09). Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 

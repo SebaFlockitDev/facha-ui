@@ -11,6 +11,10 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 5. `/facha-ui:variants <pantalla> "<objetivo>"` → revisar las 3 variantes.
 6. `/facha-ui:apply <slug> <a|b|c>` → aprobar el plan → revisar y commitear vos.
 
+![Flujo de facha-ui: vos pedís variantes, get_design_system lee el design system, la IA escribe 3 variantes en el laboratorio, check_ui las valida, Playwright las captura, vos elegís con apply y la decisión queda en decisions.md](img/flujo.svg)
+
+> Las imágenes de esta guía son **ilustrativas**: muestran una sesión de ejemplo sobre una app ficticia de pedidos ("Demo Store"). Los textos y los números de tu proyecto van a ser otros.
+
 ---
 
 ## 1. Requisitos
@@ -173,7 +177,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 Ejemplo:
 
 ```text
-/facha-ui:variants /orders "que se vean primero los pedidos atrasados"
+/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"
 ```
 
 ### 6.3 Qué hace la skill
@@ -190,11 +194,26 @@ Ejemplo:
 7. **Capturas:** en light y en cada tema extra, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
 8. **Presentación:** para cada variante, hipótesis, resultado del guardián, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
 
+Así se ve una corrida en la terminal. En este ejemplo, la brecha aparece antes de generar: no hay tokens de estado. Además, el guardián rechaza el primer intento de A y de C, y los dos pasan en el segundo.
+
+![Sesión de /facha-ui:variants en la terminal: brecha detectada, 3 hipótesis, intentos del guardián por variante, capturas y decisiones con su fuente](img/terminal-variants.png)
+
 ### 6.4 Revisar el resultado
 
 - **Variantes en el navegador:** `http://localhost:3000/lab/<slug>/<a|b|c>`. Para el tema oscuro, agregá `?theme=dark` (o el nombre del tema).
 - **Run:** `.facha-ui/runs/<slug>.json`, con hipótesis, intentos del guardián, decisiones con fuente, brechas y hallazgos.
 - **Capturas:** `.facha-ui/screenshots/`.
+
+Las tres variantes del ejemplo, en `/lab/orders/<a|b|c>`:
+
+| A · Conservadora | B · Jerarquía | C · Patrón alternativo |
+|---|---|---|
+| [![Variante A: aviso con el total pendiente y barra de acento en las filas](img/variante-a.png)](img/variante-a.png) | [![Variante B: sección "Esperan revisión" arriba de la tabla](img/variante-b.png)](img/variante-b.png) | [![Variante C: tarjetas por pedido pendiente y la tabla debajo](img/variante-c.png)](img/variante-c.png) |
+| Aviso con el total pendiente y barra de acento en esas filas. Cambia lo mínimo. | Sección propia arriba, los más antiguos primero. Lo pendiente aparece dos veces. | Una tarjeta por pedido pendiente. Es la que más cambia la pantalla. |
+
+Revisá siempre el tema oscuro (`?theme=dark`). En la variante B en dark, el badge "Pendiente de revisión" queda claro sobre el fondo oscuro, porque usa colores literales sin variante dark. Es la brecha que la skill avisó antes de generar, y por eso las variantes marcan lo pendiente con la barra de `--color-accent` y no con un color nuevo.
+
+![Variante B en tema oscuro](img/variante-b-dark.png)
 
 Si no te convence ninguna, podés pedir ajustes en la misma conversación ("en la B, el resumen va arriba de los filtros"). La skill los valida de nuevo con el guardián.
 
@@ -224,6 +243,8 @@ Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede 
 4. **Aplicación y validación:** porta la variante a la pantalla real y corre `check_ui`. No puede haber errores nuevos respecto de la línea base. Si los hay, no limpia nada y te ofrece revertir.
 5. **Limpieza:** borra el lab de esa pantalla, las capturas descartadas y el andamiaje si no quedan otros runs.
 6. **Memoria:** agrega la decisión al final de `decisions.md` (por ejemplo, `dec-2026-10-20-orders`) y marca el run como `applied`.
+
+![Sesión de /facha-ui:apply: verificaciones, plan exacto con la entrada de decisions.md, aprobación con motivo y resultado](img/terminal-apply.png)
 
 ### 7.3 Después de aplicar
 

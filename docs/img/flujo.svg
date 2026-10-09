@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-mem" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="420" rx="16" fill="#ffffff"/>
+  <text x="40" y="44" font-size="20" font-weight="700" fill="#0f172a">Flujo de facha-ui</text>
+  <text x="40" y="68" font-size="13.5" fill="#64748b">La IA propone la estructura; los valores visuales salen del código del proyecto y los valida un guardián determinista.</text>
+
+  <!-- loop: guardian back to lab -->
+  <path d="M 790 128 C 790 92, 600 92, 600 128" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-loop)"/>
+  <text x="695" y="98" font-size="12" fill="#15803d" text-anchor="middle">si hay errores, corrige solo lo reportado</text>
+
+  <!-- boxes -->
+  <g font-size="13">
+    <!-- 1 human -->
+    <rect x="30" y="130" width="175" height="110" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="117" y="160" text-anchor="middle" font-weight="700" fill="#5b21b6">Vos</text>
+    <text x="117" y="184" text-anchor="middle" font-family="Consolas, monospace" font-size="12.5" fill="#0f172a">/facha-ui:variants</text>
+    <text x="117" y="206" text-anchor="middle" fill="#475569">pantalla + objetivo</text>
+
+    <!-- 2 deterministic -->
+    <rect x="235" y="130" width="175" height="110" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="322" y="160" text-anchor="middle" font-weight="700" fill="#15803d">get_design_system</text>
+    <text x="322" y="184" text-anchor="middle" fill="#475569">tokens, temas, clases</text>
+    <text x="322" y="204" text-anchor="middle" fill="#475569">brechas y contraste</text>
+    <text x="322" y="224" text-anchor="middle" fill="#475569">guidelines, decisiones</text>
+
+    <!-- 3 AI -->
+    <rect x="440" y="130" width="175" height="110" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="527" y="160" text-anchor="middle" font-weight="700" fill="#1d4ed8">Laboratorio</text>
+    <text x="527" y="184" text-anchor="middle" fill="#475569">3 hipótesis: A · B · C</text>
+    <text x="527" y="206" text-anchor="middle" font-family="Consolas, monospace" font-size="12" fill="#0f172a">app/lab/&lt;pantalla&gt;/</text>
+    <text x="527" y="226" text-anchor="middle" fill="#475569">datos reales</text>
+
+    <!-- 4 deterministic -->
+    <rect x="645" y="130" width="175" height="110" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="732" y="160" text-anchor="middle" font-weight="700" fill="#15803d">Guardián · check_ui</text>
+    <text x="732" y="184" text-anchor="middle" fill="#475569">0 errores para pasar</text>
+    <text x="732" y="204" text-anchor="middle" fill="#475569">máximo 3 intentos</text>
+    <text x="732" y="224" text-anchor="middle" fill="#475569">sugiere el token</text>
+
+    <!-- 5 tool -->
+    <rect x="850" y="130" width="175" height="110" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="937" y="160" text-anchor="middle" font-weight="700" fill="#1d4ed8">Capturas</text>
+    <text x="937" y="184" text-anchor="middle" fill="#475569">light y dark</text>
+    <text x="937" y="204" text-anchor="middle" fill="#475569">Playwright MCP</text>
+    <text x="937" y="224" text-anchor="middle" fill="#475569">+ decisiones con fuente</text>
+
+    <!-- 6 human -->
+    <rect x="1055" y="130" width="195" height="110" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="1152" y="160" text-anchor="middle" font-weight="700" fill="#5b21b6">Vos elegís</text>
+    <text x="1152" y="184" text-anchor="middle" font-family="Consolas, monospace" font-size="12.5" fill="#0f172a">/facha-ui:apply</text>
+    <text x="1152" y="206" text-anchor="middle" fill="#475569">plan exacto + aprobación</text>
+    <text x="1152" y="226" text-anchor="middle" fill="#475569">y motivo</text>
+
+    <!-- 7 memory -->
+    <rect x="1055" y="290" width="195" height="80" rx="12" fill="#ffffff" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="1152" y="318" text-anchor="middle" font-weight="700" fill="#5b21b6">Pantalla real</text>
+    <text x="1152" y="340" text-anchor="middle" font-family="Consolas, monospace" font-size="12" fill="#0f172a">+ decisions.md</text>
+    <text x="1152" y="358" text-anchor="middle" fill="#475569">lab limpio, sin commits</text>
+  </g>
+
+  <!-- arrows between boxes -->
+  <g stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+    <line x1="205" y1="185" x2="231" y2="185"/>
+    <line x1="410" y1="185" x2="436" y2="185"/>
+    <line x1="615" y1="185" x2="641" y2="185"/>
+    <line x1="820" y1="185" x2="846" y2="185"/>
+    <line x1="1025" y1="185" x2="1051" y2="185"/>
+    <line x1="1152" y1="240" x2="1152" y2="286"/>
+  </g>
+
+  <!-- memory back to design system -->
+  <path d="M 1055 330 L 322 330 L 322 244" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-mem)"/>
+  <text x="690" y="322" font-size="12.5" fill="#6d28d9" text-anchor="middle">memoria: la próxima corrida cita la decisión como fuente</text>
+
+  <!-- legend -->
+  <g font-size="12.5" fill="#475569">
+    <rect x="40" y="384" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="62" y="396">decide el dev</text>
+    <rect x="170" y="384" width="14" height="14" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="192" y="396">código determinista (MCP de solo lectura)</text>
+    <rect x="470" y="384" width="14" height="14" rx="3" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="492" y="396">IA (skills de Claude Code)</text>
+  </g>
+</svg>
