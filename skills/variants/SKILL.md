@@ -157,8 +157,10 @@ The layout returns `notFound()` in production, so the lab never ships.
   - use existing component classes first;
   - follow the project's guidelines (e.g. "Tailwind only for layout") and its `custom/*` rules
     (listed in `rules`): they are the team's own rules;
-  - never use Tailwind's default palette (`bg-gray-100`, `text-white`…) unless the color is
-    mapped in the project's `@theme`: `check_ui` reports it as `tailwind-palette-color`;
+  - never use Tailwind's default palette (`bg-gray-100`, `text-white`…) or its default radius,
+    shadow, font-size, tracking and leading steps (`rounded-lg`, `shadow-md`, `text-sm`) unless
+    the project maps them in `@theme`: `check_ui` reports them as `tailwind-palette-color` and
+    `tailwind-default-scale`;
   - when a variant needs a style no class provides, use a CSS module next to the variant
     (`variant.module.css`), with values from `var(--token)` only.
 - Keep the screen's shell (layout components, title) so variants are comparable.
