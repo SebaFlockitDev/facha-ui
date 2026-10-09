@@ -1686,17 +1686,17 @@ var require_picomatch = __commonJS({
       }
       const opts = options || {};
       const posix = opts.windows;
-      const regex = isState ? picomatch3.compileRe(glob, options) : picomatch3.makeRe(glob, options, false, true);
-      const state = regex.state;
-      delete regex.state;
+      const regex2 = isState ? picomatch3.compileRe(glob, options) : picomatch3.makeRe(glob, options, false, true);
+      const state = regex2.state;
+      delete regex2.state;
       let isIgnored = () => false;
       if (opts.ignore) {
         const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
         isIgnored = picomatch3(opts.ignore, ignoreOpts, returnState);
       }
       const matcher = (input2, returnObject = false) => {
-        const { isMatch, match, output: output2 } = picomatch3.test(input2, regex, options, { glob, posix });
-        const result = { glob, state, regex, posix, input: input2, output: output2, match, isMatch };
+        const { isMatch, match, output: output2 } = picomatch3.test(input2, regex2, options, { glob, posix });
+        const result = { glob, state, regex: regex2, posix, input: input2, output: output2, match, isMatch };
         if (typeof opts.onResult === "function") {
           opts.onResult(result);
         }
@@ -1721,7 +1721,7 @@ var require_picomatch = __commonJS({
       }
       return matcher;
     };
-    picomatch3.test = (input2, regex, options, { glob, posix } = {}) => {
+    picomatch3.test = (input2, regex2, options, { glob, posix } = {}) => {
       if (typeof input2 !== "string") {
         throw new TypeError("Expected input to be a string");
       }
@@ -1738,16 +1738,16 @@ var require_picomatch = __commonJS({
       }
       if (match === false || opts.capture === true) {
         if (opts.matchBase === true || opts.basename === true) {
-          match = picomatch3.matchBase(input2, regex, options, posix);
+          match = picomatch3.matchBase(input2, regex2, options, posix);
         } else {
-          match = regex.exec(output2);
+          match = regex2.exec(output2);
         }
       }
       return { isMatch: Boolean(match), match, output: output2 };
     };
     picomatch3.matchBase = (input2, glob, options, posix = options && options.windows) => {
-      const regex = glob instanceof RegExp ? glob : picomatch3.makeRe(glob, options);
-      return regex.test(utils.basename(input2, { windows: posix }));
+      const regex2 = glob instanceof RegExp ? glob : picomatch3.makeRe(glob, options);
+      return regex2.test(utils.basename(input2, { windows: posix }));
     };
     picomatch3.isMatch = (str, patterns, options) => picomatch3(patterns, options)(str);
     picomatch3.parse = (pattern, options) => {
@@ -1766,11 +1766,11 @@ var require_picomatch = __commonJS({
       if (state && state.negated === true) {
         source = `^(?!${source}).*$`;
       }
-      const regex = picomatch3.toRegex(source, options);
+      const regex2 = picomatch3.toRegex(source, options);
       if (returnState === true) {
-        regex.state = state;
+        regex2.state = state;
       }
-      return regex;
+      return regex2;
     };
     picomatch3.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
       if (!input2 || typeof input2 !== "string") {
@@ -6430,10 +6430,10 @@ var require_core = __commonJS({
         }
         return metaSchema;
       }
-      _removeAllSchemas(schemas, regex) {
+      _removeAllSchemas(schemas, regex2) {
         for (const keyRef in schemas) {
           const sch = schemas[keyRef];
-          if (!regex || regex.test(keyRef)) {
+          if (!regex2 || regex2.test(keyRef)) {
             if (typeof sch == "string") {
               delete schemas[keyRef];
             } else if (sch && !sch.meta) {
@@ -8696,7 +8696,7 @@ var require_formats = __commonJS({
       // optimized https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
       ipv4: /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/,
       ipv6: /^((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))$/i,
-      regex,
+      regex: regex2,
       // uuid: http://tools.ietf.org/html/rfc4122
       uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i,
       // JSON-pointer: https://tools.ietf.org/html/rfc6901
@@ -8855,7 +8855,7 @@ var require_formats = __commonJS({
       return true;
     }
     var Z_ANCHOR = /[^\\]\\Z/;
-    function regex(str) {
+    function regex2(str) {
       if (Z_ANCHOR.test(str))
         return false;
       try {
@@ -17218,8 +17218,8 @@ function anchor(source) {
 var date = /* @__PURE__ */ anchor(dateSource);
 function timeSource(args) {
   const hhmm = `(?:[01]\\d|2[0-3]):[0-5]\\d`;
-  const regex = typeof args.precision === "number" ? args.precision === -1 ? `${hhmm}` : args.precision === 0 ? `${hhmm}:[0-5]\\d` : `${hhmm}:[0-5]\\d\\.\\d{${args.precision}}` : args.seconds ? `${hhmm}:[0-5]\\d(?:\\.\\d+)?` : `${hhmm}(?::[0-5]\\d(?:\\.\\d+)?)?`;
-  return regex;
+  const regex2 = typeof args.precision === "number" ? args.precision === -1 ? `${hhmm}` : args.precision === 0 ? `${hhmm}:[0-5]\\d` : `${hhmm}:[0-5]\\d\\.\\d{${args.precision}}` : args.seconds ? `${hhmm}:[0-5]\\d(?:\\.\\d+)?` : `${hhmm}(?::[0-5]\\d(?:\\.\\d+)?)?`;
+  return regex2;
 }
 function time(args) {
   return new RegExp(`^${timeSource(args)}$`);
@@ -17234,8 +17234,8 @@ function datetime(args) {
 }
 var anyString = /^[\s\S]{0,}$/;
 var string = (params) => {
-  const regex = params ? `[\\s\\S]{${params?.minimum ?? 0},${params?.maximum ?? ""}}` : `[\\s\\S]*`;
-  return new RegExp(`^${regex}$`);
+  const regex2 = params ? `[\\s\\S]{${params?.minimum ?? 0},${params?.maximum ?? ""}}` : `[\\s\\S]*`;
+  return new RegExp(`^${regex2}$`);
 };
 var bigint = /^-?\d+n?$/;
 var integer = /^-?\d+$/;
@@ -31417,9 +31417,9 @@ var stringProcessor = (schema, ctx, _json, _params) => {
       json2.pattern = patternList[0].source;
     else if (patternList.length > 1) {
       json2.allOf = [
-        ...patternList.map((regex) => ({
+        ...patternList.map((regex2) => ({
           ...ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0" ? { type: "string" } : {},
-          pattern: regex.source
+          pattern: regex2.source
         }))
       ];
     }
@@ -32934,10 +32934,10 @@ function currencyCode2(_params) {
 function hash(alg, params) {
   const enc = params?.enc ?? "hex";
   const format = `${alg}_${enc}`;
-  const regex = regexes_exports[format];
-  if (!regex)
+  const regex2 = regexes_exports[format];
+  if (!regex2)
     throw new Error(`Unrecognized hash format: ${format}`);
-  return _stringFormat(ZodCustomStringFormat, format, regex, params);
+  return _stringFormat(ZodCustomStringFormat, format, regex2, params);
 }
 var ZodNumber = /* @__PURE__ */ $constructor(
   "ZodNumber",
@@ -34447,7 +34447,7 @@ function convertBaseSchema(schema, ctx) {
             for (const key of Object.keys(payload.value)) {
               if (propertyKeys.includes(key))
                 continue;
-              if (patterns.some((regex) => regex.test(key)))
+              if (patterns.some((regex2) => regex2.test(key)))
                 continue;
               unrecognized.push(key);
             }
@@ -36519,7 +36519,8 @@ var RULE_IDS = [
   "inline-style",
   "theme-contrast",
   "class-contrast",
-  "non-text-contrast"
+  "non-text-contrast",
+  "tailwind-palette-color"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36535,6 +36536,17 @@ var FachaError = class extends Error {
 var CONFIG_FILE = "facha-ui.config.json";
 var LOOPBACK_HOSTS = /* @__PURE__ */ new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 var severity = external_exports.enum(["off", "info", "warning", "error"]);
+var regex = external_exports.string().min(1).refine(
+  (s) => {
+    try {
+      new RegExp(s);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: "Invalid regular expression" }
+);
 var ConfigSchema = external_exports.object({
   $schema: external_exports.string().optional(),
   version: external_exports.literal(1),
@@ -36563,16 +36575,29 @@ var ConfigSchema = external_exports.object({
     // Vision key (SPEC §2.0.2), accepted but not used by the MVP.
     viewports: external_exports.array(external_exports.object({ name: external_exports.string(), width: external_exports.number(), height: external_exports.number() })).optional()
   }).strict().default({ dir: "app/lab" }),
-  // Vision keys (SPEC §2.0.2 / §2.a.4) accepted so a full config validates; the MVP does not evaluate them.
+  // Declarative team rules (SPEC §2.a.4), evaluated since 0.4.0. No project code is executed.
   custom: external_exports.array(
-    external_exports.object({
-      id: external_exports.string().min(1),
-      kind: external_exports.enum(["forbid-token", "forbid-class"]),
-      severity: severity.optional(),
-      message: external_exports.string().optional()
-    }).passthrough()
+    external_exports.discriminatedUnion("kind", [
+      external_exports.object({
+        id: external_exports.string().regex(/^[\w-]+$/),
+        kind: external_exports.literal("forbid-token"),
+        selector: regex.optional(),
+        property: regex.optional(),
+        tokens: external_exports.array(external_exports.string().regex(/^--/)).min(1),
+        severity: severity.optional(),
+        message: external_exports.string().optional()
+      }).strict(),
+      external_exports.object({
+        id: external_exports.string().regex(/^[\w-]+$/),
+        kind: external_exports.literal("forbid-class"),
+        pattern: regex,
+        severity: severity.optional(),
+        message: external_exports.string().optional()
+      }).strict()
+    ])
   ).optional(),
-  tailwind: external_exports.record(external_exports.string(), external_exports.unknown()).optional(),
+  // useDefaultTheme is evaluated since 0.4.0; other Tailwind keys are accepted for the roadmap.
+  tailwind: external_exports.object({ useDefaultTheme: external_exports.boolean().optional() }).catchall(external_exports.unknown()).optional(),
   suggest: external_exports.object({ maxDeltaE: external_exports.number().positive() }).strict().optional(),
   preview: external_exports.object({
     baseUrl: external_exports.string().url().refine((u) => LOOPBACK_HOSTS.has(new URL(u).hostname), {
@@ -36629,7 +36654,8 @@ function loadConfig(root2) {
       { issues }
     );
   }
-  const notEvaluated = ["custom", "tailwind", "suggest"].filter((k4) => parsed.data[k4] !== void 0);
+  const notEvaluated = ["suggest"].filter((k4) => parsed.data[k4] !== void 0);
+  for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme") notEvaluated.push(`tailwind.${k4}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`] : [];
   return { config: parsed.data, configSource: CONFIG_FILE, assumptions };
@@ -37656,13 +37682,13 @@ function timeRegex(args) {
   return new RegExp(`^${timeRegexSource(args)}$`);
 }
 function datetimeRegex(args) {
-  let regex = `${dateRegexSource}T${timeRegexSource(args)}`;
+  let regex2 = `${dateRegexSource}T${timeRegexSource(args)}`;
   const opts = [];
   opts.push(args.local ? `Z?` : `Z`);
   if (args.offset)
     opts.push(`([+-]\\d{2}:?\\d{2})`);
-  regex = `${regex}(${opts.join("|")})`;
-  return new RegExp(`^${regex}$`);
+  regex2 = `${regex2}(${opts.join("|")})`;
+  return new RegExp(`^${regex2}$`);
 }
 function isValidIP(ip, version2) {
   if ((version2 === "v4" || !version2) && ipv4Regex.test(ip)) {
@@ -37908,8 +37934,8 @@ var ZodString2 = class _ZodString2 extends ZodType2 {
           status.dirty();
         }
       } else if (check2.kind === "datetime") {
-        const regex = datetimeRegex(check2);
-        if (!regex.test(input2.data)) {
+        const regex2 = datetimeRegex(check2);
+        if (!regex2.test(input2.data)) {
           ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode2.invalid_string,
@@ -37919,8 +37945,8 @@ var ZodString2 = class _ZodString2 extends ZodType2 {
           status.dirty();
         }
       } else if (check2.kind === "date") {
-        const regex = dateRegex;
-        if (!regex.test(input2.data)) {
+        const regex2 = dateRegex;
+        if (!regex2.test(input2.data)) {
           ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode2.invalid_string,
@@ -37930,8 +37956,8 @@ var ZodString2 = class _ZodString2 extends ZodType2 {
           status.dirty();
         }
       } else if (check2.kind === "time") {
-        const regex = timeRegex(check2);
-        if (!regex.test(input2.data)) {
+        const regex2 = timeRegex(check2);
+        if (!regex2.test(input2.data)) {
           ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode2.invalid_string,
@@ -38006,8 +38032,8 @@ var ZodString2 = class _ZodString2 extends ZodType2 {
     }
     return { status: status.value, value: input2.data };
   }
-  _regex(regex, validation, message) {
-    return this.refinement((data) => regex.test(data), {
+  _regex(regex2, validation, message) {
+    return this.refinement((data) => regex2.test(data), {
       validation,
       code: ZodIssueCode2.invalid_string,
       ...errorUtil.errToObj(message)
@@ -38099,10 +38125,10 @@ var ZodString2 = class _ZodString2 extends ZodType2 {
   duration(message) {
     return this._addCheck({ kind: "duration", ...errorUtil.errToObj(message) });
   }
-  regex(regex, message) {
+  regex(regex2, message) {
     return this._addCheck({
       kind: "regex",
-      regex,
+      regex: regex2,
       ...errorUtil.errToObj(message)
     });
   }
@@ -41464,7 +41490,7 @@ function addFormat(schema, value, message, refs) {
     setResponseValueAndErrors(schema, "format", value, message, refs);
   }
 }
-function addPattern2(schema, regex, message, refs) {
+function addPattern2(schema, regex2, message, refs) {
   if (schema.pattern || schema.allOf?.some((x) => x.pattern)) {
     if (!schema.allOf) {
       schema.allOf = [];
@@ -41485,24 +41511,24 @@ function addPattern2(schema, regex, message, refs) {
       }
     }
     schema.allOf.push({
-      pattern: stringifyRegExpWithFlags(regex, refs),
+      pattern: stringifyRegExpWithFlags(regex2, refs),
       ...message && refs.errorMessages && { errorMessage: { pattern: message } }
     });
   } else {
-    setResponseValueAndErrors(schema, "pattern", stringifyRegExpWithFlags(regex, refs), message, refs);
+    setResponseValueAndErrors(schema, "pattern", stringifyRegExpWithFlags(regex2, refs), message, refs);
   }
 }
-function stringifyRegExpWithFlags(regex, refs) {
-  if (!refs.applyRegexFlags || !regex.flags) {
-    return regex.source;
+function stringifyRegExpWithFlags(regex2, refs) {
+  if (!refs.applyRegexFlags || !regex2.flags) {
+    return regex2.source;
   }
   const flags = {
-    i: regex.flags.includes("i"),
-    m: regex.flags.includes("m"),
-    s: regex.flags.includes("s")
+    i: regex2.flags.includes("i"),
+    m: regex2.flags.includes("m"),
+    s: regex2.flags.includes("s")
     // `.` matches newlines
   };
-  const source = flags.i ? regex.source.toLowerCase() : regex.source;
+  const source = flags.i ? regex2.source.toLowerCase() : regex2.source;
   let pattern = "";
   let isEscaped = false;
   let inCharGroup = false;
@@ -41563,7 +41589,7 @@ function stringifyRegExpWithFlags(regex, refs) {
     new RegExp(pattern);
   } catch {
     console.warn(`Could not convert regex pattern at ${refs.currentPath.join("/")} to a flag-independent form! Falling back to the flag-ignorant source`);
-    return regex.source;
+    return regex2.source;
   }
   return pattern;
 }
@@ -49401,12 +49427,12 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     pattern,
     flags
   }) {
-    let regex = null;
+    let regex2 = null;
     try {
-      regex = new RegExp(pattern, flags);
+      regex2 = new RegExp(pattern, flags);
     } catch (_) {
     }
-    const node2 = this.estreeParseLiteral(regex);
+    const node2 = this.estreeParseLiteral(regex2);
     node2.regex = {
       pattern,
       flags
@@ -63664,6 +63690,384 @@ function sizingProperty(p4) {
   return map2[p4] ?? p4;
 }
 
+// src/tailwind-palette.ts
+var TAILWIND_PALETTE = {
+  "red-50": "oklch(97.1% 0.013 17.38)",
+  "red-100": "oklch(93.6% 0.032 17.717)",
+  "red-200": "oklch(88.5% 0.062 18.334)",
+  "red-300": "oklch(80.8% 0.114 19.571)",
+  "red-400": "oklch(70.4% 0.191 22.216)",
+  "red-500": "oklch(63.7% 0.237 25.331)",
+  "red-600": "oklch(57.7% 0.245 27.325)",
+  "red-700": "oklch(50.5% 0.213 27.518)",
+  "red-800": "oklch(44.4% 0.177 26.899)",
+  "red-900": "oklch(39.6% 0.141 25.723)",
+  "red-950": "oklch(25.8% 0.092 26.042)",
+  "orange-50": "oklch(98% 0.016 73.684)",
+  "orange-100": "oklch(95.4% 0.038 75.164)",
+  "orange-200": "oklch(90.1% 0.076 70.697)",
+  "orange-300": "oklch(83.7% 0.128 66.29)",
+  "orange-400": "oklch(75% 0.183 55.934)",
+  "orange-500": "oklch(70.5% 0.213 47.604)",
+  "orange-600": "oklch(64.6% 0.222 41.116)",
+  "orange-700": "oklch(55.3% 0.195 38.402)",
+  "orange-800": "oklch(47% 0.157 37.304)",
+  "orange-900": "oklch(40.8% 0.123 38.172)",
+  "orange-950": "oklch(26.6% 0.079 36.259)",
+  "amber-50": "oklch(98.7% 0.022 95.277)",
+  "amber-100": "oklch(96.2% 0.059 95.617)",
+  "amber-200": "oklch(92.4% 0.12 95.746)",
+  "amber-300": "oklch(87.9% 0.169 91.605)",
+  "amber-400": "oklch(82.8% 0.189 84.429)",
+  "amber-500": "oklch(76.9% 0.188 70.08)",
+  "amber-600": "oklch(66.6% 0.179 58.318)",
+  "amber-700": "oklch(55.5% 0.163 48.998)",
+  "amber-800": "oklch(47.3% 0.137 46.201)",
+  "amber-900": "oklch(41.4% 0.112 45.904)",
+  "amber-950": "oklch(27.9% 0.077 45.635)",
+  "yellow-50": "oklch(98.7% 0.026 102.212)",
+  "yellow-100": "oklch(97.3% 0.071 103.193)",
+  "yellow-200": "oklch(94.5% 0.129 101.54)",
+  "yellow-300": "oklch(90.5% 0.182 98.111)",
+  "yellow-400": "oklch(85.2% 0.199 91.936)",
+  "yellow-500": "oklch(79.5% 0.184 86.047)",
+  "yellow-600": "oklch(68.1% 0.162 75.834)",
+  "yellow-700": "oklch(55.4% 0.135 66.442)",
+  "yellow-800": "oklch(47.6% 0.114 61.907)",
+  "yellow-900": "oklch(42.1% 0.095 57.708)",
+  "yellow-950": "oklch(28.6% 0.066 53.813)",
+  "lime-50": "oklch(98.6% 0.031 120.757)",
+  "lime-100": "oklch(96.7% 0.067 122.328)",
+  "lime-200": "oklch(93.8% 0.127 124.321)",
+  "lime-300": "oklch(89.7% 0.196 126.665)",
+  "lime-400": "oklch(84.1% 0.238 128.85)",
+  "lime-500": "oklch(76.8% 0.233 130.85)",
+  "lime-600": "oklch(64.8% 0.2 131.684)",
+  "lime-700": "oklch(53.2% 0.157 131.589)",
+  "lime-800": "oklch(45.3% 0.124 130.933)",
+  "lime-900": "oklch(40.5% 0.101 131.063)",
+  "lime-950": "oklch(27.4% 0.072 132.109)",
+  "green-50": "oklch(98.2% 0.018 155.826)",
+  "green-100": "oklch(96.2% 0.044 156.743)",
+  "green-200": "oklch(92.5% 0.084 155.995)",
+  "green-300": "oklch(87.1% 0.15 154.449)",
+  "green-400": "oklch(79.2% 0.209 151.711)",
+  "green-500": "oklch(72.3% 0.219 149.579)",
+  "green-600": "oklch(62.7% 0.194 149.214)",
+  "green-700": "oklch(52.7% 0.154 150.069)",
+  "green-800": "oklch(44.8% 0.119 151.328)",
+  "green-900": "oklch(39.3% 0.095 152.535)",
+  "green-950": "oklch(26.6% 0.065 152.934)",
+  "emerald-50": "oklch(97.9% 0.021 166.113)",
+  "emerald-100": "oklch(95% 0.052 163.051)",
+  "emerald-200": "oklch(90.5% 0.093 164.15)",
+  "emerald-300": "oklch(84.5% 0.143 164.978)",
+  "emerald-400": "oklch(76.5% 0.177 163.223)",
+  "emerald-500": "oklch(69.6% 0.17 162.48)",
+  "emerald-600": "oklch(59.6% 0.145 163.225)",
+  "emerald-700": "oklch(50.8% 0.118 165.612)",
+  "emerald-800": "oklch(43.2% 0.095 166.913)",
+  "emerald-900": "oklch(37.8% 0.077 168.94)",
+  "emerald-950": "oklch(26.2% 0.051 172.552)",
+  "teal-50": "oklch(98.4% 0.014 180.72)",
+  "teal-100": "oklch(95.3% 0.051 180.801)",
+  "teal-200": "oklch(91% 0.096 180.426)",
+  "teal-300": "oklch(85.5% 0.138 181.071)",
+  "teal-400": "oklch(77.7% 0.152 181.912)",
+  "teal-500": "oklch(70.4% 0.14 182.503)",
+  "teal-600": "oklch(60% 0.118 184.704)",
+  "teal-700": "oklch(51.1% 0.096 186.391)",
+  "teal-800": "oklch(43.7% 0.078 188.216)",
+  "teal-900": "oklch(38.6% 0.063 188.416)",
+  "teal-950": "oklch(27.7% 0.046 192.524)",
+  "cyan-50": "oklch(98.4% 0.019 200.873)",
+  "cyan-100": "oklch(95.6% 0.045 203.388)",
+  "cyan-200": "oklch(91.7% 0.08 205.041)",
+  "cyan-300": "oklch(86.5% 0.127 207.078)",
+  "cyan-400": "oklch(78.9% 0.154 211.53)",
+  "cyan-500": "oklch(71.5% 0.143 215.221)",
+  "cyan-600": "oklch(60.9% 0.126 221.723)",
+  "cyan-700": "oklch(52% 0.105 223.128)",
+  "cyan-800": "oklch(45% 0.085 224.283)",
+  "cyan-900": "oklch(39.8% 0.07 227.392)",
+  "cyan-950": "oklch(30.2% 0.056 229.695)",
+  "sky-50": "oklch(97.7% 0.013 236.62)",
+  "sky-100": "oklch(95.1% 0.026 236.824)",
+  "sky-200": "oklch(90.1% 0.058 230.902)",
+  "sky-300": "oklch(82.8% 0.111 230.318)",
+  "sky-400": "oklch(74.6% 0.16 232.661)",
+  "sky-500": "oklch(68.5% 0.169 237.323)",
+  "sky-600": "oklch(58.8% 0.158 241.966)",
+  "sky-700": "oklch(50% 0.134 242.749)",
+  "sky-800": "oklch(44.3% 0.11 240.79)",
+  "sky-900": "oklch(39.1% 0.09 240.876)",
+  "sky-950": "oklch(29.3% 0.066 243.157)",
+  "blue-50": "oklch(97% 0.014 254.604)",
+  "blue-100": "oklch(93.2% 0.032 255.585)",
+  "blue-200": "oklch(88.2% 0.059 254.128)",
+  "blue-300": "oklch(80.9% 0.105 251.813)",
+  "blue-400": "oklch(70.7% 0.165 254.624)",
+  "blue-500": "oklch(62.3% 0.214 259.815)",
+  "blue-600": "oklch(54.6% 0.245 262.881)",
+  "blue-700": "oklch(48.8% 0.243 264.376)",
+  "blue-800": "oklch(42.4% 0.199 265.638)",
+  "blue-900": "oklch(37.9% 0.146 265.522)",
+  "blue-950": "oklch(28.2% 0.091 267.935)",
+  "indigo-50": "oklch(96.2% 0.018 272.314)",
+  "indigo-100": "oklch(93% 0.034 272.788)",
+  "indigo-200": "oklch(87% 0.065 274.039)",
+  "indigo-300": "oklch(78.5% 0.115 274.713)",
+  "indigo-400": "oklch(67.3% 0.182 276.935)",
+  "indigo-500": "oklch(58.5% 0.233 277.117)",
+  "indigo-600": "oklch(51.1% 0.262 276.966)",
+  "indigo-700": "oklch(45.7% 0.24 277.023)",
+  "indigo-800": "oklch(39.8% 0.195 277.366)",
+  "indigo-900": "oklch(35.9% 0.144 278.697)",
+  "indigo-950": "oklch(25.7% 0.09 281.288)",
+  "violet-50": "oklch(96.9% 0.016 293.756)",
+  "violet-100": "oklch(94.3% 0.029 294.588)",
+  "violet-200": "oklch(89.4% 0.057 293.283)",
+  "violet-300": "oklch(81.1% 0.111 293.571)",
+  "violet-400": "oklch(70.2% 0.183 293.541)",
+  "violet-500": "oklch(60.6% 0.25 292.717)",
+  "violet-600": "oklch(54.1% 0.281 293.009)",
+  "violet-700": "oklch(49.1% 0.27 292.581)",
+  "violet-800": "oklch(43.2% 0.232 292.759)",
+  "violet-900": "oklch(38% 0.189 293.745)",
+  "violet-950": "oklch(28.3% 0.141 291.089)",
+  "purple-50": "oklch(97.7% 0.014 308.299)",
+  "purple-100": "oklch(94.6% 0.033 307.174)",
+  "purple-200": "oklch(90.2% 0.063 306.703)",
+  "purple-300": "oklch(82.7% 0.119 306.383)",
+  "purple-400": "oklch(71.4% 0.203 305.504)",
+  "purple-500": "oklch(62.7% 0.265 303.9)",
+  "purple-600": "oklch(55.8% 0.288 302.321)",
+  "purple-700": "oklch(49.6% 0.265 301.924)",
+  "purple-800": "oklch(43.8% 0.218 303.724)",
+  "purple-900": "oklch(38.1% 0.176 304.987)",
+  "purple-950": "oklch(29.1% 0.149 302.717)",
+  "fuchsia-50": "oklch(97.7% 0.017 320.058)",
+  "fuchsia-100": "oklch(95.2% 0.037 318.852)",
+  "fuchsia-200": "oklch(90.3% 0.076 319.62)",
+  "fuchsia-300": "oklch(83.3% 0.145 321.434)",
+  "fuchsia-400": "oklch(74% 0.238 322.16)",
+  "fuchsia-500": "oklch(66.7% 0.295 322.15)",
+  "fuchsia-600": "oklch(59.1% 0.293 322.896)",
+  "fuchsia-700": "oklch(51.8% 0.253 323.949)",
+  "fuchsia-800": "oklch(45.2% 0.211 324.591)",
+  "fuchsia-900": "oklch(40.1% 0.17 325.612)",
+  "fuchsia-950": "oklch(29.3% 0.136 325.661)",
+  "pink-50": "oklch(97.1% 0.014 343.198)",
+  "pink-100": "oklch(94.8% 0.028 342.258)",
+  "pink-200": "oklch(89.9% 0.061 343.231)",
+  "pink-300": "oklch(82.3% 0.12 346.018)",
+  "pink-400": "oklch(71.8% 0.202 349.761)",
+  "pink-500": "oklch(65.6% 0.241 354.308)",
+  "pink-600": "oklch(59.2% 0.249 0.584)",
+  "pink-700": "oklch(52.5% 0.223 3.958)",
+  "pink-800": "oklch(45.9% 0.187 3.815)",
+  "pink-900": "oklch(40.8% 0.153 2.432)",
+  "pink-950": "oklch(28.4% 0.109 3.907)",
+  "rose-50": "oklch(96.9% 0.015 12.422)",
+  "rose-100": "oklch(94.1% 0.03 12.58)",
+  "rose-200": "oklch(89.2% 0.058 10.001)",
+  "rose-300": "oklch(81% 0.117 11.638)",
+  "rose-400": "oklch(71.2% 0.194 13.428)",
+  "rose-500": "oklch(64.5% 0.246 16.439)",
+  "rose-600": "oklch(58.6% 0.253 17.585)",
+  "rose-700": "oklch(51.4% 0.222 16.935)",
+  "rose-800": "oklch(45.5% 0.188 13.697)",
+  "rose-900": "oklch(41% 0.159 10.272)",
+  "rose-950": "oklch(27.1% 0.105 12.094)",
+  "slate-50": "oklch(98.4% 0.003 247.858)",
+  "slate-100": "oklch(96.8% 0.007 247.896)",
+  "slate-200": "oklch(92.9% 0.013 255.508)",
+  "slate-300": "oklch(86.9% 0.022 252.894)",
+  "slate-400": "oklch(70.4% 0.04 256.788)",
+  "slate-500": "oklch(55.4% 0.046 257.417)",
+  "slate-600": "oklch(44.6% 0.043 257.281)",
+  "slate-700": "oklch(37.2% 0.044 257.287)",
+  "slate-800": "oklch(27.9% 0.041 260.031)",
+  "slate-900": "oklch(20.8% 0.042 265.755)",
+  "slate-950": "oklch(12.9% 0.042 264.695)",
+  "gray-50": "oklch(98.5% 0.002 247.839)",
+  "gray-100": "oklch(96.7% 0.003 264.542)",
+  "gray-200": "oklch(92.8% 0.006 264.531)",
+  "gray-300": "oklch(87.2% 0.01 258.338)",
+  "gray-400": "oklch(70.7% 0.022 261.325)",
+  "gray-500": "oklch(55.1% 0.027 264.364)",
+  "gray-600": "oklch(44.6% 0.03 256.802)",
+  "gray-700": "oklch(37.3% 0.034 259.733)",
+  "gray-800": "oklch(27.8% 0.033 256.848)",
+  "gray-900": "oklch(21% 0.034 264.665)",
+  "gray-950": "oklch(13% 0.028 261.692)",
+  "zinc-50": "oklch(98.5% 0 none)",
+  "zinc-100": "oklch(96.7% 0.001 286.375)",
+  "zinc-200": "oklch(92% 0.004 286.32)",
+  "zinc-300": "oklch(87.1% 0.006 286.286)",
+  "zinc-400": "oklch(70.5% 0.015 286.067)",
+  "zinc-500": "oklch(55.2% 0.016 285.938)",
+  "zinc-600": "oklch(44.2% 0.017 285.786)",
+  "zinc-700": "oklch(37% 0.013 285.805)",
+  "zinc-800": "oklch(27.4% 0.006 286.033)",
+  "zinc-900": "oklch(21% 0.006 285.885)",
+  "zinc-950": "oklch(14.1% 0.005 285.823)",
+  "neutral-50": "oklch(98.5% 0 none)",
+  "neutral-100": "oklch(97% 0 none)",
+  "neutral-200": "oklch(92.2% 0 none)",
+  "neutral-300": "oklch(87% 0 none)",
+  "neutral-400": "oklch(70.8% 0 none)",
+  "neutral-500": "oklch(55.6% 0 none)",
+  "neutral-600": "oklch(43.9% 0 none)",
+  "neutral-700": "oklch(37.1% 0 none)",
+  "neutral-800": "oklch(26.9% 0 none)",
+  "neutral-900": "oklch(20.5% 0 none)",
+  "neutral-950": "oklch(14.5% 0 none)",
+  "stone-50": "oklch(98.5% 0.001 106.423)",
+  "stone-100": "oklch(97% 0.001 106.424)",
+  "stone-200": "oklch(92.3% 0.003 48.717)",
+  "stone-300": "oklch(86.9% 0.005 56.366)",
+  "stone-400": "oklch(70.9% 0.01 56.259)",
+  "stone-500": "oklch(55.3% 0.013 58.071)",
+  "stone-600": "oklch(44.4% 0.011 73.639)",
+  "stone-700": "oklch(37.4% 0.01 67.558)",
+  "stone-800": "oklch(26.8% 0.007 34.298)",
+  "stone-900": "oklch(21.6% 0.006 56.043)",
+  "stone-950": "oklch(14.7% 0.004 49.25)",
+  "mauve-50": "oklch(98.5% 0 none)",
+  "mauve-100": "oklch(96% 0.003 325.6)",
+  "mauve-200": "oklch(92.2% 0.005 325.62)",
+  "mauve-300": "oklch(86.5% 0.012 325.68)",
+  "mauve-400": "oklch(71.1% 0.019 323.02)",
+  "mauve-500": "oklch(54.2% 0.034 322.5)",
+  "mauve-600": "oklch(43.5% 0.029 321.78)",
+  "mauve-700": "oklch(36.4% 0.029 323.89)",
+  "mauve-800": "oklch(26.3% 0.024 320.12)",
+  "mauve-900": "oklch(21.2% 0.019 322.12)",
+  "mauve-950": "oklch(14.5% 0.008 326)",
+  "olive-50": "oklch(98.8% 0.003 106.5)",
+  "olive-100": "oklch(96.6% 0.005 106.5)",
+  "olive-200": "oklch(93% 0.007 106.5)",
+  "olive-300": "oklch(88% 0.011 106.6)",
+  "olive-400": "oklch(73.7% 0.021 106.9)",
+  "olive-500": "oklch(58% 0.031 107.3)",
+  "olive-600": "oklch(46.6% 0.025 107.3)",
+  "olive-700": "oklch(39.4% 0.023 107.4)",
+  "olive-800": "oklch(28.6% 0.016 107.4)",
+  "olive-900": "oklch(22.8% 0.013 107.4)",
+  "olive-950": "oklch(15.3% 0.006 107.1)",
+  "mist-50": "oklch(98.7% 0.002 197.1)",
+  "mist-100": "oklch(96.3% 0.002 197.1)",
+  "mist-200": "oklch(92.5% 0.005 214.3)",
+  "mist-300": "oklch(87.2% 0.007 219.6)",
+  "mist-400": "oklch(72.3% 0.014 214.4)",
+  "mist-500": "oklch(56% 0.021 213.5)",
+  "mist-600": "oklch(45% 0.017 213.2)",
+  "mist-700": "oklch(37.8% 0.015 216)",
+  "mist-800": "oklch(27.5% 0.011 216.9)",
+  "mist-900": "oklch(21.8% 0.008 223.9)",
+  "mist-950": "oklch(14.8% 0.004 228.8)",
+  "taupe-50": "oklch(98.6% 0.002 67.8)",
+  "taupe-100": "oklch(96% 0.002 17.2)",
+  "taupe-200": "oklch(92.2% 0.005 34.3)",
+  "taupe-300": "oklch(86.8% 0.007 39.5)",
+  "taupe-400": "oklch(71.4% 0.014 41.2)",
+  "taupe-500": "oklch(54.7% 0.021 43.1)",
+  "taupe-600": "oklch(43.8% 0.017 39.3)",
+  "taupe-700": "oklch(36.7% 0.016 35.7)",
+  "taupe-800": "oklch(26.8% 0.011 36.5)",
+  "taupe-900": "oklch(21.4% 0.009 43.1)",
+  "taupe-950": "oklch(14.7% 0.004 49.3)",
+  "black": "#000",
+  "white": "#fff"
+};
+
+// src/project-rules.ts
+var PALETTE_PREFIXES = [
+  ["inset-shadow", "box-shadow"],
+  ["inset-ring", "border-color"],
+  ["ring-offset", "border-color"],
+  ["placeholder", "color"],
+  ["decoration", "color"],
+  ["outline", "outline-color"],
+  ["border-x", "border-color"],
+  ["border-y", "border-color"],
+  ["border-t", "border-color"],
+  ["border-r", "border-color"],
+  ["border-b", "border-color"],
+  ["border-l", "border-color"],
+  ["border-s", "border-color"],
+  ["border-e", "border-color"],
+  ["border", "border-color"],
+  ["divide", "border-color"],
+  ["shadow", "box-shadow"],
+  ["accent", "color"],
+  ["stroke", "stroke"],
+  ["caret", "color"],
+  ["ring", "border-color"],
+  ["text", "color"],
+  ["fill", "fill"],
+  ["from", "background-color"],
+  ["via", "background-color"],
+  ["bg", "background-color"],
+  ["to", "background-color"]
+];
+var PALETTE_NAMES = [...new Set(Object.keys(TAILWIND_PALETTE).map((k4) => k4.replace(/-\d+$/, "")))].sort((a, b) => b.length - a.length);
+var PALETTE_RE = new RegExp(
+  `^(${PALETTE_PREFIXES.map(([p4]) => p4).join("|")})-(${PALETTE_NAMES.join("|")})(?:-(\\d{2,3}))?(?:\\/([\\w.%]+|\\[[^\\]]+\\]))?$`
+);
+var PROPERTY_OF = new Map(PALETTE_PREFIXES);
+function parsePaletteClass(raw) {
+  const utility = baseUtility(raw);
+  const m = utility.match(PALETTE_RE);
+  if (!m) return null;
+  const key = m[3] ? `${m[2]}-${m[3]}` : m[2];
+  const value = TAILWIND_PALETTE[key];
+  if (!value) return null;
+  return { utility, key, value, property: PROPERTY_OF.get(m[1]), opacity: m[4] ?? null };
+}
+function isForeignPalette(ctx, p4) {
+  if (!ctx.project.hasTailwind) return false;
+  if (ctx.project.config.tailwind?.useDefaultTheme === true) return false;
+  if (ctx.definedCustomProps.has(`--color-${p4.key}`)) return false;
+  if (ctx.componentClasses.some((c2) => c2.selector === `.${p4.utility}`)) return false;
+  return true;
+}
+var compiled = /* @__PURE__ */ new WeakMap();
+function customRules(ctx) {
+  const cached2 = compiled.get(ctx);
+  if (cached2) return cached2;
+  const out = (ctx.project.config.custom ?? []).map((r2) => {
+    if (r2.kind === "forbid-token") {
+      return {
+        id: r2.id,
+        kind: "forbid-token",
+        severity: r2.severity ?? "error",
+        message: r2.message ?? `Custom rule ${r2.id}: ${r2.tokens.join(", ")} cannot be used here.`,
+        selector: r2.selector ? new RegExp(r2.selector) : void 0,
+        property: r2.property ? new RegExp(r2.property) : void 0,
+        tokens: new Set(r2.tokens)
+      };
+    }
+    return {
+      id: r2.id,
+      kind: "forbid-class",
+      severity: r2.severity ?? "error",
+      message: r2.message ?? `Custom rule ${r2.id}: classes matching /${r2.pattern}/ are not allowed.`,
+      pattern: new RegExp(r2.pattern)
+    };
+  });
+  compiled.set(ctx, out);
+  return out;
+}
+function customRulesInfo(ctx) {
+  return customRules(ctx).map((r2) => ({
+    id: `custom/${r2.id}`,
+    severity: r2.severity,
+    summary: r2.kind === "forbid-token" ? `${r2.message} (forbid-token: ${[...r2.tokens].join(", ")}${r2.selector ? ` in selectors /${r2.selector.source}/` : ""}${r2.property ? `, property /${r2.property.source}/` : ""})` : `${r2.message} (forbid-class: /${r2.pattern.source}/)`
+  }));
+}
+
 // src/visual.ts
 var STATUS_KINDS = [
   ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
@@ -63980,6 +64384,11 @@ var RULES = [
     summary: "style={{\u2026}} attribute: a signal of a missing class or component pattern."
   },
   {
+    id: "tailwind-palette-color",
+    severity: "error",
+    summary: "Tailwind default-palette color utilities (text-gray-500, bg-white, border-slate-200\u2026) in a project with its own tokens, unless the color is mapped in @theme or tailwind.useDefaultTheme is true. Suggests the closest project token."
+  },
+  {
     id: "theme-contrast",
     severity: "error",
     summary: "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected."
@@ -64000,6 +64409,7 @@ var MESSAGES = {
   "tailwind-arbitrary-value": "Arbitrary Tailwind value bypasses the design system.",
   "unknown-token": "var() references a token that is not defined in the design system.",
   "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
+  "tailwind-palette-color": "Tailwind default-palette color instead of a project token.",
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
   "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background."
@@ -64019,8 +64429,9 @@ function checkUsages(ctx, usages) {
   const unresolved = [];
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
+  const custom2 = customRules(ctx);
   const push = (rule2, base, loc, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
-    const severity3 = effectiveSeverity(ctx, rule2, base, soft);
+    const severity3 = rule2.startsWith("custom/") ? base : effectiveSeverity(ctx, rule2, base, soft);
     if (severity3 === "off") return;
     violations.push({
       id: `${loc.file}:${loc.line}:${loc.column}:${rule2}`,
@@ -64060,9 +64471,37 @@ function checkUsages(ctx, usages) {
       continue;
     }
     if (u.kind === "class") {
+      const loc0 = { file: u.file, line: u.line, column: u.column };
+      const util2 = baseUtility(u.raw);
+      for (const cr of custom2) {
+        if (cr.kind !== "forbid-class" || cr.severity === "off" || !cr.pattern.test(util2)) continue;
+        push(`custom/${cr.id}`, cr.severity, loc0, u.raw, null, "className", {
+          match: "none",
+          kind: "none",
+          value: null,
+          detail: `Matches /${cr.pattern.source}/ from the project's custom rules.`,
+          source: "facha-ui.config.json"
+        }, [], false, cr.message);
+      }
       const a = parseArbitrary(u.raw);
       if (!a) {
-        const finding = classContrast(ctx, u.raw);
+        const palette = parsePaletteClass(u.raw);
+        if (palette && isForeignPalette(ctx, palette)) {
+          push(
+            "tailwind-palette-color",
+            "error",
+            loc0,
+            u.raw,
+            palette.property,
+            "className",
+            suggestColor(ctx, palette.value, palette.property),
+            otherThemes,
+            false,
+            `${palette.utility} is Tailwind's default ${palette.key} (${palette.value})${palette.opacity ? ` at ${palette.opacity} opacity` : ""}, not a project token.`
+          );
+          continue;
+        }
+        const finding = classContrast(ctx, util2);
         if (finding) {
           const r2 = finding.result;
           push(
@@ -64117,6 +64556,21 @@ function checkUsages(ctx, usages) {
       push("color-literal", "error", u.locAt(lit.index), lit.text, u.property, context, suggestColor(ctx, lit.text, u.property), otherThemes);
     }
     checkVarRefs(u.value, u.locAt, u.property, context);
+    for (const cr of custom2) {
+      if (cr.kind !== "forbid-token" || cr.severity === "off") continue;
+      if (cr.selector && !(u.selector && cr.selector.test(u.selector))) continue;
+      if (cr.property && !cr.property.test(u.property)) continue;
+      for (const m of u.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+        if (!cr.tokens.has(m[1])) continue;
+        push(`custom/${cr.id}`, cr.severity, u.locAt(m.index), `${u.property}: ${m[0]})`, u.property, context, {
+          match: "none",
+          kind: "none",
+          value: null,
+          detail: `${m[1]} is forbidden here by the project's custom rule ${cr.id}.`,
+          source: "facha-ui.config.json"
+        }, [], false, cr.message);
+      }
+    }
     if (u.property === "color" && (u.context === "css" || u.context === "inline-style")) {
       const bg = u.siblingBackground ?? null;
       const r2 = textContrast(ctx, u.value, bg, u.selector, minRatioOf(ctx));
@@ -64472,7 +64926,10 @@ function parseDecisions(ctx) {
   return out;
 }
 function rulesInfo(ctx) {
-  return RULES.map((r2) => ({ id: r2.id, severity: effectiveSeverity(ctx, r2.id, r2.severity), summary: r2.summary }));
+  return [
+    ...RULES.map((r2) => ({ id: r2.id, severity: effectiveSeverity(ctx, r2.id, r2.severity), summary: r2.summary })),
+    ...customRulesInfo(ctx)
+  ];
 }
 function labUrlPattern(labDir) {
   const route = labDir.replace(/^(src\/)?app\/?/, "").split("/").filter((s) => s && !/^\(.*\)$/.test(s)).join("/");
@@ -64876,7 +65333,7 @@ function scanStyles(ctx) {
 }
 
 // src/server.ts
-var VERSION = "0.3.0";
+var VERSION = "0.4.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

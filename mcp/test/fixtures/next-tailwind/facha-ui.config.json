@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "tokens": { "sources": ["app/globals.css"], "themes": { "light": ":root", "dark": ".dark" } },
+  "custom": [
+    { "id": "cards-on-panel", "kind": "forbid-token", "selector": "\\.card\\b", "property": "^background", "tokens": ["--canvas"], "severity": "error",
+      "message": "Cards sit on --panel, never on the page background." },
+    { "id": "no-zinc", "kind": "forbid-class", "pattern": "^(text|bg|border)-zinc-", "severity": "warning",
+      "message": "Use text and surface tokens instead of zinc." }
+  ]
+}

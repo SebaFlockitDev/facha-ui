@@ -148,21 +148,24 @@ describe("config validation", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  it("accepts vision-only keys (custom rules) and reports them as not evaluated", async () => {
+  it("evaluates custom rules and still reports vision-only keys as not evaluated", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "facha-custom-"));
     fs.writeFileSync(
       path.join(dir, "facha-ui.config.json"),
       JSON.stringify({
         version: 1,
         custom: [{ id: "no-x", kind: "forbid-class", pattern: "^x-", severity: "error", message: "no" }],
+        suggest: { maxDeltaE: 3 },
       }),
     );
     const c = await connect(dir);
-    const r = await c.call("get_design_system", { sections: ["project"] });
+    const r = await c.call("get_design_system", { sections: ["project", "rules"] });
     expect(r.isError).toBeFalsy();
     expect(r.structuredContent.assumptions).toEqual(
-      expect.arrayContaining([expect.stringContaining("not evaluated in this version (roadmap): custom")]),
+      expect.arrayContaining([expect.stringContaining("not evaluated in this version (roadmap): suggest")]),
     );
+    expect(r.structuredContent.assumptions.join(" ")).not.toContain("custom");
+    expect(r.structuredContent.rules).toEqual(expect.arrayContaining([expect.objectContaining({ id: "custom/no-x", severity: "error" })]));
     await c.close();
     fs.rmSync(dir, { recursive: true, force: true });
   });

@@ -9,6 +9,19 @@ const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 const severity = z.enum(["off", "info", "warning", "error"]);
 
+/** A JavaScript regular expression, validated so a typo is a CONFIG_INVALID and not a crash. */
+const regex = z.string().min(1).refine(
+  (s) => {
+    try {
+      new RegExp(s);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: "Invalid regular expression" },
+);
+
 export const ConfigSchema = z
   .object({
     $schema: z.string().optional(),
@@ -47,18 +60,35 @@ export const ConfigSchema = z
       })
       .strict()
       .default({ dir: "app/lab" }),
-    // Vision keys (SPEC §2.0.2 / §2.a.4) accepted so a full config validates; the MVP does not evaluate them.
+    // Declarative team rules (SPEC §2.a.4), evaluated since 0.4.0. No project code is executed.
     custom: z
       .array(
-        z.object({
-          id: z.string().min(1),
-          kind: z.enum(["forbid-token", "forbid-class"]),
-          severity: severity.optional(),
-          message: z.string().optional(),
-        }).passthrough(),
+        z.discriminatedUnion("kind", [
+          z
+            .object({
+              id: z.string().regex(/^[\w-]+$/),
+              kind: z.literal("forbid-token"),
+              selector: regex.optional(),
+              property: regex.optional(),
+              tokens: z.array(z.string().regex(/^--/)).min(1),
+              severity: severity.optional(),
+              message: z.string().optional(),
+            })
+            .strict(),
+          z
+            .object({
+              id: z.string().regex(/^[\w-]+$/),
+              kind: z.literal("forbid-class"),
+              pattern: regex,
+              severity: severity.optional(),
+              message: z.string().optional(),
+            })
+            .strict(),
+        ]),
       )
       .optional(),
-    tailwind: z.record(z.string(), z.unknown()).optional(),
+    // useDefaultTheme is evaluated since 0.4.0; other Tailwind keys are accepted for the roadmap.
+    tailwind: z.object({ useDefaultTheme: z.boolean().optional() }).catchall(z.unknown()).optional(),
     suggest: z.object({ maxDeltaE: z.number().positive() }).strict().optional(),
     preview: z
       .object({
@@ -139,7 +169,8 @@ export function loadConfig(root: string): LoadedConfig {
       { issues },
     );
   }
-  const notEvaluated: string[] = (["custom", "tailwind", "suggest"] as const).filter((k) => parsed.data[k] !== undefined);
+  const notEvaluated: string[] = (["suggest"] as const).filter((k) => parsed.data[k] !== undefined);
+  for (const k of Object.keys(parsed.data.tailwind ?? {})) if (k !== "useDefaultTheme") notEvaluated.push(`tailwind.${k}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length
     ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`]

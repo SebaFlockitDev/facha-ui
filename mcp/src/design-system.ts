@@ -10,6 +10,7 @@ import type { Usage } from "./sources/usage.js";
 import { suggestColor } from "./suggest.js";
 import { tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
+import { customRulesInfo } from "./project-rules.js";
 
 export const SECTIONS = [
   "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions",
@@ -222,7 +223,10 @@ export function parseDecisions(ctx: Context) {
 }
 
 export function rulesInfo(ctx: Context) {
-  return RULES.map((r) => ({ id: r.id, severity: effectiveSeverity(ctx, r.id, r.severity), summary: r.summary }));
+  return [
+    ...RULES.map((r) => ({ id: r.id as string, severity: effectiveSeverity(ctx, r.id, r.severity), summary: r.summary })),
+    ...customRulesInfo(ctx),
+  ];
 }
 
 export function labUrlPattern(labDir: string): string {

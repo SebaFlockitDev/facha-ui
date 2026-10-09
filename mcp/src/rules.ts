@@ -3,6 +3,8 @@ import type { Context } from "./context.js";
 import type { Usage } from "./sources/usage.js";
 import { suggestArbitrary, suggestColor, suggestTokenName } from "./suggest.js";
 import { parseArbitrary } from "./tailwind.js";
+import { customRules, isForeignPalette, parsePaletteClass } from "./project-rules.js";
+import { baseUtility } from "./tailwind.js";
 import { classContrast, describeContrast, isNonTextTarget, minRatioOf, nonTextContrast, suggestReadable, textContrast } from "./visual.js";
 import type { Loc, RuleId, Severity, Suggestion, Unresolved, Violation } from "./types.js";
 
@@ -30,6 +32,12 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
     summary: "style={{…}} attribute: a signal of a missing class or component pattern.",
   },
   {
+    id: "tailwind-palette-color",
+    severity: "error",
+    summary:
+      "Tailwind default-palette color utilities (text-gray-500, bg-white, border-slate-200…) in a project with its own tokens, unless the color is mapped in @theme or tailwind.useDefaultTheme is true. Suggests the closest project token.",
+  },
+  {
     id: "theme-contrast",
     severity: "error",
     summary:
@@ -54,6 +62,7 @@ const MESSAGES: Record<RuleId, string> = {
   "tailwind-arbitrary-value": "Arbitrary Tailwind value bypasses the design system.",
   "unknown-token": "var() references a token that is not defined in the design system.",
   "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
+  "tailwind-palette-color": "Tailwind default-palette color instead of a project token.",
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
   "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background.",
@@ -83,9 +92,10 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
   const unresolved: Unresolved[] = [];
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
+  const custom = customRules(ctx);
 
   const push = (
-    rule: RuleId,
+    rule: RuleId | `custom/${string}`,
     base: Severity,
     loc: Loc,
     found: string,
@@ -96,7 +106,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
     soft = false,
     message?: string,
   ) => {
-    const severity = effectiveSeverity(ctx, rule, base, soft);
+    const severity = rule.startsWith("custom/") ? base : effectiveSeverity(ctx, rule as RuleId, base, soft);
     if (severity === "off") return;
     violations.push({
       id: `${loc.file}:${loc.line}:${loc.column}:${rule}`,
@@ -108,7 +118,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       found: clip(found),
       property,
       context,
-      message: message ?? MESSAGES[rule],
+      message: message ?? MESSAGES[rule as RuleId],
       breaksThemes,
       suggestion,
     });
@@ -138,9 +148,37 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       continue;
     }
     if (u.kind === "class") {
+      const loc0 = { file: u.file, line: u.line, column: u.column };
+      const util = baseUtility(u.raw);
+      for (const cr of custom) {
+        if (cr.kind !== "forbid-class" || cr.severity === "off" || !cr.pattern!.test(util)) continue;
+        push(`custom/${cr.id}`, cr.severity, loc0, u.raw, null, "className", {
+          match: "none",
+          kind: "none",
+          value: null,
+          detail: `Matches /${cr.pattern!.source}/ from the project's custom rules.`,
+          source: "facha-ui.config.json",
+        }, [], false, cr.message);
+      }
       const a = parseArbitrary(u.raw);
       if (!a) {
-        const finding = classContrast(ctx, u.raw);
+        const palette = parsePaletteClass(u.raw);
+        if (palette && isForeignPalette(ctx, palette)) {
+          push(
+            "tailwind-palette-color",
+            "error",
+            loc0,
+            u.raw,
+            palette.property,
+            "className",
+            suggestColor(ctx, palette.value, palette.property),
+            otherThemes,
+            false,
+            `${palette.utility} is Tailwind's default ${palette.key} (${palette.value})${palette.opacity ? ` at ${palette.opacity} opacity` : ""}, not a project token.`,
+          );
+          continue;
+        }
+        const finding = classContrast(ctx, util);
         if (finding) {
           const r = finding.result;
           push(
@@ -196,6 +234,23 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       push("color-literal", "error", u.locAt(lit.index), lit.text, u.property, context, suggestColor(ctx, lit.text, u.property), otherThemes);
     }
     checkVarRefs(u.value, u.locAt, u.property, context);
+
+    // Declarative team rules: tokens forbidden in some selectors/properties.
+    for (const cr of custom) {
+      if (cr.kind !== "forbid-token" || cr.severity === "off") continue;
+      if (cr.selector && !(u.selector && cr.selector.test(u.selector))) continue;
+      if (cr.property && !cr.property.test(u.property)) continue;
+      for (const m of u.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+        if (!cr.tokens!.has(m[1]!)) continue;
+        push(`custom/${cr.id}`, cr.severity, u.locAt(m.index!), `${u.property}: ${m[0]})`, u.property, context, {
+          match: "none",
+          kind: "none",
+          value: null,
+          detail: `${m[1]} is forbidden here by the project's custom rule ${cr.id}.`,
+          source: "facha-ui.config.json",
+        }, [], false, cr.message);
+      }
+    }
 
     // Contrast of the text color against its real background (per usage).
     if (u.property === "color" && (u.context === "css" || u.context === "inline-style")) {

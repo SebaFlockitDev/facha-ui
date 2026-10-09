@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f9fafb;
+  --panel: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #2563eb;
+}
+
+.dark {
+  --canvas: #030712;
+  --panel: #111827;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --primary: #60a5fa;
+}
+
+@theme inline {
+  --color-panel: var(--panel);
+  --color-gray-500: var(--muted);
+}
+
+.card { background: var(--canvas); }
+.card-elevated { background-color: var(--panel); }
+.page { background: var(--canvas); }
+.card .title { color: var(--canvas); }
+.text-white { color: var(--text); }

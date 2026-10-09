@@ -9,6 +9,7 @@ export const RULE_IDS = [
   "theme-contrast",
   "class-contrast",
   "non-text-contrast",
+  "tailwind-palette-color",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 
@@ -63,7 +64,8 @@ export interface Suggestion {
 
 export interface Violation extends Loc {
   id: string;
-  rule: RuleId;
+  /** A built-in rule id, or "custom/<id>" for a rule declared in the config. */
+  rule: RuleId | `custom/${string}`;
   severity: Severity;
   found: string;
   property: string | null;
