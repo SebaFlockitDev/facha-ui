@@ -116,8 +116,12 @@ Stop, and explain why, when any of these holds:
    `/facha-ui:init` can create them after their approval.
 5. Tokens that `health` flags as `breaks-in-theme` or `fails-everywhere` are **not** used as
    text color in any variant. Cite the health entry as the source of that decision. This
-   includes existing classes whose text color is one of those tokens (check
-   `componentClasses`): `check_ui` accepts the class, so you have to avoid it yourself.
+   includes existing classes whose text color is one of those tokens: `check_ui` reports them
+   as `class-contrast`, and inline or CSS text colors as `theme-contrast`. Prefer avoiding
+   them from the start over fixing them in the guardian loop.
+6. If `health` has `status-confusable` entries for the states the goal is about, do not
+   rely on color alone to tell them apart: keep the text label, and add an icon or a
+   difference in shape or position. Cite the entry as the source.
 
 Then continue with the generation. The developer can interrupt you.
 
@@ -167,6 +171,9 @@ An attempt is: write or fix the files, then run `check_ui("<lab.dir>/<slug>/<x>"
 - `summary.error = 0` → the variant is **valid**. Report its warnings and info, but they
   do not block.
 - `summary.error > 0` → fix **only** what was reported, using `suggestion`, and try again.
+  For contrast errors (`theme-contrast`, `class-contrast`), `suggestion.value` is a token that
+  reaches the minimum in every theme; when it is `null` the need is a gap: report it, do not
+  pick another color.
 - After 3 attempts with errors → the variant is **failed**. Keep its files and list its
   remaining violations; `/facha-ui:apply` will refuse it.
 

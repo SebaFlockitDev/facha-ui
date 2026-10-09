@@ -95,7 +95,7 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | Tool | Pedido de ejemplo | Devuelve |
 |---|---|---|
 | `get_design_system` | "¿Qué design system tiene este proyecto?" · "¿Qué color uso para X?" | Tokens por tema, clases, roles que faltan, literales sin token, contraste por tema, guidelines y decisiones |
-| `check_ui` | "Revisá `app/orders/page.tsx`" · "Corré check_ui sobre lo que cambiaste" | Violaciones con archivo:línea, severidad y token sugerido |
+| `check_ui` | "Revisá `app/orders/page.tsx`" · "Corré check_ui sobre lo que cambiaste" | Violaciones con archivo:línea, severidad y token sugerido, incluido el contraste de textos, bordes, foco e íconos en cada tema |
 | `audit_project` | "¿Cuántas violaciones tiene el proyecto?" | Totales por severidad, regla y archivo |
 | `scan_styles` | "¿Qué tokens le faltan a este proyecto?" | Propuesta de tokens desde los valores en uso, con valor por tema, contraste y plan de migración |
 
