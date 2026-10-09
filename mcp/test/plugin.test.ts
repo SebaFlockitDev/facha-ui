@@ -58,6 +58,24 @@ describe("help skill", () => {
   });
 });
 
+describe("variant refinements", () => {
+  const read = (skill: string) => fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+
+  it("variants accepts <slug> <a|b|c> \"<change>\" and documents the refinement flow", () => {
+    const text = read("variants");
+    expect(text.match(/^argument-hint:.*$/m)?.[0]).toContain('<slug> <a|b|c> \\"<change>\\"');
+    expect(text).toContain("## Refine a variant");
+    for (const step of ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]) expect(text, step).toContain(`### ${step} ·`);
+    expect(text).toContain('"revisions": []');
+    expect(text).toContain("| `request` |");
+  });
+
+  it("apply records the refinements and help explains how to ask for them", () => {
+    expect(read("apply")).toContain("**Ajustes pedidos:**");
+    expect(read("help")).toContain("/facha-ui:variants <slug> <a\\|b\\|c>");
+  });
+});
+
 describe("init skill", () => {
   it("is developer-only and pre-approves no write tools", () => {
     const text = fs.readFileSync(path.join(REPO, "skills", "init", "SKILL.md"), "utf8");

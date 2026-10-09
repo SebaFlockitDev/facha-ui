@@ -1,7 +1,7 @@
 ---
 name: variants
-description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Use when the developer asks for variants, alternatives or design proposals for a screen.
-argument-hint: "<screen|route|file> \"<goal>\""
+description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant.
+argument-hint: "<screen|route|file> \"<goal>\"  ·  <slug> <a|b|c> \"<change>\""
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles
 ---
 
@@ -21,23 +21,34 @@ Talk to the developer in their language.
 
 ## Inputs
 
-`$ARGUMENTS` = `<screen> "<goal>"`.
+Two forms:
 
-- `<screen>`: a route (`/orders`), a file (`app/orders/page.tsx`) or a component
-  (`components/OrderCard.tsx`). Resolve it to `{ file, route, slug }`. The slug is
-  kebab-case: `/orders` → `orders`, `components/OrderCard.tsx` → `order-card`.
-- `<goal>`: free text, e.g. "make overdue orders stand out".
+1. **New run:** `$ARGUMENTS` = `<screen> "<goal>"`.
+   - `<screen>`: a route (`/orders`), a file (`app/orders/page.tsx`) or a component
+     (`components/OrderCard.tsx`). Resolve it to `{ file, route, slug }`. The slug is
+     kebab-case: `/orders` → `orders`, `components/OrderCard.tsx` → `order-card`.
+   - `<goal>`: free text, e.g. "make overdue orders stand out".
+2. **Refine a variant:** `$ARGUMENTS` = `<slug> <a|b|c> "<change>"`, e.g.
+   `orders b "add a pending counter next to the title"`. The second word is a single
+   variant letter. Go to **Refine a variant** below. The same applies when, after a run,
+   the developer asks for a change to one variant in the conversation ("in B, move the
+   filters above the table"): treat it as a refinement of that variant.
 
-If either is missing, ask for it before doing anything else.
+If something is missing (the goal, the variant or the change), ask for it before doing
+anything else.
 
 ## Hard rules
 
 1. **Where you may write.**
    - `<lab.dir>/<slug>/**`;
    - the lab scaffold (`<lab.dir>/layout.tsx`, `<lab.dir>/lab-theme.tsx`) if it does not exist yet;
-   - `.facha-ui/runs/<slug>.json`.
-
+   - `.facha-ui/runs/<slug>.json`;
    - screenshots, through Playwright, inside `project.screenshotsDir`.
+
+   When refining, only the files of that variant (`<lab.dir>/<slug>/<x>/**`), the run JSON
+   and its screenshots. `_shared/` is used by every variant: change it only if the developer
+   accepts that the other variants change too; otherwise copy the piece into the variant's
+   folder and change the copy.
 
    Nothing else. Never touch token files, global CSS, `facha-ui.config.json`, `package.json`,
    lockfiles, `.gitignore` or any other app file. Never install dependencies, run git
@@ -231,7 +242,9 @@ outside the lab, record it in `findings`.
       "finalCheck": { "error": 0, "warning": 0, "info": 0 },
       "screenshots": [".facha-ui/screenshots/<slug>/<x>-desktop-light.png"],
       "decisions": [ { "decision": "...", "source": { "type": "token", "ref": "--x", "evidence": "file:line" } } ],
-      "tradeoffs": ["..."]
+      "tradeoffs": ["..."],
+      "revision": 0,
+      "revisions": []
     }
   ],
   "findings": [],
@@ -251,6 +264,7 @@ outside the lab, record it in `findings`.
 | `decision` | A previous approved decision | Decision id |
 | `health` | Avoiding a token that fails contrast in a theme | Token + ratios |
 | `objective` | A structural choice (order, grouping, layout) derived from the goal | — |
+| `request` | A structural choice the developer asked for in a refinement | `r<n>` + the request |
 
 Visual values may only cite `token`, `class`, `rule` or `decision`. A decision with no
 source is not allowed.
@@ -266,6 +280,92 @@ For each variant, show:
 
 Restate the gaps and the proposals for the team. Close with a comparison and:
 
+> To adjust one: `/facha-ui:variants <slug> <a|b|c> "<change>"` (or just ask here).
 > To apply one: `/facha-ui:apply <slug> <a|b|c>`
 
 Do **not** apply anything.
+
+## Refine a variant
+
+The developer likes a variant and wants something added or changed. The variant is
+changed **in place**, and each refinement is recorded as a revision (`r1`, `r2`…) in the
+run, so the history and the reasons are kept and `/facha-ui:apply` records the final
+version. Every hard rule above still applies.
+
+### R1 · Preflight
+
+1. Call `get_design_system` (all sections), as in Step 1.
+2. Read `.facha-ui/runs/<slug>.json`. Stop and explain when it does not exist, when its
+   `status` is not `generated` (it was applied or discarded), or when the variant is not in
+   `variants`. A `failed` variant can be refined: the refinement may fix it.
+3. Read the variant's files, what it imports from `_shared/`, and its `decisions` and
+   `revisions`.
+4. If the developer asks for a **new** variant instead ("as a new variant", "keep B and
+   make another"), create `<x>2` (`b2`, then `b3`…) as a copy of the variant and refine
+   the copy. Otherwise, refine in place.
+
+### R2 · Gaps before changing anything
+
+Translate the change into design needs, as in Step 3. If the change asks for a value the
+design system does not have ("make it red" with no danger token, "a bit bigger" with no
+step between), say so **before** writing, with the evidence and the closest existing
+options. Do not invent the value. The developer chooses an option or drops that part.
+
+### R3 · Change the files
+
+- Change only what the request needs. Keep the variant's hypothesis unless the developer
+  explicitly changes it.
+- Update the first line of every touched file:
+  `// facha-ui lab · run <runId> · variant <x> · revision <n> · removed by /facha-ui:apply`.
+- Write with the Write and Edit tools only.
+
+### R4 · Guardian loop
+
+Same as Step 6: `check_ui` on the variant (and `_shared/` if it changed), at most 3
+attempts. The variant's `status` becomes `valid` or `failed` according to the result.
+
+### R5 · Screenshots
+
+Same as Step 7, with revision names so the previous captures are kept:
+`<project.screenshotsDir>/<slug>/<x>-r<n>-desktop-<theme>.png`. Look at every theme.
+
+### R6 · Update the run
+
+In the variant:
+- `revision`: the new number;
+- `decisions`: the current full list. Add the new decisions with their source (`request`
+  for structural choices the developer asked for; `token`, `class`, `rule` or `decision`
+  for visual values) and remove the ones the change replaced;
+- `attempts`, `finalCheck`, `status` and `screenshots`: those of this revision;
+- `tradeoffs`: updated;
+- append to `revisions`:
+
+```jsonc
+{
+  "n": 1,
+  "at": "<ISO-8601 with offset>",
+  "request": "<the developer's words, verbatim>",
+  "summary": "<what changed, in one sentence>",
+  "decisionsAdded": [ { "decision": "...", "source": { "type": "request", "ref": "r1" } } ],
+  "decisionsRemoved": ["..."],
+  "attempts": [ { "n": 1, "error": 0, "warning": 0, "info": 0 } ],
+  "finalCheck": { "error": 0, "warning": 0, "info": 0 },
+  "screenshots": [".facha-ui/screenshots/<slug>/<x>-r1-desktop-light.png"]
+}
+```
+
+The run's `status` stays `generated`. The other variants are not touched.
+
+### R7 · Present
+
+Show:
+- what changed and why, in one or two sentences;
+- the gaps found in R2, if any;
+- the guardian result of this revision;
+- the decisions added and removed, with their sources;
+- the updated trade-offs;
+- the light and dark URLs (or the screenshots).
+
+Close with:
+
+> To adjust it again: `/facha-ui:variants <slug> <x> "<change>"`. To apply it: `/facha-ui:apply <slug> <x>`.

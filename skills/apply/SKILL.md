@@ -82,7 +82,8 @@ variant yourself, not even "the obvious one".
 
 Show one plan, exact and complete:
 
-1. **Variant:** id, hypothesis and final guardian result (from step 1.3).
+1. **Variant:** id, hypothesis, its revisions (`r1`: "<request>"…) if it was refined, and
+   the final guardian result (from step 1.3).
 2. **Files to modify or create**, each with a short summary of the diff. Porting rules:
    - drop the `// facha-ui lab · …` header;
    - keep what belongs to the route: `metadata` and other exports, the component name,
@@ -129,8 +130,8 @@ Delete only what the approved plan listed, after checking that every path resolv
 `<lab.dir>/<slug>/` or `.facha-ui/screenshots/`:
 
 - the files of `<lab.dir>/<slug>/`, then its empty directories;
-- the screenshots of the variants that were not chosen (paths from `run.variants[].screenshots`).
-  Keep the chosen variant's screenshots;
+- the screenshots of the variants that were not chosen (paths from `run.variants[].screenshots`
+  and from their `revisions`). Keep the chosen variant's screenshots, from every revision;
 - the scaffold (`<lab.dir>/layout.tsx`, `<lab.dir>/lab-theme.tsx`, then `<lab.dir>` if it is
   empty), **only** if no other run in `.facha-ui/runs/` has `status: "generated"` and
   `<lab.dir>` has no other screen directories.
@@ -151,6 +152,7 @@ format, which `get_design_system` parses (`## <id> · <title>` and `**Fecha:**`)
 - **Objetivo:** <run.objective>
 - **Elegida:** <X>, <hypothesis in a few words>
 - **Motivo (dev):** "<the developer's reason, verbatim>"
+- **Ajustes pedidos:** r1 "<request>", r2 "<request>" (only if the variant was refined)
 - **Descartadas:** <Y> (<why, from its trade-offs>), <Z> (<…>)
 - **Precedentes que deja:**
   - <reusable design rule> (fuente: `<source.type>` <ref>)
@@ -159,8 +161,10 @@ format, which `get_design_system` parses (`## <id> · <title>` and `**Fecha:**`)
 ```
 
 Write the entry in the developer's language. The field labels stay as shown, because the
-parser reads them. Precedents come from the chosen variant's `decisions`. Only include those
-that apply beyond this screen, each with its original source.
+parser reads them. Precedents come from the chosen variant's current `decisions` (after its
+revisions). Only include those that apply beyond this screen, each with its original source.
+A choice the developer asked for in a refinement (`request`) is a strong precedent: it is
+what the team explicitly wanted.
 
 ## Step 8 · Update the run
 
