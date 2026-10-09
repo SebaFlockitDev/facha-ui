@@ -118,3 +118,58 @@ describe("custom rules", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 });
+
+describe("tailwind-default-scale", () => {
+  it("flags unmapped radius, shadow, font size, tracking and leading steps with the closest project value", async () => {
+    const r = await h.call("check_ui", { path: "app/page.tsx", rules: ["tailwind-default-scale"] });
+    expect(r.structuredContent.violations.map(brief)).toEqual([
+      "app/page.tsx:9 tailwind-default-scale warning rounded-md → none -",
+      "app/page.tsx:9 tailwind-default-scale warning shadow-md → none -",
+      "app/page.tsx:9 tailwind-default-scale warning text-sm → nearest meta",
+      "app/page.tsx:9 tailwind-default-scale warning tracking-wide → none -",
+      "app/page.tsx:9 tailwind-default-scale warning leading-tight → none -",
+      "app/page.tsx:11 tailwind-default-scale warning text-xs/5 → nearest caption",
+      "app/page.tsx:11 tailwind-default-scale warning md:rounded-xl → exact var(--radius)",
+    ]);
+    const v = r.structuredContent.violations;
+    expect(v.find((x: any) => x.found === "rounded-md").suggestion.detail).toContain("Project radius tokens: --radius-small (11px)");
+    expect(v.find((x: any) => x.found === "shadow-md").suggestion.detail).toContain("--shadow-card");
+    expect(v.find((x: any) => x.found === "rounded-md").message).toContain("Map it in @theme (--radius-md)");
+  });
+
+  it("accepts steps mapped in @theme and the scales allowed by default (spacing, sizing, weight, none/full)", async () => {
+    const r = await h.call("check_ui", { path: "app/page.tsx", rules: ["tailwind-default-scale"] });
+    const found = r.structuredContent.violations.map((v: any) => v.found);
+    for (const ok of ["rounded-lg", "rounded-full", "shadow-none", "font-bold", "p-4", "w-full", "leading-6", "tracking-normal"]) {
+      expect(found).not.toContain(ok);
+    }
+  });
+
+  it("respects tailwind.allowDefaultScale", async () => {
+    const dir = variant({ "facha-ui.config.json": JSON.stringify({ ...baseConfig, tailwind: { allowDefaultScale: { radius: true, fontSize: true } } }) });
+    const c = await connect(dir);
+    const r = await c.call("check_ui", { path: "app/page.tsx", rules: ["tailwind-default-scale"] });
+    expect(r.structuredContent.violations.map((v: any) => v.found)).toEqual(["shadow-md", "tracking-wide", "leading-tight"]);
+    await c.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+describe("palette sprawl (health)", () => {
+  it("reports near-duplicate tokens, hand-written colors and scale steps", async () => {
+    const r = await h.call("get_design_system", { sections: ["health"] });
+    const health = r.structuredContent.health;
+    expect(health.filter((x: any) => x.kind === "near-duplicate-tokens").map((x: any) => x.token)).toEqual(["--divider ~ --line"]);
+    expect(health.filter((x: any) => x.kind === "near-duplicate-literals").map((x: any) => x.token)).toEqual(["#fef2f2 ~ #fef2f3"]);
+    expect(health.filter((x: any) => x.kind === "near-duplicate-steps").map((x: any) => x.token)).toEqual([
+      "border-radius 8px ~ 9px",
+      "font-size 13px ~ 13.5px",
+    ]);
+  });
+
+  it("does not report tokens that differ in some theme", async () => {
+    const r = await h.call("get_design_system", { sections: ["health"] });
+    const tokens = r.structuredContent.health.filter((x: any) => x.kind === "near-duplicate-tokens").flatMap((x: any) => x.tokens);
+    expect(tokens).not.toContain("--canvas");
+  });
+});

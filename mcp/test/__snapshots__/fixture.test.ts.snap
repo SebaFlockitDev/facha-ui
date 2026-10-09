@@ -323,6 +323,11 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "summary": "Tailwind default-palette color utilities (text-gray-500, bg-white, border-slate-200…) in a project with its own tokens, unless the color is mapped in @theme or tailwind.useDefaultTheme is true. Suggests the closest project token.",
     },
     {
+      "id": "tailwind-default-scale",
+      "severity": "warning",
+      "summary": "Tailwind default scales not mapped in @theme for radius, shadow, font size, tracking and leading (rounded-lg, shadow-md, text-sm, tracking-wide). Spacing, sizing, font weight and layout are accepted by default (tailwind.allowDefaultScale).",
+    },
+    {
       "id": "theme-contrast",
       "severity": "error",
       "summary": "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected.",

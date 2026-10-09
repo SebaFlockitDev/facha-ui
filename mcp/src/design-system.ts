@@ -10,7 +10,7 @@ import type { Usage } from "./sources/usage.js";
 import { suggestColor } from "./suggest.js";
 import { tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
-import { customRulesInfo } from "./project-rules.js";
+import { customRulesInfo, sprawl } from "./project-rules.js";
 
 export const SECTIONS = [
   "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions",
@@ -116,6 +116,7 @@ export function health(ctx: Context, usages: Usage[]) {
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });
   }
   out.push(...statusConfusable(ctx));
+  out.push(...sprawl(ctx, usages));
   return out.sort((a, b) =>
     a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : a.token > b.token ? 1 : (a.theme ?? "") < (b.theme ?? "") ? -1 : 1,
   );

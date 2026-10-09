@@ -36520,7 +36520,8 @@ var RULE_IDS = [
   "theme-contrast",
   "class-contrast",
   "non-text-contrast",
-  "tailwind-palette-color"
+  "tailwind-palette-color",
+  "tailwind-default-scale"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36596,8 +36597,22 @@ var ConfigSchema = external_exports.object({
       }).strict()
     ])
   ).optional(),
-  // useDefaultTheme is evaluated since 0.4.0; other Tailwind keys are accepted for the roadmap.
-  tailwind: external_exports.object({ useDefaultTheme: external_exports.boolean().optional() }).catchall(external_exports.unknown()).optional(),
+  // useDefaultTheme (0.4.0) and allowDefaultScale (0.5.0) are evaluated; other keys are accepted for the roadmap.
+  tailwind: external_exports.object({
+    useDefaultTheme: external_exports.boolean().optional(),
+    /** Default Tailwind scales accepted without a token. Radius, shadow, font size, tracking and leading are not, by default. */
+    allowDefaultScale: external_exports.object({
+      radius: external_exports.boolean().optional(),
+      shadow: external_exports.boolean().optional(),
+      fontSize: external_exports.boolean().optional(),
+      tracking: external_exports.boolean().optional(),
+      leading: external_exports.boolean().optional(),
+      spacing: external_exports.boolean().optional(),
+      sizing: external_exports.boolean().optional(),
+      fontWeight: external_exports.boolean().optional(),
+      layout: external_exports.boolean().optional()
+    }).strict().optional()
+  }).catchall(external_exports.unknown()).optional(),
   suggest: external_exports.object({ maxDeltaE: external_exports.number().positive() }).strict().optional(),
   preview: external_exports.object({
     baseUrl: external_exports.string().url().refine((u) => LOOPBACK_HOSTS.has(new URL(u).hostname), {
@@ -36655,7 +36670,7 @@ function loadConfig(root2) {
     );
   }
   const notEvaluated = ["suggest"].filter((k4) => parsed.data[k4] !== void 0);
-  for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme") notEvaluated.push(`tailwind.${k4}`);
+  for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme" && k4 !== "allowDefaultScale") notEvaluated.push(`tailwind.${k4}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`] : [];
   return { config: parsed.data, configSource: CONFIG_FILE, assumptions };
@@ -63982,6 +63997,73 @@ var TAILWIND_PALETTE = {
   "white": "#fff"
 };
 
+// src/tailwind-scales.ts
+var TAILWIND_SCALES = {
+  radius: {
+    "xs": "0.125rem",
+    "sm": "0.25rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
+    "2xl": "1rem",
+    "3xl": "1.5rem",
+    "4xl": "2rem"
+  },
+  fontSize: {
+    "xs": "0.75rem",
+    "sm": "0.875rem",
+    "base": "1rem",
+    "lg": "1.125rem",
+    "xl": "1.25rem",
+    "2xl": "1.5rem",
+    "3xl": "1.875rem",
+    "4xl": "2.25rem",
+    "5xl": "3rem",
+    "6xl": "3.75rem",
+    "7xl": "4.5rem",
+    "8xl": "6rem",
+    "9xl": "8rem"
+  },
+  tracking: {
+    "tighter": "-0.05em",
+    "tight": "-0.025em",
+    "normal": "0em",
+    "wide": "0.025em",
+    "wider": "0.05em",
+    "widest": "0.1em"
+  },
+  leading: {
+    "tight": "1.25",
+    "snug": "1.375",
+    "normal": "1.5",
+    "relaxed": "1.625",
+    "loose": "2"
+  },
+  shadow: {
+    "2xs": "0 1px rgb(0 0 0 / 0.05)",
+    "xs": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    "sm": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+    "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+    "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    "xl": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+    "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+    "inner": "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)"
+  },
+  insetShadow: {
+    "2xs": "inset 0 1px rgb(0 0 0 / 0.05)",
+    "xs": "inset 0 1px 1px rgb(0 0 0 / 0.05)",
+    "sm": "inset 0 2px 4px rgb(0 0 0 / 0.05)"
+  },
+  dropShadow: {
+    "xs": "0 1px 1px rgb(0 0 0 / 0.05)",
+    "sm": "0 1px 2px rgb(0 0 0 / 0.15)",
+    "md": "0 3px 3px rgb(0 0 0 / 0.12)",
+    "lg": "0 4px 4px rgb(0 0 0 / 0.15)",
+    "xl": "0 9px 7px rgb(0 0 0 / 0.1)",
+    "2xl": "0 25px 25px rgb(0 0 0 / 0.15)"
+  }
+};
+
 // src/project-rules.ts
 var PALETTE_PREFIXES = [
   ["inset-shadow", "box-shadow"],
@@ -64029,7 +64111,7 @@ function parsePaletteClass(raw) {
 function isForeignPalette(ctx, p4) {
   if (!ctx.project.hasTailwind) return false;
   if (ctx.project.config.tailwind?.useDefaultTheme === true) return false;
-  if (ctx.definedCustomProps.has(`--color-${p4.key}`)) return false;
+  if (themeVariables(ctx).has(`--color-${p4.key}`)) return false;
   if (ctx.componentClasses.some((c2) => c2.selector === `.${p4.utility}`)) return false;
   return true;
 }
@@ -64066,6 +64148,197 @@ function customRulesInfo(ctx) {
     severity: r2.severity,
     summary: r2.kind === "forbid-token" ? `${r2.message} (forbid-token: ${[...r2.tokens].join(", ")}${r2.selector ? ` in selectors /${r2.selector.source}/` : ""}${r2.property ? `, property /${r2.property.source}/` : ""})` : `${r2.message} (forbid-class: /${r2.pattern.source}/)`
   }));
+}
+var themeVars = /* @__PURE__ */ new WeakMap();
+function themeVariables(ctx) {
+  const cached2 = themeVars.get(ctx);
+  if (cached2) return cached2;
+  const out = /* @__PURE__ */ new Set();
+  for (const root2 of ctx.cssRoots.values()) {
+    root2.walkAtRules("theme", (at) => {
+      at.walkDecls((d) => {
+        if (d.prop.startsWith("--")) out.add(d.prop);
+      });
+    });
+  }
+  themeVars.set(ctx, out);
+  return out;
+}
+var SCALE_PATTERNS = [
+  { kind: "radius", re: /^rounded(?:-(?:t|r|b|l|tl|tr|br|bl|s|e|ss|se|es|ee))?(?:-(xs|sm|md|lg|xl|2xl|3xl|4xl))?$/, varPrefix: () => "--radius-", property: "border-radius", bare: "sm" },
+  { kind: "shadow", re: /^(shadow|inset-shadow|drop-shadow)(?:-(2xs|xs|sm|md|lg|xl|2xl|inner))?$/, varPrefix: (m) => `--${m[1]}-`, property: "box-shadow", bare: "sm" },
+  { kind: "fontSize", re: /^text-(xs|sm|base|lg|xl|[2-9]xl)(?:\/[\w.]+)?$/, varPrefix: () => "--text-", property: "font-size" },
+  { kind: "tracking", re: /^tracking-(tighter|tight|wide|wider|widest)$/, varPrefix: () => "--tracking-", property: "letter-spacing" },
+  { kind: "leading", re: /^leading-(tight|snug|relaxed|loose)$/, varPrefix: () => "--leading-", property: "line-height" }
+];
+function scaleTable(kind, m) {
+  switch (kind) {
+    case "radius":
+      return TAILWIND_SCALES.radius;
+    case "fontSize":
+      return TAILWIND_SCALES.fontSize;
+    case "tracking":
+      return TAILWIND_SCALES.tracking;
+    case "leading":
+      return TAILWIND_SCALES.leading;
+    case "shadow":
+      return m[1] === "inset-shadow" ? TAILWIND_SCALES.insetShadow : m[1] === "drop-shadow" ? TAILWIND_SCALES.dropShadow : TAILWIND_SCALES.shadow;
+  }
+}
+function parseScaleClass(raw) {
+  const utility = baseUtility(raw);
+  for (const p4 of SCALE_PATTERNS) {
+    const m = utility.match(p4.re);
+    if (!m) continue;
+    const name = (p4.kind === "shadow" ? m[2] : m[1]) ?? p4.bare;
+    if (!name) return null;
+    const value = scaleTable(p4.kind, m)[name];
+    if (!value) return null;
+    return { utility, kind: p4.kind, name, themeVar: `${p4.varPrefix(m)}${name}`, value, property: p4.property };
+  }
+  return null;
+}
+function isForeignScale(ctx, s) {
+  if (!ctx.project.hasTailwind) return false;
+  const tw = ctx.project.config.tailwind;
+  if (tw?.useDefaultTheme === true) return false;
+  if (tw?.allowDefaultScale?.[s.kind] === true) return false;
+  if (themeVariables(ctx).has(s.themeVar)) return false;
+  if (ctx.componentClasses.some((c2) => c2.selector === `.${s.utility}`)) return false;
+  return true;
+}
+var SCALE_LABEL = { radius: "radius", shadow: "shadow", fontSize: "font size", tracking: "letter spacing", leading: "line height" };
+function suggestScale(ctx, s) {
+  const theme = ctx.tokens.themes[0]?.name ?? "light";
+  const none = (detail) => ({ match: "none", kind: "none", value: null, detail, source: null });
+  if (s.kind === "fontSize") {
+    const px = toPx(s.value);
+    return px == null ? none(`No font-size step for ${s.value}.`) : suggestFontSize(ctx, `${round2(px, 2)}px`);
+  }
+  if (s.kind === "radius") {
+    const px = toPx(s.value);
+    if (px == null) return none(`No radius step for ${s.value}.`);
+    const radii = ctx.tokens.tokens.filter((t) => t.role === "radius").map((t) => ({ name: t.name, source: t.source, px: toPx(tokenValue(ctx.tokens, t.name, theme) ?? "") })).filter((x) => x.px != null).sort((a, b) => Math.abs(a.px - px) - Math.abs(b.px - px) || (a.name < b.name ? -1 : 1));
+    const best = radii[0];
+    if (best && Math.abs(best.px - px) <= 2) {
+      return {
+        match: best.px === px ? "exact" : "nearest",
+        kind: "token",
+        value: `var(${best.name})`,
+        detail: `${best.name} is ${best.px}px (${s.utility} is ${px}px).`,
+        source: best.source
+      };
+    }
+    return none(
+      radii.length ? `No radius token within 2px of ${px}px. Project radius tokens: ${radii.map((r2) => `${r2.name} (${r2.px}px)`).join(", ")}.` : "No radius tokens in the project: it is a gap (/facha-ui:init scales can propose a scale)."
+    );
+  }
+  if (s.kind === "shadow") {
+    const shadows = ctx.tokens.tokens.filter((t) => t.type === "shadow").map((t) => t.name);
+    return none(shadows.length ? `Project shadow tokens: ${shadows.join(", ")}. Which one fits is a design decision.` : "No shadow tokens in the project: it is a gap.");
+  }
+  return none(`No ${SCALE_LABEL[s.kind]} token in the project; check the guidelines.`);
+}
+function describeScale(s) {
+  return `${s.utility} is Tailwind's default ${SCALE_LABEL[s.kind]} ${s.name} (${s.value}), not a project value. Map it in @theme (${s.themeVar}) or use the project's token.`;
+}
+function sprawl(ctx, usages) {
+  const out = [];
+  const themes = ctx.tokens.themes.map((t) => t.name);
+  const colors = ctx.tokens.tokens.filter((t) => t.type === "color");
+  for (let i = 0; i < colors.length; i++) {
+    for (let j = i + 1; j < colors.length; j++) {
+      const a = colors[i];
+      const b = colors[j];
+      const aliases = Object.values(a.values).some((v) => v.includes(`var(${b.name}`)) || Object.values(b.values).some((v) => v.includes(`var(${a.name}`));
+      if (aliases) continue;
+      const d = {};
+      let all = themes.length > 0;
+      for (const th of themes) {
+        const ca = tokenColor(ctx.tokens, a.name, th);
+        const cb = tokenColor(ctx.tokens, b.name, th);
+        const x = ca && cb ? deltaE(ca, cb) : Number.POSITIVE_INFINITY;
+        if (!(x < 2)) {
+          all = false;
+          break;
+        }
+        d[th] = round2(x, 2);
+      }
+      if (!all) continue;
+      out.push({
+        kind: "near-duplicate-tokens",
+        token: `${a.name} ~ ${b.name}`,
+        tokens: [a.name, b.name],
+        roles: [a.role, b.role],
+        deltaE: d,
+        sources: [a.source, b.source],
+        note: "Almost the same color in every theme: one token would do. If the difference is intentional (different roles that happen to match), ignore it."
+      });
+    }
+  }
+  const literals = /* @__PURE__ */ new Map();
+  for (const u of usages) {
+    if (u.kind !== "decl") continue;
+    for (const lit of findColorLiterals(u.value, u.property)) {
+      const c2 = parseColor(lit.text);
+      if (!c2) continue;
+      const hex5 = toHex(c2).toLowerCase();
+      const loc = u.locAt(lit.index);
+      const e4 = literals.get(hex5) ?? { color: c2, where: [] };
+      e4.where.push(`${loc.file}:${loc.line}`);
+      literals.set(hex5, e4);
+    }
+  }
+  const lits = [...literals.entries()].sort(([a], [b]) => a < b ? -1 : 1);
+  for (let i = 0; i < lits.length; i++) {
+    for (let j = i + 1; j < lits.length; j++) {
+      const [ha, a] = lits[i];
+      const [hb, b] = lits[j];
+      const x = deltaE(a.color, b.color);
+      if (!(x < 2)) continue;
+      out.push({
+        kind: "near-duplicate-literals",
+        token: `${ha} ~ ${hb}`,
+        values: [ha, hb],
+        deltaE: round2(x, 2),
+        where: [...a.where.slice(0, 3), ...b.where.slice(0, 3)],
+        note: "Two hand-written colors that look the same: they could be one value, ideally a token."
+      });
+    }
+  }
+  const steps = (prop, values, tolerance) => {
+    const sorted = [...values.entries()].sort(([a], [b]) => a - b);
+    let cluster = [];
+    const flush = () => {
+      if (cluster.length > 1) {
+        out.push({
+          kind: "near-duplicate-steps",
+          token: `${prop} ${cluster.map(([v]) => `${round2(v, 2)}px`).join(" ~ ")}`,
+          property: prop,
+          values: cluster.map(([v]) => `${round2(v, 2)}px`),
+          where: [...new Set(cluster.flatMap(([, sels]) => sels))].slice(0, 6),
+          note: `Values this close look the same: one step of the ${prop} scale would do.`
+        });
+      }
+      cluster = [];
+    };
+    for (const entry of sorted) {
+      if (cluster.length && entry[0] - cluster[0][0] > tolerance) flush();
+      cluster.push(entry);
+    }
+    flush();
+  };
+  steps("font-size", ctx.fontSizeUses, 0.5);
+  const radii = /* @__PURE__ */ new Map();
+  for (const cc of ctx.componentClasses) {
+    for (const d of cc.decls) {
+      if (!/radius/.test(d.prop) || d.value.includes("var(")) continue;
+      const px = toPx(d.value);
+      if (px != null && px < 999) radii.set(px, [...radii.get(px) ?? [], cc.selector]);
+    }
+  }
+  steps("border-radius", radii, 1);
+  return out;
 }
 
 // src/visual.ts
@@ -64389,6 +64662,11 @@ var RULES = [
     summary: "Tailwind default-palette color utilities (text-gray-500, bg-white, border-slate-200\u2026) in a project with its own tokens, unless the color is mapped in @theme or tailwind.useDefaultTheme is true. Suggests the closest project token."
   },
   {
+    id: "tailwind-default-scale",
+    severity: "warning",
+    summary: "Tailwind default scales not mapped in @theme for radius, shadow, font size, tracking and leading (rounded-lg, shadow-md, text-sm, tracking-wide). Spacing, sizing, font weight and layout are accepted by default (tailwind.allowDefaultScale)."
+  },
+  {
     id: "theme-contrast",
     severity: "error",
     summary: "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected."
@@ -64410,6 +64688,7 @@ var MESSAGES = {
   "unknown-token": "var() references a token that is not defined in the design system.",
   "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
   "tailwind-palette-color": "Tailwind default-palette color instead of a project token.",
+  "tailwind-default-scale": "Tailwind default scale step instead of a project value.",
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
   "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background."
@@ -64499,6 +64778,11 @@ function checkUsages(ctx, usages) {
             false,
             `${palette.utility} is Tailwind's default ${palette.key} (${palette.value})${palette.opacity ? ` at ${palette.opacity} opacity` : ""}, not a project token.`
           );
+          continue;
+        }
+        const scale = parseScaleClass(u.raw);
+        if (scale && isForeignScale(ctx, scale)) {
+          push("tailwind-default-scale", "warning", loc0, u.raw, scale.property, "className", suggestScale(ctx, scale), [], false, describeScale(scale));
           continue;
         }
         const finding = classContrast(ctx, util2);
@@ -64825,6 +65109,7 @@ function health(ctx, usages) {
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });
   }
   out.push(...statusConfusable(ctx));
+  out.push(...sprawl(ctx, usages));
   return out.sort(
     (a, b) => a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : a.token > b.token ? 1 : (a.theme ?? "") < (b.theme ?? "") ? -1 : 1
   );
@@ -65333,7 +65618,7 @@ function scanStyles(ctx) {
 }
 
 // src/server.ts
-var VERSION = "0.4.0";
+var VERSION = "0.5.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

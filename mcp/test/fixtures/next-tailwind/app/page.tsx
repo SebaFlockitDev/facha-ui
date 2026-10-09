@@ -6,6 +6,9 @@ export default function Page() {
       <p className="text-gray-500 bg-transparent">Mapped in @theme</p>
       <p className="text-white">Project class with a palette name</p>
       <span className="text-zinc-400">Zinc</span>
+      <div className="rounded-md shadow-md text-sm tracking-wide leading-tight">Default scales</div>
+      <div className="rounded-full shadow-none font-bold p-4 w-full leading-6 tracking-normal">Accepted by default</div>
+      <div className="rounded-lg text-xs/5 md:rounded-xl">Mapped and nearest</div>
     </main>
   );
 }

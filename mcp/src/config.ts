@@ -87,8 +87,28 @@ export const ConfigSchema = z
         ]),
       )
       .optional(),
-    // useDefaultTheme is evaluated since 0.4.0; other Tailwind keys are accepted for the roadmap.
-    tailwind: z.object({ useDefaultTheme: z.boolean().optional() }).catchall(z.unknown()).optional(),
+    // useDefaultTheme (0.4.0) and allowDefaultScale (0.5.0) are evaluated; other keys are accepted for the roadmap.
+    tailwind: z
+      .object({
+        useDefaultTheme: z.boolean().optional(),
+        /** Default Tailwind scales accepted without a token. Radius, shadow, font size, tracking and leading are not, by default. */
+        allowDefaultScale: z
+          .object({
+            radius: z.boolean().optional(),
+            shadow: z.boolean().optional(),
+            fontSize: z.boolean().optional(),
+            tracking: z.boolean().optional(),
+            leading: z.boolean().optional(),
+            spacing: z.boolean().optional(),
+            sizing: z.boolean().optional(),
+            fontWeight: z.boolean().optional(),
+            layout: z.boolean().optional(),
+          })
+          .strict()
+          .optional(),
+      })
+      .catchall(z.unknown())
+      .optional(),
     suggest: z.object({ maxDeltaE: z.number().positive() }).strict().optional(),
     preview: z
       .object({
@@ -170,7 +190,7 @@ export function loadConfig(root: string): LoadedConfig {
     );
   }
   const notEvaluated: string[] = (["suggest"] as const).filter((k) => parsed.data[k] !== undefined);
-  for (const k of Object.keys(parsed.data.tailwind ?? {})) if (k !== "useDefaultTheme") notEvaluated.push(`tailwind.${k}`);
+  for (const k of Object.keys(parsed.data.tailwind ?? {})) if (k !== "useDefaultTheme" && k !== "allowDefaultScale") notEvaluated.push(`tailwind.${k}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length
     ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`]

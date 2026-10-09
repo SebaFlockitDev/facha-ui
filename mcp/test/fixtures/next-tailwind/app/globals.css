@@ -26,3 +26,25 @@
 .page { background: var(--canvas); }
 .card .title { color: var(--canvas); }
 .text-white { color: var(--text); }
+
+:root {
+  --radius: 12px;
+  --radius-small: 11px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.08);
+  --line: #e5e7eb;
+  --divider: #e5e7ec;
+}
+
+.dark {
+  --line: #1f2937;
+  --divider: #1f2938;
+}
+
+@theme inline {
+  --radius-lg: var(--radius);
+}
+
+.caption { font-size: 13px; }
+.meta { font-size: 13.5px; }
+.badge-a { background: #fef2f2; border-radius: 8px; }
+.badge-b { background: #fef2f3; border-radius: 9px; }

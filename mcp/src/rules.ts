@@ -3,7 +3,7 @@ import type { Context } from "./context.js";
 import type { Usage } from "./sources/usage.js";
 import { suggestArbitrary, suggestColor, suggestTokenName } from "./suggest.js";
 import { parseArbitrary } from "./tailwind.js";
-import { customRules, isForeignPalette, parsePaletteClass } from "./project-rules.js";
+import { customRules, describeScale, isForeignPalette, isForeignScale, parsePaletteClass, parseScaleClass, suggestScale } from "./project-rules.js";
 import { baseUtility } from "./tailwind.js";
 import { classContrast, describeContrast, isNonTextTarget, minRatioOf, nonTextContrast, suggestReadable, textContrast } from "./visual.js";
 import type { Loc, RuleId, Severity, Suggestion, Unresolved, Violation } from "./types.js";
@@ -38,6 +38,12 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
       "Tailwind default-palette color utilities (text-gray-500, bg-white, border-slate-200…) in a project with its own tokens, unless the color is mapped in @theme or tailwind.useDefaultTheme is true. Suggests the closest project token.",
   },
   {
+    id: "tailwind-default-scale",
+    severity: "warning",
+    summary:
+      "Tailwind default scales not mapped in @theme for radius, shadow, font size, tracking and leading (rounded-lg, shadow-md, text-sm, tracking-wide). Spacing, sizing, font weight and layout are accepted by default (tailwind.allowDefaultScale).",
+  },
+  {
     id: "theme-contrast",
     severity: "error",
     summary:
@@ -63,6 +69,7 @@ const MESSAGES: Record<RuleId, string> = {
   "unknown-token": "var() references a token that is not defined in the design system.",
   "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
   "tailwind-palette-color": "Tailwind default-palette color instead of a project token.",
+  "tailwind-default-scale": "Tailwind default scale step instead of a project value.",
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
   "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background.",
@@ -176,6 +183,11 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
             false,
             `${palette.utility} is Tailwind's default ${palette.key} (${palette.value})${palette.opacity ? ` at ${palette.opacity} opacity` : ""}, not a project token.`,
           );
+          continue;
+        }
+        const scale = parseScaleClass(u.raw);
+        if (scale && isForeignScale(ctx, scale)) {
+          push("tailwind-default-scale", "warning", loc0, u.raw, scale.property, "className", suggestScale(ctx, scale), [], false, describeScale(scale));
           continue;
         }
         const finding = classContrast(ctx, util);

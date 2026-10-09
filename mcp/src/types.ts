@@ -10,6 +10,7 @@ export const RULE_IDS = [
   "class-contrast",
   "non-text-contrast",
   "tailwind-palette-color",
+  "tailwind-default-scale",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

@@ -1,6 +1,6 @@
 {
   "name": "facha-ui-mcp",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "facha-ui MCP server: exposes a React project's design system and a deterministic, read-only UI validator.",
   "license": "MIT",
   "type": "module",
