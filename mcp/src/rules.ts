@@ -1,0 +1,161 @@
+import { findColorLiterals } from "./color.js";
+import type { Context } from "./context.js";
+import type { Usage } from "./sources/usage.js";
+import { suggestArbitrary, suggestColor, suggestTokenName } from "./suggest.js";
+import { parseArbitrary } from "./tailwind.js";
+import type { Loc, RuleId, Severity, Suggestion, Unresolved, Violation } from "./types.js";
+
+export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
+  {
+    id: "color-literal",
+    severity: "error",
+    summary:
+      "Color literal (hex, rgb(), hsl(), oklch(), named color) outside the token definitions: CSS, style={{}}, bg-[#…], SVG fill/stroke.",
+  },
+  {
+    id: "tailwind-arbitrary-value",
+    severity: "error",
+    summary:
+      "Arbitrary Tailwind values x-[…] and [prop:val]: error for typography, color, radius, shadow and spacing; warning for sizing/layout; info when the value is just var(--existing-token).",
+  },
+  {
+    id: "unknown-token",
+    severity: "error",
+    summary: "var(--x) where --x is not defined as a design token or as a local custom property.",
+  },
+  {
+    id: "inline-style",
+    severity: "info",
+    summary: "style={{…}} attribute: a signal of a missing class or component pattern.",
+  },
+];
+
+const MESSAGES: Record<RuleId, string> = {
+  "color-literal": "Color literal outside the design tokens; it does not follow theme changes.",
+  "tailwind-arbitrary-value": "Arbitrary Tailwind value bypasses the design system.",
+  "unknown-token": "var() references a token that is not defined in the design system.",
+  "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
+};
+
+const ALWAYS_ALLOWED_VARS = /^--tw-/;
+
+/** Config overrides replace the default severity; `soft` findings (token-only arbitrary values) stay as they are. */
+export function effectiveSeverity(ctx: Context, rule: RuleId, base: Severity, soft = false): Severity | "off" {
+  const override = ctx.project.config.rules?.[rule];
+  if (override === "off") return "off";
+  if (!override || soft) return base;
+  return override;
+}
+
+function clip(s: string, n = 200): string {
+  return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+export interface FileResult {
+  violations: Violation[];
+  unresolved: Unresolved[];
+}
+
+export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
+  const violations: Violation[] = [];
+  const unresolved: Unresolved[] = [];
+  const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
+  const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
+
+  const push = (
+    rule: RuleId,
+    base: Severity,
+    loc: Loc,
+    found: string,
+    property: string | null,
+    context: Violation["context"],
+    suggestion: Suggestion,
+    breaksThemes: string[] = [],
+    soft = false,
+  ) => {
+    const severity = effectiveSeverity(ctx, rule, base, soft);
+    if (severity === "off") return;
+    violations.push({
+      id: `${loc.file}:${loc.line}:${loc.column}:${rule}`,
+      rule,
+      severity,
+      file: loc.file,
+      line: loc.line,
+      column: loc.column,
+      found: clip(found),
+      property,
+      context,
+      message: MESSAGES[rule],
+      breaksThemes,
+      suggestion,
+    });
+  };
+
+  const checkVarRefs = (text: string, locAt: (i: number) => Loc, property: string | null, context: Violation["context"]) => {
+    for (const m of text.matchAll(/var\(\s*(--[\w-]+)/g)) {
+      const name = m[1]!;
+      if (ALWAYS_ALLOWED_VARS.test(name) || ctx.definedCustomProps.has(name)) continue;
+      push("unknown-token", "error", locAt(m.index!), m[0] + ")", property, context, suggestTokenName(ctx, name));
+    }
+  };
+
+  for (const u of usages) {
+    if (u.kind === "class-dynamic") {
+      unresolved.push({ file: u.file, line: u.line, column: u.column, found: u.raw, reason: "Dynamic class name: only the static part can be checked." });
+      continue;
+    }
+    if (u.kind === "inline-style") {
+      push("inline-style", "info", u, u.raw, null, "inline-style", {
+        match: "none",
+        kind: "none",
+        value: null,
+        detail: "Consider a component class (or an existing one) instead of inline styles.",
+        source: null,
+      });
+      continue;
+    }
+    if (u.kind === "class") {
+      const a = parseArbitrary(u.raw);
+      if (!a) continue;
+      const loc = { file: u.file, line: u.line, column: u.column };
+      const varOnly = a.value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
+      if (varOnly) {
+        const name = varOnly[1]!;
+        if (!ctx.definedCustomProps.has(name) && !ALWAYS_ALLOWED_VARS.test(name)) {
+          push("unknown-token", "error", loc, u.raw, a.property, "className", suggestTokenName(ctx, name));
+        } else {
+          const t = ctx.tokens.byName.get(name);
+          const property = a.prefix === "text" && t?.type === "color" ? "color" : a.property;
+          push("tailwind-arbitrary-value", "info", loc, u.raw, property, "className", {
+            match: "none",
+            kind: "none",
+            value: null,
+            detail: `Uses the token ${name} through an arbitrary value; prefer a component class or an @theme utility.`,
+            source: t?.source ?? null,
+          }, [], true);
+        }
+        continue;
+      }
+      if (a.category === "color") {
+        const lit = findColorLiterals(a.value, a.property)[0];
+        if (lit && !allowed.has(lit.text.toLowerCase())) {
+          push("color-literal", "error", loc, u.raw, a.property, "className", suggestColor(ctx, lit.text, a.property), otherThemes);
+          continue;
+        }
+      }
+      checkVarRefs(a.value, () => loc, a.property, "className");
+      const severity: Severity = a.category === "sizing" || a.category === "layout" ? "warning" : "error";
+      push("tailwind-arbitrary-value", severity, loc, u.raw, a.property, "className", suggestArbitrary(ctx, a));
+      continue;
+    }
+    // decl: CSS declaration, inline style property or SVG attribute
+    const context: Violation["context"] = u.context === "css" ? "css" : u.context;
+    for (const lit of findColorLiterals(u.value, u.property)) {
+      if (allowed.has(lit.text.toLowerCase())) continue;
+      push("color-literal", "error", u.locAt(lit.index), lit.text, u.property, context, suggestColor(ctx, lit.text, u.property), otherThemes);
+    }
+    checkVarRefs(u.value, u.locAt, u.property, context);
+  }
+
+  return { violations, unresolved };
+}

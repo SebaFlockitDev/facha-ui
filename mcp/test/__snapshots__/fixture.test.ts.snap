@@ -1,0 +1,434 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`audit_project (fixture) > returns consistent totals (MCP-10) and is deterministic (MCP-4) 1`] = `
+{
+  "byFile": [
+    {
+      "byRule": {
+        "color-literal": 3,
+        "inline-style": 1,
+        "tailwind-arbitrary-value": 6,
+        "unknown-token": 1,
+      },
+      "error": 9,
+      "file": "app/page.tsx",
+      "info": 2,
+      "warning": 0,
+    },
+    {
+      "byRule": {
+        "color-literal": 2,
+        "unknown-token": 1,
+      },
+      "error": 3,
+      "file": "app/globals.css",
+      "info": 0,
+      "warning": 0,
+    },
+  ],
+  "byRule": {
+    "color-literal": {
+      "error": 5,
+    },
+    "inline-style": {
+      "info": 1,
+    },
+    "tailwind-arbitrary-value": {
+      "error": 5,
+      "info": 1,
+    },
+    "unknown-token": {
+      "error": 2,
+    },
+  },
+  "configSource": "facha-ui.config.json",
+  "filesScanned": 3,
+  "filesWithViolations": 2,
+  "health": [
+    {
+      "against": {
+        "dark": "--color-card",
+        "light": "--color-canvas",
+      },
+      "breaksIn": [
+        "light",
+        "dark",
+      ],
+      "kind": "token-contrast",
+      "minRatio": 4.5,
+      "ratios": {
+        "dark": 1.19,
+        "light": 1.19,
+      },
+      "role": "border.default",
+      "status": "fails-everywhere",
+      "token": "--color-line",
+      "usagesAsTextColor": 1,
+      "values": {
+        "dark": "#27272a",
+        "light": "#e5e7eb",
+      },
+    },
+  ],
+  "ignored": 0,
+  "skipped": [],
+  "top": [
+    {
+      "all": 11,
+      "error": 9,
+      "file": "app/page.tsx",
+    },
+    {
+      "all": 3,
+      "error": 3,
+      "file": "app/globals.css",
+    },
+  ],
+  "totals": {
+    "all": 14,
+    "error": 12,
+    "info": 2,
+    "warning": 0,
+  },
+  "unresolved": 1,
+}
+`;
+
+exports[`get_design_system (fixture) > parses tokens, configured themes, roles, coverage and decisions 1`] = `
+{
+  "assumptions": [
+    "Framework autodetected: next-app (package.json depends on next and an app/ directory exists).",
+  ],
+  "componentClasses": [
+    {
+      "literals": [],
+      "selector": ".title",
+      "source": "app/globals.css:28",
+      "tokens": [
+        "--color-ink",
+      ],
+    },
+    {
+      "literals": [],
+      "selector": ".caption",
+      "source": "app/globals.css:29",
+      "tokens": [
+        "--color-ink-muted",
+      ],
+    },
+    {
+      "literals": [
+        "#fee2e2",
+      ],
+      "selector": ".badge",
+      "source": "app/globals.css:30",
+      "tokens": [
+        "--color-danger",
+      ],
+    },
+    {
+      "literals": [
+        "#2563eb",
+      ],
+      "selector": ".link",
+      "source": "app/globals.css:31",
+      "tokens": [],
+    },
+    {
+      "literals": [],
+      "selector": ".ghost",
+      "source": "app/globals.css:32",
+      "tokens": [
+        "--color-lines",
+      ],
+    },
+    {
+      "literals": [],
+      "selector": ".card",
+      "source": "app/globals.css:33",
+      "tokens": [
+        "--card-pad",
+        "--color-card",
+      ],
+    },
+    {
+      "literals": [],
+      "selector": ".hint",
+      "source": "app/globals.css:34",
+      "tokens": [
+        "--color-line",
+      ],
+    },
+  ],
+  "configSource": "facha-ui.config.json",
+  "coverage": {
+    "missing": [
+      "status.success",
+      "status.warning",
+      "status.info",
+      "typography.family",
+      "typography.scale",
+      "shadow",
+    ],
+    "present": [
+      "surface.base",
+      "surface.raised",
+      "text.primary",
+      "text.secondary",
+      "border.default",
+      "accent.primary",
+      "on-accent",
+      "status.danger",
+      "radius.scale",
+      "spacing.scale",
+    ],
+    "requiredMissing": [],
+  },
+  "decisions": [
+    {
+      "date": "2026-01-15",
+      "id": "dec-2026-01-15-home",
+      "source": "design-system/decisions.md:3",
+      "title": "Home: promo first",
+    },
+  ],
+  "gaps": [
+    {
+      "kind": "literal-without-token",
+      "note": "No token within ΔE 2 with a compatible role (nearest: --color-canvas at ΔE 5.8).",
+      "values": [
+        "#fee2e2",
+      ],
+      "where": "app/globals.css:30 (.badge)",
+    },
+  ],
+  "guidelines": [
+    {
+      "id": "g1",
+      "text": "Cards always sit on --color-card.",
+    },
+  ],
+  "health": [
+    {
+      "against": {
+        "dark": "--color-card",
+        "light": "--color-canvas",
+      },
+      "breaksIn": [
+        "light",
+        "dark",
+      ],
+      "kind": "token-contrast",
+      "minRatio": 4.5,
+      "ratios": {
+        "dark": 1.19,
+        "light": 1.19,
+      },
+      "role": "border.default",
+      "status": "fails-everywhere",
+      "token": "--color-line",
+      "usagesAsTextColor": 1,
+      "values": {
+        "dark": "#27272a",
+        "light": "#e5e7eb",
+      },
+    },
+  ],
+  "project": {
+    "decisionsFile": "design-system/decisions.md",
+    "framework": "next-app",
+    "lab": {
+      "dir": "app/lab",
+      "urlPattern": "/lab/{screen}/{variant}",
+    },
+    "preview": {
+      "auth": "none",
+      "baseUrl": "http://localhost:3000",
+    },
+    "root": "next-tw4-cssvars",
+    "tailwind": {
+      "detected": true,
+      "themeMapped": false,
+      "version": "4",
+    },
+    "themes": [
+      {
+        "default": true,
+        "name": "light",
+        "selector": ":root",
+      },
+      {
+        "default": false,
+        "name": "dark",
+        "selector": ".dark",
+      },
+    ],
+    "tokenSources": [
+      "app/globals.css",
+    ],
+  },
+  "rules": [
+    {
+      "id": "color-literal",
+      "severity": "error",
+      "summary": "Color literal (hex, rgb(), hsl(), oklch(), named color) outside the token definitions: CSS, style={{}}, bg-[#…], SVG fill/stroke.",
+    },
+    {
+      "id": "tailwind-arbitrary-value",
+      "severity": "error",
+      "summary": "Arbitrary Tailwind values x-[…] and [prop:val]: error for typography, color, radius, shadow and spacing; warning for sizing/layout; info when the value is just var(--existing-token).",
+    },
+    {
+      "id": "unknown-token",
+      "severity": "error",
+      "summary": "var(--x) where --x is not defined as a design token or as a local custom property.",
+    },
+    {
+      "id": "inline-style",
+      "severity": "info",
+      "summary": "style={{…}} attribute: a signal of a missing class or component pattern.",
+    },
+  ],
+  "scales": {
+    "fontSize": {
+      "classes": {
+        "12px": [
+          ".caption",
+        ],
+        "20px": [
+          ".title",
+        ],
+      },
+      "source": "inferred",
+      "values": [
+        "12px",
+        "14px",
+        "20px",
+      ],
+    },
+    "radius": {
+      "source": "tokens",
+      "values": [
+        "4px (--radius-sm)",
+        "8px (--radius-md)",
+      ],
+    },
+    "spacing": {
+      "source": "tailwind-default",
+    },
+  },
+  "status": "partial",
+  "tokens": [
+    {
+      "comment": "page background",
+      "name": "--color-canvas",
+      "role": "surface.base",
+      "source": "app/globals.css:4",
+      "type": "color",
+      "values": {
+        "dark": "#0b0b0c",
+        "light": "#fafafa",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-card",
+      "role": "surface.raised",
+      "source": "app/globals.css:5",
+      "type": "color",
+      "values": {
+        "dark": "#18181b",
+        "light": "#ffffff",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-danger",
+      "role": "status.danger",
+      "source": "app/globals.css:11",
+      "type": "color",
+      "values": {
+        "dark": "#f87171",
+        "light": "#dc2626",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-ink",
+      "role": "text.primary",
+      "source": "app/globals.css:6",
+      "type": "color",
+      "values": {
+        "dark": "#f4f4f5",
+        "light": "#111827",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-ink-muted",
+      "role": "text.secondary",
+      "source": "app/globals.css:7",
+      "type": "color",
+      "values": {
+        "dark": "#a1a1aa",
+        "light": "#4b5563",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-line",
+      "role": "border.default",
+      "source": "app/globals.css:8",
+      "type": "color",
+      "values": {
+        "dark": "#27272a",
+        "light": "#e5e7eb",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-on-primary",
+      "role": "on-accent",
+      "source": "app/globals.css:10",
+      "type": "color",
+      "values": {
+        "dark": "#ffffff",
+        "light": "#ffffff",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--color-primary",
+      "role": "accent.primary",
+      "source": "app/globals.css:9",
+      "type": "color",
+      "values": {
+        "dark": "#3b82f6",
+        "light": "#2563eb",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--radius-md",
+      "role": "radius",
+      "source": "app/globals.css:13",
+      "type": "length",
+      "values": {
+        "dark": "8px",
+        "light": "8px",
+      },
+    },
+    {
+      "comment": null,
+      "name": "--radius-sm",
+      "role": "radius",
+      "source": "app/globals.css:12",
+      "type": "length",
+      "values": {
+        "dark": "4px",
+        "light": "4px",
+      },
+    },
+  ],
+}
+`;

@@ -1,0 +1,9 @@
+node_modules/
+# mcp/dist holds only the esbuild bundle, committed so the plugin runs without npm install
+mcp/dist/*
+!mcp/dist/facha-ui-mcp.js
+.facha-ui/
+*.log
+
+# git bundles used to sync sessions
+*.bundle

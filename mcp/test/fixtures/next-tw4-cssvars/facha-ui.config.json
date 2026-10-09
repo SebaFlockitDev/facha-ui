@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "tokens": {
+    "sources": ["app/globals.css"],
+    "themes": { "light": ":root", "dark": ".dark" },
+    "roles": {
+      "--color-ink": "text.primary",
+      "--color-ink-muted": "text.secondary",
+      "--color-line": "border.default"
+    }
+  },
+  "guidelines": ["Cards always sit on --color-card."],
+  "lab": { "dir": "app/lab" },
+  "preview": { "baseUrl": "http://localhost:3000", "auth": "none" }
+}

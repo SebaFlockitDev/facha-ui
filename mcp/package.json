@@ -1,0 +1,38 @@
+{
+  "name": "facha-ui-mcp",
+  "version": "0.1.0",
+  "description": "facha-ui MCP server: exposes a React project's design system and a deterministic, read-only UI validator.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/facha-ui-mcp.js",
+  "bin": {
+    "facha-ui-mcp": "dist/facha-ui-mcp.js"
+  },
+  "files": [
+    "dist/facha-ui-mcp.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --legal-comments=none --outfile=dist/facha-ui-mcp.js \"--banner:js=import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@babel/parser": "8.0.7",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "culori": "4.0.2",
+    "picomatch": "4.0.7",
+    "postcss": "8.5.29",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/culori": "4.0.1",
+    "@types/node": "22.20.5",
+    "@types/picomatch": "4.0.3",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

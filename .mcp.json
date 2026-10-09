@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "facha-ui": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/facha-ui-mcp.js", "--root", "${CLAUDE_PROJECT_DIR}"]
+    },
+    "playwright": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/run-pinned.mjs", "@playwright/mcp@0.0.83",
+        "--isolated",
+        "--output-dir", "${CLAUDE_PROJECT_DIR}/.facha-ui/screenshots",
+        "--viewport-size", "1440x900"
+      ]
+    }
+  }
+}

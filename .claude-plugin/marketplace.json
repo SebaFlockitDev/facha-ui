@@ -1,0 +1,16 @@
+{
+  "name": "facha-ui",
+  "owner": {
+    "name": "Flock"
+  },
+  "metadata": {
+    "description": "facha-ui: AI-generated UI that follows your project design system."
+  },
+  "plugins": [
+    {
+      "name": "facha-ui",
+      "source": "./",
+      "description": "Design-system-aware UI generation with a deterministic guardian."
+    }
+  ]
+}
