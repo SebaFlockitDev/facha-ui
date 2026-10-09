@@ -1,12 +1,21 @@
 # facha-ui
 
-Plugin de Claude Code para que la UI que genera la IA respete el design system de **tu** proyecto.
+Plugin de Claude Code que trabaja como un diseñador UI senior dentro de tu proyecto: arma o completa tu design system, diseña pantallas con él, te deja ajustarlas y probar paletas en vivo, valida cada resultado con reglas objetivas y no aplica nada sin tu aprobación.
 
-- **MCP `facha-ui`:** lee los tokens, temas y clases del código y valida la UI con reglas deterministas, incluido el contraste de cada texto, borde, foco e ícono en cada tema y los estados que se confunden por color (también con daltonismo simulado). Es de solo lectura, no usa red y no ejecuta código del proyecto.
-- **`/facha-ui:variants`:** genera 3 variantes de una pantalla en un laboratorio. Cada variante pasa por el guardián (`check_ui`) y cita la fuente de cada decisión de diseño. Si te gusta una pero querés cambiarle algo, la ajustás (`/facha-ui:variants orders b "<cambio>"`) y cada ajuste queda como revisión.
-- **`/facha-ui:apply`:** porta la variante que elegiste, limpia el laboratorio y registra la decisión en `decisions.md`. Solo la puede lanzar el dev, y pide aprobación explícita sobre un plan exacto.
-- **`/facha-ui:init`:** si al design system le faltan tokens, los propone a partir de los valores que el proyecto ya usa, con valor por tema y contraste verificado, y los crea solo si los aprobás.
-- **`/facha-ui:help`:** lista los comandos, las tools del MCP y los archivos, con ejemplos.
+**Desde cero o sobre lo que ya tenés**
+- **Sin design system:** `/facha-ui:init` lo arma a partir de los colores, tamaños y radios que tu código ya usa, con un valor por tema y contraste verificado. Te propone; vos aprobás.
+- **Con design system:** el MCP `facha-ui` lo lee del código (tokens, temas, clases, decisiones) y es la única fuente de valores visuales: la IA no inventa colores ni tamaños.
+
+**Diseñar con criterio**
+- **`/facha-ui:variants`:** 3 hipótesis realmente distintas de una pantalla en un laboratorio. Antes de diseñar, te avisa lo que al design system le falta; cada decisión cita su fuente.
+- **Ajustar en vivo** (`/facha-ui:variants <slug> live`): un panel en cada variante para pedir cambios mientras mirás, **señalar** con un clic el elemento al que te referís y **probar paletas** para toda la app. Cada conflicto (contraste, estados que se confunden, colores sin token) viene con su solución y una recomendación.
+- **`/facha-ui:apply`:** porta la variante elegida sobre un plan exacto, con tu aprobación y el motivo, y la decisión queda como memoria para las próximas pantallas.
+
+**Calidad que se mide**
+- Un guardián determinista (`check_ui`, `audit_project`) marca valores fuera del design system, contraste insuficiente de texto, bordes, foco e íconos en cada tema (WCAG), estados que se confunden por color (también con daltonismo simulado) y paletas infladas. Es de solo lectura, no usa red y no ejecuta código del proyecto.
+
+**Una forma de trabajar con IA en el front**
+- Cada pieza tiene un dueño: la IA propone (estructura, hipótesis, soluciones), el código verifica (lo medible) y vos decidís (lo que tiene consecuencias). Como cada decisión explica su fuente y cada problema trae su salida, el plugin enseña ese método mientras lo usás. `/facha-ui:help` y la [guía de uso](docs/uso.md) acompañan a quien empieza.
 
 Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificación completa en [`SPEC.md`](SPEC.md).
 

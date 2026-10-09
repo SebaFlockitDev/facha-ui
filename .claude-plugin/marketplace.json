@@ -4,13 +4,13 @@
     "name": "Sebastian Adrover"
   },
   "metadata": {
-    "description": "facha-ui: AI-generated UI that follows your project design system."
+    "description": "facha-ui: a senior UI designer for your project, inside Claude Code."
   },
   "plugins": [
     {
       "name": "facha-ui",
       "source": "./",
-      "description": "Design-system-aware UI generation with a deterministic guardian."
+      "description": "Design-system-aware UI: build the system from your code, design variants, adjust them live, validate with a deterministic guardian."
     }
   ]
 }
