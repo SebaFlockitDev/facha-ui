@@ -14,7 +14,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Estado:** 0.4.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la regla de la paleta de Tailwind y las reglas propias del equipo (`custom`). Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
+> **Estado:** 0.5.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la paleta de Tailwind y las reglas propias del equipo (`custom`); la 0.5.0, las escalas por defecto de Tailwind y la detección de paleta inflada. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 
 ## Requisitos
 

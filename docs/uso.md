@@ -123,7 +123,8 @@ Claves útiles:
 | `preview.baseUrl` | URL del dev server (tiene que ser `localhost`, `127.0.0.1` o `::1`) | `http://localhost:3000` |
 | `preview.auth` | `manual` si la app pide login (lo hacés vos) | `none` |
 | `memory.decisionsFile` | Dónde `apply` registra las decisiones | `design-system/decisions.md` |
-| `tailwind.useDefaultTheme` | `true` si el tema por defecto de Tailwind **es** tu design system: apaga `tailwind-palette-color` | `false` |
+| `tailwind.useDefaultTheme` | `true` si el tema por defecto de Tailwind **es** tu design system: apaga `tailwind-palette-color` y `tailwind-default-scale` | `false` |
+| `tailwind.allowDefaultScale` | Escalas de Tailwind que aceptás sin token, por ejemplo `{ "radius": true }` | Se aceptan espaciado, sizing y peso; no radios, sombras, tamaños, tracking ni leading |
 | `custom` | Reglas propias del equipo (ver abajo) | `[]` |
 
 **Reglas propias del equipo (`custom`).** Son declarativas: no ejecutan código. Hay dos tipos:
@@ -181,6 +182,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | `color-literal` | error | Colores escritos a mano en vez de tokens |
 | `tailwind-arbitrary-value` | error (warning para tamaños de layout; info si el valor es un token) | Valores sueltos como `text-[13px]` |
 | `tailwind-palette-color` | error | Colores de la paleta por defecto de Tailwind (`bg-white`, `text-gray-500`, `hover:bg-blue-700`…) en vez de tokens. No la marca si mapeaste el color en `@theme` o si usás el tema de Tailwind a propósito (`tailwind.useDefaultTheme: true`) |
+| `tailwind-default-scale` | warning | Escalas por defecto de Tailwind que no mapeaste: radios, sombras, tamaños de letra, tracking y leading (`rounded-lg`, `shadow-md`, `text-sm`). El espaciado, el sizing y el peso se aceptan. Sugiere el valor más cercano de tu proyecto |
 | `custom/<id>` | la que defina el equipo | Las reglas propias de tu config (ver 4.2) |
 | `unknown-token` | error | `var(--x)` de un token que no existe |
 | `inline-style` | info | `style={{…}}`: falta una clase o un patrón |
@@ -188,7 +190,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | `class-contrast` | igual que la anterior | Una clase del CSS cuyo color de texto falla, marcada en cada componente que la usa |
 | `non-text-contrast` | warning | Bordes de campos y botones, anillos de foco e íconos por debajo de 3:1 (WCAG 1.4.11) |
 
-Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste y los **estados que se confunden por color**, también simulando deuteranopía y protanopía. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
+Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste, los **estados que se confunden por color** (también simulando deuteranopía y protanopía) y la **paleta inflada**: tokens o colores casi idénticos que podrían ser uno solo, y tamaños de letra o radios que difieren en medio píxel. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
 
 ### 5.1 Si faltan tokens: `/facha-ui:init`
 

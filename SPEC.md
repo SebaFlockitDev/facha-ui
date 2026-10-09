@@ -120,7 +120,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `tokens.invariant` | `string[]` | `[]` | Tokens que *a propósito* no cambian entre temas (silencia el aviso de salud, no la regla `theme-contrast`) |
 | `include` / `exclude` | `string[]` (globs) | `app/**`, `src/**`, `components/**`, `pages/**` con ext. `tsx,jsx,ts,js,css` / `node_modules`, `.next`, `dist`, `build`, `coverage`, `.facha-ui` | Qué valida `audit_project`. El directorio del lab se excluye siempre de la auditoría |
 | `tailwind.classHelpers` | `string[]` | `["clsx","cn","cva","twMerge","classnames"]` | Funciones cuyos argumentos string son clases |
-| `tailwind.allowDefaultScale` | `object` | `{ spacing: true, sizing: true, fontWeight: true, layout: true }` | Qué escalas por defecto de Tailwind se aceptan sin token |
+| `tailwind.allowDefaultScale` | `object` | `{ spacing: true, sizing: true, fontWeight: true, layout: true }` (radio, sombra, tamaño de fuente, tracking y leading: `false`) | Qué escalas por defecto de Tailwind se aceptan sin token. Claves: `radius`, `shadow`, `fontSize`, `tracking`, `leading`, `spacing`, `sizing`, `fontWeight`, `layout` (evaluado desde 0.5.0) |
 | `tailwind.useDefaultTheme` | `boolean` | `false` | `true` = el tema por defecto de Tailwind **es** el design system (proyectos sin tokens propios) |
 | `rules` | `Record<RuleId, Severity \| {severity, options}>` | ver §2.a.4 | Severidad por regla (`off`, `info`, `warning`, `error`) |
 | `allow.literals` | `string[]` | `["transparent","currentColor","inherit","none"]` (siempre incluidos) | Literales de color aceptados |
@@ -339,13 +339,13 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `unknown-token` | error | `var(--x)` donde `--x` no está definido en ninguna fuente de tokens ni como custom property local (típico de IA: `var(--color-warning)` inventado). Se ignoran `--tw-*` | `var(--color-warning)` en un proyecto que no lo define |
 | `tailwind-arbitrary-value` | error (typography, color, radius, shadow, spacing) · warning (sizing/layout) | Valores arbitrarios `x-[…]` y propiedades arbitrarias `[prop:val]` | `text-[13px]`, `tracking-[-0.5px]`, `max-w-[420px]` (warning) |
 | `tailwind-palette-color` | error (desde 0.4.0, §7.12) | Utilidades de la paleta por defecto (`text-gray-500`, `bg-white`, `border-slate-200`…), con variantes y opacidad, que no están mapeadas a tokens en `@theme`, salvo `useDefaultTheme: true` o una clase propia con ese nombre. Sugiere el token más parecido | `text-gray-500` en una tarjeta |
-| `tailwind-default-scale` | warning | Escalas por defecto no mapeadas a tokens para radio, sombra, tamaño de fuente, tracking y leading (`rounded-lg`, `shadow-md`, `text-sm`, `tracking-wide`). El espaciado y el sizing se aceptan por defecto (`allowDefaultScale`) | `rounded-lg`, `tracking-wide` |
+| `tailwind-default-scale` | warning (desde 0.5.0, §7.13) | Escalas por defecto no mapeadas en `@theme` para radio, sombra, tamaño de fuente, tracking y leading (`rounded-lg`, `shadow-md`, `text-sm`, `tracking-wide`). El espaciado, el sizing, el peso y `none`/`full`/`normal` se aceptan por defecto (`allowDefaultScale`). Sugiere el valor más cercano del proyecto | `rounded-lg`, `tracking-wide` |
 | `inline-style` | info | `style={{…}}`: señal de un patrón que falta. Si contiene un literal, ese literal se reporta además como `color-literal` (error) | `style={{ color: "var(--color-primary)" }}` en links |
 | `theme-contrast` | error si el fondo es conocido, warning si no (desde 0.3.0, §7.11) | Un color de texto (`color` en CSS o `style={{}}`) que no llega a `contrast.minRatio` en algún tema. Si la misma regla CSS fija el fondo, se usa ese par (con composición alfa); si no, el peor caso contra las superficies. Sugiere un token legible en todos los temas, de la misma familia de rol | `color: var(--color-title)` → 1,2:1 en dark; `color: var(--color-primary)` → 3,1:1 en dark |
 | `class-contrast` | igual que `theme-contrast` (desde 0.3.0) | Una clase cuya regla CSS fija un color de texto que falla en algún tema, reportada donde el componente la usa | `className="numeric"` con `.table .numeric { color: var(--color-title) }` |
 | `non-text-contrast` | warning (desde 0.3.0) | WCAG 1.4.11: bordes y outlines de partes interactivas, anillos de foco e íconos SVG por debajo de `contrast.nonTextMinRatio` (3:1) | `.field input { border: 1px solid var(--color-border) }` → 1,2:1 |
 
-**Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas.
+**Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas. Desde 0.5.0 suma la **paleta inflada**: `near-duplicate-tokens` (tokens de color casi iguales en todos los temas), `near-duplicate-literals` (colores escritos a mano casi iguales) y `near-duplicate-steps` (tamaños de letra a ±0,5 px y radios a ±1 px).
 
 **Reglas extra declarativas (`custom`)**, evaluadas desde 0.4.0 (§7.12). No se ejecuta código del proyecto. `selector`, `property` y `pattern` son expresiones regulares de JavaScript (una inválida da `CONFIG_INVALID`); `severity` admite `off`. Cada violación se reporta como `custom/<id>` con el mensaje del equipo:
 
@@ -591,7 +591,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -836,7 +836,6 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 | Ítem | Sección de la visión |
 |---|---|
 | Adapter de framework `vite-react` (lab en `facha-lab/`) | §2.b.4 |
-| Regla `tailwind-default-scale` (`tailwind-palette-color` llegó en 0.4.0, §7.12) | §2.a.4 |
 | Directivas `facha-ui-ignore-next-line` | §2.a.4 |
 | Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
 | `outputSchema` en las tools (el MVP devuelve `structuredContent` sin esquema declarado) | §2.a.1 |
@@ -891,7 +890,6 @@ El SPEC v0.1 (§1–§6) está aprobado como **visión**. Esta sección define e
 ### 7.2 Excluido hoy (pasa al roadmap)
 
 - `vite-react`;
-- regla `tailwind-default-scale` (`theme-contrast` por uso llegó en 0.3.0, §7.11; `tailwind-palette-color` y `custom`, en 0.4.0, §7.12);
 - directivas `facha-ui-ignore`;
 - resources `decisions` y `config`;
 - `outputSchema`;
@@ -1058,6 +1056,21 @@ Criterio: lo que se puede medir lo valida el guardián; lo que es gusto lo sugie
 - **`assumptions`:** `custom` y `tailwind.useDefaultTheme` dejan de figurar como "no evaluadas"; sí figuran `suggest`, `lab.viewports` y las demás claves de `tailwind`.
 - **En la prueba real:** 0 violaciones de ambas reglas. El proyecto usa Tailwind solo para layout, como dice su guideline, y respeta su regla de tarjetas; el resultado confirma que no hay falsos positivos sobre un proyecto ordenado.
 - **Tests:** fixture `next-tailwind` con la paleta (variantes, opacidad, mapeo en `@theme`, clase propia con nombre de paleta, utilidades que no son de paleta), `useDefaultTheme`, proyecto sin Tailwind, `forbid-token` y `forbid-class` con positivos y negativos, severidad `off`, regex inválida con su JSON Pointer y conteo en `audit_project`.
+
+### 7.13 Versión 0.5.0: escalas por defecto y paleta inflada
+
+- **`tailwind-default-scale` (warning):**
+  - reconoce `rounded[-lado][-paso]`, `shadow-*`, `inset-shadow-*`, `drop-shadow-*`, `text-<tamaño>` (también con `/leading`), `tracking-*` y `leading-<nombre>`, con variantes;
+  - acepta sin marcar `rounded-none`, `rounded-full`, `shadow-none`, `tracking-normal`, `leading-none`, `leading-normal` y `leading-<número>` (escala de espaciado), además de lo que permita `tailwind.allowDefaultScale`;
+  - un paso está mapeado solo si el proyecto declara su variable en `@theme` (`--radius-lg`, `--text-sm`…). Un token con ese nombre en `:root` no cambia lo que hace la utilidad en Tailwind 4, así que no cuenta. Desde esta versión `tailwind-palette-color` usa el mismo criterio;
+  - **sugerencias:** tamaño de letra con la lógica de `tailwind-arbitrary-value` (la clase tipográfica a ±1 px); radio, el token más cercano a ±2 px o la lista de radios del proyecto; sombra, la lista de sombras del proyecto (elegir es una decisión de diseño); tracking y leading, la indicación de revisar las guidelines;
+  - los valores por defecto son los de Tailwind 4.3.3 (`theme.css`, MIT), en `mcp/src/tailwind-scales.ts`.
+- **Paleta inflada (en `health`, informativo):**
+  - `near-duplicate-tokens`: tokens de color a ΔE < 2 en **todos** los temas que no son alias uno del otro;
+  - `near-duplicate-literals`: colores escritos a mano a ΔE < 2 entre sí, con dónde se usan;
+  - `near-duplicate-steps`: tamaños de letra a ±0,5 px y radios a ±1 px usados en clases de componentes, agrupados (la misma consolidación que propone `scan_styles`).
+- **En la prueba real:** 3 warnings de escalas por defecto (`tracking-wide` y `rounded-lg` en un modal; el único radio del proyecto es de 12 px), un par de tokens casi idénticos (dos tintes que en dark son el mismo color), dos pares de tintes escritos a mano y cuatro grupos de pasos casi iguales (letras de 10,5/11, 12,5/13 y 13,5/14 px; radios de 8 y 9 px).
+- **Tests:** escalas con y sin mapeo, variantes, `/leading`, lo aceptado por defecto, `allowDefaultScale`, sugerencias (clase tipográfica cercana, radio exacto, lista de radios y de sombras) y los tres tipos de paleta inflada, incluido que no se reporten tokens que difieren en algún tema.
 
 ---
 
