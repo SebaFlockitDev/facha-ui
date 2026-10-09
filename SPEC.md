@@ -338,7 +338,7 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `color-literal` | error | Color literal (hex, `rgb()`, `hsl()`, `oklch()`, nombre CSS) fuera de los bloques de definición de tokens: CSS, `style={{}}`, `bg-[#…]`, `fill`/`stroke`. Si el proyecto tiene más de un tema, agrega `breaksThemes`. Incluye custom properties locales con valor literal | `.badge-pending { background: #fef3c7 }` |
 | `unknown-token` | error | `var(--x)` donde `--x` no está definido en ninguna fuente de tokens ni como custom property local (típico de IA: `var(--color-warning)` inventado). Se ignoran `--tw-*` | `var(--color-warning)` en un proyecto que no lo define |
 | `tailwind-arbitrary-value` | error (typography, color, radius, shadow, spacing) · warning (sizing/layout) | Valores arbitrarios `x-[…]` y propiedades arbitrarias `[prop:val]` | `text-[13px]`, `tracking-[-0.5px]`, `max-w-[420px]` (warning) |
-| `tailwind-palette-color` | error | Utilidades de la paleta por defecto (`text-gray-500`, `bg-white`, `border-slate-200`…) que no están mapeadas a tokens, salvo `useDefaultTheme: true` | `text-gray-500` en una tarjeta |
+| `tailwind-palette-color` | error (desde 0.4.0, §7.12) | Utilidades de la paleta por defecto (`text-gray-500`, `bg-white`, `border-slate-200`…), con variantes y opacidad, que no están mapeadas a tokens en `@theme`, salvo `useDefaultTheme: true` o una clase propia con ese nombre. Sugiere el token más parecido | `text-gray-500` en una tarjeta |
 | `tailwind-default-scale` | warning | Escalas por defecto no mapeadas a tokens para radio, sombra, tamaño de fuente, tracking y leading (`rounded-lg`, `shadow-md`, `text-sm`, `tracking-wide`). El espaciado y el sizing se aceptan por defecto (`allowDefaultScale`) | `rounded-lg`, `tracking-wide` |
 | `inline-style` | info | `style={{…}}`: señal de un patrón que falta. Si contiene un literal, ese literal se reporta además como `color-literal` (error) | `style={{ color: "var(--color-primary)" }}` en links |
 | `theme-contrast` | error si el fondo es conocido, warning si no (desde 0.3.0, §7.11) | Un color de texto (`color` en CSS o `style={{}}`) que no llega a `contrast.minRatio` en algún tema. Si la misma regla CSS fija el fondo, se usa ese par (con composición alfa); si no, el peor caso contra las superficies. Sugiere un token legible en todos los temas, de la misma familia de rol | `color: var(--color-title)` → 1,2:1 en dark; `color: var(--color-primary)` → 3,1:1 en dark |
@@ -347,7 +347,7 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 
 **Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas.
 
-**Reglas extra declarativas (`custom`)** en el MVP. No se ejecuta código del proyecto:
+**Reglas extra declarativas (`custom`)**, evaluadas desde 0.4.0 (§7.12). No se ejecuta código del proyecto. `selector`, `property` y `pattern` son expresiones regulares de JavaScript (una inválida da `CONFIG_INVALID`); `severity` admite `off`. Cada violación se reporta como `custom/<id>` con el mensaje del equipo:
 
 ```jsonc
 "custom": [
@@ -591,7 +591,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -836,8 +836,7 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 | Ítem | Sección de la visión |
 |---|---|
 | Adapter de framework `vite-react` (lab en `facha-lab/`) | §2.b.4 |
-| Reglas `tailwind-palette-color` y `tailwind-default-scale` | §2.a.4 |
-| Reglas declarativas `custom` | §2.a.4 |
+| Regla `tailwind-default-scale` (`tailwind-palette-color` llegó en 0.4.0, §7.12) | §2.a.4 |
 | Directivas `facha-ui-ignore-next-line` | §2.a.4 |
 | Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
 | `outputSchema` en las tools (el MVP devuelve `structuredContent` sin esquema declarado) | §2.a.1 |
@@ -892,7 +891,7 @@ El SPEC v0.1 (§1–§6) está aprobado como **visión**. Esta sección define e
 ### 7.2 Excluido hoy (pasa al roadmap)
 
 - `vite-react`;
-- reglas `tailwind-palette-color`, `tailwind-default-scale` y `custom` (`theme-contrast` por uso llegó en 0.3.0, §7.11);
+- regla `tailwind-default-scale` (`theme-contrast` por uso llegó en 0.3.0, §7.11; `tailwind-palette-color` y `custom`, en 0.4.0, §7.12);
 - directivas `facha-ui-ignore`;
 - resources `decisions` y `config`;
 - `outputSchema`;
@@ -1044,6 +1043,21 @@ Criterio: lo que se puede medir lo valida el guardián; lo que es gusto lo sugie
 - **En la prueba real:** 18 errores nuevos de contraste (título invisible en dark en el shell, montos de tablas, etiquetas con `--text-faint`, textos de estado a 4,42 y 4,48:1), 3 warnings de bordes de inputs y foco, y 4 pares de estados confundibles (uno con colores idénticos: inactivo y pendiente). Ningún falso positivo en la barra lateral oscura.
 - **`variants`:** el paso de brechas cita `class-contrast`/`theme-contrast` y `status-confusable`, y el bucle del guardián usa la sugerencia de contraste o reporta la brecha.
 - **Tests:** fixture `next-visual` con positivos y negativos de cada regla (pares legibles, overrides de tema, overlays translúcidos, texto sobre fondos desconocidos, foco legible), severidad con superficies autodetectadas, reglas apagadas por config y `status-confusable`.
+
+### 7.12 Versión 0.4.0: paleta de Tailwind y reglas del equipo
+
+- **`tailwind-palette-color` (error):**
+  - reconoce utilidades de color de la paleta por defecto con cualquier prefijo de color (`text`, `bg`, `border-*`, `ring`, `outline`, `divide`, `fill`, `stroke`, `decoration`, `placeholder`, `caret`, `accent`, `shadow`, `from`/`via`/`to`…), con variantes (`hover:`, `md:`) y opacidad (`/50`);
+  - no la marca cuando el proyecto no usa Tailwind, cuando `tailwind.useDefaultTheme` es `true`, cuando el color está mapeado en `@theme` (`--color-gray-500`) o cuando el proyecto tiene una clase propia con ese nombre exacto;
+  - la paleta es la de Tailwind 4.3.3 (`theme.css`, MIT), incluida como datos en `mcp/src/tailwind-palette.ts`. Se usa para reconocer la clase y para sugerir el token más parecido con la misma lógica de rol que `color-literal`; nunca como valor de diseño.
+- **`custom` (evaluadas):**
+  - `forbid-token`: un token prohibido en las declaraciones cuyo selector y propiedad coinciden con las regex `selector` y `property` (opcionales; sin `selector` también aplica a `style={{}}`);
+  - `forbid-class`: clases (sin variantes) que coinciden con la regex `pattern`;
+  - se reportan como `custom/<id>` con la severidad y el mensaje del equipo, aparecen en `get_design_system` → `rules` y cuentan en `audit_project`. Valen también en el laboratorio;
+  - el schema de la config ahora es estricto para cada tipo y valida las regex.
+- **`assumptions`:** `custom` y `tailwind.useDefaultTheme` dejan de figurar como "no evaluadas"; sí figuran `suggest`, `lab.viewports` y las demás claves de `tailwind`.
+- **En la prueba real:** 0 violaciones de ambas reglas. El proyecto usa Tailwind solo para layout, como dice su guideline, y respeta su regla de tarjetas; el resultado confirma que no hay falsos positivos sobre un proyecto ordenado.
+- **Tests:** fixture `next-tailwind` con la paleta (variantes, opacidad, mapeo en `@theme`, clase propia con nombre de paleta, utilidades que no son de paleta), `useDefaultTheme`, proyecto sin Tailwind, `forbid-token` y `forbid-class` con positivos y negativos, severidad `off`, regex inválida con su JSON Pointer y conteo en `audit_project`.
 
 ---
 

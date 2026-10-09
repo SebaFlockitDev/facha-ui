@@ -123,8 +123,25 @@ Claves útiles:
 | `preview.baseUrl` | URL del dev server (tiene que ser `localhost`, `127.0.0.1` o `::1`) | `http://localhost:3000` |
 | `preview.auth` | `manual` si la app pide login (lo hacés vos) | `none` |
 | `memory.decisionsFile` | Dónde `apply` registra las decisiones | `design-system/decisions.md` |
+| `tailwind.useDefaultTheme` | `true` si el tema por defecto de Tailwind **es** tu design system: apaga `tailwind-palette-color` | `false` |
+| `custom` | Reglas propias del equipo (ver abajo) | `[]` |
 
-Ejemplo completo: SPEC, Anexo A. Si la config tiene un error, las tools responden `CONFIG_INVALID` con la ruta exacta del campo.
+**Reglas propias del equipo (`custom`).** Son declarativas: no ejecutan código. Hay dos tipos:
+
+```json
+"custom": [
+  { "id": "cards-on-panel", "kind": "forbid-token", "selector": "\\.card\\b", "property": "^background",
+    "tokens": ["--color-bg"], "severity": "error", "message": "Las tarjetas van sobre --color-panel." },
+  { "id": "no-gray", "kind": "forbid-class", "pattern": "^(text|bg|border)-gray-",
+    "severity": "warning", "message": "Usá los tokens de texto en lugar de grises de Tailwind." }
+]
+```
+
+- `forbid-token` prohíbe tokens en los selectores y propiedades que coinciden con las expresiones regulares `selector` y `property` (las dos son opcionales).
+- `forbid-class` prohíbe las clases que coinciden con `pattern`.
+- `severity` puede ser `error`, `warning`, `info` u `off`. Las violaciones salen como `custom/<id>` con tu mensaje, también en el laboratorio, así que las variantes las respetan.
+
+Ejemplo completo: SPEC, Anexo A. Si la config tiene un error (incluida una expresión regular inválida), las tools responden `CONFIG_INVALID` con la ruta exacta del campo.
 
 ### 4.3 `.gitignore`
 
@@ -163,6 +180,8 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 |---|---|---|
 | `color-literal` | error | Colores escritos a mano en vez de tokens |
 | `tailwind-arbitrary-value` | error (warning para tamaños de layout; info si el valor es un token) | Valores sueltos como `text-[13px]` |
+| `tailwind-palette-color` | error | Colores de la paleta por defecto de Tailwind (`bg-white`, `text-gray-500`, `hover:bg-blue-700`…) en vez de tokens. No la marca si mapeaste el color en `@theme` o si usás el tema de Tailwind a propósito (`tailwind.useDefaultTheme: true`) |
+| `custom/<id>` | la que defina el equipo | Las reglas propias de tu config (ver 4.2) |
 | `unknown-token` | error | `var(--x)` de un token que no existe |
 | `inline-style` | info | `style={{…}}`: falta una clase o un patrón |
 | `theme-contrast` | error si el fondo es conocido, warning si no | Un texto que no llega a 4.5:1 contra su fondo en algún tema. Sugiere un token legible en todos los temas |
