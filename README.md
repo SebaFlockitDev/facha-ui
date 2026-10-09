@@ -123,4 +123,4 @@ npm test
 
 ## Licencia
 
-Todavía no tiene licencia. El código es público para consultarlo, pero hasta que se defina una licencia no hay permiso para usarlo, copiarlo ni modificarlo.
+[MIT](LICENSE) © 2026 Sebastian Adrover.

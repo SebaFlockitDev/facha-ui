@@ -579,7 +579,7 @@ facha-ui/
 ├── docs/
 │   ├── prompts/                  # 01-spec.md, 02-mvp-plan.md, 03-variants.md
 │   └── uso.md                    # guía de uso
-├── SPEC.md · README.md          # sin LICENSE por ahora (ver B9)
+├── SPEC.md · README.md · LICENSE (MIT)
 ```
 
 #### 2.d.2 `.claude-plugin/plugin.json`
@@ -591,6 +591,7 @@ facha-ui/
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Flock" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
+  "license": "MIT",
   "keywords": ["design-system", "ui", "mcp", "tailwind", "react", "design-tokens"]
 }
 ```
@@ -1047,5 +1048,5 @@ Config completa para una app ficticia de pedidos en Next.js (App Router), con lo
 | B6 | Umbral ΔE 2,0 | Puede ser demasiado estricto o demasiado laxo | Configurable; calibrar con los fixtures y con proyectos reales |
 | B7 | Tokens de estado en el proyecto | La Prueba 1 puede revelar que faltan. ¿Se crean? | Decisión del equipo del proyecto, fuera de facha-ui; se registraría en `decisions.md` |
 | B8 | Nombre en npm | `facha-ui-mcp` es provisorio (el repo ya es `SebaFlockitDev/facha-ui`) | A confirmar antes de publicar en npm |
-| B9 | Licencia | El repo es público sin licencia (solo consulta); MIT era la propuesta | A definir |
+| B9 | Licencia | MIT, copyright Sebastian Adrover | Resuelto |
 | B10 | Capturas en monorepos | `CLAUDE_PROJECT_DIR` es la raíz del workspace (p. ej. `mi-repo/`), no la del proyecto (`web/`): las capturas quedarían en `<workspace>/.facha-ui/screenshots/` y los runs en `web/.facha-ui/runs/` | Spike T0: verificar si `browser_take_screenshot` acepta rutas absolutas dentro de los roots para guardarlo todo bajo el proyecto. Si no, se documenta y ambos `.facha-ui/` van al `.gitignore` |

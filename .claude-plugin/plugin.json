@@ -7,6 +7,7 @@
   },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
+  "license": "MIT",
   "keywords": [
     "design-system",
     "ui",
