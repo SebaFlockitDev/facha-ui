@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": {
-    "name": "Flock"
+    "name": "Sebastian Adrover"
   },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
   "repository": "https://github.com/SebaFlockitDev/facha-ui",

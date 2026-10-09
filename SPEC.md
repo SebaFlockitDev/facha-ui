@@ -589,7 +589,7 @@ facha-ui/
   "name": "facha-ui",
   "version": "0.1.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
-  "author": { "name": "Flock" },
+  "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
   "license": "MIT",
   "keywords": ["design-system", "ui", "mcp", "tailwind", "react", "design-tokens"]
@@ -603,7 +603,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "owner": { "name": "Flock" },
+  "owner": { "name": "Sebastian Adrover" },
   "plugins": [
     { "name": "facha-ui", "source": ".", "description": "Design-system-aware UI generation with a deterministic guardian." }
   ]
