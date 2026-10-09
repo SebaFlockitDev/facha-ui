@@ -7,7 +7,7 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 1. Instalar el plugin.
 2. Verificar que los servidores MCP conecten.
 3. Preparar el proyecto (raíz, config, `.gitignore`).
-4. Diagnosticar el design system y las violaciones.
+4. Diagnosticar el design system y las violaciones. Si faltan tokens, `/facha-ui:init` los propone desde lo que ya usás.
 5. `/facha-ui:variants <pantalla> "<objetivo>"` → revisar las 3 variantes.
 6. `/facha-ui:apply <slug> <a|b|c>` → aprobar el plan → revisar y commitear vos.
 
@@ -67,9 +67,9 @@ claude --plugin-dir "C:\ruta\a\facha-ui"
 
 ## 3. Verificar la instalación
 
-1. Abrí Claude Code **en la carpeta del frontend** (ver el paso 4.1 si es un monorepo).
+1. Abrí Claude Code en la carpeta del frontend o en la raíz del repo: si hay un solo frontend, facha-ui lo encuentra solo (paso 4.1).
 2. Corré `/mcp`. Tienen que aparecer dos servidores conectados:
-   - `plugin:facha-ui:facha-ui`, el guardián;
+   - `plugin:facha-ui:facha-ui`, el guardián, con 4 tools;
    - `plugin:facha-ui:playwright`, para las capturas. La primera vez tarda un poco más, porque descarga `@playwright/mcp@0.0.83`.
 3. Corré `/facha-ui:help`. Tiene que mostrar los comandos, las tools y los archivos del plugin. También podés pedir una sola sección: `/facha-ui:help variants`, `apply`, `init`, `tools` o `files`.
 4. Preguntale a Claude: *"¿qué design system tiene este proyecto?"*. Tiene que llamar a `get_design_system` y responder con los tokens, los temas y lo que falta.
@@ -226,7 +226,7 @@ Así se ve una corrida en la terminal. En este ejemplo, la brecha aparece antes 
 
 - **Variantes en el navegador:** `http://localhost:3000/lab/<slug>/<a|b|c>`. Para el tema oscuro, agregá `?theme=dark` (o el nombre del tema).
 - **Run:** `.facha-ui/runs/<slug>.json`, con hipótesis, intentos del guardián, decisiones con fuente, brechas y hallazgos.
-- **Capturas:** `.facha-ui/screenshots/`.
+- **Capturas:** `.facha-ui/screenshots/<slug>/`, con un archivo por variante y tema (por ejemplo `a-desktop-dark.png`).
 
 Las tres variantes del ejemplo, en `/lab/orders/<a|b|c>`:
 

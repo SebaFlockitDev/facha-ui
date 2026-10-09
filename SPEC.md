@@ -589,7 +589,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": { "name": "Sebastian Adrover" },
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -760,7 +760,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 | ID | Criterio | Verificación |
 |---|---|---|
 | MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project` y `scan_styles` (desde 0.2.0), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
-| MCP-2 | **Solo lectura:** las 3 tools y los 4 recursos funcionan sobre un fixture con permisos de solo lectura, y el árbol queda idéntico (hash) después de correrlos | [auto] |
+| MCP-2 | **Solo lectura:** las tools (3 en 0.1.0, 4 desde 0.2.0) y los 4 recursos funcionan sobre un fixture con permisos de solo lectura, y el árbol queda idéntico (hash) después de correrlos | [auto] |
 | MCP-3 | **Sin red ni procesos:** el bundle no referencia `child_process`, `net`, `http`, `https`, `dgram`, `fetch` ni APIs de escritura de `fs` | [auto] análisis del bundle + ESLint |
 | MCP-4 | **Determinismo:** dos ejecuciones con la misma entrada producen JSON idéntico byte a byte | [auto] |
 | MCP-5 | **Confinamiento:** `check_ui("../x")`, una ruta absoluta externa y un symlink que escapa devuelven `PATH_OUTSIDE_PROJECT` | [auto] |
@@ -875,7 +875,7 @@ El SPEC v0.1 (§1–§6) está aprobado como **visión**. Esta sección define e
   - `preview.baseUrl`.
   
   Sin config, se autodetecta.
-- **Raíz:** `--root` apunta **directo** al proyecto frontend (la carpeta del `package.json`). No hay descubrimiento de proyectos, `MULTIPLE_PROJECTS` ni `roots/list`. Las rutas relativas se resuelven contra la raíz y, si no existen, contra su carpeta padre, siempre confinadas a la raíz. Así funciona, por ejemplo, `web/app/orders/page.tsx` cuando Claude Code está abierto en la raíz de un monorepo.
+- **Raíz:** `--root` apunta **directo** al proyecto frontend (la carpeta del `package.json`). No hay descubrimiento de proyectos, `MULTIPLE_PROJECTS` ni `roots/list` (el descubrimiento y `MULTIPLE_PROJECTS` llegan en 0.2.0, §7.10). Las rutas relativas se resuelven contra la raíz y, si no existen, contra su carpeta padre, siempre confinadas a la raíz. Así funciona, por ejemplo, `web/app/orders/page.tsx` cuando Claude Code está abierto en la raíz de un monorepo.
 - **Adapters:** tokens `css-custom-properties` (postcss); fuentes `jsx` (Babel) y `css`; framework solo `next-app`.
 - **Reglas:** `color-literal`, `tailwind-arbitrary-value`, `unknown-token` e `inline-style`, con las severidades de §2.a.4. La sugerencia es `exact`/`nearest`/`none`, con compatibilidad de rol (§2.a.3).
 - **`health`:** contraste token a token (no por uso). Se evalúan los tokens con rol de texto y los tokens que el proyecto usa en la propiedad `color`, contra los tokens de superficie, en cada tema. Así aparecen los títulos invisibles en dark (p. ej. un `--color-title` oscuro que no cambia entre temas).
@@ -942,7 +942,7 @@ Compatibilidad (B3), probada con un prototipo descartable: SDK 1.32.1 + zod 4.6.
 3. `CLAUDE_PROJECT_DIR`;
 4. cwd.
 
-`FACHA_UI_ROOT` es la salida explícita para monorepos sin descubrimiento automático. Por ejemplo, si Claude Code se abre en la raíz de un monorepo con el frontend en `web/`, alcanza con `FACHA_UI_ROOT=web`. Abrirlo directamente en `web/` también funciona.
+`FACHA_UI_ROOT` es la salida explícita para monorepos sin descubrimiento automático. Por ejemplo, si Claude Code se abre en la raíz de un monorepo con el frontend en `web/`, alcanza con `FACHA_UI_ROOT=web`. Abrirlo directamente en `web/` también funciona. Desde 0.2.0, con un solo frontend debajo de la carpeta abierta ya no hace falta: se descubre solo (§7.10).
 
 ### 7.5 Decisiones de implementación de T1
 
@@ -1079,4 +1079,4 @@ Config completa para una app ficticia de pedidos en Next.js (App Router), con lo
 | B7 | Tokens de estado en el proyecto | La Prueba 1 puede revelar que faltan. ¿Se crean? | Decisión del equipo del proyecto, fuera de facha-ui; se registraría en `decisions.md` |
 | B8 | Nombre en npm | `facha-ui-mcp` es provisorio (el repo ya es `SebaFlockitDev/facha-ui`) | A confirmar antes de publicar en npm |
 | B9 | Licencia | MIT, copyright Sebastian Adrover | Resuelto |
-| B10 | Capturas en monorepos | `CLAUDE_PROJECT_DIR` es la raíz del workspace (p. ej. `mi-repo/`), no la del proyecto (`web/`): las capturas quedarían en `<workspace>/.facha-ui/screenshots/` y los runs en `web/.facha-ui/runs/` | Spike T0: verificar si `browser_take_screenshot` acepta rutas absolutas dentro de los roots para guardarlo todo bajo el proyecto. Si no, se documenta y ambos `.facha-ui/` van al `.gitignore` |
+| B10 | Capturas en monorepos | `CLAUDE_PROJECT_DIR` es la raíz del workspace (p. ej. `mi-repo/`), no la del proyecto (`web/`): las capturas quedarían en `<workspace>/.facha-ui/screenshots/` y los runs en `web/.facha-ui/runs/` | Resuelto en 0.2.0 (§7.10): Playwright resuelve los nombres explícitos contra el workspace, así que la skill guarda en `project.screenshotsDir` (relativo al workspace) y las capturas quedan en `web/.facha-ui/screenshots/`. En la raíz solo queda `.facha-ui/playwright/` con archivos automáticos, para el `.gitignore` |
