@@ -359,7 +359,7 @@ var require_scan = __commonJS({
       const tokens = [];
       const parts = [];
       let str = input2;
-      let index = -1;
+      let index2 = -1;
       let start = 0;
       let lastIndex = 0;
       let isBrace = false;
@@ -376,13 +376,13 @@ var require_scan = __commonJS({
       let prev;
       let code2;
       let token = { value: "", depth: 0, isGlob: false };
-      const eos = () => index >= length;
-      const peek = () => str.charCodeAt(index + 1);
+      const eos = () => index2 >= length;
+      const peek = () => str.charCodeAt(index2 + 1);
       const advance = () => {
         prev = code2;
-        return str.charCodeAt(++index);
+        return str.charCodeAt(++index2);
       };
-      while (index < length) {
+      while (index2 < length) {
         code2 = advance();
         let next;
         if (code2 === CHAR_BACKWARD_SLASH) {
@@ -439,15 +439,15 @@ var require_scan = __commonJS({
           break;
         }
         if (code2 === CHAR_FORWARD_SLASH) {
-          slashes.push(index);
+          slashes.push(index2);
           tokens.push(token);
           token = { value: "", depth: 0, isGlob: false };
           if (finished === true) continue;
-          if (prev === CHAR_DOT && index === start + 1) {
+          if (prev === CHAR_DOT && index2 === start + 1) {
             start += 2;
             continue;
           }
-          lastIndex = index + 1;
+          lastIndex = index2 + 1;
           continue;
         }
         if (opts.noext !== true) {
@@ -456,7 +456,7 @@ var require_scan = __commonJS({
             isGlob = token.isGlob = true;
             isExtglob = token.isExtglob = true;
             finished = true;
-            if (code2 === CHAR_EXCLAMATION_MARK && index === start) {
+            if (code2 === CHAR_EXCLAMATION_MARK && index2 === start) {
               negatedExtglob = true;
             }
             if (scanToEnd === true) {
@@ -517,7 +517,7 @@ var require_scan = __commonJS({
           }
           break;
         }
-        if (opts.nonegate !== true && code2 === CHAR_EXCLAMATION_MARK && index === start) {
+        if (opts.nonegate !== true && code2 === CHAR_EXCLAMATION_MARK && index2 === start) {
           negated = token.negated = true;
           start++;
           continue;
@@ -827,10 +827,10 @@ var require_parse = __commonJS({
       return `${source}*`;
     };
     var getStarExtglobSequenceChars = (pattern) => {
-      let index = 0;
+      let index2 = 0;
       const chars = [];
-      while (index < pattern.length) {
-        const match = parseRepeatedExtglob(pattern.slice(index), false);
+      while (index2 < pattern.length) {
+        const match = parseRepeatedExtglob(pattern.slice(index2), false);
         if (!match || match.type !== "*") {
           return;
         }
@@ -843,7 +843,7 @@ var require_parse = __commonJS({
           return;
         }
         chars.push(branch);
-        index += match.end + 1;
+        index2 += match.end + 1;
       }
       if (chars.length < 1) {
         return;
@@ -1079,7 +1079,7 @@ var require_parse = __commonJS({
       };
       if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input2)) {
         let backslashes = false;
-        let output2 = input2.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc2, chars, first, rest, index) => {
+        let output2 = input2.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc2, chars, first, rest, index2) => {
           if (first === "\\") {
             backslashes = true;
             return m;
@@ -1088,7 +1088,7 @@ var require_parse = __commonJS({
             if (esc2) {
               return esc2 + first + (rest ? QMARK.repeat(rest.length) : "");
             }
-            if (index === 0) {
+            if (index2 === 0) {
               return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
             }
             return QMARK.repeat(chars.length);
@@ -8990,16 +8990,16 @@ var require_picocolors = __commonJS({
     var env = p4.env || {};
     var isColorSupported = !(!!env.NO_COLOR || argv.includes("--no-color")) && (!!env.FORCE_COLOR || argv.includes("--color") || p4.platform === "win32" || (p4.stdout || {}).isTTY && env.TERM !== "dumb" || !!env.CI);
     var formatter = (open2, close, replace = open2) => (input2) => {
-      let string4 = "" + input2, index = string4.indexOf(close, open2.length);
-      return ~index ? open2 + replaceClose(string4, close, replace, index) + close : open2 + string4 + close;
+      let string4 = "" + input2, index2 = string4.indexOf(close, open2.length);
+      return ~index2 ? open2 + replaceClose(string4, close, replace, index2) + close : open2 + string4 + close;
     };
-    var replaceClose = (string4, close, replace, index) => {
+    var replaceClose = (string4, close, replace, index2) => {
       let result = "", cursor = 0;
       do {
-        result += string4.substring(cursor, index) + replace;
-        cursor = index + close.length;
-        index = string4.indexOf(close, cursor);
-      } while (~index);
+        result += string4.substring(cursor, index2) + replace;
+        cursor = index2 + close.length;
+        index2 = string4.indexOf(close, cursor);
+      } while (~index2);
       return result + string4.substring(cursor);
     };
     var createColors = (enabled = isColorSupported) => {
@@ -9398,8 +9398,8 @@ var require_css_syntax_error = __commonJS({
         let start = Math.max(this.line - 3, 0);
         let end = Math.min(this.line + 2, lines.length);
         let maxWidth = String(end).length;
-        return lines.slice(start, end).map((line, index) => {
-          let number4 = start + 1 + index;
+        return lines.slice(start, end).map((line, index2) => {
+          let number4 = start + 1 + index2;
           let gutter = " " + (" " + number4).slice(-maxWidth) + " | ";
           if (number4 === this.line) {
             if (line.length > 160) {
@@ -10062,8 +10062,8 @@ var require_node = __commonJS({
       }
       next() {
         if (!this.parent) return void 0;
-        let index = this.parent.index(this);
-        return this.parent.nodes[index + 1];
+        let index2 = this.parent.index(this);
+        return this.parent.nodes[index2 + 1];
       }
       positionBy(opts = {}) {
         let inputString = "document" in this.source.input ? this.source.input.document : this.source.input.css;
@@ -10079,17 +10079,17 @@ var require_node = __commonJS({
             sourceOffset(inputString, this.source.start),
             sourceOffset(inputString, this.source.end)
           );
-          let index = stringRepresentation.indexOf(opts.word);
-          if (index !== -1) pos = this.positionInside(index);
+          let index2 = stringRepresentation.indexOf(opts.word);
+          if (index2 !== -1) pos = this.positionInside(index2);
         }
         return pos;
       }
-      positionInside(index) {
+      positionInside(index2) {
         let column = this.source.start.column;
         let line = this.source.start.line;
         let inputString = "document" in this.source.input ? this.source.input.document : this.source.input.css;
         let offset = sourceOffset(inputString, this.source.start);
-        let end = offset + index;
+        let end = offset + index2;
         for (let i = offset; i < end; i++) {
           if (inputString[i] === "\n") {
             column = 1;
@@ -10102,8 +10102,8 @@ var require_node = __commonJS({
       }
       prev() {
         if (!this.parent) return void 0;
-        let index = this.parent.index(this);
-        return this.parent.nodes[index - 1];
+        let index2 = this.parent.index(this);
+        return this.parent.nodes[index2 - 1];
       }
       rangeBy(opts = {}) {
         let inputString = "document" in this.source.input ? this.source.input.document : this.source.input.css;
@@ -10134,10 +10134,10 @@ var require_node = __commonJS({
             sourceOffset(inputString, this.source.start),
             sourceOffset(inputString, this.source.end)
           );
-          let index = stringRepresentation.indexOf(opts.word);
-          if (index !== -1) {
-            start = this.positionInside(index);
-            end = this.positionInside(index + opts.word.length);
+          let index2 = stringRepresentation.indexOf(opts.word);
+          if (index2 !== -1) {
+            start = this.positionInside(index2);
+            end = this.positionInside(index2 + opts.word.length);
           }
         } else {
           if (opts.start) {
@@ -10398,10 +10398,10 @@ var require_container = __commonJS({
       each(callback) {
         if (!this.proxyOf.nodes) return void 0;
         let iterator = this.getIterator();
-        let index, result;
+        let index2, result;
         while (this.indexes[iterator] < this.proxyOf.nodes.length) {
-          index = this.indexes[iterator];
-          result = callback(this.proxyOf.nodes[index], index);
+          index2 = this.indexes[iterator];
+          result = callback(this.proxyOf.nodes[index2], index2);
           if (result === false) break;
           this.indexes[iterator] += 1;
         }
@@ -10431,7 +10431,7 @@ var require_container = __commonJS({
                 return node2[prop](
                   ...args.map((i) => {
                     if (typeof i === "function") {
-                      return (child, index) => i(child.toProxy(), index);
+                      return (child, index2) => i(child.toProxy(), index2);
                     } else {
                       return i;
                     }
@@ -10474,11 +10474,11 @@ var require_container = __commonJS({
         let nodes = this.normalize(add, this.proxyOf.nodes[existIndex]).reverse();
         existIndex = this.index(exist);
         for (let node2 of nodes) this.proxyOf.nodes.splice(existIndex + 1, 0, node2);
-        let index;
+        let index2;
         for (let id in this.indexes) {
-          index = this.indexes[id];
-          if (existIndex < index) {
-            this.indexes[id] = index + nodes.length;
+          index2 = this.indexes[id];
+          if (existIndex < index2) {
+            this.indexes[id] = index2 + nodes.length;
           }
         }
         this.markDirty();
@@ -10494,11 +10494,11 @@ var require_container = __commonJS({
         ).reverse();
         existIndex = this.index(exist);
         for (let node2 of nodes) this.proxyOf.nodes.splice(existIndex, 0, node2);
-        let index;
+        let index2;
         for (let id in this.indexes) {
-          index = this.indexes[id];
-          if (existIndex <= index) {
-            this.indexes[id] = index + nodes.length;
+          index2 = this.indexes[id];
+          if (existIndex <= index2) {
+            this.indexes[id] = index2 + nodes.length;
           }
         }
         this.markDirty();
@@ -10580,11 +10580,11 @@ var require_container = __commonJS({
         child = this.index(child);
         this.proxyOf.nodes[child].parent = void 0;
         this.proxyOf.nodes.splice(child, 1);
-        let index;
+        let index2;
         for (let id in this.indexes) {
-          index = this.indexes[id];
-          if (index >= child) {
-            this.indexes[id] = index - 1;
+          index2 = this.indexes[id];
+          if (index2 >= child) {
+            this.indexes[id] = index2 - 1;
           }
         }
         this.markDirty();
@@ -10611,18 +10611,18 @@ var require_container = __commonJS({
         let stack = [{ iterator: this.getIterator(), node: this.proxyOf }];
         while (stack.length > 0) {
           let { iterator, node: node2 } = stack[stack.length - 1];
-          let index = node2.indexes[iterator];
-          if (index >= node2.proxyOf.nodes.length) {
+          let index2 = node2.indexes[iterator];
+          if (index2 >= node2.proxyOf.nodes.length) {
             delete node2.indexes[iterator];
             stack.pop();
             let parent = stack[stack.length - 1];
             if (parent) parent.node.indexes[parent.iterator] += 1;
             continue;
           }
-          let child = node2.proxyOf.nodes[index];
+          let child = node2.proxyOf.nodes[index2];
           let result;
           try {
-            result = callback(child, index);
+            result = callback(child, index2);
           } catch (e4) {
             throw child.addToError(e4);
           }
@@ -11097,11 +11097,11 @@ var require_util2 = __commonJS({
       aRoot = aRoot.replace(/\/$/, "");
       var level = 0;
       while (aPath.indexOf(aRoot + "/") !== 0) {
-        var index = aRoot.lastIndexOf("/");
-        if (index < 0) {
+        var index2 = aRoot.lastIndexOf("/");
+        if (index2 < 0) {
           return aPath;
         }
-        aRoot = aRoot.slice(0, index);
+        aRoot = aRoot.slice(0, index2);
         if (aRoot.match(/^([^\/]+:\/)?\/*$/)) {
           return aPath;
         }
@@ -11295,9 +11295,9 @@ var require_util2 = __commonJS({
           throw new Error("sourceMapURL could not be parsed");
         }
         if (parsed.path) {
-          var index = parsed.path.lastIndexOf("/");
-          if (index >= 0) {
-            parsed.path = parsed.path.substring(0, index + 1);
+          var index2 = parsed.path.lastIndexOf("/");
+          if (index2 >= 0) {
+            parsed.path = parsed.path.substring(0, index2 + 1);
           }
         }
         sourceURL = join(urlGenerate(parsed), sourceURL);
@@ -11743,7 +11743,7 @@ var require_binary_search = __commonJS({
       if (aHaystack.length === 0) {
         return -1;
       }
-      var index = recursiveSearch(
+      var index2 = recursiveSearch(
         -1,
         aHaystack.length,
         aNeedle,
@@ -11751,16 +11751,16 @@ var require_binary_search = __commonJS({
         aCompare,
         aBias || exports.GREATEST_LOWER_BOUND
       );
-      if (index < 0) {
+      if (index2 < 0) {
         return -1;
       }
-      while (index - 1 >= 0) {
-        if (aCompare(aHaystack[index], aHaystack[index - 1], true) !== 0) {
+      while (index2 - 1 >= 0) {
+        if (aCompare(aHaystack[index2], aHaystack[index2 - 1], true) !== 0) {
           break;
         }
-        --index;
+        --index2;
       }
-      return index;
+      return index2;
     };
   }
 });
@@ -11864,8 +11864,8 @@ var require_source_map_consumer = __commonJS({
         return this.__originalMappings;
       }
     });
-    SourceMapConsumer.prototype._charIsMappingSeparator = function SourceMapConsumer_charIsMappingSeparator(aStr, index) {
-      var c2 = aStr.charAt(index);
+    SourceMapConsumer.prototype._charIsMappingSeparator = function SourceMapConsumer_charIsMappingSeparator(aStr, index2) {
+      var c2 = aStr.charAt(index2);
       return c2 === ";" || c2 === ",";
     };
     SourceMapConsumer.prototype._parseMappings = function SourceMapConsumer_parseMappings(aStr, aSourceRoot) {
@@ -11922,7 +11922,7 @@ var require_source_map_consumer = __commonJS({
         return [];
       }
       var mappings = [];
-      var index = this._findMapping(
+      var index2 = this._findMapping(
         needle,
         this._originalMappings,
         "originalLine",
@@ -11930,8 +11930,8 @@ var require_source_map_consumer = __commonJS({
         util2.compareByOriginalPositions,
         binarySearch.LEAST_UPPER_BOUND
       );
-      if (index >= 0) {
-        var mapping = this._originalMappings[index];
+      if (index2 >= 0) {
+        var mapping = this._originalMappings[index2];
         if (aArgs.column === void 0) {
           var originalLine = mapping.originalLine;
           while (mapping && mapping.originalLine === originalLine) {
@@ -11940,7 +11940,7 @@ var require_source_map_consumer = __commonJS({
               column: util2.getArg(mapping, "generatedColumn", null),
               lastColumn: util2.getArg(mapping, "lastGeneratedColumn", null)
             });
-            mapping = this._originalMappings[++index];
+            mapping = this._originalMappings[++index2];
           }
         } else {
           var originalColumn = mapping.originalColumn;
@@ -11950,7 +11950,7 @@ var require_source_map_consumer = __commonJS({
               column: util2.getArg(mapping, "generatedColumn", null),
               lastColumn: util2.getArg(mapping, "lastGeneratedColumn", null)
             });
-            mapping = this._originalMappings[++index];
+            mapping = this._originalMappings[++index2];
           }
         }
       }
@@ -12094,36 +12094,36 @@ var require_source_map_consumer = __commonJS({
       var previousSource = 0;
       var previousName = 0;
       var length = aStr.length;
-      var index = 0;
+      var index2 = 0;
       var cachedSegments = {};
       var temp = {};
       var originalMappings = [];
       var generatedMappings = [];
       var mapping, str, segment, end, value;
       let subarrayStart = 0;
-      while (index < length) {
-        if (aStr.charAt(index) === ";") {
+      while (index2 < length) {
+        if (aStr.charAt(index2) === ";") {
           generatedLine++;
-          index++;
+          index2++;
           previousGeneratedColumn = 0;
           sortGenerated(generatedMappings, subarrayStart);
           subarrayStart = generatedMappings.length;
-        } else if (aStr.charAt(index) === ",") {
-          index++;
+        } else if (aStr.charAt(index2) === ",") {
+          index2++;
         } else {
           mapping = new Mapping();
           mapping.generatedLine = generatedLine;
-          for (end = index; end < length; end++) {
+          for (end = index2; end < length; end++) {
             if (this._charIsMappingSeparator(aStr, end)) {
               break;
             }
           }
-          str = aStr.slice(index, end);
+          str = aStr.slice(index2, end);
           segment = [];
-          while (index < end) {
-            base64VLQ.decode(aStr, index, temp);
+          while (index2 < end) {
+            base64VLQ.decode(aStr, index2, temp);
             value = temp.value;
-            index = temp.rest;
+            index2 = temp.rest;
             segment.push(value);
           }
           if (segment.length === 2) {
@@ -12179,10 +12179,10 @@ var require_source_map_consumer = __commonJS({
       return binarySearch.search(aNeedle, aMappings, aComparator, aBias);
     };
     BasicSourceMapConsumer.prototype.computeColumnSpans = function SourceMapConsumer_computeColumnSpans() {
-      for (var index = 0; index < this._generatedMappings.length; ++index) {
-        var mapping = this._generatedMappings[index];
-        if (index + 1 < this._generatedMappings.length) {
-          var nextMapping = this._generatedMappings[index + 1];
+      for (var index2 = 0; index2 < this._generatedMappings.length; ++index2) {
+        var mapping = this._generatedMappings[index2];
+        if (index2 + 1 < this._generatedMappings.length) {
+          var nextMapping = this._generatedMappings[index2 + 1];
           if (mapping.generatedLine === nextMapping.generatedLine) {
             mapping.lastGeneratedColumn = nextMapping.generatedColumn - 1;
             continue;
@@ -12196,7 +12196,7 @@ var require_source_map_consumer = __commonJS({
         generatedLine: util2.getArg(aArgs, "line"),
         generatedColumn: util2.getArg(aArgs, "column")
       };
-      var index = this._findMapping(
+      var index2 = this._findMapping(
         needle,
         this._generatedMappings,
         "generatedLine",
@@ -12204,8 +12204,8 @@ var require_source_map_consumer = __commonJS({
         util2.compareByGeneratedPositionsDeflated,
         util2.getArg(aArgs, "bias", SourceMapConsumer.GREATEST_LOWER_BOUND)
       );
-      if (index >= 0) {
-        var mapping = this._generatedMappings[index];
+      if (index2 >= 0) {
+        var mapping = this._generatedMappings[index2];
         if (mapping.generatedLine === needle.generatedLine) {
           var source = util2.getArg(mapping, "source", null);
           if (source !== null) {
@@ -12243,9 +12243,9 @@ var require_source_map_consumer = __commonJS({
       if (!this.sourcesContent) {
         return null;
       }
-      var index = this._findSourceIndex(aSource);
-      if (index >= 0) {
-        return this.sourcesContent[index];
+      var index2 = this._findSourceIndex(aSource);
+      if (index2 >= 0) {
+        return this.sourcesContent[index2];
       }
       var relativeSource = aSource;
       if (this.sourceRoot != null) {
@@ -12282,7 +12282,7 @@ var require_source_map_consumer = __commonJS({
         originalLine: util2.getArg(aArgs, "line"),
         originalColumn: util2.getArg(aArgs, "column")
       };
-      var index = this._findMapping(
+      var index2 = this._findMapping(
         needle,
         this._originalMappings,
         "originalLine",
@@ -12290,8 +12290,8 @@ var require_source_map_consumer = __commonJS({
         util2.compareByOriginalPositions,
         util2.getArg(aArgs, "bias", SourceMapConsumer.GREATEST_LOWER_BOUND)
       );
-      if (index >= 0) {
-        var mapping = this._originalMappings[index];
+      if (index2 >= 0) {
+        var mapping = this._originalMappings[index2];
         if (mapping.source === needle.source) {
           return {
             line: util2.getArg(mapping, "generatedLine", null),
@@ -13049,8 +13049,8 @@ var require_input = __commonJS({
       }
       fromLineAndColumn(line, column) {
         let lineToIndex = getLineToIndex(this);
-        let index = lineToIndex[line - 1];
-        return index + column - 1;
+        let index2 = lineToIndex[line - 1];
+        return index2 + column - 1;
       }
       fromOffset(offset) {
         let lineToIndex = getLineToIndex(this);
@@ -13187,9 +13187,9 @@ var require_root = __commonJS({
         return nodes;
       }
       removeChild(child, ignore) {
-        let index = this.index(child);
-        if (!ignore && index === 0 && this.nodes.length > 1) {
-          this.nodes[1].raws.before = this.nodes[index].raws.before;
+        let index2 = this.index(child);
+        if (!ignore && index2 === 0 && this.nodes.length > 1) {
+          this.nodes[1].raws.before = this.nodes[index2].raws.before;
         }
         return super.removeChild(child);
       }
@@ -18545,11 +18545,11 @@ var $ZodDate = /* @__PURE__ */ $constructor("$ZodDate", (inst, def) => {
     return payload;
   };
 });
-function handleArrayResult(result, final, index) {
+function handleArrayResult(result, final, index2) {
   if (result.issues.length) {
-    final.issues.push(...prefixIssues(index, result.issues));
+    final.issues.push(...prefixIssues(index2, result.issues));
   }
-  final.value[index] = result.value;
+  final.value[index2] = result.value;
 }
 var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
   $ZodType.init(inst, def);
@@ -19160,14 +19160,14 @@ function mergeValues(a, b) {
       return { valid: false, mergeErrorPath: [] };
     }
     const newArray = [];
-    for (let index = 0; index < a.length; index++) {
-      const itemA = a[index];
-      const itemB = b[index];
+    for (let index2 = 0; index2 < a.length; index2++) {
+      const itemA = a[index2];
+      const itemB = b[index2];
       const sharedValue = mergeValues(itemA, itemB);
       if (!sharedValue.valid) {
         return {
           valid: false,
-          mergeErrorPath: [index, ...sharedValue.mergeErrorPath]
+          mergeErrorPath: [index2, ...sharedValue.mergeErrorPath]
         };
       }
       newArray.push(sharedValue.data);
@@ -19318,11 +19318,11 @@ function getTupleOptStart(items, key) {
   }
   return 0;
 }
-function handleTupleResult(result, final, index) {
+function handleTupleResult(result, final, index2) {
   if (result.issues.length) {
-    final.issues.push(...prefixIssues(index, result.issues));
+    final.issues.push(...prefixIssues(index2, result.issues));
   }
-  final.value[index] = result.value;
+  final.value[index2] = result.value;
 }
 function handleTupleResults(itemResults, final, items, input2, optoutStart) {
   for (let i = 0; i < items.length; i++) {
@@ -34003,7 +34003,7 @@ function detectVersion(schema, defaultTarget) {
   return defaultTarget ?? "draft-2020-12";
 }
 function applyMinItems(items, minItems) {
-  return items.map((item, index) => index < minItems ? item : item.optional());
+  return items.map((item, index2) => index2 < minItems ? item : item.optional());
 }
 function decodeJSONPointerSegment(segment) {
   return segment.replace(/~1/g, "/").replace(/~0/g, "~");
@@ -36416,12 +36416,12 @@ var ReadBuffer = class {
     if (!this._buffer) {
       return null;
     }
-    const index = this._buffer.indexOf("\n");
-    if (index === -1) {
+    const index2 = this._buffer.indexOf("\n");
+    if (index2 === -1) {
       return null;
     }
-    const line = this._buffer.toString("utf8", 0, index).replace(/\r$/, "");
-    this._buffer = this._buffer.subarray(index + 1);
+    const line = this._buffer.toString("utf8", 0, index2).replace(/\r$/, "");
+    this._buffer = this._buffer.subarray(index2 + 1);
     return deserializeMessage(line);
   }
   clear() {
@@ -36516,7 +36516,10 @@ var RULE_IDS = [
   "color-literal",
   "tailwind-arbitrary-value",
   "unknown-token",
-  "inline-style"
+  "inline-style",
+  "theme-contrast",
+  "class-contrast",
+  "non-text-contrast"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36548,7 +36551,11 @@ var ConfigSchema = external_exports.object({
   allow: external_exports.object({ literals: external_exports.array(external_exports.string()).default([]) }).strict().optional(),
   contrast: external_exports.object({
     surfaces: external_exports.array(external_exports.string().regex(/^--/)).optional(),
-    minRatio: external_exports.number().min(1).max(21).default(4.5)
+    minRatio: external_exports.number().min(1).max(21).default(4.5),
+    /** WCAG 1.4.11: borders, focus rings and icons of interactive parts. */
+    nonTextMinRatio: external_exports.number().min(1).max(21).default(3),
+    /** Minimum OKLab ΔE (×100) between status colors, also under simulated deuteranopia/protanopia. */
+    statusMinDeltaE: external_exports.number().positive().default(10)
   }).strict().optional(),
   guidelines: external_exports.array(external_exports.string()).default([]),
   lab: external_exports.object({
@@ -39284,10 +39291,10 @@ var ZodObject2 = class _ZodObject extends ZodType2 {
   //   }) as any;
   //   return merged;
   // }
-  catchall(index) {
+  catchall(index2) {
     return new _ZodObject({
       ...this._def,
-      catchall: index
+      catchall: index2
     });
   }
   pick(mask) {
@@ -39609,9 +39616,9 @@ function mergeValues2(a, b) {
       return { valid: false };
     }
     const newArray = [];
-    for (let index = 0; index < a.length; index++) {
-      const itemA = a[index];
-      const itemB = b[index];
+    for (let index2 = 0; index2 < a.length; index2++) {
+      const itemA = a[index2];
+      const itemB = b[index2];
       const sharedValue = mergeValues2(itemA, itemB);
       if (!sharedValue.valid) {
         return { valid: false };
@@ -39817,10 +39824,10 @@ var ZodMap2 = class extends ZodType2 {
     }
     const keyType = this._def.keyType;
     const valueType = this._def.valueType;
-    const pairs = [...ctx.data.entries()].map(([key, value], index) => {
+    const pairs = [...ctx.data.entries()].map(([key, value], index2) => {
       return {
-        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index, "key"])),
-        value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"]))
+        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index2, "key"])),
+        value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index2, "value"]))
       };
     });
     if (ctx.common.async) {
@@ -40833,8 +40840,8 @@ function getDotPath(path7) {
   if (path7.length === 0) {
     return "object root";
   }
-  return path7.reduce((acc, seg, index) => {
-    if (index === 0) {
+  return path7.reduce((acc, seg, index2) => {
+    if (index2 === 0) {
       return String(seg);
     }
     if (typeof seg === "number") {
@@ -42114,7 +42121,7 @@ var get$ref = (item, refs) => {
       return { $ref: getRelativePath(refs.currentPath, item.path) };
     case "none":
     case "seen": {
-      if (item.path.length < refs.currentPath.length && item.path.every((value, index) => refs.currentPath[index] === value)) {
+      if (item.path.length < refs.currentPath.length && item.path.every((value, index2) => refs.currentPath[index2] === value)) {
         console.warn(`Recursive reference detected at ${refs.currentPath.join("/")}! Defaulting to any`);
         return parseAnyDef(refs);
       }
@@ -43538,7 +43545,7 @@ var Server = class extends Protocol {
     super(options);
     this._serverInfo = _serverInfo;
     this._loggingLevels = /* @__PURE__ */ new Map();
-    this.LOG_LEVEL_SEVERITY = new Map(LoggingLevelSchema.options.map((level, index) => [level, index]));
+    this.LOG_LEVEL_SEVERITY = new Map(LoggingLevelSchema.options.map((level, index2) => [level, index2]));
     this.isMessageIgnored = (level, sessionId) => {
       const currentLevel = this._loggingLevels.get(sessionId);
       return currentLevel ? this.LOG_LEVEL_SEVERITY.get(level) < this.LOG_LEVEL_SEVERITY.get(currentLevel) : false;
@@ -43943,7 +43950,7 @@ function validateToolName(name) {
     warnings.push("Tool name starts or ends with a dot, which may cause parsing issues in some contexts");
   }
   if (!TOOL_NAME_REGEX.test(name)) {
-    const invalidChars = name.split("").filter((char) => !/[A-Za-z0-9._-]/.test(char)).filter((char, index, arr) => arr.indexOf(char) === index);
+    const invalidChars = name.split("").filter((char) => !/[A-Za-z0-9._-]/.test(char)).filter((char, index2, arr) => arr.indexOf(char) === index2);
     warnings.push(`Tool name contains invalid characters: ${invalidChars.map((c2) => `"${c2}"`).join(", ")}`, "Allowed characters are: A-Z, a-z, 0-9, underscore (_), dash (-), and dot (.)");
     return {
       isValid: false,
@@ -45661,8 +45668,8 @@ var convertRgbToLrgb = ({ r: r2, g, b, alpha }) => {
 var convertRgbToLrgb_default = convertRgbToLrgb;
 
 // node_modules/culori/src/xyz65/convertRgbToXyz65.js
-var convertRgbToXyz65 = (rgb3) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb3);
+var convertRgbToXyz65 = (rgb4) => {
+  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
   let res = {
     mode: "xyz65",
     x: 0.4123907992659593 * r2 + 0.357584339383878 * g + 0.1804807884018343 * b,
@@ -45994,9 +46001,9 @@ var convertXyz65ToLab65 = ({ x, y, z: z2, alpha }) => {
 var convertXyz65ToLab65_default = convertXyz65ToLab65;
 
 // node_modules/culori/src/lab65/convertRgbToLab65.js
-var convertRgbToLab65 = (rgb3) => {
-  let res = convertXyz65ToLab65_default(convertRgbToXyz65_default(rgb3));
-  if (rgb3.r === rgb3.b && rgb3.b === rgb3.g) {
+var convertRgbToLab65 = (rgb4) => {
+  let res = convertXyz65ToLab65_default(convertRgbToXyz65_default(rgb4));
+  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -46755,9 +46762,9 @@ var convertJabToXyz65 = ({ j, a, b, alpha }) => {
 var convertJabToXyz65_default = convertJabToXyz65;
 
 // node_modules/culori/src/jab/convertRgbToJab.js
-var convertRgbToJab = (rgb3) => {
-  let res = convertXyz65ToJab_default(convertRgbToXyz65_default(rgb3));
-  if (rgb3.r === rgb3.b && rgb3.b === rgb3.g) {
+var convertRgbToJab = (rgb4) => {
+  let res = convertXyz65ToJab_default(convertRgbToXyz65_default(rgb4));
+  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -46912,8 +46919,8 @@ var convertLabToRgb = (lab2) => convertXyz50ToRgb_default(convertLabToXyz50_defa
 var convertLabToRgb_default = convertLabToRgb;
 
 // node_modules/culori/src/xyz50/convertRgbToXyz50.js
-var convertRgbToXyz50 = (rgb3) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb3);
+var convertRgbToXyz50 = (rgb4) => {
+  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
   let res = {
     mode: "xyz50",
     x: 0.436065742824811 * r2 + 0.3851514688337912 * g + 0.14307845442264197 * b,
@@ -46950,9 +46957,9 @@ var convertXyz50ToLab = ({ x, y, z: z2, alpha }) => {
 var convertXyz50ToLab_default = convertXyz50ToLab;
 
 // node_modules/culori/src/lab/convertRgbToLab.js
-var convertRgbToLab = (rgb3) => {
-  let res = convertXyz50ToLab_default(convertRgbToXyz50_default(rgb3));
-  if (rgb3.r === rgb3.b && rgb3.b === rgb3.g) {
+var convertRgbToLab = (rgb4) => {
+  let res = convertXyz50ToLab_default(convertRgbToXyz50_default(rgb4));
+  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -47229,7 +47236,7 @@ var convertLuvToXyz50 = ({ l, u, v, alpha }) => {
 var convertLuvToXyz50_default = convertLuvToXyz50;
 
 // node_modules/culori/src/lchuv/definition.js
-var convertRgbToLchuv = (rgb3) => convertLuvToLchuv_default(convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb3)));
+var convertRgbToLchuv = (rgb4) => convertLuvToLchuv_default(convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb4)));
 var convertLchuvToRgb = (lchuv2) => convertXyz50ToRgb_default(convertLuvToXyz50_default(convertLchuvToLuv_default(lchuv2)));
 var definition17 = {
   mode: "lchuv",
@@ -47288,7 +47295,7 @@ var definition19 = {
   },
   fromMode: {
     xyz50: convertXyz50ToLuv_default,
-    rgb: (rgb3) => convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb3))
+    rgb: (rgb4) => convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb4))
   },
   channels: ["l", "u", "v", "alpha"],
   parse: ["--luv"],
@@ -47335,9 +47342,9 @@ var convertLrgbToOklab = ({ r: r2, g, b, alpha }) => {
 var convertLrgbToOklab_default = convertLrgbToOklab;
 
 // node_modules/culori/src/oklab/convertRgbToOklab.js
-var convertRgbToOklab = (rgb3) => {
-  let res = convertLrgbToOklab_default(convertRgbToLrgb_default(rgb3));
-  if (rgb3.r === rgb3.b && rgb3.b === rgb3.g) {
+var convertRgbToOklab = (rgb4) => {
+  let res = convertLrgbToOklab_default(convertRgbToLrgb_default(rgb4));
+  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -47438,8 +47445,8 @@ function compute_max_saturation(a, b) {
 }
 function find_cusp(a, b) {
   let S_cusp = compute_max_saturation(a, b);
-  let rgb3 = convertOklabToLrgb_default({ l: 1, a: S_cusp * a, b: S_cusp * b });
-  let L_cusp = Math.cbrt(1 / Math.max(rgb3.r, rgb3.g, rgb3.b));
+  let rgb4 = convertOklabToLrgb_default({ l: 1, a: S_cusp * a, b: S_cusp * b });
+  let L_cusp = Math.cbrt(1 / Math.max(rgb4.r, rgb4.g, rgb4.b));
   let C_cusp = L_cusp * S_cusp;
   return [L_cusp, C_cusp];
 }
@@ -47826,8 +47833,8 @@ var definition21 = {
 var definition_default21 = definition21;
 
 // node_modules/culori/src/p3/convertP3ToXyz65.js
-var convertP3ToXyz65 = (rgb3) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb3);
+var convertP3ToXyz65 = (rgb4) => {
+  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
   let res = {
     mode: "xyz65",
     x: 0.486570948648216 * r2 + 0.265667693169093 * g + 0.1982172852343625 * b,
@@ -48277,6 +48284,264 @@ var serializeHex8 = (color) => {
 var formatHex = (c2) => serializeHex(rgb(c2));
 var formatHex8 = (c2) => serializeHex8(rgb(c2));
 
+// node_modules/culori/src/deficiency.js
+var rgb2 = converter_default("rgb");
+var PROT = [
+  [1, 0, -0, 0, 1, 0, -0, -0, 1],
+  [
+    0.856167,
+    0.182038,
+    -0.038205,
+    0.029342,
+    0.955115,
+    0.015544,
+    -288e-5,
+    -1563e-6,
+    1.004443
+  ],
+  [
+    0.734766,
+    0.334872,
+    -0.069637,
+    0.05184,
+    0.919198,
+    0.028963,
+    -4928e-6,
+    -4209e-6,
+    1.009137
+  ],
+  [
+    0.630323,
+    0.465641,
+    -0.095964,
+    0.069181,
+    0.890046,
+    0.040773,
+    -6308e-6,
+    -7724e-6,
+    1.014032
+  ],
+  [
+    0.539009,
+    0.579343,
+    -0.118352,
+    0.082546,
+    0.866121,
+    0.051332,
+    -7136e-6,
+    -0.011959,
+    1.019095
+  ],
+  [
+    0.458064,
+    0.679578,
+    -0.137642,
+    0.092785,
+    0.846313,
+    0.060902,
+    -7494e-6,
+    -0.016807,
+    1.024301
+  ],
+  [
+    0.38545,
+    0.769005,
+    -0.154455,
+    0.100526,
+    0.829802,
+    0.069673,
+    -7442e-6,
+    -0.02219,
+    1.029632
+  ],
+  [
+    0.319627,
+    0.849633,
+    -0.169261,
+    0.106241,
+    0.815969,
+    0.07779,
+    -7025e-6,
+    -0.028051,
+    1.035076
+  ],
+  [
+    0.259411,
+    0.923008,
+    -0.18242,
+    0.110296,
+    0.80434,
+    0.085364,
+    -6276e-6,
+    -0.034346,
+    1.040622
+  ],
+  [
+    0.203876,
+    0.990338,
+    -0.194214,
+    0.112975,
+    0.794542,
+    0.092483,
+    -5222e-6,
+    -0.041043,
+    1.046265
+  ],
+  [
+    0.152286,
+    1.052583,
+    -0.204868,
+    0.114503,
+    0.786281,
+    0.099216,
+    -3882e-6,
+    -0.048116,
+    1.051998
+  ]
+];
+var DEUTER = [
+  [1, 0, -0, 0, 1, 0, -0, -0, 1],
+  [
+    0.866435,
+    0.177704,
+    -0.044139,
+    0.049567,
+    0.939063,
+    0.01137,
+    -3453e-6,
+    7233e-6,
+    0.99622
+  ],
+  [
+    0.760729,
+    0.319078,
+    -0.079807,
+    0.090568,
+    0.889315,
+    0.020117,
+    -6027e-6,
+    0.013325,
+    0.992702
+  ],
+  [
+    0.675425,
+    0.43385,
+    -0.109275,
+    0.125303,
+    0.847755,
+    0.026942,
+    -795e-5,
+    0.018572,
+    0.989378
+  ],
+  [
+    0.605511,
+    0.52856,
+    -0.134071,
+    0.155318,
+    0.812366,
+    0.032316,
+    -9376e-6,
+    0.023176,
+    0.9862
+  ],
+  [
+    0.547494,
+    0.607765,
+    -0.155259,
+    0.181692,
+    0.781742,
+    0.036566,
+    -0.01041,
+    0.027275,
+    0.983136
+  ],
+  [
+    0.498864,
+    0.674741,
+    -0.173604,
+    0.205199,
+    0.754872,
+    0.039929,
+    -0.011131,
+    0.030969,
+    0.980162
+  ],
+  [
+    0.457771,
+    0.731899,
+    -0.18967,
+    0.226409,
+    0.731012,
+    0.042579,
+    -0.011595,
+    0.034333,
+    0.977261
+  ],
+  [
+    0.422823,
+    0.781057,
+    -0.203881,
+    0.245752,
+    0.709602,
+    0.044646,
+    -0.011843,
+    0.037423,
+    0.974421
+  ],
+  [
+    0.392952,
+    0.82361,
+    -0.216562,
+    0.263559,
+    0.69021,
+    0.046232,
+    -0.01191,
+    0.040281,
+    0.97163
+  ],
+  [
+    0.367322,
+    0.860646,
+    -0.227968,
+    0.280085,
+    0.672501,
+    0.047413,
+    -0.01182,
+    0.04294,
+    0.968881
+  ]
+];
+var deficiency = (lut, t) => {
+  let tt2 = Math.max(0, Math.min(1, t));
+  let i = Math.round(tt2 / 0.1);
+  let w = Math.round(tt2 % 0.1);
+  let arr = lut[i];
+  if (w > 0 && i < lut.length - 1) {
+    let arr_2 = lut[i + 1];
+    arr = arr.map((v, idx) => lerp(arr[idx], arr_2[idx], w));
+  }
+  return (color) => {
+    let c2 = prepare_default(color);
+    if (c2 === void 0) {
+      return void 0;
+    }
+    let { r: r2, g, b } = rgb2(c2);
+    let ret = {
+      mode: "rgb",
+      r: arr[0] * r2 + arr[1] * g + arr[2] * b,
+      g: arr[3] * r2 + arr[4] * g + arr[5] * b,
+      b: arr[6] * r2 + arr[7] * g + arr[8] * b
+    };
+    if (c2.alpha !== void 0) {
+      ret.alpha = c2.alpha;
+    }
+    return converter_default(c2.mode)(ret);
+  };
+};
+var filterDeficiencyProt = (severity3 = 1) => deficiency(PROT, severity3);
+var filterDeficiencyDeuter = (severity3 = 1) => deficiency(DEUTER, severity3);
+
 // node_modules/culori/src/wcag.js
 function luminance(color) {
   let c2 = converter_default("lrgb")(color);
@@ -48314,7 +48579,7 @@ var oklch = useMode(definition_default21);
 var p3 = useMode(definition_default22);
 var prophoto = useMode(definition_default23);
 var rec2020 = useMode(definition_default24);
-var rgb2 = useMode(definition_default);
+var rgb3 = useMode(definition_default);
 var xyb = useMode(definition_default25);
 var xyz50 = useMode(definition_default26);
 var xyz65 = useMode(definition_default27);
@@ -48606,10 +48871,10 @@ function tokenColor(ts, name, theme) {
 
 // src/sources/usage.ts
 function makeLocAt(file2, startLine, startColumn, text) {
-  return (index) => {
+  return (index2) => {
     let line = startLine;
     let column = startColumn;
-    for (let i = 0; i < index && i < text.length; i++) {
+    for (let i = 0; i < index2 && i < text.length; i++) {
       if (text[i] === "\n") {
         line++;
         column = 1;
@@ -48654,13 +48919,13 @@ function extractCss(file2, code2, opts) {
 
 // node_modules/@babel/parser/lib/index.js
 var Position = class {
-  constructor(line, col, index) {
+  constructor(line, col, index2) {
     this.line = void 0;
     this.column = void 0;
-    if (index !== void 0) this.index = void 0;
+    if (index2 !== void 0) this.index = void 0;
     this.line = line;
     this.column = col;
-    if (index !== void 0) this.index = index;
+    if (index2 !== void 0) this.index = index2;
   }
 };
 var SourceLocation = class {
@@ -48677,9 +48942,9 @@ function createPositionWithColumnOffset(position, columnOffset) {
   const {
     line,
     column,
-    index
+    index: index2
   } = position;
-  return new Position(line, column + columnOffset, index + columnOffset);
+  return new Position(line, column + columnOffset, index2 + columnOffset);
 }
 var code = "BABEL_PARSER_SOURCETYPE_MODULE_REQUIRED";
 var ModuleErrors = {
@@ -48992,9 +49257,9 @@ function toParseErrorConstructor({
       const {
         line,
         column,
-        index = pos
+        index: index2 = pos
       } = overrides.loc ?? loc;
-      return constructor(new Position(line, column), index, {
+      return constructor(new Position(line, column), index2, {
         ...details,
         ...overrides.details
       });
@@ -51792,12 +52057,12 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     }
     super.toAssignable(node2, isLHS);
   }
-  toAssignableListItem(exprList, index, isLHS) {
-    const node2 = exprList[index];
+  toAssignableListItem(exprList, index2, isLHS) {
+    const node2 = exprList[index2];
     if (node2.type === "TypeCastExpression") {
-      exprList[index] = this.typeCastToParameter(node2);
+      exprList[index2] = this.typeCastToParameter(node2);
     }
-    super.toAssignableListItem(exprList, index, isLHS);
+    super.toAssignableListItem(exprList, index2, isLHS);
   }
   toReferencedList(exprList, isParenthesizedExpr) {
     for (let i = 0; i < exprList.length; i++) {
@@ -54984,11 +55249,11 @@ var Tokenizer = class extends CommentsParser {
     }
   }
   recordStrictModeErrors(toParseError, at) {
-    const index = at.index;
-    if (this.state.strict && !this.state.strictErrors.has(index)) {
+    const index2 = at.index;
+    if (this.state.strict && !this.state.strictErrors.has(index2)) {
       this.raise(toParseError, at);
     } else {
-      this.state.strictErrors.set(index, [toParseError, at]);
+      this.state.strictErrors.set(index2, [toParseError, at]);
     }
   }
   readWord1(firstCode) {
@@ -55216,11 +55481,11 @@ var ArrowHeadParsingScope = class extends ExpressionScope {
   constructor(type) {
     super(type);
   }
-  recordDeclarationError(ParsingErrorClass, index) {
-    this.declarationErrors.set(index, ParsingErrorClass);
+  recordDeclarationError(ParsingErrorClass, index2) {
+    this.declarationErrors.set(index2, ParsingErrorClass);
   }
-  clearDeclarationError(index) {
-    this.declarationErrors.delete(index);
+  clearDeclarationError(index2) {
+    this.declarationErrors.delete(index2);
   }
   iterateErrors(iterator) {
     this.declarationErrors.forEach(iterator);
@@ -55829,8 +56094,8 @@ var LValParser = class extends NodeUtils {
       }
     }
   }
-  toAssignableListItem(exprList, index, isLHS) {
-    const node2 = exprList[index];
+  toAssignableListItem(exprList, index2, isLHS) {
+    const node2 = exprList[index2];
     if (node2.type === "SpreadElement") {
       this.castNodeTo(node2, "RestElement");
       const arg = node2.argument;
@@ -62013,12 +62278,12 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     }
     return type;
   }
-  toAssignableListItem(exprList, index, isLHS) {
-    const node2 = exprList[index];
+  toAssignableListItem(exprList, index2, isLHS) {
+    const node2 = exprList[index2];
     if (node2.type === "TSTypeCastExpression") {
-      exprList[index] = this.typeCastToParameter(node2);
+      exprList[index2] = this.typeCastToParameter(node2);
     }
-    super.toAssignableListItem(exprList, index, isLHS);
+    super.toAssignableListItem(exprList, index2, isLHS);
   }
   typeCastToParameter(node2) {
     node2.expression.typeAnnotation = node2.typeAnnotation;
@@ -63399,6 +63664,299 @@ function sizingProperty(p4) {
   return map2[p4] ?? p4;
 }
 
+// src/visual.ts
+var STATUS_KINDS = [
+  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
+  ["warning", /warn|pending|review|caution|attention/],
+  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
+  ["info", /info|sent|notice|hint/],
+  ["neutral", /inactive|neutral|archiv/]
+];
+function withoutPseudo(selector) {
+  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
+}
+function statusKindOf(selector) {
+  const t = withoutPseudo(selector).toLowerCase();
+  for (const [kind, re] of STATUS_KINDS) if (re.test(t)) return kind;
+  return null;
+}
+var indexes = /* @__PURE__ */ new WeakMap();
+var oklabDistance2 = differenceEuclidean("oklab");
+var deuteranopia = filterDeficiencyDeuter(1);
+var protanopia = filterDeficiencyProt(1);
+function minRatioOf(ctx) {
+  return ctx.project.config.contrast?.minRatio ?? 4.5;
+}
+function surfaces(ctx) {
+  const configured = ctx.project.config.contrast?.surfaces;
+  if (configured?.length) return { names: configured, configured: true };
+  return { names: ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name), configured: false };
+}
+function colorOf(ctx, raw, theme) {
+  if (!raw) return void 0;
+  const v = raw.trim();
+  const only = v.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*([^()]+))?\)$/);
+  if (only) return tokenColor(ctx.tokens, only[1], theme) ?? (only[2] ? parseColor(only[2]) : void 0);
+  const direct = parseColor(v);
+  if (direct) return direct;
+  for (const m of v.matchAll(/var\(\s*(--[\w-]+)/g)) {
+    const c2 = tokenColor(ctx.tokens, m[1], theme);
+    if (c2) return c2;
+  }
+  const lit = findColorLiterals(v)[0];
+  return lit ? parseColor(lit.text) : void 0;
+}
+function themeScope(ctx, selector) {
+  if (!selector) return { theme: null, base: null };
+  for (const th of ctx.tokens.themes.slice(1)) {
+    const prefix2 = th.selector.trim() + " ";
+    if (selector.startsWith(prefix2)) return { theme: th.name, base: selector.slice(prefix2.length).trim() };
+  }
+  return { theme: null, base: selector };
+}
+var BACKGROUND_PROPS = /* @__PURE__ */ new Set(["background", "background-color"]);
+function index(ctx) {
+  const cached2 = indexes.get(ctx);
+  if (cached2) return cached2;
+  const idx = { overrides: /* @__PURE__ */ new Set(), classFindings: /* @__PURE__ */ new Map() };
+  indexes.set(ctx, idx);
+  const rules = [];
+  for (const [file2, root2] of [...ctx.cssRoots.entries()].sort(([a], [b]) => a < b ? -1 : 1)) {
+    root2.walkRules((rule2) => {
+      const selector = selectorContext(rule2);
+      if (themeForSelector(selector, ctx.project.config.tokens.themes) !== null) return;
+      rules.push({ rule: rule2, selector, file: file2 });
+      const { theme, base } = themeScope(ctx, selector);
+      if (!theme || !base) return;
+      for (const n of rule2.nodes ?? []) {
+        if (n.type !== "decl") continue;
+        if (n.prop === "color") idx.overrides.add(`${theme}|${base}|color`);
+        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base}|background`);
+      }
+    });
+  }
+  const minRatio = minRatioOf(ctx);
+  for (const { rule: rule2, selector, file: file2 } of rules) {
+    if (selector.includes(":") || selector.startsWith("@")) continue;
+    const decls = (rule2.nodes ?? []).filter((n) => n.type === "decl");
+    const color = decls.find((d) => d.prop === "color");
+    if (!color) continue;
+    const bg = decls.find((d) => BACKGROUND_PROPS.has(d.prop))?.value ?? null;
+    const result = textContrast(ctx, color.value, bg, selector, minRatio);
+    if (!result || result.failing.length === 0) continue;
+    for (const part of selector.split(",")) {
+      const last = part.trim().split(/[\s>+~]+/).pop() ?? "";
+      for (const m of last.matchAll(/\.([\w-]+)/g)) {
+        const name = m[1];
+        if (!idx.classFindings.has(name)) {
+          idx.classFindings.set(name, { result, selector, value: color.value, background: bg, source: `${file2}:${color.source?.start?.line ?? 0}` });
+        }
+      }
+    }
+  }
+  return idx;
+}
+function textContrast(ctx, value, background, selector, minRatio, opts = { text: true }) {
+  const { theme: scoped, base } = themeScope(ctx, selector);
+  const idx = index(ctx);
+  const themes = ctx.tokens.themes.map((t) => t.name).filter((t) => !scoped || t === scoped);
+  const surf = surfaces(ctx);
+  const ratios = {};
+  const against = {};
+  for (const th of themes) {
+    if (!scoped && base && th !== ctx.tokens.themes[0]?.name) {
+      if (idx.overrides.has(`${th}|${base}|color`)) continue;
+      if (background && idx.overrides.has(`${th}|${base}|background`)) continue;
+    }
+    const fg = colorOf(ctx, value, th);
+    if (!fg) return null;
+    const baseSurface = surf.names[0] ? tokenColor(ctx.tokens, surf.names[0], th) : void 0;
+    if (background) {
+      const bg = colorOf(ctx, background, th);
+      if (!bg || (bg.alpha ?? 1) < 1) return null;
+      ratios[th] = contrast2(fg, bg, baseSurface);
+      against[th] = background.trim();
+      continue;
+    }
+    let worst = Number.POSITIVE_INFINITY;
+    let worstName = "";
+    for (const s of surf.names) {
+      const bg = tokenColor(ctx.tokens, s, th);
+      if (!bg) continue;
+      const r2 = contrast2(fg, bg, baseSurface);
+      if (r2 < worst) {
+        worst = r2;
+        worstName = s;
+      }
+    }
+    if (!Number.isFinite(worst)) continue;
+    ratios[th] = worst;
+    against[th] = worstName;
+  }
+  const measured = Object.keys(ratios);
+  if (measured.length === 0) return null;
+  const defaultTheme2 = ctx.tokens.themes[0]?.name;
+  if (opts.text !== false && !background && defaultTheme2 && ratios[defaultTheme2] !== void 0 && ratios[defaultTheme2] < 1.5) return null;
+  return {
+    failing: measured.filter((th) => ratios[th] < minRatio),
+    ratios,
+    against,
+    minRatio,
+    certain: !!background || surf.configured
+  };
+}
+function describeContrast(r2) {
+  return r2.failing.map((th) => `${r2.ratios[th]}:1 on ${r2.against[th]} in ${th}`).join("; ") + ` (needs ${r2.minRatio}:1)`;
+}
+function suggestReadable(ctx, value, background, selector, r2) {
+  const defaultTheme2 = ctx.tokens.themes[0]?.name ?? "light";
+  const current = colorOf(ctx, value, defaultTheme2);
+  const readable = (role2) => /^(text\.|on-accent|accent|status\.)/.test(role2);
+  const familyOf = (role2) => role2.split(".")[0];
+  const own2 = value.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
+  const twin = !own2 && current ? ctx.tokens.tokens.find((t) => {
+    const c2 = t.type === "color" ? tokenColor(ctx.tokens, t.name, defaultTheme2) : void 0;
+    return c2 && readable(t.role) && oklabDistance2(current, c2) * 100 < 2;
+  }) : void 0;
+  const statusKind = selector ? statusKindOf(selector) : null;
+  const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null);
+  const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r2.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
+    const c2 = tokenColor(ctx.tokens, x.t.name, defaultTheme2);
+    return { ...x, d: current && c2 ? oklabDistance2(current, c2) : Number.POSITIVE_INFINITY };
+  }).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
+  const sameFamily = role && readable(role) ? passing.filter((x) => familyOf(x.t.role) === familyOf(role)) : [];
+  const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
+  const textLike = !role || !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
+  const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
+  const why = describeContrast(r2);
+  if (candidates.length === 0) {
+    return {
+      match: "none",
+      kind: "none",
+      value: null,
+      detail: `${why}. No ${role?.startsWith("status.") ? "status" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") ? " (/facha-ui:init can propose status tokens)" : ""}.`,
+      source: null
+    };
+  }
+  const best = candidates[0];
+  const reached = Object.entries(best.res.ratios).map(([th, v]) => `${v}:1 in ${th}`).join(", ");
+  return {
+    match: "nearest",
+    kind: "token",
+    value: `var(${best.t.name})`,
+    detail: `${why}. ${best.t.name} reaches it in every theme (${reached}).`,
+    source: best.t.source
+  };
+}
+function classContrast(ctx, className) {
+  return index(ctx).classFindings.get(className) ?? null;
+}
+var INTERACTIVE = /(^|[\s>+~,(])(input|select|textarea|button)\b|:focus|\.(btn|button|field|input|select|checkbox|radio|switch|toggle|tab)\b|\[role=/i;
+function isNonTextTarget(property, selector, context) {
+  const p4 = property.toLowerCase();
+  if (context === "svg-attribute") return p4 === "fill" || p4 === "stroke";
+  if (!selector || !INTERACTIVE.test(selector)) return false;
+  if (/^(border|outline)(-[a-z]+)*$/.test(p4)) return !/(radius|width|style|offset|collapse|spacing|image)/.test(p4);
+  return p4 === "box-shadow" && /:focus/.test(selector);
+}
+function nonTextContrast(ctx, value, background, selector) {
+  const min = ctx.project.config.contrast?.nonTextMinRatio ?? 3;
+  return textContrast(ctx, value, background, selector, min, { text: false });
+}
+function statusConfusable(ctx) {
+  const threshold = ctx.project.config.contrast?.statusMinDeltaE ?? 10;
+  const themes = ctx.tokens.themes.map((t) => t.name);
+  const items = [];
+  const byKind = /* @__PURE__ */ new Map();
+  for (const t of ctx.tokens.tokens) {
+    if (t.type !== "color" || !t.role.startsWith("status.")) continue;
+    const kind = t.role.slice("status.".length).replace("other", "neutral");
+    const part = /(bg|background|soft|tint|surface|subtle)/.test(t.name) ? "bg" : "fg";
+    const item = byKind.get(kind) ?? { label: `status ${kind} tokens`, kind, source: t.source, parts: { fg: {}, bg: {} } };
+    for (const th of themes) {
+      const c2 = tokenColor(ctx.tokens, t.name, th);
+      if (c2 && !item.parts[part][th]) item.parts[part][th] = c2;
+    }
+    byKind.set(kind, item);
+  }
+  items.push(...byKind.values());
+  for (const cc of ctx.componentClasses) {
+    if (themeScope(ctx, cc.selector).theme || cc.selector.includes(":")) continue;
+    const kind = statusKindOf(cc.selector);
+    if (!kind) continue;
+    const item = { label: cc.selector, kind, source: cc.source, parts: { fg: {}, bg: {} } };
+    for (const d of cc.decls) {
+      const part = d.prop === "color" ? "fg" : BACKGROUND_PROPS.has(d.prop) ? "bg" : null;
+      if (!part) continue;
+      for (const th of themes) {
+        const c2 = colorOf(ctx, d.value, th);
+        if (c2) item.parts[part][th] = c2;
+      }
+    }
+    if (Object.keys(item.parts.fg).length || Object.keys(item.parts.bg).length) items.push(item);
+  }
+  const visions = [
+    ["normal", (c2) => c2],
+    ["deuteranopia", (c2) => deuteranopia(c2)],
+    ["protanopia", (c2) => protanopia(c2)]
+  ];
+  const worstByPair = /* @__PURE__ */ new Map();
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i];
+      const b = items[j];
+      if (a.kind === b.kind) continue;
+      for (const th of themes) {
+        const deltaE2 = {};
+        let shared = false;
+        for (const [name, sim] of visions) {
+          let best = 0;
+          for (const part of ["fg", "bg"]) {
+            const ca = a.parts[part][th];
+            const cb = b.parts[part][th];
+            if (!ca || !cb) continue;
+            shared = true;
+            best = Math.max(best, oklabDistance2(sim(ca), sim(cb)) * 100);
+          }
+          deltaE2[name] = round2(best, 1);
+        }
+        if (!shared) continue;
+        const min = Math.min(...Object.values(deltaE2));
+        if (min >= threshold) continue;
+        const key = [a.kind, b.kind].sort().join("|");
+        const prev = worstByPair.get(key);
+        if (prev) {
+          if (!prev.themes.includes(th)) prev.themes.push(th);
+          if (Math.min(...Object.values(prev.deltaE)) <= min) continue;
+        }
+        const [first, second] = a.kind < b.kind ? [a, b] : [b, a];
+        worstByPair.set(key, {
+          themes: prev?.themes ?? [th],
+          kind: "status-confusable",
+          token: `${first.label} ~ ${second.label}`,
+          states: [first.kind, second.kind],
+          items: [
+            { label: first.label, source: first.source, colors: partsHex(first, th) },
+            { label: second.label, source: second.source, colors: partsHex(second, th) }
+          ],
+          measuredIn: th,
+          deltaE: deltaE2,
+          minDeltaE: threshold,
+          hardFor: Object.entries(deltaE2).filter(([, v]) => v < threshold).map(([k4]) => k4),
+          note: "These states are hard to tell apart by color alone for the listed vision types: keep a text label or an icon, or separate them more in lightness."
+        });
+      }
+    }
+  }
+  return [...worstByPair.values()].map(({ themes: ths, ...rest }) => ({ ...rest, themes: [...ths].sort((p4, q) => themes.indexOf(p4) - themes.indexOf(q)) })).sort((x, y) => x.token < y.token ? -1 : x.token > y.token ? 1 : 0);
+}
+function partsHex(item, theme) {
+  const out = {};
+  if (item.parts.fg[theme]) out.text = toHex(item.parts.fg[theme]);
+  if (item.parts.bg[theme]) out.background = toHex(item.parts.bg[theme]);
+  return out;
+}
+
 // src/rules.ts
 var RULES = [
   {
@@ -63420,13 +63978,31 @@ var RULES = [
     id: "inline-style",
     severity: "info",
     summary: "style={{\u2026}} attribute: a signal of a missing class or component pattern."
+  },
+  {
+    id: "theme-contrast",
+    severity: "error",
+    summary: "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected."
+  },
+  {
+    id: "class-contrast",
+    severity: "error",
+    summary: "A class whose CSS rule sets a text color that fails contrast in some theme (the guardian cannot see it from the component otherwise). Same severity logic as theme-contrast."
+  },
+  {
+    id: "non-text-contrast",
+    severity: "warning",
+    summary: "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background."
   }
 ];
 var MESSAGES = {
   "color-literal": "Color literal outside the design tokens; it does not follow theme changes.",
   "tailwind-arbitrary-value": "Arbitrary Tailwind value bypasses the design system.",
   "unknown-token": "var() references a token that is not defined in the design system.",
-  "inline-style": "Inline style: signals a missing pattern (class or component) in the design system."
+  "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
+  "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
+  "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
+  "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
 function effectiveSeverity(ctx, rule2, base, soft = false) {
@@ -63443,7 +64019,7 @@ function checkUsages(ctx, usages) {
   const unresolved = [];
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
-  const push = (rule2, base, loc, found, property, context, suggestion, breaksThemes = [], soft = false) => {
+  const push = (rule2, base, loc, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
     const severity3 = effectiveSeverity(ctx, rule2, base, soft);
     if (severity3 === "off") return;
     violations.push({
@@ -63456,7 +64032,7 @@ function checkUsages(ctx, usages) {
       found: clip(found),
       property,
       context,
-      message: MESSAGES[rule2],
+      message: message ?? MESSAGES[rule2],
       breaksThemes,
       suggestion
     });
@@ -63485,7 +64061,25 @@ function checkUsages(ctx, usages) {
     }
     if (u.kind === "class") {
       const a = parseArbitrary(u.raw);
-      if (!a) continue;
+      if (!a) {
+        const finding = classContrast(ctx, u.raw);
+        if (finding) {
+          const r2 = finding.result;
+          push(
+            "class-contrast",
+            r2.certain ? "error" : "warning",
+            { file: u.file, line: u.line, column: u.column },
+            u.raw,
+            "color",
+            "className",
+            { ...suggestReadable(ctx, finding.value, finding.background, finding.selector, r2), source: finding.source },
+            r2.failing,
+            false,
+            `.${u.raw} sets color: ${finding.value} (${finding.source}): ${describeContrast(r2)}.`
+          );
+        }
+        continue;
+      }
       const loc = { file: u.file, line: u.line, column: u.column };
       const varOnly = a.value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
       if (varOnly) {
@@ -63523,6 +64117,42 @@ function checkUsages(ctx, usages) {
       push("color-literal", "error", u.locAt(lit.index), lit.text, u.property, context, suggestColor(ctx, lit.text, u.property), otherThemes);
     }
     checkVarRefs(u.value, u.locAt, u.property, context);
+    if (u.property === "color" && (u.context === "css" || u.context === "inline-style")) {
+      const bg = u.siblingBackground ?? null;
+      const r2 = textContrast(ctx, u.value, bg, u.selector, minRatioOf(ctx));
+      if (r2 && r2.failing.length > 0) {
+        push(
+          "theme-contrast",
+          r2.certain ? "error" : "warning",
+          { file: u.file, line: u.line, column: u.column },
+          u.value,
+          "color",
+          context,
+          suggestReadable(ctx, u.value, bg, u.selector, r2),
+          r2.failing,
+          false,
+          `Text color ${u.value.trim()}: ${describeContrast(r2)}.`
+        );
+      }
+    }
+    if (isNonTextTarget(u.property, u.selector, u.context)) {
+      const bg = u.siblingBackground ?? null;
+      const r2 = nonTextContrast(ctx, u.value, bg, u.selector);
+      if (r2 && r2.failing.length > 0) {
+        push(
+          "non-text-contrast",
+          "warning",
+          { file: u.file, line: u.line, column: u.column },
+          u.value,
+          u.property,
+          context,
+          { match: "none", kind: "none", value: null, detail: describeContrast(r2), source: null },
+          r2.failing,
+          false,
+          `${u.property}: ${u.value.trim()}: ${describeContrast(r2)}.`
+        );
+      }
+    }
   }
   return { violations, unresolved };
 }
@@ -63688,7 +64318,7 @@ function colorUsageCounts(usages) {
 function health(ctx, usages) {
   const minRatio = ctx.project.config.contrast?.minRatio ?? 4.5;
   const themes = ctx.tokens.themes.map((t) => t.name);
-  const surfaces = ctx.project.config.contrast?.surfaces ?? ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name);
+  const surfaces2 = ctx.project.config.contrast?.surfaces ?? ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name);
   const usage = colorUsageCounts(usages);
   const candidates = ctx.tokens.tokens.filter(
     (t) => t.type === "color" && (t.role.startsWith("text.") || t.role === "on-accent" || usage.has(t.name))
@@ -63703,10 +64333,10 @@ function health(ctx, usages) {
       if (!fg) continue;
       let worst = Number.POSITIVE_INFINITY;
       let worstName = "";
-      for (const s of surfaces) {
+      for (const s of surfaces2) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
-        const base = tokenColor(ctx.tokens, surfaces[0], th);
+        const base = tokenColor(ctx.tokens, surfaces2[0], th);
         const r2 = contrast2(fg, bg, base);
         if (r2 < worst) {
           worst = r2;
@@ -63740,7 +64370,10 @@ function health(ctx, usages) {
     const notRedefined = themes.slice(1).filter((th) => !declaredIn(ctx, t.name, th) && t.values[th] === defaultRaw);
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });
   }
-  return out.sort((a, b) => a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : 1);
+  out.push(...statusConfusable(ctx));
+  return out.sort(
+    (a, b) => a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : a.token > b.token ? 1 : (a.theme ?? "") < (b.theme ?? "") ? -1 : 1
+  );
 }
 function declaredIn(ctx, token, theme) {
   const sel = ctx.tokens.themes.find((t) => t.name === theme)?.selector;
@@ -63902,13 +64535,6 @@ function readDeps(root2) {
 // src/propose.ts
 var toOklch = converter_default("oklch");
 var WHERE_LIMIT = 12;
-var KINDS = [
-  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
-  ["warning", /warn|pending|review|caution|attention/],
-  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
-  ["info", /info|sent|notice|hint/],
-  ["neutral", /inactive|neutral|archiv/]
-];
 function partOf(property) {
   const p4 = (property ?? "").toLowerCase();
   if (["color", "fill", "stroke", "caret-color", "text-decoration-color"].includes(p4)) return "fg";
@@ -63917,18 +64543,10 @@ function partOf(property) {
   return "other";
 }
 var PART_SUFFIX = { bg: "bg", fg: "fg", border: "border", other: "color" };
-function withoutPseudo(selector) {
-  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
-}
 function stemOf(selector) {
   const cls = selector ? withoutPseudo(selector).match(/\.([A-Za-z][\w-]*)/)?.[1] : void 0;
   if (!cls) return "color";
   return cls.replace(/_/g, "-").replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-function kindOf(selector) {
-  const t = withoutPseudo(selector).toLowerCase();
-  for (const [kind, re] of KINDS) if (re.test(t)) return kind;
-  return null;
 }
 function hex4(c2) {
   return toHex(c2).toLowerCase();
@@ -63963,7 +64581,7 @@ function scanStyles(ctx) {
     if (v) return tokenColor(ctx.tokens, v[1], theme);
     return parseColor(raw);
   };
-  const themeScope = (selector) => {
+  const themeScope2 = (selector) => {
     if (!selector) return { theme: null, base: null };
     for (const th of themes.slice(1)) {
       const prefix2 = th.selector.trim() + " ";
@@ -64001,7 +64619,7 @@ function scanStyles(ctx) {
       continue;
     }
     const part = partOf(v.property);
-    const { theme, base } = themeScope(occ.selector);
+    const { theme, base } = themeScope2(occ.selector);
     if (theme) {
       themed.push({ theme, part, base, hex: hex4(c2), occ });
       continue;
@@ -64034,7 +64652,7 @@ function scanStyles(ctx) {
     const sels = [...g.selectors].sort();
     const votes = /* @__PURE__ */ new Map();
     for (const s of sels) {
-      const k4 = kindOf(s) ?? statusRoleOf(s);
+      const k4 = statusKindOf(s) ?? statusRoleOf(s);
       if (k4) votes.set(k4, (votes.get(k4) ?? 0) + 1);
     }
     const kind = [...votes.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]?.[0] ?? null;
@@ -64258,7 +64876,7 @@ function scanStyles(ctx) {
 }
 
 // src/server.ts
-var VERSION = "0.2.0";
+var VERSION = "0.3.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

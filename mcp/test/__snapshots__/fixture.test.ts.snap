@@ -7,35 +7,57 @@ exports[`audit_project (fixture) > returns consistent totals (MCP-10) and is det
       "byRule": {
         "color-literal": 3,
         "inline-style": 1,
+        "non-text-contrast": 1,
         "tailwind-arbitrary-value": 6,
+        "theme-contrast": 1,
         "unknown-token": 1,
       },
       "error": 9,
       "file": "app/page.tsx",
       "info": 2,
-      "warning": 0,
+      "warning": 2,
     },
     {
       "byRule": {
         "color-literal": 2,
+        "theme-contrast": 2,
         "unknown-token": 1,
       },
-      "error": 3,
+      "error": 4,
       "file": "app/globals.css",
+      "info": 0,
+      "warning": 1,
+    },
+    {
+      "byRule": {
+        "class-contrast": 1,
+      },
+      "error": 1,
+      "file": "components/Badge.tsx",
       "info": 0,
       "warning": 0,
     },
   ],
   "byRule": {
+    "class-contrast": {
+      "error": 1,
+    },
     "color-literal": {
       "error": 5,
     },
     "inline-style": {
       "info": 1,
     },
+    "non-text-contrast": {
+      "warning": 1,
+    },
     "tailwind-arbitrary-value": {
       "error": 5,
       "info": 1,
+    },
+    "theme-contrast": {
+      "error": 1,
+      "warning": 2,
     },
     "unknown-token": {
       "error": 2,
@@ -43,7 +65,7 @@ exports[`audit_project (fixture) > returns consistent totals (MCP-10) and is det
   },
   "configSource": "facha-ui.config.json",
   "filesScanned": 3,
-  "filesWithViolations": 2,
+  "filesWithViolations": 3,
   "health": [
     {
       "against": {
@@ -74,21 +96,26 @@ exports[`audit_project (fixture) > returns consistent totals (MCP-10) and is det
   "skipped": [],
   "top": [
     {
-      "all": 11,
+      "all": 13,
       "error": 9,
       "file": "app/page.tsx",
     },
     {
-      "all": 3,
-      "error": 3,
+      "all": 5,
+      "error": 4,
       "file": "app/globals.css",
+    },
+    {
+      "all": 1,
+      "error": 1,
+      "file": "components/Badge.tsx",
     },
   ],
   "totals": {
-    "all": 14,
-    "error": 12,
+    "all": 19,
+    "error": 14,
     "info": 2,
-    "warning": 0,
+    "warning": 3,
   },
   "unresolved": 1,
 }
@@ -289,6 +316,21 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "id": "inline-style",
       "severity": "info",
       "summary": "style={{…}} attribute: a signal of a missing class or component pattern.",
+    },
+    {
+      "id": "theme-contrast",
+      "severity": "error",
+      "summary": "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected.",
+    },
+    {
+      "id": "class-contrast",
+      "severity": "error",
+      "summary": "A class whose CSS rule sets a text color that fails contrast in some theme (the guardian cannot see it from the component otherwise). Same severity logic as theme-contrast.",
+    },
+    {
+      "id": "non-text-contrast",
+      "severity": "warning",
+      "summary": "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background.",
     },
   ],
   "scales": {

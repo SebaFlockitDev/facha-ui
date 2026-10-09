@@ -69,9 +69,11 @@ describe("check_ui (fixture)", () => {
       "app/page.tsx:11:40 color-literal error bg-[#ff00aa] → none -",
       "app/page.tsx:12:47 inline-style info style={{ color: \"#333\", borderColor: \"var(--color-line)\" }} → none -",
       "app/page.tsx:12:64 color-literal error #333 → none -",
+      "app/page.tsx:12:64 theme-contrast warning #333 → nearest var(--color-ink)",
       "app/page.tsx:13:27 tailwind-arbitrary-value error rounded-[8px] → exact var(--radius-md)",
       "app/page.tsx:13:54 tailwind-arbitrary-value error shadow-[0_1px_2px_rgba(0,0,0,.2)] → none -",
       "app/page.tsx:14:18 color-literal error #000 → none -",
+      "app/page.tsx:14:18 non-text-contrast warning #000 → none -",
       "app/page.tsx:15:21 tailwind-arbitrary-value info text-[var(--color-primary)] → none -",
       "app/page.tsx:16:21 unknown-token error text-[var(--color-brand)] → none -",
     ]);
@@ -87,6 +89,8 @@ describe("check_ui (fixture)", () => {
     const lines = r.structuredContent.violations.map(brief);
     expect(lines).toEqual([
       "app/globals.css:30:22 color-literal error #fee2e2 → none -",
+      "app/globals.css:30:31 theme-contrast error var(--color-danger) → none -",
+      "app/globals.css:31:9 theme-contrast warning #2563eb → nearest var(--color-primary)",
       "app/globals.css:31:16 color-literal error #2563eb → exact var(--color-primary)",
       "app/globals.css:32:28 unknown-token error var(--color-lines) → nearest var(--color-line)",
     ]);

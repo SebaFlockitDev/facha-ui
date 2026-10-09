@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "tokens": { "sources": ["app/globals.css"], "themes": { "light": ":root", "dark": "html.dark" } },
+  "contrast": { "surfaces": ["--panel"] }
+}

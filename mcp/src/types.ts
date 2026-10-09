@@ -6,6 +6,9 @@ export const RULE_IDS = [
   "tailwind-arbitrary-value",
   "unknown-token",
   "inline-style",
+  "theme-contrast",
+  "class-contrast",
+  "non-text-contrast",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

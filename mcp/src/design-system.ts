@@ -9,6 +9,7 @@ import { scanFiles } from "./check.js";
 import type { Usage } from "./sources/usage.js";
 import { suggestColor } from "./suggest.js";
 import { tokenColor, tokenValue } from "./tokens.js";
+import { statusConfusable } from "./visual.js";
 
 export const SECTIONS = [
   "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions",
@@ -113,7 +114,10 @@ export function health(ctx: Context, usages: Usage[]) {
     const notRedefined = themes.slice(1).filter((th) => !declaredIn(ctx, t.name, th) && t.values[th] === defaultRaw);
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });
   }
-  return out.sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : 1));
+  out.push(...statusConfusable(ctx));
+  return out.sort((a, b) =>
+    a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : a.token < b.token ? -1 : a.token > b.token ? 1 : (a.theme ?? "") < (b.theme ?? "") ? -1 : 1,
+  );
 }
 
 function declaredIn(ctx: Context, token: string, theme: string): boolean {

@@ -31,6 +31,10 @@ export const ConfigSchema = z
       .object({
         surfaces: z.array(z.string().regex(/^--/)).optional(),
         minRatio: z.number().min(1).max(21).default(4.5),
+        /** WCAG 1.4.11: borders, focus rings and icons of interactive parts. */
+        nonTextMinRatio: z.number().min(1).max(21).default(3),
+        /** Minimum OKLab ΔE (×100) between status colors, also under simulated deuteranopia/protanopia. */
+        statusMinDeltaE: z.number().positive().default(10),
       })
       .strict()
       .optional(),

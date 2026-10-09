@@ -1,0 +1,36 @@
+:root {
+  --panel: #ffffff;
+  --text: #1f2937;
+  --text-muted: #4b5563;
+  --text-faint: #c4c9d2;
+  --title: #111827;
+  --primary: #2563eb;
+  --on-primary: #ffffff;
+  --border: #e5e7eb;
+  --status-success-fg: #15803d;
+  --status-warning-fg: #b45309;
+}
+
+html.dark {
+  --panel: #111827;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-faint: #4b5563;
+  --title: #111827;
+  --primary: #60a5fa;
+  --on-primary: #0b1220;
+  --border: #374151;
+  --status-success-fg: #4ade80;
+  --status-warning-fg: #fbbf24;
+}
+
+.title { color: var(--title); }
+.muted { color: var(--text-muted); }
+.faint { color: var(--text-faint); }
+.button-primary { background: var(--primary); color: var(--on-primary); }
+.overlay-label { background: rgba(0, 0, 0, 0.4); color: var(--on-primary); }
+.sidebar-link { color: var(--on-primary); }
+.notice { color: var(--title); }
+html.dark .notice { color: var(--text); }
+.field input { border: 1px solid var(--border); }
+.field input:focus-visible { outline: 2px solid var(--primary); }

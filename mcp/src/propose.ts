@@ -6,6 +6,7 @@ import { coverage } from "./design-system.js";
 import { listProjectFiles } from "./project.js";
 import type { DeclUsage } from "./sources/usage.js";
 import { tokenColor } from "./tokens.js";
+import { statusKindOf as kindOf, withoutPseudo } from "./visual.js";
 
 /**
  * scan_styles (SPEC §3.3, init contract): inventories the style literals a project already uses
@@ -47,15 +48,6 @@ interface Value {
 const toOklch = converter("oklch");
 const WHERE_LIMIT = 12;
 
-/** Semantic hints in selectors. Order matters: "unpaid" must read as danger before "paid". */
-const KINDS: [string, RegExp][] = [
-  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
-  ["warning", /warn|pending|review|caution|attention/],
-  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
-  ["info", /info|sent|notice|hint/],
-  ["neutral", /inactive|neutral|archiv/],
-];
-
 function partOf(property: string | null): Part {
   const p = (property ?? "").toLowerCase();
   if (["color", "fill", "stroke", "caret-color", "text-decoration-color"].includes(p)) return "fg";
@@ -66,21 +58,10 @@ function partOf(property: string | null): Part {
 
 const PART_SUFFIX: Record<Part, string> = { bg: "bg", fg: "fg", border: "border", other: "color" };
 
-/** Selector without pseudo-classes/elements, so ":not(:disabled)" is not read as a meaning. */
-function withoutPseudo(selector: string): string {
-  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
-}
-
 function stemOf(selector: string | null): string {
   const cls = selector ? withoutPseudo(selector).match(/\.([A-Za-z][\w-]*)/)?.[1] : undefined;
   if (!cls) return "color";
   return cls.replace(/_/g, "-").replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-function kindOf(selector: string): string | null {
-  const t = withoutPseudo(selector).toLowerCase();
-  for (const [kind, re] of KINDS) if (re.test(t)) return kind;
-  return null;
 }
 
 function hex(c: Color): string {

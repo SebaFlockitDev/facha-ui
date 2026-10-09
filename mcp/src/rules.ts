@@ -3,6 +3,7 @@ import type { Context } from "./context.js";
 import type { Usage } from "./sources/usage.js";
 import { suggestArbitrary, suggestColor, suggestTokenName } from "./suggest.js";
 import { parseArbitrary } from "./tailwind.js";
+import { classContrast, describeContrast, isNonTextTarget, minRatioOf, nonTextContrast, suggestReadable, textContrast } from "./visual.js";
 import type { Loc, RuleId, Severity, Suggestion, Unresolved, Violation } from "./types.js";
 
 export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
@@ -28,6 +29,24 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
     severity: "info",
     summary: "style={{…}} attribute: a signal of a missing class or component pattern.",
   },
+  {
+    id: "theme-contrast",
+    severity: "error",
+    summary:
+      "Text color below contrast.minRatio against its real background in some theme: the rule's own background, or the reference surfaces. Error when the background is known (own background or surfaces declared in contrast.surfaces), warning when the surfaces were autodetected.",
+  },
+  {
+    id: "class-contrast",
+    severity: "error",
+    summary:
+      "A class whose CSS rule sets a text color that fails contrast in some theme (the guardian cannot see it from the component otherwise). Same severity logic as theme-contrast.",
+  },
+  {
+    id: "non-text-contrast",
+    severity: "warning",
+    summary:
+      "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background.",
+  },
 ];
 
 const MESSAGES: Record<RuleId, string> = {
@@ -35,6 +54,9 @@ const MESSAGES: Record<RuleId, string> = {
   "tailwind-arbitrary-value": "Arbitrary Tailwind value bypasses the design system.",
   "unknown-token": "var() references a token that is not defined in the design system.",
   "inline-style": "Inline style: signals a missing pattern (class or component) in the design system.",
+  "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
+  "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
+  "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -72,6 +94,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
     suggestion: Suggestion,
     breaksThemes: string[] = [],
     soft = false,
+    message?: string,
   ) => {
     const severity = effectiveSeverity(ctx, rule, base, soft);
     if (severity === "off") return;
@@ -85,7 +108,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       found: clip(found),
       property,
       context,
-      message: MESSAGES[rule],
+      message: message ?? MESSAGES[rule],
       breaksThemes,
       suggestion,
     });
@@ -116,7 +139,25 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
     }
     if (u.kind === "class") {
       const a = parseArbitrary(u.raw);
-      if (!a) continue;
+      if (!a) {
+        const finding = classContrast(ctx, u.raw);
+        if (finding) {
+          const r = finding.result;
+          push(
+            "class-contrast",
+            r.certain ? "error" : "warning",
+            { file: u.file, line: u.line, column: u.column },
+            u.raw,
+            "color",
+            "className",
+            { ...suggestReadable(ctx, finding.value, finding.background, finding.selector, r), source: finding.source },
+            r.failing,
+            false,
+            `.${u.raw} sets color: ${finding.value} (${finding.source}): ${describeContrast(r)}.`,
+          );
+        }
+        continue;
+      }
       const loc = { file: u.file, line: u.line, column: u.column };
       const varOnly = a.value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
       if (varOnly) {
@@ -155,6 +196,45 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       push("color-literal", "error", u.locAt(lit.index), lit.text, u.property, context, suggestColor(ctx, lit.text, u.property), otherThemes);
     }
     checkVarRefs(u.value, u.locAt, u.property, context);
+
+    // Contrast of the text color against its real background (per usage).
+    if (u.property === "color" && (u.context === "css" || u.context === "inline-style")) {
+      const bg = u.siblingBackground ?? null;
+      const r = textContrast(ctx, u.value, bg, u.selector, minRatioOf(ctx));
+      if (r && r.failing.length > 0) {
+        push(
+          "theme-contrast",
+          r.certain ? "error" : "warning",
+          { file: u.file, line: u.line, column: u.column },
+          u.value,
+          "color",
+          context,
+          suggestReadable(ctx, u.value, bg, u.selector, r),
+          r.failing,
+          false,
+          `Text color ${u.value.trim()}: ${describeContrast(r)}.`,
+        );
+      }
+    }
+    // WCAG 1.4.11 for interactive borders, focus rings and icons.
+    if (isNonTextTarget(u.property, u.selector, u.context)) {
+      const bg = u.siblingBackground ?? null;
+      const r = nonTextContrast(ctx, u.value, bg, u.selector);
+      if (r && r.failing.length > 0) {
+        push(
+          "non-text-contrast",
+          "warning",
+          { file: u.file, line: u.line, column: u.column },
+          u.value,
+          u.property,
+          context,
+          { match: "none", kind: "none", value: null, detail: describeContrast(r), source: null },
+          r.failing,
+          false,
+          `${u.property}: ${u.value.trim()}: ${describeContrast(r)}.`,
+        );
+      }
+    }
   }
 
   return { violations, unresolved };
