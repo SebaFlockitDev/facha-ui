@@ -9,7 +9,7 @@
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/scripts/run-pinned.mjs", "@playwright/mcp@0.0.83",
         "--isolated",
-        "--output-dir", "${CLAUDE_PROJECT_DIR}/.facha-ui/screenshots",
+        "--output-dir", "${CLAUDE_PROJECT_DIR}/.facha-ui/playwright",
         "--viewport-size", "1440x900"
       ]
     }

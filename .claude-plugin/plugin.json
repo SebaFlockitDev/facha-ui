@@ -1,6 +1,6 @@
 {
   "name": "facha-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Make AI-generated UI follow your project's design system: design-system-aware variants, a deterministic validator and human-approved apply.",
   "author": {
     "name": "Sebastian Adrover"
