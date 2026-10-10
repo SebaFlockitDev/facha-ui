@@ -417,3 +417,70 @@ describe("visible progress in apply and init", () => {
     });
   }
 });
+
+describe("natural language and quick start", () => {
+  const skillText = (skill: string) => fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+  const frontmatterOf = (skill: string) => skillText(skill).match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const descriptionOf = (skill: string) => frontmatterOf(skill).match(/^description:\s*(.*)$/m)?.[1] ?? "";
+
+  it("descriptions of the skills Claude may start include plain-language requests", () => {
+    const examples: Record<string, string[]> = {
+      variants: ["mejorá la pantalla de pedidos", "en la B mové los filtros arriba", "hacelo rápido", "probá colores más cálidos"],
+      flow: ["revisá el recorrido de alta"],
+      learn: ["enseñame a usar facha-ui"],
+      start: ["¿cómo está la UI de mi proyecto?"],
+    };
+    for (const [skill, phrases] of Object.entries(examples)) {
+      const description = descriptionOf(skill);
+      expect(frontmatterOf(skill), skill).not.toMatch(/^disable-model-invocation:/m);
+      for (const phrase of phrases) expect(description, `${skill}: ${phrase}`).toContain(`"${phrase}"`);
+      // Claude Code truncates description + when_to_use at 1,536 characters in the skill listing.
+      expect(description.length, skill).toBeLessThanOrEqual(1536);
+    }
+  });
+
+  it("apply, init and help stay developer-only", () => {
+    for (const skill of ["apply", "init", "help"]) expect(frontmatterOf(skill), skill).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+  });
+
+  it('"aplicá la B" gets the exact command, from variants and from the MCP instructions Claude always receives', async () => {
+    const rules = variantsFile("SKILL.md").split("## Hard rules")[1]?.split("\n## ")[0]?.replace(/\s+/g, " ") ?? "";
+    expect(rules).toContain('If they ask in words ("aplicá la B"), answer with the exact command to run, `/facha-ui:apply <slug> b`.');
+    const { connect, FIXTURE } = await import("./helpers.js");
+    const h = await connect(FIXTURE);
+    try {
+      const instructions = h.client.getInstructions() ?? "";
+      expect(instructions).toContain("`/facha-ui:apply <slug> <a|b|c>`");
+      expect(instructions).toContain("`/facha-ui:init`");
+      expect(instructions).toContain('("aplicá la B"), answer with the exact command for them to run; never do it yourself.');
+    } finally {
+      await h.close();
+    }
+  });
+
+  it("the README starts with a 2-minute quick start that runs /facha-ui:start", () => {
+    const readme = fs.readFileSync(path.join(REPO, "README.md"), "utf8");
+    expect(readme.match(/^## .+$/m)?.[0]).toBe("## Empezá en 2 minutos");
+    const quick = readme.split("## Empezá en 2 minutos")[1]?.split("\n## ")[0] ?? "";
+    expect(quick).toContain("/plugin install facha-ui@facha-ui");
+    expect(quick).toContain("/facha-ui:start");
+    expect(quick).toContain("¿cómo está la UI de mi proyecto?");
+  });
+
+  it("README, help and the usage guide show the plain-language request before the command", () => {
+    const docs = {
+      "README.md": fs.readFileSync(path.join(REPO, "README.md"), "utf8"),
+      "skills/help/SKILL.md": skillText("help"),
+      "docs/uso.md": fs.readFileSync(path.join(REPO, "docs", "uso.md"), "utf8"),
+    };
+    for (const [name, text] of Object.entries(docs)) {
+      const lower = text.toLowerCase();
+      const natural = lower.indexOf("mejorá la pantalla de pedidos");
+      const command = lower.indexOf("/facha-ui:variants /orders");
+      expect(natural, `${name}: natural request`).toBeGreaterThanOrEqual(0);
+      expect(command, `${name}: command`).toBeGreaterThanOrEqual(0);
+      expect(natural, name).toBeLessThan(command);
+      expect(text, name).toContain("aplicá la B");
+    }
+  });
+});

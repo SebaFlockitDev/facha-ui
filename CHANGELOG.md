@@ -16,6 +16,9 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 ### Changed
 - `start`, `learn` y `help` copian el registro de quien los usa (vos, tú o usted) en lugar de usar siempre el voseo.
 - `/facha-ui:apply` y `/facha-ui:init` terminan con el progreso de todo el proyecto, antes y después: "UX del proyecto 62 → 71 · violaciones 46 → 31" (§2.c.1).
+- Se puede pedir todo con palabras: "mejorá la pantalla de pedidos" (sin objetivo, toma el diagnóstico), "hacelo rápido", "en la B mové los filtros arriba", "probá colores más cálidos", "revisá el recorrido de alta", "enseñame a usar facha-ui". Los comandos quedan como atajos (§2.b).
+- Si pedís "aplicá la B" o "armá los tokens", Claude te responde con el comando exacto (`/facha-ui:apply`, `/facha-ui:init`): aplicar y crear tokens los seguís lanzando vos. Lo indican las `instructions` del MCP (punto 4, §2.a.2).
+- El README arranca con "Empezá en 2 minutos" (instalar, abrir Claude Code en tu proyecto, `/facha-ui:start`), y el README, `help` y la guía de uso muestran primero el pedido con palabras y después el comando.
 
 ### Security
 - El guardián automático solo lee: mismo bundle sin escritura, red ni ejecución de código del proyecto; el texto del proyecto que le pasa a Claude va cortado a 200 caracteres y marcado como dato; cualquier error interno es silencio y nunca rompe la edición (§2.f).

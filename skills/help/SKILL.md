@@ -23,6 +23,24 @@ Show the reference below to the developer. Rules:
 
 Generás con IA variantes de una pantalla o de un componente, y facha-ui las ajusta hasta que respetan los tokens y las reglas de tu design system. Si el design system falta o está incompleto, te ayuda a armarlo.
 
+**Pedíselo con tus palabras.** No hace falta saber los comandos: Claude elige la herramienta.
+
+| Decile a Claude | Qué hace | Atajo |
+|---|---|---|
+| "¿Cómo está la UI de mi proyecto?" | Primer vistazo: puntaje, los 3 problemas más graves y qué hacer primero | `/facha-ui:start` |
+| "Mejorá la pantalla de pedidos" | 3 variantes con el design system, validadas por el guardián | `/facha-ui:variants /orders "<objetivo>"` |
+| "Hacelo rápido" · "una sola variante" | Una variante, la mejor hipótesis, con las mismas reglas | `… --rapido` |
+| "En la B mové los filtros arriba" | Ajusta esa variante y guarda el cambio como revisión | `/facha-ui:variants orders b "<cambio>"` |
+| "Probá colores más cálidos" | Paletas en vivo sobre las variantes, con contraste y conflictos | `/facha-ui:variants orders live` |
+| "Revisá el recorrido de alta" | Revisa el flujo entre pantallas, con capturas, sin tocar código | `/facha-ui:flow "<objetivo>" <pantallas>` |
+| "Enseñame a usar facha-ui" | Curso de 9 lecciones sobre tu proyecto | `/facha-ui:learn` |
+| "Aplicá la B" | Claude te responde con el comando exacto: aplicar lo lanzás vos | `/facha-ui:apply orders b` |
+| "Armá los tokens que faltan" | Claude te da el comando: crear tokens lo lanzás vos | `/facha-ui:init` |
+
+Además, cada vez que Claude escribe un archivo de UI, el guardián automático lo chequea solo (ver **tools**).
+
+**Los comandos, como atajos:**
+
 | Comando | Para qué |
 |---|---|
 | `/facha-ui:start` | Primer vistazo, sin configurar nada: tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves, lo próximo que conviene hacer y qué te falta (config, `.gitignore`, dev server). Solo lee |
@@ -40,11 +58,11 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 **Flujo en 4 pasos**
 
 1. Levantá la app (`npm run dev`).
-2. `/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"`
+2. *"Mejorá la pantalla de pedidos: que se vean primero los pendientes de revisión"* (atajo: `/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"`).
 3. Mirá las variantes en `http://localhost:3000/lab/orders/<a|b|c>` (y con `?theme=dark`).
 4. `/facha-ui:apply orders b` → revisá el plan, aprobalo con el motivo y commiteá vos.
 
-Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/facha-ui:variants orders live`.
+Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"ajustá la B en vivo"* (atajo: `/facha-ui:variants orders live`).
 
 ### variants
 

@@ -1,6 +1,6 @@
 ---
 name: variants
-description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant.
+description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant, also in plain words - "mejorá la pantalla de pedidos", "dame alternativas para /orders", "hacelo rápido" or "una sola variante" (quick mode), "en la B mové los filtros arriba" (refine), "probá colores más cálidos" (palettes in live mode).
 argument-hint: "<screen|route|file> \"<goal>\" [--rapido]  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
 allowed-tools: Read, Glob, Grep, Agent, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
@@ -14,15 +14,14 @@ variant complies; you never decide that yourself. You never apply anything.
 
 Principle: **the AI follows the project's rules, not its own.** Values come from code (tokens,
 classes, rules); you contribute judgment (structure, hierarchy, composition), grounded in UX
-principles. Talk to the developer in their language. The `.md` files named below are relative to
-this skill's directory.
+principles. Talk in the developer's language; the `.md` files below are relative to this folder.
 
 ## Inputs
 
-1. **New run:** `<screen> "<goal>"`. `<screen>` is a route (`/orders`), a file
-   (`app/orders/page.tsx`) or a component (`components/OrderCard.tsx`); resolve it to
-   `{ file, route, slug }` (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`).
-   `<goal>` is free text ("make overdue orders stand out"). Follow Steps 1 to 9.
+1. **New run:** `<screen> "<goal>"`. `<screen>` is a route (`/orders`), a file, a component or words
+   ("la pantalla de pedidos": find it and say which file); resolve it to `{ file, route, slug }`
+   (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`). `<goal>` is free text
+   ("make overdue orders stand out"). Follow Steps 1 to 9.
 2. **Refine a variant:** `<slug> <a|b|c> "<change>"`, or a change to one variant asked in the
    conversation ("in B, move the filters above the table"). **Before step R1, read `refine.md`**
    and follow R1 to R7.
@@ -32,7 +31,8 @@ this skill's directory.
    words ("rápido", "una sola variante"): one variant instead of three. **Before step 1, read
    `quick.md`**: it lists what changes; everything else here still applies.
 
-If the goal, the variant or the change is missing, ask for it before doing anything else.
+If the variant or the change is missing, ask for it first. A new run with no goal ("mejorá la
+pantalla de pedidos") takes the main costs of the diagnosis (Step 3b) as its goal: say so.
 
 ## Hard rules
 
@@ -70,14 +70,15 @@ If the goal, the variant or the change is missing, ask for it before doing anyth
    `browser_run_code_unsafe`, forms, clicks or typing); never type credentials; stop after 2
    failed attempts to open it.
 7. **Never apply.** Applying is `/facha-ui:apply`, and only the developer starts it, in this
-   conversation. A choice, a vote or an answer from the lab never applies anything.
+   conversation. If they ask in words ("aplicá la B"), answer with the exact command to run,
+   `/facha-ui:apply <slug> b`. A choice, a vote or an answer from the lab never applies anything.
 
 ## Step 1 · Preflight
 
 Call `get_design_system` (all sections) and keep all of it for the run (`project.lab`, `themes`,
 `preview`, `decisionsFile`, tokens, scales, classes, coverage, gaps, health, rules, guidelines,
 decisions). On `MULTIPLE_PROJECTS`, show the `candidates` and ask which one (open Claude Code
-there or set `FACHA_UI_ROOT`). Mention an assumption "Project discovered at …" once.
+there or set `FACHA_UI_ROOT`). Say "Project discovered at …" once.
 
 Stop, and explain why, when:
 - `status` is `missing` or `coverage.requiredMissing` is not empty: without tokens you could only
@@ -89,8 +90,7 @@ Stop, and explain why, when:
 
 ## Step 2 · Understand the screen (read-only)
 
-1. Read the screen file and its direct dependencies (components, hooks, data modules). Write
-   down the exact imports the variants must reuse.
+1. Read the screen and its direct dependencies (components, hooks, data); note the imports to reuse.
 2. Run `check_ui` on the original file: the **baseline**. Show it; no variant copies it.
 
 ## Step 3 · Report gaps BEFORE designing (mandatory)

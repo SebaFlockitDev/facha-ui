@@ -1,6 +1,6 @@
 ---
 name: start
-description: First look at a project's UI with facha-ui, with no setup - what the project and its design system are, in plain words; its UX score and the 3 most serious problems with file:line; the one next step with the most impact; and a checklist of what is missing (config, .gitignore lines, dev server). Read-only, it never writes files. Use right after installing facha-ui, or when the developer asks "¿cómo está la UI de mi proyecto?", "¿por dónde empiezo?", "revisá el front", "how is my UI doing?" or "what should I fix first?".
+description: First look at a project's UI with facha-ui, with no setup - what the project and its design system are, in plain words; its UX score and the 3 most serious problems with file:line; the one next step with the most impact; and a checklist of what is missing (config, .gitignore lines, dev server). Read-only, it never writes files. Use right after installing facha-ui, or when the developer asks "¿cómo está la UI de mi proyecto?", "¿por dónde empiezo?", "revisá el front", "¿qué arreglo primero?", "how is my UI doing?" or "what should I fix first?".
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__audit_project
 ---
 
