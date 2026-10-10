@@ -66,7 +66,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Versión 0.15.0** · Next.js App Router, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
+> **Versión 0.16.0** · Next.js App Router, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
 
 ## Requisitos
 

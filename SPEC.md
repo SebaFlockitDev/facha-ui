@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.15.0** (§7.10–§7.23). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.16.0** (§7.10–§7.24). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -668,10 +668,14 @@ facha-ui/
 ├── CLAUDE.md                     # rol y reglas de trabajo para quien desarrolla el plugin
 ├── agents/
 │   └── ux-reviewer.md            # subagente crítico, solo lectura (facha-ui:ux-reviewer)
+├── hooks/
+│   └── hooks.json                # guardián automático: PostToolUse → facha-ui-mcp.js guard (0.16.0, §2.f)
 ├── skills/
 │   ├── _shared/ux-principles.md  # principios de UX con ids estables (ux:nielsen-1, ux:wcag-2.5.8…)
+│   ├── start/SKILL.md            # primer vistazo: puntaje, 3 problemas, una recomendación, checklist (0.16.0, §2.e)
 │   ├── variants/
 │   │   ├── SKILL.md              # flujo de un run nuevo, reglas duras y método UX (≤ 250 líneas)
+│   │   ├── quick.md              # modo rápido (--rapido): se lee antes del paso 1 (0.16.0, §2.b.6)
 │   │   ├── refine.md · live.md   # ajustes (revisiones) y modo en vivo: se leen antes de R1 / L1
 │   │   ├── lab.md · run-state.md # scaffold, capturas y esquema del run: se leen antes del paso que los usa
 │   │   ├── templates/next-app/   # layout.tsx, lab-theme.tsx, lab-panel.tsx, facha-live/{route,live-core}.ts
@@ -682,7 +686,7 @@ facha-ui/
 │   ├── help/SKILL.md             # referencia de comandos, tools y archivos
 │   └── learn/SKILL.md            # curso guiado sobre el propio proyecto (0.8.0)
 ├── mcp/                          # paquete facha-ui-mcp (Node + TS)
-│   ├── src/                      # server.ts, check.ts, rules.ts, project-rules.ts, visual.ts, design-system.ts,
+│   ├── src/                      # server.ts, guard.ts (modo del hook), check.ts, rules.ts, project-rules.ts, visual.ts, design-system.ts,
 │   │                             # propose.ts, tokens.ts, tailwind*.ts, config.ts, project.ts, sources/{jsx,css,usage}.ts…
 │   ├── test/                     # suites de vitest + fixtures/{next-tailwind,next-tw4-cssvars,next-visual}
 │   └── dist/facha-ui-mcp.js      # bundle (esbuild); se commitea junto con cada cambio en src (§7.8)
@@ -698,8 +702,8 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.15.0",
-  "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast) and applies nothing without your approval.",
+  "version": "0.16.0",
+  "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
   "repository": "https://github.com/SebaFlockitDev/facha-ui",
@@ -938,7 +942,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 
 | ID | Criterio | Verificación |
 |---|---|---|
-| PLG-1 | `claude plugin validate .` pasa; el plugin se instala desde GitHub con los comandos de §3.2 y expone `/facha-ui:variants`, `/facha-ui:apply`, `/facha-ui:init`, `/facha-ui:learn` y `/facha-ui:help` | [manual] |
+| PLG-1 | `claude plugin validate .` pasa; el plugin se instala desde GitHub con los comandos de §3.2 y expone `/facha-ui:start` (desde 0.16.0), `/facha-ui:variants`, `/facha-ui:apply`, `/facha-ui:init`, `/facha-ui:flow`, `/facha-ui:learn` y `/facha-ui:help`, y el hook del guardián automático (`hooks/hooks.json`) | [manual] |
 | PLG-2 | `.mcp.json` no contiene especificadores sin versión exacta; `run-pinned.mjs` rechaza `@latest` y funciona en Windows y en macOS/Linux | [auto] + [manual] Windows |
 | VAR-1 | `variants` crea exactamente `lab.dir/<slug>/{a,b,c}` (más `_shared/` opcional, `<x>2` si se pide un ajuste como variante nueva, y el andamiaje); en modo en vivo, además `.facha-ui/live/` y `.facha-ui/proposals/`. `git status --porcelain` antes y después muestra cambios **solo** en el lab y en `.facha-ui/` | [manual] guion |
 | VAR-2 | Cada variante termina `valid` con `check_ui` = 0 errores, o `failed` después de exactamente 3 intentos registrados en `attempts` | [auto] validación del run JSON + [manual] |
@@ -1362,6 +1366,25 @@ Pedido del dev: shadcn/ui es la base de muchísimas apps React hechas con IA, y 
 - **Hallazgo de diseño en shadcn:** con `--muted` y `--accent` reconocidos como superficies, `--muted-foreground` del tema neutral (oklch 0.556) no llega a 4.5:1 en claro sobre esos fondos suaves; sobre `--background` sí. Es el caso de texto secundario dentro de un área `bg-muted` (WCAG 1.4.3).
 - **Calibración contra la 0.14.0** (el mismo bundle del tag sobre los fixtures nuevos): `shadcn-tw3` pasó de `missing` y `rounded-md` marcado a `partial` y solo el color escrito a mano; `shadcn-tw4` mantiene status y `check_ui`, y corrige los roles.
 - **Tests:** 148. Fixtures `shadcn-tw3` (canales HSL en `@layer`, `tailwind.config` y `components.json`) y `shadcn-tw4` (oklch con `@theme inline`); `@layer` con nombre, anónimo, anidado y con media query; canales con y sin alfa y sin evidencia; la tabla de roles; lectura del config (anidados, `module.exports`, presets, funciones, spreads, `@config`); un config con efectos secundarios que no debe ejecutarse (S2); `tailwind.mapped`; alias y `calc()`. Los snapshots existentes no cambian.
+
+### 7.24 Versión 0.16.0: primer uso y modo rápido
+
+Objetivo: que quien instala facha-ui tenga valor en menos de un minuto, sin configurar nada, y que el plugin aporte en el trabajo diario aunque no lo invoque.
+
+- **Modo rápido de `variants`** (§2.b.6): `--rapido`, `--quick` o "hacelo rápido". Piensa A, B y C en una línea, construye la que mejor resuelve el diagnóstico, diseña los estados sin capturarlos, hasta 2 intentos del guardián, una captura de escritorio, solo las señales de `review_ui` y sin revisor independiente. Se omite exploración y revisión de calidad, nunca seguridad ni cumplimiento: siguen las 7 reglas duras, `check_ui` en 0 errores, las citas de fuente y nada sin `/facha-ui:apply`. `SKILL.md` sigue en 250 líneas; `quick.md` se lee antes del paso 1.
+- **`/facha-ui:start`** (§2.e): proyecto y design system en palabras simples, puntaje y los 3 problemas más graves con `archivo:línea` y su principio `ux:*`, **una** recomendación con regla fija y el checklist de config, `.gitignore` y dev server. El análisis es de solo lectura; al final pregunta "¿Querés que agregue esto?" y, solo con un sí explícito, agrega al final del `.gitignore` las líneas que faltan y crea `facha-ui.config.json` si no existe. La regla de S4 era *nada sin aprobación*, no *nunca*.
+- **Guardián automático** (§2.f): hook `PostToolUse` en `hooks/hooks.json`, en *exec form* (`command: "node"` + `args`) porque las rutas con espacios se partirían en un shell. El modo `guard` del bundle chequea solo el archivo escrito y calla en todo lo que no le corresponde. `guard: off | quiet | on`. Claude corrige solo lo que escribió en ese turno, una vez por archivo y turno, e informa lo que ya estaba; el texto del proyecto va cortado a 200 caracteres y marcado como dato.
+- **Progreso visible:** `apply` e `init` terminan con `UX del proyecto 62 → 71 · violaciones 46 → 31` (§2.c.1).
+- **Lenguaje natural:** las descriptions de `variants`, `flow`, `learn` y `start` traen pedidos con palabras; `apply`, `init` y `help` siguen con `disable-model-invocation` (S3). Como esas tres no le llegan al modelo, el punto 4 de las `instructions` del MCP (§2.a.2) hace que "aplicá la B" se responda con el comando exacto. El README arranca con "Empezá en 2 minutos", y README, `help` y `docs/uso.md` muestran primero el pedido y después el comando.
+- **Registro:** `start`, `learn` y `help` copian el tratamiento del dev (vos, tú o usted).
+- **Verificado en la documentación de Claude Code** (2026-10-10): formato de `hooks/hooks.json`, entrada y salida del hook, *exec form*, matcher como lista de nombres, `timeout` en segundos; `disable-model-invocation` saca la skill del contexto del modelo; tope de 1.536 caracteres para la description.
+- **Pruebas de punta a punta** con `claude -p --plugin-dir` sobre copias de un fixture:
+  - el hook avisa (`facha-ui ⚠ 2 problemas en app/promo/page.tsx`) y Claude recibe el detalle;
+  - "¿cómo está la UI de mi proyecto?" → `start`; "mejorá la pantalla principal, hacelo rápido" → `variants` en modo rápido (lee `quick.md`, una variante `valid` en 2 intentos, `"mode": "quick"`, 11 decisiones con fuente, cambios solo en el laboratorio y `.facha-ui/`); "aplicá la B" → el comando, sin aplicar; "enseñame qué es un design system" → `learn`. Las cuatro, correctas a la primera;
+  - `start` sin respuesta no escribe nada; con "sí" crea `.gitignore` y config en un proyecto sin ellos, y en otro solo agrega las 3 líneas que faltaban al final del `.gitignore` y no pisa una config creada entre la pregunta y el sí.
+  - En `-p` las herramientas piden permiso: con la herramienta Skill sin permiso, la skill no carga y Claude improvisa (llegó a intentar escribir la pantalla real, y el permiso lo frenó). Con el plugin instalado, la herramienta Skill y las del MCP se aprueban como cualquier otra.
+- **Tiempos del hook** (bundle, Windows): ~140 ms cuando calla, ~170–230 ms cuando chequea.
+- **Tests:** 179. Modo rápido, `start` (solo lectura del análisis y escritura con sí), hook (`hooks.json`, silencios, modos, sin design system, instantánea sin escrituras, texto truncado y marcado, tiempo), progreso en `apply` e `init`, descriptions y lenguaje natural, `instructions` con el punto 4. Ningún test existente cambió.
 ---
 
 ## Anexo A · Config completa de ejemplo
