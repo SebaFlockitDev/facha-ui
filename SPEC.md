@@ -637,7 +637,7 @@ facha-ui/
 ├── docs/
 │   ├── img/                      # diagrama del flujo y capturas de la demo
 │   └── uso.md                    # guía de uso
-├── SPEC.md · README.md · LICENSE (MIT)
+├── SPEC.md · README.md · CHANGELOG.md · LICENSE (MIT)
 ```
 
 #### 2.d.2 `.claude-plugin/plugin.json`

@@ -32,6 +32,10 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 - **Commits chicos y convencionales** (`feat(skills): …`, `fix(mcp): …`, `docs: …`), uno por
   punto del plan. Sin trailers de atribución (`Co-Authored-By`, `Claude-Session`).
 - **Push solo cuando lo pida quien mantiene el repo**, y solo con todo en verde.
+- **CHANGELOG:** cada cambio que note quien usa el plugin se anota en `CHANGELOG.md`, en
+  Unreleased. Cada release actualiza `CHANGELOG.md`: lo de Unreleased pasa a la versión nueva, con
+  fecha (AAAA-MM-DD), y la versión coincide con `plugin.json`, `mcp/package.json` y el server
+  (hay un test que lo controla).
 - **Bundle:** cada cambio en `mcp/src` se acompaña de `npm run build` en `mcp/`, y
   `mcp/dist/facha-ui-mcp.js` va en el mismo commit.
 - **Nada hardcodeado de proyectos de prueba:** ni nombres, ni rutas, ni términos de dominio, ni

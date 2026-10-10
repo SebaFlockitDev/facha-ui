@@ -101,7 +101,7 @@ describe("MCP-7 · nothing from the test projects is hardcoded", () => {
   it.skipIf(BANNED_TERMS.length === 0)("the plugin, its tests and its docs do not mention the test projects", () => {
     const banned = new RegExp(BANNED_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "i");
     const dirs = [path.join(MCP_DIR, "src"), path.join(MCP_DIR, "test"), path.join(REPO, "skills"), path.join(REPO, "agents"), path.join(REPO, "docs")].filter((d) => fs.existsSync(d));
-    const rootDocs = ["README.md", "SPEC.md", "CLAUDE.md"].map((f) => path.join(REPO, f)).filter((f) => fs.existsSync(f));
+    const rootDocs = ["README.md", "SPEC.md", "CLAUDE.md", "CHANGELOG.md"].map((f) => path.join(REPO, f)).filter((f) => fs.existsSync(f));
     const offenders: string[] = [];
     for (const f of [...dirs.flatMap((d) => listFiles(d)), ...rootDocs]) {
       if (/\.(png|jpe?g|gif|webp|ico)$/i.test(f)) continue;

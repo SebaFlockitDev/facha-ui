@@ -241,6 +241,31 @@ describe("ux-reviewer agent", () => {
   });
 });
 
+describe("CHANGELOG", () => {
+  const text = fs.readFileSync(path.join(REPO, "CHANGELOG.md"), "utf8");
+  /** Version headings in order, as "## [x.y.z] - YYYY-MM-DD" (Unreleased has no date). */
+  const versions = [...text.matchAll(/^## \[(\d+\.\d+\.\d+)\] - (\d{4}-\d{2}-\d{2})$/gm)].map((m) => ({ version: m[1]!, date: m[2]! }));
+
+  it("starts with Unreleased, then one dated section per version, newest first", () => {
+    expect(text.match(/^## \[[^\]]+\]/m)?.[0]).toBe("## [Unreleased]");
+    expect(versions.length).toBeGreaterThan(0);
+    const key = (v: string) => v.split(".").map(Number).reduce((acc, n) => acc * 1000 + n, 0);
+    for (let i = 1; i < versions.length; i++) expect(key(versions[i - 1]!.version), versions[i]!.version).toBeGreaterThan(key(versions[i]!.version));
+    expect(versions.at(-1)?.version).toBe("0.1.0");
+  });
+
+  it("its latest version is the one in plugin.json, mcp/package.json and the server", () => {
+    const latest = versions[0]?.version;
+    expect(JSON.parse(fs.readFileSync(path.join(REPO, ".claude-plugin", "plugin.json"), "utf8")).version).toBe(latest);
+    expect(JSON.parse(fs.readFileSync(path.join(MCP_DIR, "package.json"), "utf8")).version).toBe(latest);
+    expect(fs.readFileSync(path.join(MCP_DIR, "src", "server.ts"), "utf8")).toContain(`export const VERSION = "${latest}";`);
+  });
+
+  it("uses only the Keep a Changelog categories", () => {
+    for (const m of text.matchAll(/^### (.+)$/gm)) expect(["Added", "Changed", "Deprecated", "Fixed", "Removed", "Security"], m[1]).toContain(m[1]);
+  });
+});
+
 describe("short skills that read their parts when a step needs them", () => {
   const SKILLS = path.join(REPO, "skills");
   const VARIANTS = path.join(SKILLS, "variants");
