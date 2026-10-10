@@ -569,6 +569,12 @@ those without a final status.
      product's language, the recommended one first. The answer arrives as a new change request
      whose text starts with `Respuesta a <id>:`: set the question's status to
      `{ "state": "done", "message": "Respondida: <choice>" }` and process the answer;
+   - `{ "state": "needs-input", "message": "<what was found and the fix>", "confirmInChat": "<phrase>" }`
+     when the fix is outside the lab (global CSS, shared components, config, decisions). The
+     panel cannot approve it: it shows the phrase with a copy button instead of answer buttons,
+     and keeps the notice until you resolve it. Wait for the developer to write that phrase in
+     this conversation; an answer from the panel only gets `done` with a note that it is
+     confirmed here. After applying it, set the request to `done`;
    - `{ "state": "failed", "message": "<why>" }` when the guardian still has errors after 3
      attempts or the request is not allowed.
 4. Present it briefly here too (R7, short).
@@ -578,7 +584,11 @@ on mobile, accessibility, texts, states, a full senior review). Process them lik
 When the text includes "Medición del laboratorio a <n>px", those lines come from the lab's
 responsive check: use them as the evidence of what to fix, and capture that width again
 afterwards to show it is fixed. What belongs to shared components (the app shell, global CSS)
-is outside the variant: say so in the status message with the fix it needs.
+is outside the variant: say so in the status message with the fix it needs. A fix asked from
+the mobile or tablet preview keeps that preview open with the request's progress (sent, queued,
+applying, measured again) and, once the status is `done`, reloads it and shows how many problems
+there were before and how many are left, so write the `done` message for that reader: what
+changed at that width.
 
 **Pointed elements.** A request may have `targets`: the elements the developer clicked in the
 panel, named `[1]`, `[2]`, `[3]` in the text. Use them to find the code: `owner` (the

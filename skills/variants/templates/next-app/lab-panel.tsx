@@ -100,6 +100,11 @@ interface Status {
   guardian?: { error: number; warning: number; info: number };
   /** For needs-input: the choices, shown as buttons; the recommended one stands out. */
   options?: { label: string; recommended?: boolean }[];
+  /**
+   * For needs-input that touches code outside the lab: the exact phrase to write in the Claude
+   * Code chat. The panel shows it to copy instead of answer buttons, since it cannot approve it.
+   */
+  confirmInChat?: string;
 }
 
 /** What is sent about a pointed element. The endpoint keeps only these fields. */
@@ -288,6 +293,18 @@ button.view[aria-pressed="true"] { border-color: #ff8a4c; }
 .device-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .issue { margin: 0; border-left: 3px solid #ff8a4c; padding-left: 8px; }
 .issue.ok { border-left-color: #4fd17f; }
+.fix { display: grid; gap: 8px; }
+.steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.steps li { position: relative; padding-left: 22px; color: #9ba2b8; }
+.steps li::before { content: ""; position: absolute; left: 2px; top: 4px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; border: 2px solid #3a4256; }
+.steps li.ok, .steps li.now { color: #e8eaf2; }
+.steps li.ok::before { background: #4fd17f; border-color: #4fd17f; }
+.steps li.now::before { border-color: #ff8a4c; border-top-color: transparent; animation: facha-spin .9s linear infinite; }
+.steps li.stop { color: #ff8a4c; }
+.steps li.stop::before { background: #ff8a4c; border-color: #ff8a4c; }
+.fix .row { flex-wrap: wrap; gap: 6px; }
+@keyframes facha-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .steps li.now::before { animation: none; } }
 .device iframe { display: block; max-width: calc(100vw - 48px); border: 8px solid #161a25; border-radius: 18px; background: #ffffff; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 @media (max-width: 760px) { .device-frame { flex-direction: column; overflow: auto; } .device-side { width: auto; max-height: none; } }
 .layer { position: fixed; inset: 0; pointer-events: none; z-index: 2147482999; }
@@ -768,6 +785,68 @@ function LiveOff({ slug }: { slug: string }) {
   );
 }
 
+/** A decision only the Claude Code chat can approve: the phrase to write there, ready to copy. */
+function ChatConfirm({ phrase }: { phrase: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="liveoff" role="note">
+      <span>
+        <b>Se confirma en la conversación de Claude Code, no desde acá:</b> cambia código fuera del laboratorio. Escribí ahí:
+      </span>
+      <span className="row">
+        <code>{phrase}</code>
+        <button
+          className="act"
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(phrase);
+              setCopied(true);
+            } catch {
+              /* clipboard blocked: the phrase is visible to copy by hand */
+            }
+          }}
+        >
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </span>
+    </div>
+  );
+}
+
+/** Where a fix asked from the mobile or tablet preview stands, kept across Next reloads. */
+interface DeviceFix {
+  id: string;
+  viewport: string;
+  before: string[];
+}
+const DEVICE_FIX_KEY = "facha-ui:device-fix";
+
+function loadDeviceFix(): DeviceFix | null {
+  try {
+    return JSON.parse(window.sessionStorage.getItem(DEVICE_FIX_KEY) ?? "null") as DeviceFix | null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDeviceFix(fix: DeviceFix | null) {
+  try {
+    if (fix) window.sessionStorage.setItem(DEVICE_FIX_KEY, JSON.stringify(fix));
+    else window.sessionStorage.removeItem(DEVICE_FIX_KEY);
+  } catch {
+    /* storage blocked: the progress shows until the page reloads */
+  }
+}
+
+/** How the "apply" step of a device fix reads: done, in progress, or not reached yet. */
+function fixStepClass(state: Status["state"] | undefined): string {
+  if (state === "done") return "ok";
+  if (state === "working") return "now";
+  if (state === "needs-input" || state === "failed") return "stop";
+  return "";
+}
+
 /** The responsive check's lines as problems in plain words (what passes is left out). */
 function issuesOf(lines: string[]): string[] {
   return lines.flatMap((line) => {
@@ -811,6 +890,10 @@ export function LabPanel() {
   const [customHex, setCustomHex] = useState("#2563eb");
   const [viewport, setViewport] = useState<(typeof VIEWPORTS)[number] | null>(null);
   const [ownAnswer, setOwnAnswer] = useState("");
+  const [deviceFix, setDeviceFix] = useState<DeviceFix | null>(null);
+  /** Bumped to reload the preview once a fix lands. */
+  const [frameKey, setFrameKey] = useState(0);
+  const reloadedFor = useRef<string | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -828,6 +911,13 @@ export function LabPanel() {
     if (navigator.webdriver || window.self !== window.top) return;
     setHere(variantFromPath());
     setLayout({ ...DEFAULT_LAYOUT, ...load<Partial<Layout>>(STORAGE_KEY, {}) });
+    // A fix asked from the preview survives the reload: reopen the same size to show how it went.
+    const fix = loadDeviceFix();
+    const size = fix && VIEWPORTS.find((v) => v.name === fix.viewport);
+    if (fix && size) {
+      setDeviceFix(fix);
+      setViewport(size);
+    }
     setChoice(load<PaletteChoice | null>(PALETTE_KEY, null));
     const host = document.createElement("div");
     host.setAttribute("data-facha-ui", "lab-panel");
@@ -905,6 +995,16 @@ export function LabPanel() {
 
   const mine = (live.requests ?? []).filter((r) => r.variant === here?.variant);
   const pending = mine.some((r) => r.status.state === "queued" || r.status.state === "working");
+  const fixReq = deviceFix ? mine.find((r) => r.id === deviceFix.id) : undefined;
+
+  // Once the fix lands, reload the preview so the lab measures the new revision.
+  useEffect(() => {
+    if (!fixReq || fixReq.status.state !== "done") return;
+    const mark = `${fixReq.id}:${fixReq.status.revision ?? ""}`;
+    if (reloadedFor.current === mark) return;
+    reloadedFor.current = mark;
+    setFrameKey((k) => k + 1);
+  }, [fixReq?.id, fixReq?.status.state, fixReq?.status.revision]);
 
   useEffect(() => {
     if (!here) return;
@@ -1070,7 +1170,7 @@ export function LabPanel() {
   }, [open, hiddenPanel, picking, targets]);
 
   const post = async (body: Record<string, unknown>) => {
-    if (!here || !live.token) return false;
+    if (!here || !live.token) return null;
     setSending(true);
     setError(null);
     try {
@@ -1082,10 +1182,11 @@ export function LabPanel() {
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error ?? `Error ${res.status}`);
-        return false;
+        return null;
       }
+      const { id } = (await res.json().catch(() => ({}))) as { id?: string };
       await refresh();
-      return true;
+      return id ?? "sent";
     } finally {
       setSending(false);
     }
@@ -1125,12 +1226,20 @@ export function LabPanel() {
   const fixDevice = async () => {
     if (!viewport || !deviceReport) return;
     const request = `${QUICK[0].text}\n\nMedición del laboratorio a ${viewport.width}px:\n${deviceReport.join("\n")}`;
-    const ok = await post({ kind: "change", text: request.slice(0, 2000) });
-    if (ok) {
+    const id = await post({ kind: "change", text: request.slice(0, 2000) });
+    if (id) {
+      // The preview stays open and follows the request: queued, working, then measured again.
+      const fix = { id, viewport: viewport.name, before: issuesOf(deviceReport) };
+      reloadedFor.current = null;
+      setDeviceFix(fix);
+      saveDeviceFix(fix);
       setNotice(`Pedido enviado: arreglar lo que falla a ${viewport.width}px, con la medición.`);
-      setViewport(null);
-      setTab("changes");
     }
+  };
+
+  const closeDeviceFix = () => {
+    setDeviceFix(null);
+    saveDeviceFix(null);
   };
 
   const send = async (kind: "change" | "choose") => {
@@ -1219,8 +1328,11 @@ export function LabPanel() {
   const showTab = tab === "palette" && !paletteBase ? "improve" : tab;
   const deviceIssues = issuesOf(deviceReport ?? []);
   // The newest question still waiting for an answer, unless a later request already answers it.
+  // A chat-only confirmation stays until Claude Code resolves it: a panel answer cannot.
   const decision = [...mine].reverse().find(
-    (r) => r.status.state === "needs-input" && !mine.some((m) => m.text.startsWith(`Respuesta a ${r.id}`)),
+    (r) =>
+      r.status.state === "needs-input" &&
+      (r.status.confirmInChat || !mine.some((m) => m.text.startsWith(`Respuesta a ${r.id}`))),
   );
   const params = new URLSearchParams(window.location.search);
   const currentTheme = params.get("theme") ?? "";
@@ -1565,39 +1677,45 @@ export function LabPanel() {
               <div className="decision" role="alert">
                 <span className="label">Necesita tu decisión</span>
                 <p className="decision-text">{decision.status.message}</p>
-                {(decision.status.options ?? []).length > 0 && (
-                  <div className="decision-options">
-                    {(decision.status.options ?? []).map((o) => (
-                      <button
-                        key={o.label}
-                        className={`act${o.recommended ? " primary" : ""}`}
-                        type="button"
-                        disabled={sending || !liveHere}
-                        onClick={() => void answer(decision, o.label)}
-                      >
-                        {o.label}
-                        {o.recommended ? " · recomendada" : ""}
+                {decision.status.confirmInChat ? (
+                  <ChatConfirm phrase={decision.status.confirmInChat} />
+                ) : (
+                  <>
+                    {(decision.status.options ?? []).length > 0 && (
+                      <div className="decision-options">
+                        {(decision.status.options ?? []).map((o) => (
+                          <button
+                            key={o.label}
+                            className={`act${o.recommended ? " primary" : ""}`}
+                            type="button"
+                            disabled={sending || !liveHere}
+                            onClick={() => void answer(decision, o.label)}
+                          >
+                            {o.label}
+                            {o.recommended ? " · recomendada" : ""}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <div className="row">
+                      <input
+                        className="answer"
+                        value={ownAnswer}
+                        maxLength={500}
+                        placeholder="O escribí tu respuesta"
+                        aria-label="Tu respuesta"
+                        onChange={(e) => setOwnAnswer(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && ownAnswer.trim()) void answer(decision, ownAnswer.trim());
+                        }}
+                      />
+                      <button className="act" type="button" disabled={sending || !liveHere || !ownAnswer.trim()} onClick={() => void answer(decision, ownAnswer.trim())}>
+                        Responder
                       </button>
-                    ))}
-                  </div>
+                    </div>
+                    {!liveHere && <LiveOff slug={here.slug} />}
+                  </>
                 )}
-                <div className="row">
-                  <input
-                    className="answer"
-                    value={ownAnswer}
-                    maxLength={500}
-                    placeholder="O escribí tu respuesta"
-                    aria-label="Tu respuesta"
-                    onChange={(e) => setOwnAnswer(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && ownAnswer.trim()) void answer(decision, ownAnswer.trim());
-                    }}
-                  />
-                  <button className="act" type="button" disabled={sending || !liveHere || !ownAnswer.trim()} onClick={() => void answer(decision, ownAnswer.trim())}>
-                    Responder
-                  </button>
-                </div>
-                {!liveHere && <LiveOff slug={here.slug} />}
               </div>
             )}
             <div className="body">{showTab === "palette" ? paletteTab : showTab === "improve" ? improveTab : changesTab}</div>
@@ -1616,6 +1734,7 @@ export function LabPanel() {
           <div className="device-frame">
             <div className="device-phone">
               <iframe
+                key={frameKey}
                 ref={deviceFrame}
                 title={`Variante ${letter} en ${viewport.label}`}
                 src={previewUrl()}
@@ -1639,7 +1758,78 @@ export function LabPanel() {
                   </button>
                 ))}
               </div>
-              {!deviceReport ? (
+              {deviceFix && deviceFix.viewport === viewport.name ? (
+                <div className="fix" aria-live="polite">
+                  <span className="label">Tu pedido</span>
+                  <ol className="steps">
+                    <li className="ok">Enviado a Claude Code</li>
+                    <li className={fixReq && fixReq.status.state !== "queued" ? "ok" : "now"}>
+                      {fixReq?.status.state === "queued" || !fixReq ? "En cola: Claude Code lo toma en segundos" : "Tomado por Claude Code"}
+                    </li>
+                    <li className={fixStepClass(fixReq?.status.state)}>
+                      {fixReq?.status.state === "working"
+                        ? "Aplicando el arreglo…"
+                        : fixReq?.status.state === "done"
+                          ? `Aplicado${fixReq.status.revision ? ` · revisión ${fixReq.status.revision}` : ""}${fixReq.status.guardian ? ` · guardián ${fixReq.status.guardian.error} errores` : ""}`
+                          : fixReq?.status.state === "needs-input"
+                            ? "Necesita tu decisión"
+                            : fixReq?.status.state === "failed"
+                              ? "No se pudo aplicar"
+                              : "Aplicar el arreglo"}
+                    </li>
+                    <li className={fixReq?.status.state === "done" ? (deviceReport ? "ok" : "now") : ""}>
+                      {fixReq?.status.state === "done" && deviceReport
+                        ? `Medido de nuevo: ${deviceFix.before.length} ${deviceFix.before.length === 1 ? "problema" : "problemas"} antes, ${deviceIssues.length} ahora`
+                        : "Medir de nuevo en este tamaño"}
+                    </li>
+                  </ol>
+                  {fixReq?.status.message && <p className={`issue${fixReq.status.state === "done" ? " ok" : ""}`}>{fixReq.status.message}</p>}
+                  {fixReq?.status.state === "needs-input" &&
+                    (fixReq.status.confirmInChat ? (
+                      <ChatConfirm phrase={fixReq.status.confirmInChat} />
+                    ) : (
+                      <p className="muted">Respondé en el aviso «Necesita tu decisión» del panel.</p>
+                    ))}
+                  {fixReq?.status.state === "done" && deviceReport && deviceIssues.length > 0 && (
+                    <>
+                      <span className="label">Lo que sigue fallando</span>
+                      {deviceIssues.map((issue, i) => (
+                        <p className="issue" key={i}>
+                          {issue}
+                        </p>
+                      ))}
+                    </>
+                  )}
+                  <div className="row">
+                    {(fixReq?.status.state === "done" || fixReq?.status.state === "failed") && deviceIssues.length > 0 && deviceReport && (
+                      <button className="act primary" type="button" disabled={sending || !liveHere} onClick={() => void fixDevice()}>
+                        Pedir otra vuelta
+                      </button>
+                    )}
+                    <button className="act" type="button" onClick={() => setFrameKey((k) => k + 1)}>
+                      Volver a medir
+                    </button>
+                    {fixReq?.status.state === "queued" || fixReq?.status.state === "working" || !fixReq ? (
+                      <button
+                        className="act"
+                        type="button"
+                        onClick={() => {
+                          closeDeviceFix();
+                          setViewport(null);
+                          setOpen(true);
+                          setTab("changes");
+                        }}
+                      >
+                        Seguir en Cambios
+                      </button>
+                    ) : (
+                      <button className="act" type="button" onClick={closeDeviceFix}>
+                        Listo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : !deviceReport ? (
                 <p className="muted">Midiendo la página…</p>
               ) : deviceIssues.length === 0 ? (
                 <p className="issue ok">Se ve bien en este tamaño: nada se sale de la pantalla, el contenido tiene el ancho, los objetivos y los textos alcanzan el mínimo.</p>
