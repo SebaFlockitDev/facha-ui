@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.12.0** (§7.10–§7.20). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.13.0** (§7.10–§7.21). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 > **Prompts de origen:** [`docs/prompts/01-spec.md`](docs/prompts/01-spec.md) · [`docs/prompts/02-mvp-plan.md`](docs/prompts/02-mvp-plan.md)
 
@@ -1213,6 +1213,15 @@ Pedido del dev, actuando "como experto en UX": que el plugin juzgue si una panta
 - **Comparar y decidir en equipo:** `/lab/compare/<pantalla>` muestra las variantes lado a lado con los mismos datos reales, a ancho de escritorio, tablet o móvil, en cualquier tema y estado, con scroll sincronizado. Con el modo en vivo, cada persona vota con su nombre y un motivo (pasa por el mismo endpoint, con el token de la sesión); Claude lo registra en `votes` del run (L4b) y `apply` muestra los votos en el plan y en la decisión (`**Votos del equipo:**`). `report.mjs` arma un HTML autocontenido y sin scripts para compartir, con el texto del proyecto escapado.
 - **Calibración:** `review_flow` sobre 4 pantallas reales dejó de marcar los filtros como "formulario sin salida" (solo cuenta formularios que envían), y las señales ya no leen comentarios.
 - **Tests:** 103 en total, con fixtures de flujo (3 pasos), puntaje, CLI con línea base, diff de imágenes, votos y reporte.
+
+### 7.21 Versión 0.13.0: el panel como centro de control
+
+Pedido del dev: "esto debe ser sencillo de usar; el popup debería tener todos los botones desde donde configurar y mejorar la UI". Hasta acá, cada mejora pedía conocer un comando o escribirla.
+
+- **Pestaña Mejorar** (la primera): *Ver* (escritorio, móvil 375, tablet 768; tema y estado sin tocar la URL), *Mejorar con un clic* (arreglar en el celular, accesibilidad, textos, estados, revisión senior completa: cada una es un pedido de cambio con un texto preparado que Claude aplica como revisión) y *Decidir* (comparar y elegir).
+- **Arreglar lo medido:** en la vista Móvil o Tablet el panel lee el medidor del laboratorio dentro del iframe (mismo origen) y lo muestra arriba; **Pedir que lo arregle** manda el pedido con esas líneas como evidencia. Claude arregla lo que está dentro de la variante y dice qué necesita lo compartido (shell, CSS global).
+- Sin el modo en vivo, *Ver* y *Decidir* funcionan igual, y donde haría falta enviar un pedido, el panel dice cómo activarlo.
+- **Calibración propia:** el enlace "Comparar las variantes" del panel tenía bajo contraste (estilo del navegador); corregido.
 ---
 
 ## Anexo A · Config completa de ejemplo

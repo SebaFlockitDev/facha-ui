@@ -2,6 +2,7 @@
 // facha-ui lab scaffold · live panel · removed by /facha-ui:apply when no runs remain
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { THEMES } from "./lab-theme";
 
 /**
  * Floating panel of the facha-ui lab. With live mode on (/facha-ui:variants <slug> live in Claude
@@ -36,6 +37,54 @@ const VIEWPORTS = [
   { name: "mobile", label: "Móvil", width: 375, height: 812 },
   { name: "tablet", label: "Tablet", width: 768, height: 1024 },
 ] as const;
+
+/**
+ * One-click improvements. Each one is sent as a change request: Claude Code applies it as a
+ * revision of this variant, with every rule, and the page reloads.
+ */
+const QUICK = [
+  {
+    id: "mobile",
+    label: "Arreglar en el celular",
+    text: "Hacé que esta variante funcione bien en el celular (375px) y en tablet (768px): sin scroll horizontal, que el contenido principal tenga la pantalla (la navegación lateral se apila o va a un menú), tablas con scroll propio o como tarjetas, objetivos táctiles de 24px o más y textos de 12px o más.",
+  },
+  {
+    id: "a11y",
+    label: "Mejorar la accesibilidad",
+    text: "Mejorá la accesibilidad de esta variante: foco visible, todo alcanzable con el teclado, etiquetas en los campos, nombres en los botones de ícono, contraste en todos los temas y títulos sin saltos.",
+  },
+  {
+    id: "copy",
+    label: "Mejorar los textos",
+    text: "Mejorá los textos de esta variante con la voz del producto: botones con verbo y objeto, enlaces que digan adónde van, errores que digan qué pasó y qué hacer, y estados vacíos con el próximo paso.",
+  },
+  {
+    id: "states",
+    label: "Completar los estados",
+    text: "Asegurá que esta variante tenga bien diseñados sus estados de cargando, vacío, error y datos extremos, con los patrones del proyecto.",
+  },
+  {
+    id: "senior",
+    label: "Revisión senior completa",
+    text: "Hacé la crítica senior completa de esta variante (C1–C10) mirando sus capturas en cada tema, estado y tamaño, aplicá los arreglos que estén dentro de la variante y dejá lo demás con tu recomendación.",
+  },
+] as const;
+
+const STATE_OPTIONS = [
+  { value: "", label: "Datos reales" },
+  { value: "loading", label: "Cargando" },
+  { value: "empty", label: "Vacío" },
+  { value: "error", label: "Error" },
+  { value: "long", label: "Datos extremos" },
+];
+
+/** Reloads the lab page with a query parameter set (or removed). */
+function setParam(name: string, value: string) {
+  const url = new URL(window.location.href);
+  if (value) url.searchParams.set(name, value);
+  else url.searchParams.delete(name);
+  window.location.assign(url.toString());
+}
 
 /** The current lab URL with the responsive check on (the theme and state stay). */
 function previewUrl(): string {
@@ -213,6 +262,14 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .conflicts.has { border-color: #ff8a4c; }
 .conflicts p { margin: 0; }
 .views { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
+.section { display: grid; gap: 6px; flex-shrink: 0; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #9ba2b8; }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; }
+a.act.link { display: inline-block; text-decoration: none; border-radius: 9px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 7px 12px; font-weight: 600; }
+a.act.link:focus-visible { outline: 2px solid #ff8a4c; outline-offset: 2px; }
+select { font: inherit; font-size: 12px; color: #e8eaf2; background: #0e1119; border: 1px solid #3a4256; border-radius: 8px; padding: 3px 6px; }
+.device-report { display: grid; gap: 4px; max-width: min(760px, calc(100vw - 48px)); background: #161a25; border: 1px solid #3a4256; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+.device-report button { justify-self: start; margin-top: 4px; }
 button.view { border-radius: 999px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
 button.view[aria-pressed="true"] { border-color: #ff8a4c; }
 .device { position: fixed; inset: 0; z-index: 2147483001; box-sizing: border-box; padding: 16px; display: flex; align-items: center; justify-content: center; background: rgba(8,10,16,.72); font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: #e8eaf2; }
@@ -682,7 +739,10 @@ export function LabPanel() {
   const [here, setHere] = useState<{ slug: string; variant: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [hiddenPanel, setHiddenPanel] = useState(false);
-  const [tab, setTab] = useState<"changes" | "palette">("changes");
+  const [tab, setTab] = useState<"improve" | "changes" | "palette">("improve");
+  /** What the responsive check measured inside the mobile or tablet preview. */
+  const [deviceReport, setDeviceReport] = useState<string[] | null>(null);
+  const deviceFrame = useRef<HTMLIFrameElement | null>(null);
   const [live, setLive] = useState<LiveState>({ active: false });
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -975,6 +1035,39 @@ export function LabPanel() {
     }
   };
 
+  /** A one-click improvement, sent as a change; the status shows in the Cambios tab. */
+  const quick = async (label: string, request: string) => {
+    const ok = await post({ kind: "change", text: request });
+    if (ok) {
+      setNotice(`Pedido enviado: ${label}. Claude Code lo aplica como revisión y la página se recarga sola.`);
+      setTab("changes");
+    }
+  };
+
+  // Reads the responsive check inside the preview once the page has settled.
+  const readDeviceReport = () => {
+    setDeviceReport(null);
+    let tries = 0;
+    const id = window.setInterval(() => {
+      const box = deviceFrame.current?.contentDocument?.querySelector('[data-facha-ui="responsive-check"]');
+      if (box || ++tries > 20) {
+        window.clearInterval(id);
+        if (box) setDeviceReport(Array.from(box.children).map((c) => c.textContent ?? ""));
+      }
+    }, 300);
+  };
+
+  const fixDevice = async () => {
+    if (!viewport || !deviceReport) return;
+    const request = `${QUICK[0].text}\n\nMedición del laboratorio a ${viewport.width}px:\n${deviceReport.join("\n")}`;
+    const ok = await post({ kind: "change", text: request.slice(0, 2000) });
+    if (ok) {
+      setNotice(`Pedido enviado: arreglar lo que falla a ${viewport.width}px, con la medición.`);
+      setViewport(null);
+      setTab("changes");
+    }
+  };
+
   const send = async (kind: "change" | "choose") => {
     const ok = await post({
       kind,
@@ -1058,7 +1151,99 @@ export function LabPanel() {
   const wrapStyle: React.CSSProperties = placed ? { left: layout.x ?? 0, top: layout.y ?? 0, right: "auto", bottom: "auto" } : {};
   const cardStyle: React.CSSProperties = sized ? { width: layout.width ?? undefined, height: layout.height ?? undefined } : {};
   const liveHere = live.active && live.slug === here.slug;
-  const showTab = paletteBase ? tab : "changes";
+  const showTab = tab === "palette" && !paletteBase ? "improve" : tab;
+  const params = new URLSearchParams(window.location.search);
+  const currentTheme = params.get("theme") ?? "";
+  const currentState = params.get("state") ?? "";
+
+  const improveTab = (
+    <>
+      <div className="section">
+        <span className="label">Ver</span>
+        <div className="views" role="group" aria-label="Tamaño">
+          <button className="view" type="button" aria-pressed={!viewport} onClick={() => setViewport(null)}>
+            Escritorio
+          </button>
+          {VIEWPORTS.map((v) => (
+            <button
+              key={v.name}
+              className="view"
+              type="button"
+              aria-pressed={viewport?.name === v.name}
+              title={`${v.width} × ${v.height}, con el medidor de responsive`}
+              onClick={() => setViewport(v)}
+            >
+              {v.label} {v.width}
+            </button>
+          ))}
+        </div>
+        <div className="views">
+          {Object.keys(THEMES).length > 0 && (
+            <label className="muted">
+              Tema{" "}
+              <select value={currentTheme} onChange={(e) => setParam("theme", e.target.value)}>
+                <option value="">Por defecto</option>
+                {Object.keys(THEMES).map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className="muted">
+            Estado{" "}
+            <select value={currentState} onChange={(e) => setParam("state", e.target.value)}>
+              {STATE_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+      <div className="section">
+        <span className="label">Mejorar con un clic</span>
+        {liveHere ? (
+          <div className="quick">
+            {QUICK.map((q) => (
+              <button key={q.id} className="act" type="button" disabled={sending} title={q.text} onClick={() => void quick(q.label, q.text)}>
+                {q.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">
+            Para pedir mejoras desde acá, activá el modo en vivo en Claude Code: <code>/facha-ui:variants {here.slug} live</code>
+          </p>
+        )}
+        <p className="muted">Claude Code aplica cada mejora como una revisión de esta variante, con todas las reglas. Para algo puntual, usá la pestaña Cambios.</p>
+      </div>
+      <div className="section">
+        <span className="label">Decidir</span>
+        <div className="quick">
+          <a className="act link" href={`${LAB_BASE}/compare/${here.slug}`} target="_blank" rel="noreferrer">
+            Comparar las variantes
+          </a>
+          {liveHere && (
+            <button
+              className="act"
+              type="button"
+              onClick={() => {
+                setTab("changes");
+                setConfirming(true);
+              }}
+            >
+              Elegir esta variante
+            </button>
+          )}
+        </div>
+      </div>
+      {notice && <p className="muted">{notice}</p>}
+      {error && <p className="error">{error}</p>}
+    </>
+  );
 
   const swatchesOf = (c: PaletteChoice | null) => {
     if (!paletteBase) return [];
@@ -1137,6 +1322,7 @@ export function LabPanel() {
         )}
       </div>
       {confirming && <p className="muted">Nada se aplica desde acá: Claude Code te muestra el plan y lo confirmás ahí, con el motivo.</p>}
+      {notice && <p className="muted">{notice}</p>}
       {error && <p className="error">{error}</p>}
       <div className="list" aria-live="polite">
         {latest && <RequestItem r={latest} />}
@@ -1279,26 +1465,23 @@ export function LabPanel() {
                 <button className="icon" type="button" onClick={hide} aria-label="Ocultar el panel" title="Ocultar (vuelve al recargar o con Alt+Shift+F)">×</button>
               </span>
             </div>
-            <div className="views" role="group" aria-label="Ver la variante en otro tamaño">
-              <span className="muted">Ver en</span>
-              {VIEWPORTS.map((v) => (
-                <button
-                  key={v.name}
-                  className="view"
-                  type="button"
-                  aria-pressed={viewport?.name === v.name}
-                  title={`${v.width} × ${v.height}, con el medidor de responsive`}
-                  onClick={() => setViewport(v)}
-                >
-                  {v.label} {v.width}
-                </button>
-              ))}
-            </div>
-            {paletteBase && (
-              <div className="tabs" role="tablist">
-                <button className="tab" type="button" role="tab" aria-selected={showTab === "changes"} onClick={() => setTab("changes")}>
-                  Cambios
-                </button>
+            <div className="tabs" role="tablist">
+              <button
+                className="tab"
+                type="button"
+                role="tab"
+                aria-selected={showTab === "improve"}
+                onClick={() => {
+                  setPicking(false);
+                  setTab("improve");
+                }}
+              >
+                Mejorar
+              </button>
+              <button className="tab" type="button" role="tab" aria-selected={showTab === "changes"} onClick={() => setTab("changes")}>
+                Cambios
+              </button>
+              {paletteBase && (
                 <button
                   className="tab"
                   type="button"
@@ -1311,9 +1494,9 @@ export function LabPanel() {
                 >
                   Paleta
                 </button>
-              </div>
-            )}
-            <div className="body">{showTab === "palette" ? paletteTab : changesTab}</div>
+              )}
+            </div>
+            <div className="body">{showTab === "palette" ? paletteTab : showTab === "improve" ? improveTab : changesTab}</div>
           </div>
         )}
       </div>
@@ -1340,10 +1523,29 @@ export function LabPanel() {
                 ×
               </button>
             </div>
+            {deviceReport && (
+              <div className="device-report" role="status">
+                {deviceReport.map((line, i) => (
+                  <span key={i}>{line.replace(/^facha-ui responsive · /, "")}</span>
+                ))}
+                {deviceReport.some((l) => /desborde horizontal: [1-9]|Contenido principal|Más anchos|menos de 24|menos de 12/.test(l)) &&
+                  (liveHere ? (
+                    <button className="act primary" type="button" disabled={sending} onClick={() => void fixDevice()}>
+                      Pedir que lo arregle
+                    </button>
+                  ) : (
+                    <span className="muted">
+                      Para pedir el arreglo desde acá, activá el modo en vivo: <code>/facha-ui:variants {here.slug} live</code>
+                    </span>
+                  ))}
+              </div>
+            )}
             <iframe
+              ref={deviceFrame}
               title={`Variante ${letter} en ${viewport.label}`}
               src={previewUrl()}
-              style={{ width: viewport.width, height: `min(${viewport.height}px, calc(100vh - 96px))` }}
+              onLoad={readDeviceReport}
+              style={{ width: viewport.width, height: `min(${viewport.height}px, calc(100vh - 140px))` }}
             />
           </div>
         </div>

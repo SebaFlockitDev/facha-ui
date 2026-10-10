@@ -568,6 +568,13 @@ those without a final status.
      attempts or the request is not allowed.
 4. Present it briefly here too (R7, short).
 
+**One-click improvements.** The panel's **Mejorar** tab sends ready-made change requests (fix it
+on mobile, accessibility, texts, states, a full senior review). Process them like any change.
+When the text includes "Medición del laboratorio a <n>px", those lines come from the lab's
+responsive check: use them as the evidence of what to fix, and capture that width again
+afterwards to show it is fixed. What belongs to shared components (the app shell, global CSS)
+is outside the variant: say so in the status message with the fix it needs.
+
 **Pointed elements.** A request may have `targets`: the elements the developer clicked in the
 panel, named `[1]`, `[2]`, `[3]` in the text. Use them to find the code: `owner` (the
 component whose code renders the element), `components` (nearest first), `source` (when the dev
