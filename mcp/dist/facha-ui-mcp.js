@@ -2060,27 +2060,27 @@ var require_util = __commonJS({
       };
     }
     var normalize2 = lruMemoize(function normalize3(aPath) {
-      var path10 = aPath;
+      var path11 = aPath;
       var url2 = urlParse(aPath);
       if (url2) {
         if (!url2.path) {
           return aPath;
         }
-        path10 = url2.path;
+        path11 = url2.path;
       }
-      var isAbsolute = exports.isAbsolute(path10);
+      var isAbsolute = exports.isAbsolute(path11);
       var parts = [];
       var start = 0;
       var i = 0;
       while (true) {
         start = i;
-        i = path10.indexOf("/", start);
+        i = path11.indexOf("/", start);
         if (i === -1) {
-          parts.push(path10.slice(start));
+          parts.push(path11.slice(start));
           break;
         } else {
-          parts.push(path10.slice(start, i));
-          while (i < path10.length && path10[i] === "/") {
+          parts.push(path11.slice(start, i));
+          while (i < path11.length && path11[i] === "/") {
             i++;
           }
         }
@@ -2101,15 +2101,15 @@ var require_util = __commonJS({
           }
         }
       }
-      path10 = parts.join("/");
-      if (path10 === "") {
-        path10 = isAbsolute ? "/" : ".";
+      path11 = parts.join("/");
+      if (path11 === "") {
+        path11 = isAbsolute ? "/" : ".";
       }
       if (url2) {
-        url2.path = path10;
+        url2.path = path11;
         return urlGenerate(url2);
       }
-      return path10;
+      return path11;
     });
     exports.normalize = normalize2;
     function join(aRoot, aPath) {
@@ -3834,11 +3834,11 @@ var require_previous_map = __commonJS({
     var { existsSync, readFileSync, realpathSync } = __require("fs");
     var { dirname, isAbsolute, join, relative, sep } = __require("path");
     var { SourceMapConsumer, SourceMapGenerator } = require_source_map();
-    function realPath(path10) {
+    function realPath(path11) {
       try {
-        return realpathSync(path10);
+        return realpathSync(path11);
       } catch {
-        return path10;
+        return path11;
       }
     }
     function fromBase64(str) {
@@ -3901,19 +3901,19 @@ var require_previous_map = __commonJS({
           this.annotation = this.getAnnotationURL(css.substring(start, end));
         }
       }
-      loadFile(path10, cssFile, trusted) {
+      loadFile(path11, cssFile, trusted) {
         if (!trusted && !this.unsafeMap) {
-          if (!/\.map$/i.test(path10)) return void 0;
+          if (!/\.map$/i.test(path11)) return void 0;
           if (!cssFile) return void 0;
-          let rel3 = relative(realPath(dirname(cssFile)), realPath(path10));
+          let rel3 = relative(realPath(dirname(cssFile)), realPath(path11));
           if (rel3 === ".." || rel3.startsWith(".." + sep) || isAbsolute(rel3)) {
             return void 0;
           }
         }
-        this.root = dirname(path10);
-        if (existsSync(path10)) {
-          this.mapFile = path10;
-          return readFileSync(path10, "utf-8").toString().trim();
+        this.root = dirname(path11);
+        if (existsSync(path11)) {
+          this.mapFile = path11;
+          return readFileSync(path11, "utf-8").toString().trim();
         }
       }
       loadMap(file2, prev) {
@@ -4709,9 +4709,9 @@ var require_map_generator = __commonJS({
         if (typeof this.mapOpts.annotation === "string") {
           from = dirname(resolve(from, this.mapOpts.annotation));
         }
-        let path10 = relative(from, file2);
-        this.memoizedPaths.set(file2, path10);
-        return path10;
+        let path11 = relative(from, file2);
+        this.memoizedPaths.set(file2, path11);
+        return path11;
       }
       previous() {
         if (!this.previousMaps) {
@@ -4766,12 +4766,12 @@ var require_map_generator = __commonJS({
           return window.btoa(unescape(encodeURIComponent(str)));
         }
       }
-      toFileUrl(path10) {
-        let cached2 = this.memoizedFileURLs.get(path10);
+      toFileUrl(path11) {
+        let cached2 = this.memoizedFileURLs.get(path11);
         if (cached2) return cached2;
         if (pathToFileURL) {
-          let fileURL = pathToFileURL(path10).toString();
-          this.memoizedFileURLs.set(path10, fileURL);
+          let fileURL = pathToFileURL(path11).toString();
+          this.memoizedFileURLs.set(path11, fileURL);
           return fileURL;
         } else {
           throw new Error(
@@ -4779,14 +4779,14 @@ var require_map_generator = __commonJS({
           );
         }
       }
-      toUrl(path10) {
-        let cached2 = this.memoizedURLs.get(path10);
+      toUrl(path11) {
+        let cached2 = this.memoizedURLs.get(path11);
         if (cached2) return cached2;
         if (sep === "\\") {
-          path10 = path10.replace(/\\/g, "/");
+          path11 = path11.replace(/\\/g, "/");
         }
-        let url2 = encodeURI(path10).replace(/[#?]/g, encodeURIComponent);
-        this.memoizedURLs.set(path10, url2);
+        let url2 = encodeURI(path11).replace(/[#?]/g, encodeURIComponent);
+        this.memoizedURLs.set(path11, url2);
         return url2;
       }
     };
@@ -6509,8 +6509,8 @@ var require_utils = __commonJS({
       }
       return output2;
     };
-    exports.basename = (path10, { windows } = {}) => {
-      const segs = path10.split(windows ? /[\\/]/ : "/");
+    exports.basename = (path11, { windows } = {}) => {
+      const segs = path11.split(windows ? /[\\/]/ : "/");
       const last = segs[segs.length - 1];
       if (last === "") {
         return segs[segs.length - 2];
@@ -8237,9 +8237,9 @@ var require_scope = __commonJS({
         super(nameStr);
         this.prefix = prefix2;
       }
-      setValue(value, { property, itemIndex }) {
+      setValue(value, { property: property2, itemIndex }) {
         this.value = value;
-        this.scopePath = (0, code_1._)`.${new code_1.Name(property)}[${itemIndex}]`;
+        this.scopePath = (0, code_1._)`.${new code_1.Name(property2)}[${itemIndex}]`;
       }
     };
     exports.ValueScopeName = ValueScopeName;
@@ -9738,18 +9738,18 @@ var require_code2 = __commonJS({
       });
     }
     exports.hasPropFunc = hasPropFunc;
-    function isOwnProperty(gen, data, property) {
-      return (0, codegen_1._)`${hasPropFunc(gen)}.call(${data}, ${property})`;
+    function isOwnProperty(gen, data, property2) {
+      return (0, codegen_1._)`${hasPropFunc(gen)}.call(${data}, ${property2})`;
     }
     exports.isOwnProperty = isOwnProperty;
-    function propertyInData(gen, data, property, ownProperties) {
-      const cond = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)(property)} !== undefined`;
-      return ownProperties ? (0, codegen_1._)`${cond} && ${isOwnProperty(gen, data, property)}` : cond;
+    function propertyInData(gen, data, property2, ownProperties) {
+      const cond = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)(property2)} !== undefined`;
+      return ownProperties ? (0, codegen_1._)`${cond} && ${isOwnProperty(gen, data, property2)}` : cond;
     }
     exports.propertyInData = propertyInData;
-    function noPropertyInData(gen, data, property, ownProperties) {
-      const cond = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)(property)} === undefined`;
-      return ownProperties ? (0, codegen_1.or)(cond, (0, codegen_1.not)(isOwnProperty(gen, data, property))) : cond;
+    function noPropertyInData(gen, data, property2, ownProperties) {
+      const cond = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)(property2)} === undefined`;
+      return ownProperties ? (0, codegen_1.or)(cond, (0, codegen_1.not)(isOwnProperty(gen, data, property2))) : cond;
     }
     exports.noPropertyInData = noPropertyInData;
     function allSchemaProperties(schemaMap) {
@@ -11259,8 +11259,8 @@ var require_utils2 = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path10) {
-      let input2 = path10;
+    function removeDotSegments(path11) {
+      let input2 = path11;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -11669,8 +11669,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path10 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path10 && path10 !== "/" ? path10 : void 0;
+        const path11 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path11 && path11 !== "/" ? path11 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -13754,11 +13754,11 @@ var require_dependencies = __commonJS({
     var util_1 = require_util2();
     var code_1 = require_code2();
     exports.error = {
-      message: ({ params: { property, depsCount, deps } }) => {
+      message: ({ params: { property: property2, depsCount, deps } }) => {
         const property_ies = depsCount === 1 ? "property" : "properties";
-        return (0, codegen_1.str)`must have ${property_ies} ${deps} when property ${property} is present`;
+        return (0, codegen_1.str)`must have ${property_ies} ${deps} when property ${property2} is present`;
       },
-      params: ({ params: { property, depsCount, deps, missingProperty } }) => (0, codegen_1._)`{property: ${property},
+      params: ({ params: { property: property2, depsCount, deps, missingProperty } }) => (0, codegen_1._)`{property: ${property2},
     missingProperty: ${missingProperty},
     depsCount: ${depsCount},
     deps: ${deps}}`
@@ -16018,10 +16018,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path10) {
-  if (!path10)
+function getElementAtPath(obj, path11) {
+  if (!path11)
     return obj;
-  return path10.reduce((acc, key) => acc?.[key], obj);
+  return path11.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -16361,11 +16361,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path10, issues) {
+function prefixIssues(path11, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path10);
+    iss.path.unshift(path11);
     return iss;
   });
 }
@@ -16815,16 +16815,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path10 = []) => {
+  const processError = (error63, path11 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else {
-        const fullpath = [...path10, ...issue2.path];
+        const fullpath = [...path11, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -16863,17 +16863,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path10 = []) => {
+  const processError = (error63, path11 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else {
-        const fullpath = [...path10, ...issue2.path];
+        const fullpath = [...path11, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -16912,8 +16912,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path10 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path10) {
+  const path11 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path11) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -17678,9 +17678,9 @@ var $ZodCheckEndsWith = /* @__PURE__ */ $constructor("$ZodCheckEndsWith", (inst,
     });
   };
 });
-function handleCheckPropertyResult(result, payload, property) {
+function handleCheckPropertyResult(result, payload, property2) {
   if (result.issues.length) {
-    payload.issues.push(...prefixIssues(property, result.issues));
+    payload.issues.push(...prefixIssues(property2, result.issues));
   }
 }
 var $ZodCheckProperty = /* @__PURE__ */ $constructor("$ZodCheckProperty", (inst, def) => {
@@ -30358,10 +30358,10 @@ function _endsWith(suffix, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _property(property, schema, params) {
+function _property(property2, schema, params) {
   return new $ZodCheckProperty({
     check: "property",
-    property,
+    property: property2,
     schema,
     ...normalizeParams(params)
   });
@@ -34015,13 +34015,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path10 = ref.slice(1).split("/").filter(Boolean);
-  if (path10.length === 0) {
+  const path11 = ref.slice(1).split("/").filter(Boolean);
+  if (path11.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path10[0] === defsKey) {
-    const key = path10[1] === void 0 ? void 0 : decodeJSONPointerSegment(path10[1]);
+  if (path11[0] === defsKey) {
+    const key = path11[1] === void 0 ? void 0 : decodeJSONPointerSegment(path11[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -36506,7 +36506,7 @@ var StdioServerTransport = class {
 };
 
 // src/context.ts
-import path5 from "node:path";
+import path6 from "node:path";
 
 // node_modules/postcss/lib/postcss.mjs
 var import_postcss = __toESM(require_postcss(), 1);
@@ -40276,9 +40276,9 @@ var NEUTRAL_KEYWORDS = /* @__PURE__ */ new Set([
 var NAMED = new Set(Object.keys(named_default).map((n) => n.toLowerCase()));
 var NON_COLOR_PROPERTIES = /^(font|font-family|content|src|grid-template-areas|grid-area|animation(-name)?|transition(-property)?|will-change|counter-.*|list-style-type|quotes|font-feature-settings|text-transform|display|position|cursor|overflow.*|white-space|align.*|justify.*|flex.*|text-align|vertical-align)$/;
 var COLOR_RE = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^()]*\)|\b[a-zA-Z]+\b/g;
-function findColorLiterals(value, property) {
+function findColorLiterals(value, property2) {
   const matches = [];
-  const checkNamed = !property || !NON_COLOR_PROPERTIES.test(property.toLowerCase());
+  const checkNamed = !property2 || !NON_COLOR_PROPERTIES.test(property2.toLowerCase());
   const masked = value.replace(/var\([^()]*\)/g, (m) => " ".repeat(m.length)).replace(/url\([^()]*\)/g, (m) => " ".repeat(m.length));
   for (const m of masked.matchAll(COLOR_RE)) {
     const text = m[0];
@@ -40459,7 +40459,7 @@ var ConfigSchema = external_exports.object({
       }).strict()
     ])
   ).optional(),
-  // useDefaultTheme (0.4.0) and allowDefaultScale (0.5.0) are evaluated; other keys are accepted for the roadmap.
+  // useDefaultTheme (0.4.0), allowDefaultScale (0.5.0) and mapped (0.15.0) are evaluated; other keys are accepted for the roadmap.
   tailwind: external_exports.object({
     useDefaultTheme: external_exports.boolean().optional(),
     /** Default Tailwind scales accepted without a token. Radius, shadow, font size, tracking and leading are not, by default. */
@@ -40473,7 +40473,12 @@ var ConfigSchema = external_exports.object({
       sizing: external_exports.boolean().optional(),
       fontWeight: external_exports.boolean().optional(),
       layout: external_exports.boolean().optional()
-    }).strict().optional()
+    }).strict().optional(),
+    /**
+     * Utilities the project maps to its own values where facha-ui cannot read them (presets,
+     * plugins, computed configs), as @theme variable names: "--radius-md", "--color-brand" (0.15.0).
+     */
+    mapped: external_exports.array(external_exports.string().regex(/^--[a-z0-9-]+$/i, "an @theme variable name such as --radius-md")).optional()
   }).catchall(external_exports.unknown()).optional(),
   suggest: external_exports.object({ maxDeltaE: external_exports.number().positive() }).strict().optional(),
   preview: external_exports.object({
@@ -40532,7 +40537,7 @@ function loadConfig(root2) {
     );
   }
   const notEvaluated = ["suggest"].filter((k4) => parsed.data[k4] !== void 0);
-  for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme" && k4 !== "allowDefaultScale") notEvaluated.push(`tailwind.${k4}`);
+  for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme" && k4 !== "allowDefaultScale" && k4 !== "mapped") notEvaluated.push(`tailwind.${k4}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`] : [];
   return { config: parsed.data, configSource: CONFIG_FILE, assumptions };
@@ -43467,18 +43472,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       return this.finishNode(node2, "ObjectTypeProperty");
     }
   }
-  flowCheckGetterSetterParams(property) {
-    const paramCount = property.kind === "get" ? 0 : 1;
-    const value = property.value;
+  flowCheckGetterSetterParams(property2) {
+    const paramCount = property2.kind === "get" ? 0 : 1;
+    const value = property2.value;
     const length = value.params.length + (value.rest ? 1 : 0);
     if (value.this) {
-      this.raise(property.kind === "get" ? FlowErrors.GetterMayNotHaveThisParam : FlowErrors.SetterMayNotHaveThisParam, value.this);
+      this.raise(property2.kind === "get" ? FlowErrors.GetterMayNotHaveThisParam : FlowErrors.SetterMayNotHaveThisParam, value.this);
     }
     if (length !== paramCount) {
-      this.raise(property.kind === "get" ? Errors.BadGetterArity : Errors.BadSetterArity, property);
+      this.raise(property2.kind === "get" ? Errors.BadGetterArity : Errors.BadSetterArity, property2);
     }
-    if (property.kind === "set" && value.rest) {
-      this.raise(Errors.BadSetterRestParameter, property);
+    if (property2.kind === "set" && value.rest) {
+      this.raise(Errors.BadSetterRestParameter, property2);
     }
   }
   flowObjectTypeSemicolon() {
@@ -49625,21 +49630,21 @@ var ExpressionParser = class extends LValParser {
       const {
         key
       } = prop;
-      const keyName = key.name;
-      if (keyName === "async" && !this.hasPrecedingLineBreak()) {
+      const keyName2 = key.name;
+      if (keyName2 === "async" && !this.hasPrecedingLineBreak()) {
         isAsync2 = true;
         this.resetPreviousNodeTrailingComments(key);
         isGenerator = this.eat(51);
         this.parsePropertyName(prop);
       }
-      if (keyName === "get" || keyName === "set") {
+      if (keyName2 === "get" || keyName2 === "set") {
         isAccessor = true;
         this.resetPreviousNodeTrailingComments(key);
-        prop.kind = keyName;
+        prop.kind = keyName2;
         if (this.match(51)) {
           isGenerator = true;
           this.raise(Errors.AccessorIsGenerator, this.state.curPosition(), {
-            kind: keyName
+            kind: keyName2
           });
           this.next();
         }
@@ -51757,15 +51762,15 @@ var StatementParser = class extends ExpressionParser {
         break;
       }
       const node2 = this.startNode();
-      const keyName = this.state.value;
-      if (attrNames.has(keyName)) {
+      const keyName2 = this.state.value;
+      if (attrNames.has(keyName2)) {
         this.raise(Errors.ModuleAttributesWithDuplicateKeys, this.state.startLoc, {
-          key: keyName
+          key: keyName2
         });
       }
-      attrNames.add(keyName);
+      attrNames.add(keyName2);
       if (this.match(130)) {
-        node2.key = this.parseStringLiteral(keyName);
+        node2.key = this.parseStringLiteral(keyName2);
       } else {
         node2.key = this.parseIdentifier(true);
       }
@@ -52459,12 +52464,12 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
       }
       return this.finishNode(method, "TSMethodSignature");
     } else {
-      const property = node2;
-      if (readonly2) property.readonly = true;
+      const property2 = node2;
+      if (readonly2) property2.readonly = true;
       const type = this.tsTryParseTypeAnnotation();
-      if (type) property.typeAnnotation = type;
+      if (type) property2.typeAnnotation = type;
       this.tsParseTypeMemberSemicolon();
-      return this.finishNode(property, "TSPropertySignature");
+      return this.finishNode(property2, "TSPropertySignature");
     }
   }
   tsParseTypeMember() {
@@ -54758,9 +54763,9 @@ function isPossiblyLiteralEnum(expression) {
   if (expression.type !== "MemberExpression") return false;
   const {
     computed,
-    property
+    property: property2
   } = expression;
-  if (computed && property.type !== "StringLiteral" && (property.type !== "TemplateLiteral" || property.expressions.length > 0)) {
+  if (computed && property2.type !== "StringLiteral" && (property2.type !== "TemplateLiteral" || property2.expressions.length > 0)) {
     return false;
   }
   return isUncomputedMemberExpressionChain(expression.object);
@@ -55576,6 +55581,136 @@ function extractJsx(file2, code2, ext, classHelpers) {
   return usages;
 }
 
+// src/tailwind-config.ts
+import path5 from "node:path";
+var SECTIONS = {
+  colors: "--color-",
+  borderRadius: "--radius-",
+  boxShadow: "--shadow-",
+  fontSize: "--text-",
+  letterSpacing: "--tracking-",
+  lineHeight: "--leading-"
+};
+var lineOf = (n) => n?.loc?.start.line ?? 0;
+function unwrap(n) {
+  let cur = n ?? void 0;
+  while (cur && ["TSSatisfiesExpression", "TSAsExpression", "TSTypeAssertion", "ParenthesizedExpression", "TSNonNullExpression"].includes(cur.type)) cur = cur.expression;
+  return cur;
+}
+function keyName(p4) {
+  if (p4.computed) return null;
+  const k4 = p4.key;
+  if (k4.type === "Identifier") return k4.name;
+  if (k4.type === "StringLiteral" || k4.type === "NumericLiteral") return String(k4.value);
+  return null;
+}
+function property(obj, name) {
+  return obj.properties.find((p4) => (p4.type === "ObjectProperty" || p4.type === "Property") && keyName(p4) === name);
+}
+function exportedObject(ast) {
+  const body = ast.program.body;
+  const declared = /* @__PURE__ */ new Map();
+  for (const st of body) {
+    const decl2 = st.type === "ExportNamedDeclaration" ? st.declaration : st;
+    if (decl2?.type !== "VariableDeclaration") continue;
+    for (const d of decl2.declarations) if (d.id?.type === "Identifier" && d.init) declared.set(d.id.name, d.init);
+  }
+  let exported;
+  for (const st of body) {
+    if (st.type === "ExportDefaultDeclaration") exported = st.declaration;
+    const e4 = st.type === "ExpressionStatement" ? st.expression : void 0;
+    if (e4?.type === "AssignmentExpression" && e4.left?.type === "MemberExpression" && e4.left.object?.name === "module" && (e4.left.property?.name === "exports" || e4.left.property?.value === "exports")) {
+      exported = e4.right;
+    }
+  }
+  let cur = unwrap(exported);
+  if (cur?.type === "Identifier") cur = unwrap(declared.get(cur.name));
+  if (cur?.type === "ObjectExpression") return { obj: cur };
+  if (!exported) return { unread: { what: "no exported config object found", line: 0 } };
+  return { unread: { what: `the exported config is ${cur?.type ?? "not an object"}, not an object literal`, line: lineOf(exported) } };
+}
+function readSection(name, value, out, where) {
+  const v = unwrap(value);
+  if (!v) return;
+  if (v.type !== "ObjectExpression") {
+    out.unread.push({ what: `${where}.${name} (${v.type === "ArrowFunctionExpression" || v.type === "FunctionExpression" ? "a function" : "not an object literal"})`, line: lineOf(v) });
+    return;
+  }
+  const prefix2 = SECTIONS[name];
+  const walkObject = (obj, keyPath) => {
+    for (const p4 of obj.properties) {
+      if (p4.type === "SpreadElement") {
+        out.unread.push({ what: `a spread in ${where}.${[name, ...keyPath].join(".")}`, line: lineOf(p4) });
+        continue;
+      }
+      const k4 = keyName(p4);
+      if (k4 === null) {
+        out.unread.push({ what: `a computed key in ${where}.${[name, ...keyPath].join(".")}`, line: lineOf(p4) });
+        continue;
+      }
+      const inner = unwrap(p4.value);
+      if (name === "colors" && inner?.type === "ObjectExpression") {
+        walkObject(inner, [...keyPath, k4]);
+        continue;
+      }
+      const parts = k4 === "DEFAULT" ? keyPath : [...keyPath, k4];
+      if (parts.length) out.mapped.add(`${prefix2}${parts.join("-")}`);
+      else if (name !== "colors") out.mapped.add(prefix2.replace(/-$/, ""));
+    }
+  };
+  walkObject(v, []);
+}
+function configFile(project, cssConfigs) {
+  for (const name of TAILWIND_CONFIG_NAMES) if (readRootFile(project, name) !== null) return name;
+  for (const c2 of cssConfigs) {
+    const relPath = toPosix(path5.relative(project.root, path5.resolve(project.root, c2)));
+    if (isInside(project.root, path5.resolve(project.root, c2)) && readRootFile(project, relPath) !== null) return relPath;
+  }
+  return null;
+}
+function readTailwindConfig(project, cssConfigs = []) {
+  const file2 = configFile(project, cssConfigs);
+  if (!file2) return null;
+  const out = { file: file2, mapped: /* @__PURE__ */ new Set(), unread: [] };
+  const code2 = readRootFile(project, file2) ?? "";
+  let ast;
+  try {
+    ast = parse5(code2, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true });
+  } catch (e4) {
+    out.unread.push({ what: `the file does not parse (${e4.message.slice(0, 120)})`, line: 0 });
+    return out;
+  }
+  const { obj, unread } = exportedObject(ast);
+  if (!obj) {
+    if (unread) out.unread.push(unread);
+    return out;
+  }
+  for (const key of ["presets", "plugins"]) {
+    const p4 = property(obj, key);
+    const v = unwrap(p4?.value);
+    if (p4 && !(v?.type === "ArrayExpression" && v.elements.length === 0)) out.unread.push({ what: `${key} (what they add is not known without running them)`, line: lineOf(p4) });
+  }
+  for (const p4 of obj.properties) if (p4.type === "SpreadElement") out.unread.push({ what: "a spread in the config", line: lineOf(p4) });
+  const themeProp = property(obj, "theme");
+  const theme = unwrap(themeProp?.value);
+  if (!theme) return out;
+  if (theme.type !== "ObjectExpression") {
+    out.unread.push({ what: "theme (not an object literal)", line: lineOf(theme) });
+    return out;
+  }
+  for (const name of Object.keys(SECTIONS)) readSection(name, property(theme, name)?.value, out, "theme");
+  const extendProp = property(theme, "extend");
+  const extend2 = unwrap(extendProp?.value);
+  if (extend2?.type === "ObjectExpression") {
+    for (const name of Object.keys(SECTIONS)) readSection(name, property(extend2, name)?.value, out, "theme.extend");
+    for (const p4 of extend2.properties) if (p4.type === "SpreadElement") out.unread.push({ what: "a spread in theme.extend", line: lineOf(p4) });
+  } else if (extend2) {
+    out.unread.push({ what: "theme.extend (not an object literal)", line: lineOf(extend2) });
+  }
+  for (const p4 of theme.properties) if (p4.type === "SpreadElement") out.unread.push({ what: "a spread in theme", line: lineOf(p4) });
+  return out;
+}
+
 // src/context.ts
 var CLASS_HELPERS = ["clsx", "cn", "cva", "twMerge", "classnames", "classNames"];
 var TYPO_PROPS = /* @__PURE__ */ new Set([
@@ -55591,6 +55726,27 @@ var TYPO_PROPS = /* @__PURE__ */ new Set([
   "margin-top",
   "margin-bottom"
 ]);
+function tailwindMapping(project, cssRoots) {
+  if (!project.hasTailwind) return null;
+  const cssConfigs = [];
+  for (const [file2, root2] of cssRoots) {
+    root2.walkAtRules("config", (at) => {
+      const p4 = at.params.trim().replace(/^["']|["']$/g, "");
+      if (p4) cssConfigs.push(path6.posix.normalize(path6.posix.join(path6.posix.dirname(file2), p4)));
+    });
+  }
+  const mapping = readTailwindConfig(project, cssConfigs);
+  if (!mapping) return null;
+  const sample = [...mapping.mapped].slice(0, 6).join(", ");
+  project.assumptions.push(
+    `Tailwind config read statically (${mapping.file}, never run): ${mapping.mapped.size} utilit${mapping.mapped.size === 1 ? "y" : "ies"} mapped to project values${sample ? ` (${sample}${mapping.mapped.size > 6 ? "\u2026" : ""})` : ""}.`
+  );
+  if (mapping.unread.length) {
+    const list2 = mapping.unread.map((u) => `${u.what}${u.line ? ` (line ${u.line})` : ""}`).join("; ");
+    project.assumptions.push(`Not read in ${mapping.file} without running it: ${list2}. If they map utilities to project values, list them in tailwind.mapped.`);
+  }
+  return mapping;
+}
 function toPx(value) {
   const m = value.trim().match(/^(-?[\d.]+)(px|rem|em)?$/);
   if (!m) return null;
@@ -55651,11 +55807,12 @@ function createContext(root2, ws) {
       }
     });
   }
-  return { project, tokens, componentClasses, typographyClasses, fontSizeUses, definedCustomProps, cssRoots };
+  const tailwindConfig = tailwindMapping(project, cssRoots);
+  return { project, tokens, componentClasses, typographyClasses, fontSizeUses, definedCustomProps, cssRoots, tailwindConfig };
 }
 function extractFile(ctx, abs2) {
   const file2 = rel2(ctx.project, abs2);
-  const ext = path5.extname(abs2);
+  const ext = path6.extname(abs2);
   const code2 = readSource(abs2);
   if (code2 == null) return { usages: [], skipped: { file: file2, code: "FILE_TOO_LARGE", detail: "File is larger than 1 MB" } };
   try {
@@ -55680,10 +55837,10 @@ function extractFile(ctx, abs2) {
 
 // src/score.ts
 import fs4 from "node:fs";
-import path8 from "node:path";
+import path9 from "node:path";
 
 // src/check.ts
-import path6 from "node:path";
+import path7 from "node:path";
 
 // src/a11y.ts
 var INTERACTIVE_ROLES = /* @__PURE__ */ new Set(["button", "link", "checkbox", "radio", "switch", "tab", "menuitem", "option", "combobox", "textbox", "slider", "treeitem", "gridcell"]);
@@ -55821,9 +55978,9 @@ function checkA11y(usages, report) {
     }
   }
 }
-function removesFocusOutline(property, value, selector, siblings) {
+function removesFocusOutline(property2, value, selector, siblings) {
   if (!selector || !/:focus(?!-within)/.test(selector) || /:not\(:focus-visible\)/.test(selector)) return false;
-  if (!/^outline(-style|-width)?$/.test(property) || !/^(none|0(px)?)$/.test(value.trim())) return false;
+  if (!/^outline(-style|-width)?$/.test(property2) || !/^(none|0(px)?)$/.test(value.trim())) return false;
   return !(siblings ?? []).some((d) => /^(box-shadow|border|border-color|outline-color|background|background-color|text-decoration)$/.test(d.prop) && !/^(none|0)$/.test(d.value.trim()));
 }
 
@@ -56148,8 +56305,8 @@ var MAX_DELTA_E = 2;
 var EXACT_DELTA_E = 0.5;
 var FONT_SIZE_RANGE_PX = 1;
 var NONE2 = (detail) => ({ match: "none", kind: "none", value: null, detail, source: null });
-function roleCompatible(property, role) {
-  const p4 = (property ?? "").toLowerCase();
+function roleCompatible(property2, role) {
+  const p4 = (property2 ?? "").toLowerCase();
   if (!p4 || p4.startsWith("--") || /shadow/.test(p4)) return true;
   if (/^(background|background-color)$/.test(p4)) return /^(surface|accent|status|generic)/.test(role);
   if (/^(border|outline|column-rule|divide)/.test(p4)) return /^(border|status|generic)/.test(role) || role === "accent.primary";
@@ -56168,7 +56325,7 @@ function otherThemesValues(ctx, t) {
   });
   return others.filter(Boolean).join(", ");
 }
-function suggestColor(ctx, literal2, property) {
+function suggestColor(ctx, literal2, property2) {
   const c2 = parseColor(literal2);
   if (!c2) return NONE2("Not a parseable color.");
   const theme = defaultTheme(ctx);
@@ -56176,7 +56333,7 @@ function suggestColor(ctx, literal2, property) {
     const tc = tokenColor(ctx.tokens, t.name, theme);
     return { t, d: tc ? deltaE(c2, tc) : Number.POSITIVE_INFINITY };
   }).filter((x) => Number.isFinite(x.d)).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
-  const compatible = candidates.filter((x) => roleCompatible(property, x.t.role));
+  const compatible = candidates.filter((x) => roleCompatible(property2, x.t.role));
   const exact = compatible.filter((x) => x.d < EXACT_DELTA_E);
   if (exact.length > 0) {
     const best = exact[0].t;
@@ -56202,7 +56359,7 @@ function suggestColor(ctx, literal2, property) {
   }
   const parts = [];
   if (alphaOf(c2) < 1) parts.push(`Translucent value (alpha ${round2(alphaOf(c2), 2)}): no token with the same opacity.`);
-  const incompatibleExact = candidates.filter((x) => x.d < EXACT_DELTA_E && !roleCompatible(property, x.t.role));
+  const incompatibleExact = candidates.filter((x) => x.d < EXACT_DELTA_E && !roleCompatible(property2, x.t.role));
   if (incompatibleExact.length > 0) {
     const names = incompatibleExact.map((x) => x.t.name);
     const roles = [...new Set(incompatibleExact.map((x) => x.t.role))].join("/");
@@ -56211,9 +56368,9 @@ function suggestColor(ctx, literal2, property) {
       return o ? `${x.t.name} ${o}` : null;
     }).filter(Boolean);
     parts.push(
-      `Matches ${names.join(", ")} by value, but ${roles} tokens are not valid for '${property}'${others.length ? ` (${others.join("; ")})` : ""}.`
+      `Matches ${names.join(", ")} by value, but ${roles} tokens are not valid for '${property2}'${others.length ? ` (${others.join("; ")})` : ""}.`
     );
-    if (/color|fill|stroke/.test(property ?? "") && !ctx.tokens.tokens.some((t) => t.role === "on-accent")) {
+    if (/color|fill|stroke/.test(property2 ?? "") && !ctx.tokens.tokens.some((t) => t.role === "on-accent")) {
       parts.push("No on-accent token exists.");
     }
   }
@@ -56325,9 +56482,9 @@ function parseArbitrary(raw) {
   const util2 = baseUtility(raw);
   const prop = util2.match(/^\[([a-z-]+):(.+)\]$/);
   if (prop) {
-    const property = prop[1];
+    const property2 = prop[1];
     const value2 = prop[2].replace(/_/g, " ");
-    return { raw, prefix: null, value: value2, property, category: categoryForProperty(property, value2) };
+    return { raw, prefix: null, value: value2, property: property2, category: categoryForProperty(property2, value2) };
   }
   const m = util2.match(/^(-?[a-z][a-z0-9-]*?)-\[(.+)\](\/[\w.[\]%-]+)?$/);
   if (!m) return null;
@@ -56354,8 +56511,8 @@ function parseArbitrary(raw) {
   }
   if (COLOR_ONLY.test(p4)) {
     if (color) {
-      const property = p4 === "bg" ? "background-color" : p4.startsWith("border") || p4 === "divide" ? "border-color" : p4 === "fill" ? "fill" : p4 === "stroke" ? "stroke" : `${p4}-color`;
-      return { raw, prefix: prefix2, value, property, category: "color" };
+      const property2 = p4 === "bg" ? "background-color" : p4.startsWith("border") || p4 === "divide" ? "border-color" : p4 === "fill" ? "fill" : p4 === "stroke" ? "stroke" : `${p4}-color`;
+      return { raw, prefix: prefix2, value, property: property2, category: "color" };
     }
     if (p4 === "bg") return { raw, prefix: prefix2, value, property: "background", category: "layout" };
     if (isLength(value)) return { raw, prefix: prefix2, value, property: p4.startsWith("border") ? "border-width" : `${p4}-width`, category: "sizing" };
@@ -56365,13 +56522,13 @@ function parseArbitrary(raw) {
   if (SIZING.test(p4)) return { raw, prefix: prefix2, value, property: sizingProperty(p4), category: "sizing" };
   return { raw, prefix: prefix2, value, property: p4, category: "layout" };
 }
-function categoryForProperty(property, value) {
-  if (/color|^background$|^fill$|^stroke$/.test(property) && isColorValue(value)) return "color";
-  if (/^(font|line-height|letter-spacing|text-transform)/.test(property)) return "typography";
-  if (/radius/.test(property)) return "radius";
-  if (/shadow/.test(property)) return "shadow";
-  if (/^(margin|padding|gap|inset|top|right|bottom|left)/.test(property)) return "spacing";
-  if (/^(width|height|min-|max-)/.test(property)) return "sizing";
+function categoryForProperty(property2, value) {
+  if (/color|^background$|^fill$|^stroke$/.test(property2) && isColorValue(value)) return "color";
+  if (/^(font|line-height|letter-spacing|text-transform)/.test(property2)) return "typography";
+  if (/radius/.test(property2)) return "radius";
+  if (/shadow/.test(property2)) return "shadow";
+  if (/^(margin|padding|gap|inset|top|right|bottom|left)/.test(property2)) return "spacing";
+  if (/^(width|height|min-|max-)/.test(property2)) return "sizing";
   return "layout";
 }
 function spacingProperty(p4) {
@@ -56856,7 +57013,7 @@ var themeVars = /* @__PURE__ */ new WeakMap();
 function themeVariables(ctx) {
   const cached2 = themeVars.get(ctx);
   if (cached2) return cached2;
-  const out = /* @__PURE__ */ new Set();
+  const out = /* @__PURE__ */ new Set([...ctx.tailwindConfig?.mapped ?? [], ...ctx.project.config.tailwind?.mapped ?? []]);
   for (const root2 of ctx.cssRoots.values()) {
     root2.walkAtRules("theme", (at) => {
       at.walkDecls((d) => {
@@ -57232,8 +57389,8 @@ function classContrast(ctx, className) {
   return index(ctx).classFindings.get(className) ?? null;
 }
 var INTERACTIVE = /(^|[\s>+~,(])(input|select|textarea|button)\b|:focus|\.(btn|button|field|input|select|checkbox|radio|switch|toggle|tab)\b|\[role=/i;
-function isNonTextTarget(property, selector, context) {
-  const p4 = property.toLowerCase();
+function isNonTextTarget(property2, selector, context) {
+  const p4 = property2.toLowerCase();
   if (context === "svg-attribute") return p4 === "fill" || p4 === "stroke";
   if (!selector || !INTERACTIVE.test(selector)) return false;
   if (/^(border|outline)(-[a-z]+)*$/.test(p4)) return !/(radius|width|style|offset|collapse|spacing|image)/.test(p4);
@@ -57466,7 +57623,7 @@ function checkUsages(ctx, usages) {
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
   const custom2 = customRules(ctx);
-  const push = (rule2, base4, loc2, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
+  const push = (rule2, base4, loc2, found, property2, context, suggestion, breaksThemes = [], soft = false, message) => {
     const severity3 = rule2.startsWith("custom/") ? base4 : effectiveSeverity(ctx, rule2, base4, soft);
     if (severity3 === "off") return;
     violations.push({
@@ -57477,18 +57634,18 @@ function checkUsages(ctx, usages) {
       line: loc2.line,
       column: loc2.column,
       found: clip(found),
-      property,
+      property: property2,
       context,
       message: message ?? MESSAGES[rule2],
       breaksThemes,
       suggestion
     });
   };
-  const checkVarRefs = (text, locAt, property, context) => {
+  const checkVarRefs = (text, locAt, property2, context) => {
     for (const m of text.matchAll(/var\(\s*(--[\w-]+)/g)) {
       const name = m[1];
       if (ALWAYS_ALLOWED_VARS.test(name) || ctx.definedCustomProps.has(name)) continue;
-      push("unknown-token", "error", locAt(m.index), m[0] + ")", property, context, suggestTokenName(ctx, name));
+      push("unknown-token", "error", locAt(m.index), m[0] + ")", property2, context, suggestTokenName(ctx, name));
     }
   };
   for (const u of usages) {
@@ -57568,8 +57725,8 @@ function checkUsages(ctx, usages) {
           push("unknown-token", "error", loc2, u.raw, a.property, "className", suggestTokenName(ctx, name));
         } else {
           const t = ctx.tokens.byName.get(name);
-          const property = a.prefix === "text" && t?.type === "color" ? "color" : a.property;
-          push("tailwind-arbitrary-value", "info", loc2, u.raw, property, "className", {
+          const property2 = a.prefix === "text" && t?.type === "color" ? "color" : a.property;
+          push("tailwind-arbitrary-value", "info", loc2, u.raw, property2, "className", {
             match: "none",
             kind: "none",
             value: null,
@@ -57734,7 +57891,7 @@ function checkUi(ctx, input2, opts = {}) {
   if (isDir) {
     files = walk(abs2);
   } else {
-    if (!SOURCE_EXTENSIONS.has(path6.extname(abs2))) {
+    if (!SOURCE_EXTENSIONS.has(path7.extname(abs2))) {
       throw new FachaError("UNSUPPORTED_FILE", `Unsupported file type: ${relPath} (supported: ${[...SOURCE_EXTENSIONS].join(", ")})`, { path: input2 });
     }
     files = [abs2];
@@ -57795,7 +57952,7 @@ function auditProject(ctx, opts = {}) {
 }
 
 // src/review.ts
-import path7 from "node:path";
+import path8 from "node:path";
 var MAX_ACCENTS = 2;
 var MAX_FONT_SIZES = 4;
 var SCREEN_FILE = /(^|\/)page\.[jt]sx$/;
@@ -57815,14 +57972,14 @@ function isAction(e4) {
 function withoutComments(code2) {
   return code2.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`\\])\/\/[^\n]*/g, (m, lead) => lead + " ".repeat(m.length - lead.length));
 }
-function lineOf(text, re) {
+function lineOf2(text, re) {
   const m = re.exec(text);
   return m ? text.slice(0, m.index).split("\n").length : null;
 }
 function reviewUi(ctx, input2) {
   const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
   const relPath = rel2(ctx.project, abs2) || ".";
-  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path7.extname(f3)) && !f3.endsWith(".css"));
+  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path8.extname(f3)) && !f3.endsWith(".css"));
   if (!isDir && files.length === 0) throw new FachaError("UNSUPPORTED_FILE", `review_ui reads JSX/TSX files: ${relPath}`, { path: input2 });
   const roleOf = (token) => ctx.tokens.byName.get(token)?.role ?? "";
   const classRule = new Map(ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector)).map((c2) => [c2.selector.slice(1), c2]));
@@ -57881,7 +58038,7 @@ function reviewUi(ctx, input2) {
     const headings = elements.filter((e4) => /^h[1-6]$/.test(e4.tag)).map((e4) => ({ level: Number(e4.tag[1]), text: e4.text, line: e4.line }));
     const isScreen = SCREEN_FILE.test(file2);
     const states = Object.fromEntries(
-      Object.keys(STATE_SIGNALS).map((k4) => [k4, lineOf(source, STATE_SIGNALS[k4])])
+      Object.keys(STATE_SIGNALS).map((k4) => [k4, lineOf2(source, STATE_SIGNALS[k4])])
     );
     results.push({
       file: file2,
@@ -57988,10 +58145,10 @@ function importsOf(ctx, abs2, depth = 2, seen = /* @__PURE__ */ new Set()) {
   const source = readSource(abs2) ?? "";
   for (const m of source.matchAll(/(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g)) {
     const spec = m[1];
-    const bases = spec.startsWith(".") ? [path8.resolve(path8.dirname(abs2), spec)] : spec.startsWith("@/") ? [path8.join(ctx.project.root, spec.slice(2)), path8.join(ctx.project.root, "src", spec.slice(2))] : [];
+    const bases = spec.startsWith(".") ? [path9.resolve(path9.dirname(abs2), spec)] : spec.startsWith("@/") ? [path9.join(ctx.project.root, spec.slice(2)), path9.join(ctx.project.root, "src", spec.slice(2))] : [];
     for (const b of bases) {
-      const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path8.join(b, "index" + e4))].find(
-        (p4) => fs4.existsSync(p4) && fs4.statSync(p4).isFile() && !p4.includes(`${path8.sep}node_modules${path8.sep}`)
+      const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path9.join(b, "index" + e4))].find(
+        (p4) => fs4.existsSync(p4) && fs4.statSync(p4).isFile() && !p4.includes(`${path9.sep}node_modules${path9.sep}`)
       );
       if (hit && !seen.has(hit) && hit.startsWith(ctx.project.root)) importsOf(ctx, hit, depth - 1, seen);
     }
@@ -58431,8 +58588,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path10, errorMaps, issueData } = params;
-  const fullPath = [...path10, ...issueData.path || []];
+  const { data, path: path11, errorMaps, issueData } = params;
+  const fullPath = [...path11, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -58547,11 +58704,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path10, key) {
+  constructor(parent, value, path11, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path10;
+    this._path = path11;
     this._key = key;
   }
   get path() {
@@ -62102,11 +62259,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path10) {
-  if (path10.length === 0) {
+function getDotPath(path11) {
+  if (path11.length === 0) {
     return "object root";
   }
-  return path10.reduce((acc, seg, index2) => {
+  return path11.reduce((acc, seg, index2) => {
     if (index2 === 0) {
       return String(seg);
     }
@@ -66094,8 +66251,8 @@ var EMPTY_COMPLETION_RESULT = {
 
 // src/design-system.ts
 import fs5 from "node:fs";
-import path9 from "node:path";
-var SECTIONS = [
+import path10 from "node:path";
+var SECTIONS2 = [
   "project",
   "tokens",
   "scales",
@@ -66293,7 +66450,7 @@ function gaps(ctx) {
 }
 function parseDecisions(ctx) {
   const file2 = ctx.project.config.memory.decisionsFile;
-  const abs2 = path9.join(ctx.project.root, file2);
+  const abs2 = path10.join(ctx.project.root, file2);
   if (!fs5.existsSync(abs2)) return [];
   const lines = fs5.readFileSync(abs2, "utf8").split(/\r?\n/);
   const out = [];
@@ -66322,7 +66479,7 @@ function labUrlPattern(labDir) {
   const route = labDir.replace(/^(src\/)?app\/?/, "").split("/").filter((s) => s && !/^\(.*\)$/.test(s)).join("/");
   return `/${route}/{screen}/{variant}`.replace(/\/+/g, "/");
 }
-function getDesignSystem(ctx, sections = SECTIONS) {
+function getDesignSystem(ctx, sections = SECTIONS2) {
   const want = new Set(sections);
   const cov = coverage(ctx);
   const out = { status: cov.status, configSource: ctx.project.configSource };
@@ -66331,7 +66488,7 @@ function getDesignSystem(ctx, sections = SECTIONS) {
     const pkgDeps = readDeps(ctx.project.root);
     const twVersion = (pkgDeps.tailwindcss ?? "").match(/\d+/)?.[0] ?? null;
     out.project = {
-      root: path9.basename(ctx.project.root),
+      root: path10.basename(ctx.project.root),
       framework: ctx.project.config.framework === "auto" ? ctx.project.frameworkDetected : ctx.project.config.framework,
       tailwind: {
         detected: ctx.project.hasTailwind,
@@ -66372,7 +66529,7 @@ function getDesignSystem(ctx, sections = SECTIONS) {
 }
 function readDeps(root2) {
   try {
-    const pkg = JSON.parse(fs5.readFileSync(path9.join(root2, "package.json"), "utf8"));
+    const pkg = JSON.parse(fs5.readFileSync(path10.join(root2, "package.json"), "utf8"));
     return { ...pkg.dependencies ?? {}, ...pkg.devDependencies ?? {} };
   } catch {
     return {};
@@ -66382,8 +66539,8 @@ function readDeps(root2) {
 // src/propose.ts
 var toOklch = converter_default("oklch");
 var WHERE_LIMIT = 12;
-function partOf(property) {
-  const p4 = (property ?? "").toLowerCase();
+function partOf(property2) {
+  const p4 = (property2 ?? "").toLowerCase();
   if (["color", "fill", "stroke", "caret-color", "text-decoration-color"].includes(p4)) return "fg";
   if (p4.startsWith("background")) return "bg";
   if (p4.startsWith("border") || p4.startsWith("outline")) return "border";
@@ -66910,13 +67067,13 @@ function createServer(opts) {
     {
       title: "Get design system",
       description: DESCRIPTIONS.get_design_system,
-      inputSchema: { sections: external_exports.array(external_exports.enum(SECTIONS)).optional() },
+      inputSchema: { sections: external_exports.array(external_exports.enum(SECTIONS2)).optional() },
       annotations: { title: "Get design system", ...READ_ONLY }
     },
     async ({ sections }) => {
       try {
         const ctx = context();
-        const data = getDesignSystem(ctx, sections ?? SECTIONS);
+        const data = getDesignSystem(ctx, sections ?? SECTIONS2);
         const cov = data.coverage;
         return ok(
           `Design system status: ${data.status}. ${ctx.tokens.tokens.length} tokens, themes: ${ctx.tokens.themes.map((t) => t.name).join(", ") || "none"}.${cov?.missing.length ? ` Missing roles: ${cov.missing.join(", ")}.` : ""}`,
@@ -66939,9 +67096,9 @@ function createServer(opts) {
       },
       annotations: { title: "Check UI", ...READ_ONLY }
     },
-    async ({ path: path10, rules, minSeverity }) => {
+    async ({ path: path11, rules, minSeverity }) => {
       try {
-        const data = checkUi(context(), path10, { rules, minSeverity });
+        const data = checkUi(context(), path11, { rules, minSeverity });
         const s = data.summary;
         return ok(`${data.path}: ${s.error} error(s), ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
@@ -67001,9 +67158,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).describe("File or directory, relative to the project root or the workspace root.") },
       annotations: { title: "Review UI", ...READ_ONLY }
     },
-    async ({ path: path10 }) => {
+    async ({ path: path11 }) => {
       try {
-        const data = reviewUi(context(), path10);
+        const data = reviewUi(context(), path11);
         const s = data.summary;
         return ok(`${data.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
@@ -67019,9 +67176,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).optional().describe("A screen file or a directory; by default every screen outside the lab.") },
       annotations: { title: "UX score", ...READ_ONLY }
     },
-    async ({ path: path10 }) => {
+    async ({ path: path11 }) => {
       try {
-        const data = uxScore(context(), path10);
+        const data = uxScore(context(), path11);
         return ok(`${data.screens.length} screen(s), average ${data.average ?? "-"}/100.`, data);
       } catch (e4) {
         return fail(e4);

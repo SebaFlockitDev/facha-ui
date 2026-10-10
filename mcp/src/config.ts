@@ -100,7 +100,7 @@ export const ConfigSchema = z
         ]),
       )
       .optional(),
-    // useDefaultTheme (0.4.0) and allowDefaultScale (0.5.0) are evaluated; other keys are accepted for the roadmap.
+    // useDefaultTheme (0.4.0), allowDefaultScale (0.5.0) and mapped (0.15.0) are evaluated; other keys are accepted for the roadmap.
     tailwind: z
       .object({
         useDefaultTheme: z.boolean().optional(),
@@ -119,6 +119,11 @@ export const ConfigSchema = z
           })
           .strict()
           .optional(),
+        /**
+         * Utilities the project maps to its own values where facha-ui cannot read them (presets,
+         * plugins, computed configs), as @theme variable names: "--radius-md", "--color-brand" (0.15.0).
+         */
+        mapped: z.array(z.string().regex(/^--[a-z0-9-]+$/i, "an @theme variable name such as --radius-md")).optional(),
       })
       .catchall(z.unknown())
       .optional(),
@@ -203,7 +208,7 @@ export function loadConfig(root: string): LoadedConfig {
     );
   }
   const notEvaluated: string[] = (["suggest"] as const).filter((k) => parsed.data[k] !== undefined);
-  for (const k of Object.keys(parsed.data.tailwind ?? {})) if (k !== "useDefaultTheme" && k !== "allowDefaultScale") notEvaluated.push(`tailwind.${k}`);
+  for (const k of Object.keys(parsed.data.tailwind ?? {})) if (k !== "useDefaultTheme" && k !== "allowDefaultScale" && k !== "mapped") notEvaluated.push(`tailwind.${k}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length
     ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`]

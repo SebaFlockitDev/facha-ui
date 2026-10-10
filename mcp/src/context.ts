@@ -5,6 +5,7 @@ import { extractCss } from "./sources/css.js";
 import { extractJsx } from "./sources/jsx.js";
 import type { Usage } from "./sources/usage.js";
 import { listProjectFiles, openProject, readSource, rel, type Project, type Workspace } from "./project.js";
+import { readTailwindConfig, type TailwindConfigMapping } from "./tailwind-config.js";
 import { loadTokens, selectorContext, themeForSelector, type TokenSet } from "./tokens.js";
 import type { Skipped } from "./types.js";
 
@@ -35,6 +36,32 @@ export interface Context {
   definedCustomProps: Set<string>;
   /** Parsed CSS by project-relative path (token sources and project CSS). */
   cssRoots: Map<string, Root>;
+  /** Tailwind 3 theme mapping read statically from tailwind.config, when the project has one. */
+  tailwindConfig: TailwindConfigMapping | null;
+}
+
+/** Reads the tailwind.config mapping (without running it) and says what was and was not read. */
+function tailwindMapping(project: Project, cssRoots: Map<string, Root>): TailwindConfigMapping | null {
+  if (!project.hasTailwind) return null;
+  // Tailwind 4 can point to a v3 config from CSS with @config "<path>", relative to that stylesheet.
+  const cssConfigs: string[] = [];
+  for (const [file, root] of cssRoots) {
+    root.walkAtRules("config", (at: AtRule) => {
+      const p = at.params.trim().replace(/^["']|["']$/g, "");
+      if (p) cssConfigs.push(path.posix.normalize(path.posix.join(path.posix.dirname(file), p)));
+    });
+  }
+  const mapping = readTailwindConfig(project, cssConfigs);
+  if (!mapping) return null;
+  const sample = [...mapping.mapped].slice(0, 6).join(", ");
+  project.assumptions.push(
+    `Tailwind config read statically (${mapping.file}, never run): ${mapping.mapped.size} utilit${mapping.mapped.size === 1 ? "y" : "ies"} mapped to project values${sample ? ` (${sample}${mapping.mapped.size > 6 ? "…" : ""})` : ""}.`,
+  );
+  if (mapping.unread.length) {
+    const list = mapping.unread.map((u) => `${u.what}${u.line ? ` (line ${u.line})` : ""}`).join("; ");
+    project.assumptions.push(`Not read in ${mapping.file} without running it: ${list}. If they map utilities to project values, list them in tailwind.mapped.`);
+  }
+  return mapping;
 }
 
 export function toPx(value: string): number | null {
@@ -103,7 +130,8 @@ export function createContext(root: string, ws?: Workspace): Context {
     });
   }
 
-  return { project, tokens, componentClasses, typographyClasses, fontSizeUses, definedCustomProps, cssRoots };
+  const tailwindConfig = tailwindMapping(project, cssRoots);
+  return { project, tokens, componentClasses, typographyClasses, fontSizeUses, definedCustomProps, cssRoots, tailwindConfig };
 }
 
 /** Extracts usages from one file. */

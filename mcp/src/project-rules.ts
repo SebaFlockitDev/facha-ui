@@ -148,11 +148,15 @@ export function customRulesInfo(ctx: Context) {
 
 const themeVars = new WeakMap<Context, Set<string>>();
 
-/** Custom properties declared inside @theme blocks: what Tailwind 4 utilities actually resolve to. */
+/**
+ * The utilities the project maps to its own values, as @theme variable names: the variables of
+ * @theme blocks (Tailwind 4), the theme keys read statically from tailwind.config (Tailwind 3) and
+ * tailwind.mapped from the config, for what cannot be read without running code.
+ */
 export function themeVariables(ctx: Context): Set<string> {
   const cached = themeVars.get(ctx);
   if (cached) return cached;
-  const out = new Set<string>();
+  const out = new Set<string>([...(ctx.tailwindConfig?.mapped ?? []), ...((ctx.project.config.tailwind as { mapped?: string[] } | undefined)?.mapped ?? [])]);
   for (const root of ctx.cssRoots.values()) {
     root.walkAtRules("theme", (at: AtRule) => {
       at.walkDecls((d) => {
