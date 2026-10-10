@@ -29,7 +29,8 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 | Git | `apply` lo usa para saber si la pantalla cambió desde el run |
 | Google Chrome (o `npx playwright install chromium`) | Capturas de las variantes |
 | Proyecto Next.js con App Router | Único framework soportado por ahora |
-| Tokens como CSS custom properties (`--panel`, `--text`, …) | Con o sin Tailwind 4 |
+| Tokens como CSS custom properties (`--panel`, `--text`, …) | Con o sin Tailwind |
+| shadcn/ui (Tailwind 3 o 4) | Se reconoce solo (`components.json`): roles de sus tokens y colores en canales HSL. En Tailwind 3, el mapeo de `tailwind.config` se lee sin ejecutarlo; lo que agreguen plugins o presets se declara en `tailwind.mapped` de `facha-ui.config.json` (por ejemplo `["--radius-md"]`) |
 
 ---
 

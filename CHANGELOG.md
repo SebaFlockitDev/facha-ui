@@ -7,14 +7,31 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-10
+
 ### Added
+- Compatibilidad con shadcn/ui, con Tailwind 3 y 4: se reconoce por `components.json` o por sus pares de tokens `--x` / `--x-foreground` (§7.23).
+- Roles de los tokens canónicos de shadcn: `--accent`, `--secondary` y `--muted` como fondos suaves, `--muted-foreground` como texto secundario, `--primary-foreground` como texto sobre la marca (§2.0.2).
+- Colores escritos como canales HSL sueltos (`222.2 47.4% 11.2%`, también con alfa), cuando el proyecto los usa como `hsl(var(--x))` o es shadcn: con roles, contraste y sugerencias (§7.23).
+- Tailwind 3: el mapeo de `tailwind.config` se lee de forma estática, así que `rounded-md` o `bg-primary` mapeados ya no se marcan; lo que no se puede leer (plugins, presets) se informa con su línea (§7.23).
+- Opción `tailwind.mapped` en `facha-ui.config.json` para declarar utilidades mapeadas que no se pueden leer sin ejecutar código (§2.0.2).
 - `CHANGELOG.md`: el historial de versiones en un solo lugar.
 
 ### Changed
 - El README resume el estado en una línea (versión, stacks soportados y enlace a este archivo).
 
+### Fixed
+- Los tokens dentro de `@layer` (como `@layer base { :root {…} }`) se leen: un proyecto shadcn con Tailwind 3 ya no da `missing` (§7.23).
+- Las clases dentro de `@layer components` se reconocen como clases del proyecto (§7.23).
+- Los alias de `@theme inline` (`--color-x: var(--x)`) ya no generan avisos de tema faltante ni casi-duplicados repetidos (§7.23).
+- Los radios con `calc()` (`calc(var(--radius) - 2px)`) se leen como radios con su valor en px (§7.23).
+- `--primary-foreground` de shadcn ya no aparece como texto ilegible: se mide sobre la marca, no sobre las superficies (§7.23).
+
 ### Removed
 - `docs/prompts/`: el registro de prompts de desarrollo ya no forma parte del repositorio.
+
+### Security
+- `tailwind.config` solo se parsea; nunca se importa ni se ejecuta, y `components.json` y el config se leen sin seguir symlinks ni salir del proyecto (§7.23).
 
 ## [0.14.0] - 2026-10-10
 
@@ -151,7 +168,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.11.0...v0.12.0

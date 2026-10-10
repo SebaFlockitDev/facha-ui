@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.14.0** (§7.10–§7.22). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.15.0** (§7.10–§7.23). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -109,9 +109,9 @@ interface Rule             { id: string; defaultSeverity: Severity; check(u: Sty
 
 | Tipo | Adapter MVP | Futuro (roadmap) |
 |---|---|---|
-| Tokens | `css-custom-properties`: `:root`, bloques de tema por selector (`html.dark`, `.dark`, `[data-theme=…]`), `@media (prefers-color-scheme: dark)` y `@theme` de Tailwind 4 | DTCG/JSON, Style Dictionary, SCSS, JS theme objects |
+| Tokens | `css-custom-properties`: `:root`, bloques de tema por selector (`html.dark`, `.dark`, `[data-theme=…]`), `@media (prefers-color-scheme: dark)` y `@theme` de Tailwind 4, también dentro de `@layer` (desde 0.15.0); colores como canales HSL sueltos con evidencia del proyecto (shadcn/ui) | DTCG/JSON, Style Dictionary, SCSS, JS theme objects; canales RGB |
 | Fuentes | `jsx` (`.tsx/.jsx/.ts/.js`: `className`, helpers `clsx/cn/cva/twMerge/classnames`, `style={{}}`, atributos SVG `fill/stroke`), `css` (`.css`, `.module.css`) | Vue SFC, Svelte, styled-components, CSS-in-JS |
-| Sistema de estilos | `tailwind-v4` (parser de candidatos: variantes `hover:`/`dark:`/`md:`, `!`, `[...]`, `[prop:val]`, modificadores `/50`) | Tailwind 3 (`tailwind.config.js`), UnoCSS |
+| Sistema de estilos | `tailwind-v4` (parser de candidatos: variantes `hover:`/`dark:`/`md:`, `!`, `[...]`, `[prop:val]`, modificadores `/50`); Tailwind 3 con el mapeo de `tailwind.config` leído de forma estática, sin plugins ni presets (desde 0.15.0) | Plugins y presets de Tailwind 3, UnoCSS |
 | Framework (lab) | `next-app` (App Router) | `vite-react` *(roadmap)*, Remix/React Router, Astro, Expo |
 
 #### 2.0.2 Configuración: `facha-ui.config.json`
@@ -130,6 +130,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `tailwind.classHelpers` | `string[]` | `["clsx","cn","cva","twMerge","classnames"]` | Funciones cuyos argumentos string son clases |
 | `tailwind.allowDefaultScale` | `object` | `{ spacing: true, sizing: true, fontWeight: true, layout: true }` (radio, sombra, tamaño de fuente, tracking y leading: `false`) | Qué escalas por defecto de Tailwind se aceptan sin token. Claves: `radius`, `shadow`, `fontSize`, `tracking`, `leading`, `spacing`, `sizing`, `fontWeight`, `layout` (evaluado desde 0.5.0) |
 | `tailwind.useDefaultTheme` | `boolean` | `false` | `true` = el tema por defecto de Tailwind **es** el design system (proyectos sin tokens propios) |
+| `tailwind.mapped` | `string[]` | — | Utilidades que el proyecto mapea a valores propios y que facha-ui no puede leer sin ejecutar código (presets, plugins, configs calculadas), como nombres de variable de `@theme`: `["--radius-md", "--color-brand"]` (desde 0.15.0) |
 | `rules` | `Record<RuleId, Severity \| {severity, options}>` | ver §2.a.4 | Severidad por regla (`off`, `info`, `warning`, `error`) |
 | `allow.literals` | `string[]` | `["transparent","currentColor","inherit","none"]` (siempre incluidos) | Literales de color aceptados |
 | `custom` | `CustomRule[]` | `[]` | Reglas declarativas extra (ver §2.a.4). No se ejecuta código del proyecto |
@@ -154,6 +155,30 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
    - `brand|primary|accent` → `accent` (`accent.primary` si es el token "base" del grupo, sin sufijo).
 
    Sin coincidencia → `generic`. Los nombres ambiguos se corrigen con `tokens.roles`.
+
+   **Proyectos shadcn/ui** (desde 0.15.0). Un proyecto es shadcn cuando tiene `components.json` en la raíz o al menos 3 pares canónicos `--x` / `--x-foreground` (background/foreground, card, popover, primary, secondary, muted, accent, destructive). En ese caso, sus tokens canónicos toman estos roles en lugar de los patrones de arriba, porque en shadcn `--accent`, `--secondary` y `--muted` son fondos suaves (hover, botones secundarios, áreas atenuadas), no la marca:
+
+   | Tokens | Rol |
+   |---|---|
+   | `--background` | `surface.base` |
+   | `--card`, `--popover`, `--muted`, `--secondary`, `--accent` | `surface.raised` |
+   | `--foreground`, `--card-foreground`, `--popover-foreground`, `--secondary-foreground`, `--accent-foreground` | `text.primary` |
+   | `--muted-foreground` | `text.secondary` |
+   | `--primary` | `accent.primary` |
+   | `--primary-foreground`, `--destructive-foreground` | `on-accent` |
+   | `--destructive` | `status.danger` |
+   | `--border`, `--input` | `border.default` |
+   | `--ring` | `border.default` (facha-ui no tiene rol de foco) |
+
+   El set del sidebar (`--sidebar`, `--sidebar-primary`…) sigue la misma tabla, con `--sidebar` como `surface.raised`; los alias de Tailwind 4 (`--color-muted-foreground`) toman el rol de su token; `--chart-N` es color sin rol. `tokens.roles` siempre gana.
+
+   **Colores como canales HSL sueltos** (desde 0.15.0). shadcn con Tailwind 3 guarda los colores como canales (`--primary: 222.2 47.4% 11.2%`, también con alfa: `222 47% 11% / 0.5`) y los usa como `hsl(var(--primary))`. Un valor con esa forma (tono con unidad opcional `deg`, `rad`, `grad` o `turn`; saturación y luminosidad en %; alfa opcional) es un color **solo con evidencia del propio proyecto**: que se consuma como `hsl(var(--x))` o `hsla(var(--x))` en su CSS o en `tailwind.config`, o que el proyecto sea shadcn y el nombre sea canónico. El token conserva su valor y suma `format: "hsl-channels"`; contraste, `health`, sugerencias y `scan_styles` lo leen como `hsl(…)`. Límites: solo canales HSL (los canales RGB con `rgb(var(--x))` son *roadmap*); un token con canales que solo se usa desde JS, con otro nombre y sin `components.json`, queda como `other` y se resuelve con `tokens.roles`.
+
+   **Alias y `calc()`** (desde 0.15.0). Un token que en todos los temas es solo `var(--x)` (los `--color-x: var(--x)` de `@theme inline`) es un alias: sigue a `--x` en cada tema, así que no recibe `theme-missing` ni se compara como casi-duplicado. Un `calc()` hecho solo de longitudes y números (`calc(var(--radius) - 2px)` resuelto) es una longitud con su valor en px.
+
+   **Capas de cascada** (desde 0.15.0). `@layer` no cambia a qué elementos se aplica un selector, así que no cuenta para decidir el tema: `:root` y `.dark` dentro de `@layer base` son bloques de tema, y las clases dentro de `@layer components` son clases de componente.
+
+   **Tailwind 3** (desde 0.15.0). El mapeo de utilidades a valores del proyecto se lee de `tailwind.config.{ts,js,mjs,cjs,mts,cts}` en la raíz, o del archivo que indique `@config` en el CSS. El archivo **solo se parsea** (Babel, AST); nunca se importa, se requiere ni se ejecuta (S2). Se leen las claves literales de `theme` y `theme.extend` para `colors` (con grupos anidados y `DEFAULT`), `borderRadius`, `boxShadow`, `fontSize`, `letterSpacing` y `lineHeight`, y se traducen a su equivalente de `@theme` (`--color-primary-foreground`, `--radius-md`). Presets, plugins, spreads, funciones y claves calculadas no se leen: van a `assumptions` con su línea, y lo que mapeen se declara en `tailwind.mapped`.
 
 **Sin config:** todo funciona con autodetección y la respuesta de cada tool incluye `configSource: "autodetected"` y la lista de supuestos. Con config inválida, las tools devuelven `CONFIG_INVALID` con el JSON Pointer del campo y el motivo (hoy se valida con zod; el JSON Schema publicado `schema/facha-ui.config.schema.json` es *roadmap*).
 
@@ -645,7 +670,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast) and applies nothing without your approval.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -718,7 +743,7 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 ### 3.1 Requisitos
 
 - Claude Code con soporte de plugins, Node ≥ 20 y Git.
-- Proyecto React con Next.js (App Router), con tokens como CSS custom properties (con o sin Tailwind 4) o sin design system (`init` lo arma). Vite es *roadmap*.
+- Proyecto React con Next.js (App Router), con tokens como CSS custom properties (con o sin Tailwind; shadcn/ui con Tailwind 3 o 4) o sin design system (`init` lo arma). Vite es *roadmap*.
 - Google Chrome instalado (Playwright MCP usa el canal `chrome`), o `npx playwright install chromium`.
 
 ### 3.2 Pasos
@@ -893,7 +918,7 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 | Ítem | Notas |
 |---|---|
 | UI web de configuración | Editor visual de `facha-ui.config.json`, roles y reglas `custom` |
-| Otros stacks y formatos | Vue/Svelte/Angular (adapters de fuente), CSS-in-JS, Tailwind 3, tokens DTCG/Style Dictionary/SCSS (adapters de tokens), Remix/Astro/Expo (adapters de framework) |
+| Otros stacks y formatos | Vue/Svelte/Angular (adapters de fuente), CSS-in-JS, plugins y presets de Tailwind 3, colores como canales RGB, tokens DTCG/Style Dictionary/SCSS (adapters de tokens), Remix/Astro/Expo (adapters de framework) |
 | GitHub MCP para PRs | `apply` abre un PR con capturas antes/después y la entrada de `decisions.md` |
 | Ejecución con LangGraph / Strands | El mismo flujo como agente fuera de Claude Code, reutilizando el MCP |
 | CI de violaciones | `facha-ui audit --baseline`: falla si aparecen violaciones nuevas (ratchet). El puntaje de UX ya tiene su modo CI (§7.20) |
@@ -1248,6 +1273,20 @@ Pedido del dev: una versión sin features nuevas, para que el plugin actúe como
 - **Sin rastros de proyectos reales:** el color de marca de un ejemplo y de un fixture pasó a valores neutros, y el test de términos prohibidos (`FACHA_UI_BANNED_TERMS`) también revisa `mcp/test`, `agents/`, `docs/` y los MD de la raíz.
 - **Roadmap (§6):** las 4 reglas UX pedidas ya existían desde 0.9.0. Quedan propuestas `a11y-color-only`, `ux-too-many-choices`, `ux-missing-states` y `copy-error-action`.
 - **Tests:** 113. Nuevos: principios bien formados, todo `ux:*` citado existe, el agente no puede escribir y `variants` lo invoca sin el razonamiento; toda `SKILL.md` en 250 líneas o menos; cada parte se lee desde un paso concreto y existe; las reglas duras siguen en `SKILL.md`.
+
+### 7.23 Versión 0.15.0: compatibilidad con shadcn/ui
+
+Pedido del dev: shadcn/ui es la base de muchísimas apps React hechas con IA, y facha-ui no la reconocía. Verificado sobre la 0.14.0: con Tailwind 3, `get_design_system` daba `missing` y 0 tokens; sin el `@layer`, los colores en canales HSL salían `other`/`generic`; y `rounded-md` se marcaba como `tailwind-default-scale` aunque shadcn lo mapea a `--radius`. Con Tailwind 4 (oklch, sin `@layer`) ya funcionaba.
+
+- **`@layer`:** `selectorContext()` deja afuera las capas de cascada, así que los tokens de `:root` y `.dark` dentro de `@layer base` se leen, y las clases de `@layer components` son clases de componente (§2.0.2).
+- **Canales HSL con evidencia** (`mcp/src/shadcn.ts`): un valor `H S% L%` (con alfa opcional) es color si el proyecto lo consume como `hsl(var(--x))` o si es shadcn y el nombre es canónico. Conserva su valor, suma `format: "hsl-channels"` y se mide como `hsl(…)`. Sin evidencia, nada cambia (§2.0.2).
+- **Roles de shadcn:** con `components.json` o 3 pares canónicos, la tabla de §2.0.2. Corrige dos cosas que la 0.14.0 hacía mal en shadcn con Tailwind 4: `--accent` competía con `--primary` como marca, y `--primary-foreground` se medía como texto sobre las superficies (falsa alarma "falla en todos los temas").
+- **Tailwind 3** (`mcp/src/tailwind-config.ts`): el mapeo de `tailwind.config` se lee del AST, nunca se ejecuta (S2). Lo que no se puede leer va a `assumptions` con su línea; `tailwind.mapped` lo declara.
+- **Alias y `calc()`:** los `--color-x: var(--x)` de `@theme inline` dejan de dar `theme-missing` y casi-duplicados repetidos (el tema neutral de shadcn pasó de 14 avisos falsos y 12 casi-duplicados a los 3 reales), y `calc(var(--radius) - 2px)` es un radio con su valor en px.
+- **Lectura segura de archivos de la raíz:** `readRootFile()` lee `components.json` y `tailwind.config.*` solo como texto, sin seguir symlinks ni salir de la raíz.
+- **Hallazgo de diseño en shadcn:** con `--muted` y `--accent` reconocidos como superficies, `--muted-foreground` del tema neutral (oklch 0.556) no llega a 4.5:1 en claro sobre esos fondos suaves; sobre `--background` sí. Es el caso de texto secundario dentro de un área `bg-muted` (WCAG 1.4.3).
+- **Calibración contra la 0.14.0** (el mismo bundle del tag sobre los fixtures nuevos): `shadcn-tw3` pasó de `missing` y `rounded-md` marcado a `partial` y solo el color escrito a mano; `shadcn-tw4` mantiene status y `check_ui`, y corrige los roles.
+- **Tests:** 148. Fixtures `shadcn-tw3` (canales HSL en `@layer`, `tailwind.config` y `components.json`) y `shadcn-tw4` (oklch con `@theme inline`); `@layer` con nombre, anónimo, anidado y con media query; canales con y sin alfa y sin evidencia; la tabla de roles; lectura del config (anidados, `module.exports`, presets, funciones, spreads, `@config`); un config con efectos secundarios que no debe ejecutarse (S2); `tailwind.mapped`; alias y `calc()`. Los snapshots existentes no cambian.
 ---
 
 ## Anexo A · Config completa de ejemplo
