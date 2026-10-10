@@ -1,6 +1,6 @@
 {
   "name": "facha-ui",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast) and applies nothing without your approval.",
   "author": {
     "name": "Sebastian Adrover"

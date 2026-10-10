@@ -60,6 +60,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
   - **C, patrón alternativo:** otro patrón con piezas existentes.
 - Cada variante diseña sus estados (cargando, vacío, error, datos extremos): los ves con `?state=…` en la URL del laboratorio.
 - Cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Incluye accesibilidad: `alt`, etiquetas, nombres de botones, teclado, foco visible, objetivos de 24 px y orden de títulos.
+- Responsive: el guardián marca anchos fijos, grillas que no colapsan, tablas sin scroll y `100vh`; además captura cada variante en celular (375) y tablet (768) y mide la página real con `?check=responsive` (desborde, contenido aplastado, objetivos y textos chicos).
 - Después, una crítica senior con `review_ui` y las capturas: arregla lo que puede y te deja lo demás con su recomendación.
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
@@ -67,6 +68,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
 - **Modo en vivo:** `/facha-ui:variants orders live`. En cada variante aparece un panel **facha-ui** abajo a la derecha: escribís el cambio, Claude lo aplica como revisión y la página se recarga sola. "Elegir esta variante" no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code. Dura 2 horas o hasta `/facha-ui:variants orders live stop`. Necesita la sesión de Claude Code abierta y la app corriendo.
   - **⌖ Señalar:** hacés clic en hasta 3 elementos y los nombrás [1], [2], [3] en el pedido; Claude sabe qué componente los dibuja.
   - **Paleta:** probás con un clic paletas predefinidas o tu color sobre toda la app, solo en tu navegador, con el contraste y los conflictos (y su solución) a la vista. *Proponer* la guarda para `/facha-ui:init palette`.
+  - **Ver en Móvil 375 / Tablet 768:** abre la variante a ese ancho, con el medidor de responsive encendido.
   - El panel se arrastra, se ajusta de tamaño, se minimiza (–) o se oculta (×; Alt+Shift+F lo trae).
 
 ### apply

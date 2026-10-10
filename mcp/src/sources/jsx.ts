@@ -233,6 +233,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
   };
 
   const ancestors: string[] = [];
+  const ancestorClassStack: string[][] = [];
 
   const visit = (n: Node | null | undefined) => {
     if (!n || typeof n !== "object") return;
@@ -244,19 +245,22 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
     if (n.type === "JSXElement") {
       const opening = n.openingElement as Node;
       const nm = elementName(opening);
-      if (nm.intrinsic) {
+      const attrs = nm.intrinsic ? attrsOf(opening) : null;
+      if (nm.intrinsic && attrs) {
         usages.push({
           kind: "element",
           tag: nm.tag,
-          ...attrsOf(opening),
+          ...attrs,
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
+          ancestorClasses: ancestorClassStack.flat(),
           file,
           line: opening.loc!.start.line,
           column: opening.loc!.start.column + 1,
         });
       }
       ancestors.push(nm.intrinsic ? nm.tag : "");
+      ancestorClassStack.push(attrs?.classes ?? []);
       pushed = true;
     }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
@@ -289,7 +293,10 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
       const child = n[key];
       if (child && typeof child === "object") visit(child);
     }
-    if (pushed) ancestors.pop();
+    if (pushed) {
+      ancestors.pop();
+      ancestorClassStack.pop();
+    }
   };
 
   visit(ast);

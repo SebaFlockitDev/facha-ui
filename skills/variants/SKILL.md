@@ -170,9 +170,10 @@ tone. Each state choice is a design decision with its source.
 
 **Scaffold** (once per project). If `<lab.dir>/layout.tsx` does not exist, copy these files
 from this skill's `templates/next-app/` into `<lab.dir>/`, keeping their relative paths:
-`layout.tsx`, `lab-theme.tsx`, `lab-state.ts`, `lab-panel.tsx`, `facha-live/route.ts` and
-`facha-live/live-core.ts`. (A lab created by an older version: add `lab-state.ts` when it is
-missing.) In `lab-panel.tsx`, set `LAB_BASE` to the lab's URL prefix (the part
+`layout.tsx`, `lab-theme.tsx`, `lab-state.ts`, `lab-responsive.tsx`, `lab-panel.tsx`,
+`facha-live/route.ts` and `facha-live/live-core.ts`. (A lab created by an older version: add
+`lab-state.ts` and `lab-responsive.tsx` when they are missing, and update `layout.tsx` to the
+template's version.) In `lab-panel.tsx`, set `LAB_BASE` to the lab's URL prefix (the part
 of `project.lab.urlPattern` before `/{screen}`, e.g. `"/lab"`). In `lab-theme.tsx`, replace
 `/*__THEMES__*/` with one entry per non-default theme, taken from `project.themes`:
 
@@ -213,6 +214,11 @@ automated browsers, so captures stay clean.
   ```
   The preview only forces the screen's own states with its own data shape: never invent
   domain data (`stress()` and `many()` repeat the real values).
+- **Responsive from the start:** design mobile first with the project's breakpoints (Tailwind
+  `sm:`/`md:`/`lg:` or the media queries the CSS already uses): no fixed widths wider than a
+  phone, grids that collapse to one column, tables inside a horizontal scroll container (or as
+  cards on small screens), side columns that stack or collapse. The guardian reports what a
+  static read can see (`responsive-*` rules); the lab measures the rest (Step 7).
 - **Accessibility is part of the guardian:** images with `alt`, labelled controls, buttons
   with a name, keyboard-reachable actions, a visible focus, targets of at least 24×24 px and a
   heading outline without holes (`a11y-*` rules). Fix them like any other violation.
@@ -251,6 +257,13 @@ The lab URL of each variant is `preview.baseUrl` + `project.lab.urlPattern`. Add
     themselves in that window; never type credentials;
   - capture desktop screenshots for each theme with `browser_take_screenshot` and an
     explicit `filename`: `<project.screenshotsDir>/<slug>/<x>-desktop-<theme>.png`;
+  - capture the default theme at **mobile (375×812)** and **tablet (768×1024)** too, with
+    `browser_resize`: `<x>-mobile-<theme>.png` and `<x>-tablet-<theme>.png`. Before each one,
+    open the URL with `?check=responsive` and read the lab's responsive check with
+    `browser_snapshot` (a status box: horizontal overflow, the main content's width and what
+    squeezes it, elements wider than the screen or clipped, targets under 24px, text under
+    12px). Then capture without `?check=` so the screenshot stays clean. Record the check's
+    lines in the run (`responsive`);
   - capture each state in the default theme, with `?state=<state>`:
     `<project.screenshotsDir>/<slug>/<x>-desktop-<theme>-<state>.png` (loading, empty, error,
     long). Use `browser_wait_for` so the state is rendered before the capture;
@@ -288,6 +301,10 @@ Review each valid variant like a senior UI designer:
      error states give a next step).
    - **C8 · Accessibility beyond the rules:** a visible focus, a reading order that matches the
      visual order, readable text in every theme.
+   - **C9 · Responsive:** at 375 and 768px nothing scrolls sideways, the main content gets the
+     screen (side navigation collapses or stacks), tables scroll inside their container or become
+     cards, columns collapse, targets keep 24px (44px is better for touch) and text stays at
+     12px or more. Use the responsive check's numbers as evidence.
 3. For each finding record: the checklist item, the evidence (a `review_ui` signal, a
    violation, or the capture and the area in it), why it matters to the person using the
    screen, the fix and its source. **A finding without a fix is not finished.**
@@ -320,6 +337,10 @@ Review each valid variant like a senior UI designer:
       "states": {
         "loading": { "how": "skeleton rows with .skeleton", "source": { "type": "pattern", "ref": "app/x/page.tsx:40" } },
         "empty": { "how": "...", "source": {} }, "error": { "how": "...", "source": {} }, "long": { "how": "...", "source": {} }
+      },
+      "responsive": {
+        "mobile": ["facha-ui responsive · 375px · desborde horizontal: 0px", "Nada más ancho que la pantalla"],
+        "tablet": ["…"]
       },
       "critique": [
         { "item": "C2", "evidence": "review_ui: 2 primary actions (lines 30, 52)", "why": "...", "fix": "...", "source": { "type": "class", "ref": ".btn-secondary" }, "status": "fixed | open" }
@@ -357,6 +378,7 @@ For each variant, show:
 - the hypothesis and how it serves the goal;
 - the guardian result: attempts and final counts (accessibility included);
 - its states, with the state captures;
+- how it behaves on mobile and tablet (the responsive check and the captures);
 - the critique: what was found, what was fixed, and what stays open with your recommendation;
 - the main decisions with their sources;
 - trade-offs;

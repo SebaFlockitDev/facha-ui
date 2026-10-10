@@ -57,7 +57,7 @@ Show it like this, marking the recommended start:
 | 1 | El design system de tu proyecto | Qué son los tokens, los roles y los temas, y cómo los ve la IA |
 | 2 | Por qué la IA inventa valores | Cómo se evita: leer antes de escribir, validar después |
 | 3 | El guardián | Qué verifica el código determinista y por qué no lo decide la IA |
-| 4 | Calidad visual que se mide | Contraste WCAG, accesibilidad, jerarquía y estados de la pantalla |
+| 4 | Calidad visual que se mide | Contraste WCAG, accesibilidad, responsive, jerarquía y estados |
 | 5 | Si falta el design system | Cómo se arma desde lo que el código ya usa |
 | 6 | Pedirle diseño a la IA | Objetivos (no valores), 3 hipótesis, decisiones con fuente |
 | 7 | Ajustar con criterio | Revisiones, modo en vivo, señalar elementos, paletas |
@@ -122,6 +122,9 @@ Every lesson has the same five parts, short:
   without alt, controls without a label, icon buttons without a name, clicks only for the
   mouse, an invisible focus, small targets, holes in the headings) and explain who each one
   leaves out.
+- Then responsive: `check_ui` with the `responsive-*` rules (fixed widths, grids that never
+  collapse, tables without scroll, 100vh), and what the lab's `?check=responsive` measures on the
+  real page at 375px (overflow, the content squeezed by a side column, small targets and text).
 - Then hierarchy and states: `review_ui` on the same screen (competing primary actions,
   accents, type sizes, headings, and whether it handles loading, empty and error), and why a
   senior looks there first.

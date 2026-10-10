@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.9.0** (§7.10–§7.17). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.10.0** (§7.10–§7.18). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 > **Prompts de origen:** [`docs/prompts/01-spec.md`](docs/prompts/01-spec.md) · [`docs/prompts/02-mvp-plan.md`](docs/prompts/02-mvp-plan.md)
 
@@ -370,6 +370,10 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `a11y-focus-visible` | warning (0.9.0) | Se quita el foco (`outline-none`, `focus:outline-none` o `outline: none` en una regla `:focus`) sin otro estilo de foco visible | `.field input:focus { outline: none }` |
 | `a11y-target-size` | warning (0.9.0) | Botón o enlace de menos de 24×24 px por sus utilidades de tamaño y sin padding (WCAG 2.5.8) | `<button className="h-4 w-4">` |
 | `a11y-heading-order` | warning (0.9.0) | Un nivel de título salteado dentro de un archivo (h2 → h4) | `<h1>…<h3>` |
+| `responsive-fixed-width` | warning (desde 0.10.0, §7.18) | `width`/`min-width` (o `w-…`/`min-w-…`) más ancho que un celular (343 px útiles a 375) fuera de un breakpoint o media query, sin tope `max-w-full` | `w-[800px]`, `.wide { width: 900px }` |
+| `responsive-grid-columns` | warning (0.10.0) | Grilla de 3+ columnas en todos los anchos: `grid-cols-N` sin variante de breakpoint, o `grid-template-columns` sin `auto-fit`/`auto-fill` ni media query | `grid-cols-4` |
+| `responsive-table-scroll` | info (0.10.0) | `<table>` sin contenedor con scroll horizontal en el mismo archivo (Tailwind `overflow-x-auto` o una clase del proyecto con `overflow-x: auto`) | `<div className="card overflow-hidden"><table>` |
+| `responsive-viewport-height` | info (0.10.0) | `h-screen` o `100vh`: en celulares incluye la zona bajo la barra del navegador; `dvh` sigue la altura visible | `min-height: 100vh` |
 
 **Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas. Desde 0.5.0 suma la **paleta inflada**: `near-duplicate-tokens` (tokens de color casi iguales en todos los temas), `near-duplicate-literals` (colores escritos a mano casi iguales) y `near-duplicate-steps` (tamaños de letra a ±0,5 px y radios a ±1 px).
 
@@ -1163,6 +1167,15 @@ Pedido del dev, actuando "como experto en UX": que el plugin juzgue si una panta
 - **Estados completos:** cada hipótesis diseña cargando, vacío, error, datos extremos y, si aplica, sin permisos, reusando los patrones del proyecto. El andamiaje `lab-state.ts` (`useLabState`, `stress`, `many`) permite verlos con `?state=loading|empty|error|long` sobre los datos reales, y se capturan. Las líneas marcadas `// facha-ui lab: state preview` las quita `apply` al portar.
 - **Run:** cada variante guarda `states` y `critique`.
 - **Tests:** fixture `next-ux` con una pantalla con cada problema y otra con cada solución (0 hallazgos), regla de foco en CSS, `review_ui` (primarias, acentos, tamaños, títulos, estados) y determinismo.
+
+### 7.18 Versión 0.10.0: responsive
+
+- **Guardián:** 4 reglas `responsive-*` sobre JSX y CSS (§2.a.4). El modelo de elementos registra las clases de los contenedores del mismo archivo, para saber si una tabla está dentro de un scroll.
+- **Medidor en la página** (`lab-responsive.tsx`, con `?check=responsive`): desborde horizontal, ancho útil del contenido principal y qué columna lateral lo ocupa, elementos más anchos que la pantalla (los más externos) o recortados por un `overflow: hidden`, objetivos de menos de 24 px (salvo enlaces dentro de texto) y textos de menos de 12 px. Lo muestra en una caja `role="status"` que `browser_snapshot` lee sin ejecutar código, así la regla de no usar `browser_evaluate` se mantiene.
+- **Capturas** en celular (375×812) y tablet (768×1024) además de escritorio, con el resultado del medidor en el run (`responsive`), y un punto **C9 · Responsive** en la crítica.
+- **Panel en vivo:** "Ver en Móvil 375 / Tablet 768" abre la variante en un iframe de ese ancho con el medidor; el panel no se dibuja dentro del iframe y se ocultan las barras de scroll para emular un celular.
+- **Calibrado en un proyecto real:** 0 falsos positivos en las reglas; el medidor encontró a 375 px un desborde de 107 px, tablas recortadas por `overflow-hidden`, la barra lateral de 232 px dejando 143 px al contenido y encabezados de 11 px.
+- **Tests:** casos que rompen y casos que se adaptan (tope, breakpoint, grilla que colapsa, tabla con scroll, `auto-fit`, media query).
 ---
 
 ## Anexo A · Config completa de ejemplo

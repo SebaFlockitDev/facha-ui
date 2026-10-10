@@ -52,6 +52,8 @@ export interface ElementUsage extends Loc {
   text: string;
   /** Inside a <label>. */
   inLabel: boolean;
+  /** Static classes of the intrinsic elements that contain it in the same file. */
+  ancestorClasses: string[];
 }
 
 export type Usage = ClassUsage | DynamicClassUsage | InlineStyleUsage | DeclUsage | ElementUsage;

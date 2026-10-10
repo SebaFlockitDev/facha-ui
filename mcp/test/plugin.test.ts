@@ -90,6 +90,16 @@ describe("states and senior critique", () => {
     expect(fs.existsSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-state.ts"))).toBe(true);
   });
 
+  it("variants measures responsive in the lab and captures mobile and tablet (C9)", () => {
+    const text = read("variants");
+    expect(text).toContain("**C9 · Responsive:**");
+    expect(text).toContain("?check=responsive");
+    expect(text).toContain("<x>-mobile-<theme>.png");
+    const layout = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "layout.tsx"), "utf8");
+    expect(layout).toContain("<LabResponsive />");
+    expect(read("apply")).toContain("`<lab.dir>/lab-responsive.tsx`");
+  });
+
   it("apply removes the state preview lines and the state scaffold", () => {
     const text = read("apply");
     expect(text).toContain("`// facha-ui lab: state preview`");

@@ -382,6 +382,26 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "severity": "warning",
       "summary": "A heading level is skipped inside a file (h2 → h4): the outline screen readers navigate has a hole.",
     },
+    {
+      "id": "responsive-fixed-width",
+      "severity": "warning",
+      "summary": "A width or min-width wider than a phone (343px usable at 375px) outside a breakpoint or media query: the page scrolls sideways.",
+    },
+    {
+      "id": "responsive-grid-columns",
+      "severity": "warning",
+      "summary": "A grid of 3 or more columns at every width (grid-cols-N without a breakpoint, or grid-template-columns without auto-fit or a media query).",
+    },
+    {
+      "id": "responsive-table-scroll",
+      "severity": "info",
+      "summary": "A <table> with no horizontal scroll container in the same file: it overflows or gets clipped on a phone.",
+    },
+    {
+      "id": "responsive-viewport-height",
+      "severity": "info",
+      "summary": "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height.",
+    },
   ],
   "scales": {
     "fontSize": {

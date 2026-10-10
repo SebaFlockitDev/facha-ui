@@ -31,6 +31,19 @@ const STORAGE_KEY = "facha-ui-lab-panel";
 const PALETTE_KEY = "facha-ui-lab-palette";
 const MAX_TARGETS = 3;
 
+/** Sizes the panel previews the variant at, with the lab's responsive check on. */
+const VIEWPORTS = [
+  { name: "mobile", label: "Móvil", width: 375, height: 812 },
+  { name: "tablet", label: "Tablet", width: 768, height: 1024 },
+] as const;
+
+/** The current lab URL with the responsive check on (the theme and state stay). */
+function previewUrl(): string {
+  const url = new URL(window.location.href);
+  url.searchParams.set("check", "responsive");
+  return url.toString();
+}
+
 interface Status {
   state: "queued" | "working" | "done" | "needs-input" | "failed" | "chosen" | "proposed";
   message?: string;
@@ -198,6 +211,13 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .conflicts { display: grid; gap: 8px; border: 1px solid #272d3d; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
 .conflicts.has { border-color: #ff8a4c; }
 .conflicts p { margin: 0; }
+.views { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
+button.view { border-radius: 999px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+button.view[aria-pressed="true"] { border-color: #ff8a4c; }
+.device { position: fixed; inset: 0; z-index: 2147483001; box-sizing: border-box; padding: 16px; display: flex; align-items: center; justify-content: center; background: rgba(8,10,16,.72); font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: #e8eaf2; }
+.device-frame { display: grid; gap: 8px; max-width: 100%; }
+.device-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.device iframe { display: block; max-width: calc(100vw - 48px); border: 8px solid #161a25; border-radius: 18px; background: #ffffff; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 .layer { position: fixed; inset: 0; pointer-events: none; z-index: 2147482999; }
 .box { position: absolute; left: 0; top: 0; box-sizing: border-box; border-radius: 3px; }
 .box.hover { border: 2px solid #ff8a4c; background: rgba(255,138,76,.12); }
@@ -666,6 +686,7 @@ export function LabPanel() {
   const [targets, setTargets] = useState<Picked[]>([]);
   const [choice, setChoice] = useState<PaletteChoice | null>(null);
   const [customHex, setCustomHex] = useState("#2563eb");
+  const [viewport, setViewport] = useState<(typeof VIEWPORTS)[number] | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -679,7 +700,8 @@ export function LabPanel() {
   const paintNow = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (navigator.webdriver) return; // keep automated captures clean
+    // Keep automated captures clean, and stay out of the panel's own mobile and tablet previews.
+    if (navigator.webdriver || window.self !== window.top) return;
     setHere(variantFromPath());
     setLayout({ ...DEFAULT_LAYOUT, ...load<Partial<Layout>>(STORAGE_KEY, {}) });
     setChoice(load<PaletteChoice | null>(PALETTE_KEY, null));
@@ -1002,6 +1024,16 @@ export function LabPanel() {
     setPicking(false);
     setOpen(false);
   };
+  // Esc closes the mobile or tablet preview.
+  useEffect(() => {
+    if (!viewport) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setViewport(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [viewport]);
+
   const hide = () => {
     setPicking(false);
     setHiddenPanel(true);
@@ -1239,6 +1271,21 @@ export function LabPanel() {
                 <button className="icon" type="button" onClick={hide} aria-label="Ocultar el panel" title="Ocultar (vuelve al recargar o con Alt+Shift+F)">×</button>
               </span>
             </div>
+            <div className="views" role="group" aria-label="Ver la variante en otro tamaño">
+              <span className="muted">Ver en</span>
+              {VIEWPORTS.map((v) => (
+                <button
+                  key={v.name}
+                  className="view"
+                  type="button"
+                  aria-pressed={viewport?.name === v.name}
+                  title={`${v.width} × ${v.height}, con el medidor de responsive`}
+                  onClick={() => setViewport(v)}
+                >
+                  {v.label} {v.width}
+                </button>
+              ))}
+            </div>
             {paletteBase && (
               <div className="tabs" role="tablist">
                 <button className="tab" type="button" role="tab" aria-selected={showTab === "changes"} onClick={() => setTab("changes")}>
@@ -1262,6 +1309,37 @@ export function LabPanel() {
           </div>
         )}
       </div>
+      {viewport && (
+        <div
+          className="device"
+          role="dialog"
+          aria-label={`Vista ${viewport.label}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setViewport(null);
+          }}
+        >
+          <div className="device-frame">
+            <div className="device-head">
+              <span>
+                <b>
+                  {viewport.label} · {viewport.width} × {viewport.height}
+                </b>{" "}
+                <span className="muted">
+                  medidor de responsive encendido{choice ? " · sin la paleta de prueba" : ""}
+                </span>
+              </span>
+              <button className="icon" type="button" onClick={() => setViewport(null)} aria-label="Cerrar la vista">
+                ×
+              </button>
+            </div>
+            <iframe
+              title={`Variante ${letter} en ${viewport.label}`}
+              src={previewUrl()}
+              style={{ width: viewport.width, height: `min(${viewport.height}px, calc(100vh - 96px))` }}
+            />
+          </div>
+        </div>
+      )}
     </>,
     root,
   );

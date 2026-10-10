@@ -60,6 +60,31 @@ describe("accessibility rules", () => {
   });
 });
 
+describe("responsive rules", () => {
+  const RESPONSIVE = ["responsive-fixed-width", "responsive-grid-columns", "responsive-table-scroll", "responsive-viewport-height"];
+
+  it("flag what breaks on a phone and accept what adapts (caps, breakpoints, scroll containers)", async () => {
+    const r = await h.call("check_ui", { path: "app/wide/page.tsx", rules: RESPONSIVE });
+    expect(r.structuredContent.violations.map(brief)).toEqual([
+      "4 responsive-viewport-height info h-screen",
+      "5 responsive-fixed-width warning w-[800px]",
+      "8 responsive-grid-columns warning grid-cols-4",
+      "10 responsive-table-scroll info <table>",
+    ]);
+    const grid = r.structuredContent.violations.find((v: any) => v.rule === "responsive-grid-columns");
+    expect(grid.suggestion.detail).toContain("md:grid-cols-4");
+  });
+
+  it("read CSS the same way: fixed widths and grids outside media queries, auto-fit is fine", async () => {
+    const r = await h.call("check_ui", { path: "app/globals.css", rules: RESPONSIVE });
+    expect(r.structuredContent.violations.map(brief)).toEqual([
+      "31 responsive-fixed-width warning width: 900px",
+      "32 responsive-grid-columns warning grid-template-columns: repeat(4, 1fr)",
+      "34 responsive-viewport-height info min-height: 100vh",
+    ]);
+  });
+});
+
 describe("review_ui", () => {
   it("measures competing primary actions, accents and font sizes", async () => {
     const r = await h.call("review_ui", { path: "app/orders/page.tsx" });

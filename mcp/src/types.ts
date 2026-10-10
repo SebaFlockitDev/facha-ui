@@ -19,6 +19,10 @@ export const RULE_IDS = [
   "a11y-focus-visible",
   "a11y-target-size",
   "a11y-heading-order",
+  "responsive-fixed-width",
+  "responsive-grid-columns",
+  "responsive-table-scroll",
+  "responsive-viewport-height",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

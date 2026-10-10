@@ -1,4 +1,5 @@
 import { checkA11y, removesFocusOutline } from "./a11y.js";
+import { checkResponsive, responsiveDecl } from "./responsive.js";
 import { findColorLiterals } from "./color.js";
 import type { Context } from "./context.js";
 import type { Usage } from "./sources/usage.js";
@@ -78,6 +79,18 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
   },
   { id: "a11y-target-size", severity: "warning", summary: "Button or link smaller than 24×24 px by its size utilities and without padding (WCAG 2.5.8)." },
   { id: "a11y-heading-order", severity: "warning", summary: "A heading level is skipped inside a file (h2 → h4): the outline screen readers navigate has a hole." },
+  {
+    id: "responsive-fixed-width",
+    severity: "warning",
+    summary: "A width or min-width wider than a phone (343px usable at 375px) outside a breakpoint or media query: the page scrolls sideways.",
+  },
+  {
+    id: "responsive-grid-columns",
+    severity: "warning",
+    summary: "A grid of 3 or more columns at every width (grid-cols-N without a breakpoint, or grid-template-columns without auto-fit or a media query).",
+  },
+  { id: "responsive-table-scroll", severity: "info", summary: "A <table> with no horizontal scroll container in the same file: it overflows or gets clipped on a phone." },
+  { id: "responsive-viewport-height", severity: "info", summary: "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height." },
 ];
 
 const MESSAGES: Record<RuleId, string> = {
@@ -98,6 +111,10 @@ const MESSAGES: Record<RuleId, string> = {
   "a11y-focus-visible": "Focus outline removed without a visible replacement.",
   "a11y-target-size": "Target smaller than 24×24 px.",
   "a11y-heading-order": "Heading level skipped.",
+  "responsive-fixed-width": "Fixed width wider than a phone.",
+  "responsive-grid-columns": "Grid columns that never collapse on small screens.",
+  "responsive-table-scroll": "Table without a horizontal scroll container.",
+  "responsive-viewport-height": "100vh height on phones.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -309,6 +326,12 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
         );
       }
     }
+    // Layouts that break on a phone: fixed widths, grids that never collapse, 100vh.
+    const narrow = responsiveDecl(u);
+    if (narrow) {
+      push(narrow.rule, narrow.base, { file: u.file, line: u.line, column: u.column }, `${u.property}: ${u.value.trim()}`, u.property, context,
+        { match: "none", kind: "none", value: null, detail: narrow.fix, source: null }, [], false, narrow.message);
+    }
     // A :focus rule that removes the outline with nothing visible instead.
     if (u.context === "css") {
       const siblings = ctx.componentClasses.find((c) => c.selector === u.selector)?.decls ?? null;
@@ -338,6 +361,14 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
     }
   }
 
+  const overflowClasses = new Set(
+    ctx.componentClasses
+      .filter((c) => /^\.[\w-]+$/.test(c.selector) && c.decls.some((d) => /^overflow(-x)?$/.test(d.prop) && /auto|scroll/.test(d.value)))
+      .map((c) => c.selector.slice(1)),
+  );
+  checkResponsive(usages, overflowClasses, (rule, base, loc, found, message, fix) =>
+    push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
+  );
   checkA11y(usages, (rule, base, loc, found, message, fix) =>
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
   );

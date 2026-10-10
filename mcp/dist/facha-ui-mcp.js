@@ -557,7 +557,7 @@ var require_scan = __commonJS({
         isExtglob = false;
         isGlob = false;
       }
-      let base3 = str;
+      let base4 = str;
       let prefix2 = "";
       let glob = "";
       if (start > 0) {
@@ -565,31 +565,31 @@ var require_scan = __commonJS({
         str = str.slice(start);
         lastIndex -= start;
       }
-      if (base3 && isGlob === true && lastIndex > 0) {
-        base3 = str.slice(0, lastIndex);
+      if (base4 && isGlob === true && lastIndex > 0) {
+        base4 = str.slice(0, lastIndex);
         glob = str.slice(lastIndex);
       } else if (isGlob === true) {
-        base3 = "";
+        base4 = "";
         glob = str;
       } else {
-        base3 = str;
+        base4 = str;
       }
-      if (base3 && base3 !== "" && base3 !== "/" && base3 !== str) {
-        if (isPathSeparator(base3.charCodeAt(base3.length - 1))) {
-          base3 = base3.slice(0, -1);
+      if (base4 && base4 !== "" && base4 !== "/" && base4 !== str) {
+        if (isPathSeparator(base4.charCodeAt(base4.length - 1))) {
+          base4 = base4.slice(0, -1);
         }
       }
       if (opts.unescape === true) {
         if (glob) glob = utils.removeBackslashes(glob);
-        if (base3 && backslashes === true) {
-          base3 = utils.removeBackslashes(base3);
+        if (base4 && backslashes === true) {
+          base4 = utils.removeBackslashes(base4);
         }
       }
       const state = {
         prefix: prefix2,
         input: input2,
         start,
-        base: base3,
+        base: base4,
         glob,
         isBrace,
         isBracket,
@@ -5657,10 +5657,10 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base3, relative, options, skipNormalization) {
+    function resolveComponent(base4, relative, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
-        base3 = parse6(serialize(base3, options), options);
+        base4 = parse6(serialize(base4, options), options);
         relative = parse6(serialize(relative, options), options);
       }
       options = options || {};
@@ -5680,32 +5680,32 @@ var require_fast_uri = __commonJS({
           target.query = relative.query;
         } else {
           if (!relative.path) {
-            target.path = base3.path;
+            target.path = base4.path;
             if (relative.query !== void 0) {
               target.query = relative.query;
             } else {
-              target.query = base3.query;
+              target.query = base4.query;
             }
           } else {
             if (relative.path[0] === "/") {
               target.path = removeDotSegments(relative.path);
             } else {
-              if ((base3.userinfo !== void 0 || base3.host !== void 0 || base3.port !== void 0) && !base3.path) {
+              if ((base4.userinfo !== void 0 || base4.host !== void 0 || base4.port !== void 0) && !base4.path) {
                 target.path = "/" + relative.path;
-              } else if (!base3.path) {
+              } else if (!base4.path) {
                 target.path = relative.path;
               } else {
-                target.path = base3.path.slice(0, base3.path.lastIndexOf("/") + 1) + relative.path;
+                target.path = base4.path.slice(0, base4.path.lastIndexOf("/") + 1) + relative.path;
               }
               target.path = removeDotSegments(target.path);
             }
             target.query = relative.query;
           }
-          target.userinfo = base3.userinfo;
-          target.host = base3.host;
-          target.port = base3.port;
+          target.userinfo = base4.userinfo;
+          target.host = base4.host;
+          target.port = base4.port;
         }
-        target.scheme = base3.scheme;
+        target.scheme = base4.scheme;
       }
       target.fragment = relative.fragment;
       return target;
@@ -20390,14 +20390,14 @@ var memo = {
     var _a3;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base3 = inst._zod.parse;
+      const base4 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (ctx.direction !== "backward" && isBackEdge(ctx, payload.value))
           throw new $ZodCyclicError();
-        return base3(payload, ctx);
+        return base4(payload, ctx);
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base3)
+      if (inst._zod.run === base4)
         inst._zod.run = wrapped;
     });
   },
@@ -20409,15 +20409,15 @@ var memo = {
     let lastBucket;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base3 = inst._zod.parse;
+      const base4 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (isRecursiveInst === void 0) {
           const walked = isRecursive(inst, /* @__PURE__ */ new Set(), false);
           if (walked === NONE) {
-            inst._zod.parse = base3;
+            inst._zod.parse = base4;
             if (inst._zod.run === wrapped)
-              inst._zod.run = base3;
-            return base3(payload, ctx);
+              inst._zod.run = base4;
+            return base4(payload, ctx);
           }
           if (walked === PROVEN || rechecked)
             isRecursiveInst = true;
@@ -20426,7 +20426,7 @@ var memo = {
         }
         const input2 = payload.value;
         if (!isRef(input2))
-          return base3(payload, ctx);
+          return base4(payload, ctx);
         let state = ctx[STATE];
         if (!state) {
           state = { buckets: /* @__PURE__ */ new WeakMap(), backEdges: void 0 };
@@ -20455,7 +20455,7 @@ var memo = {
         }
         handoff = bucket;
         const depth = open.length;
-        const result = base3(payload, ctx);
+        const result = base4(payload, ctx);
         handoff = void 0;
         const entry = open.length > depth ? open.pop() : void 0;
         if (result instanceof Promise) {
@@ -20470,7 +20470,7 @@ var memo = {
         return result;
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base3)
+      if (inst._zod.run === base4)
         inst._zod.run = wrapped;
     });
   }
@@ -36529,7 +36529,11 @@ var RULE_IDS = [
   "a11y-tabindex",
   "a11y-focus-visible",
   "a11y-target-size",
-  "a11y-heading-order"
+  "a11y-heading-order",
+  "responsive-fixed-width",
+  "responsive-grid-columns",
+  "responsive-table-scroll",
+  "responsive-viewport-height"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36705,7 +36709,7 @@ function projectTier(dir) {
   const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
   return "react" in deps || "next" in deps ? 1 : 0;
 }
-function discoverCandidates(base3) {
+function discoverCandidates(base4) {
   const found = [];
   const visit2 = (dir, depth) => {
     if (depth > DISCOVERY_DEPTH) return;
@@ -36723,7 +36727,7 @@ function discoverCandidates(base3) {
       else visit2(abs2, depth + 1);
     }
   };
-  visit2(base3, 1);
+  visit2(base4, 1);
   const best = Math.max(0, ...found.map((f3) => f3.tier));
   return found.filter((f3) => f3.tier === best).map((f3) => f3.dir).sort();
 }
@@ -36731,16 +36735,16 @@ function resolveWorkspace(opts) {
   const env = opts.env ?? process.env;
   const cwd = opts.cwd ?? process.cwd();
   const isUsable = (v) => !!v && !v.includes("${");
-  const base3 = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
+  const base4 = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
   const existingDir = (p4) => {
     if (!fs2.existsSync(p4) || !fs2.statSync(p4).isDirectory()) {
       throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${p4}`);
     }
     return fs2.realpathSync(p4);
   };
-  const workspaceRoot = existingDir(base3);
+  const workspaceRoot = existingDir(base4);
   if (isUsable(env.FACHA_UI_ROOT)) {
-    return { workspaceRoot, root: existingDir(path2.resolve(base3, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
+    return { workspaceRoot, root: existingDir(path2.resolve(base4, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
   }
   if (projectTier(workspaceRoot) > 0) return { workspaceRoot, root: workspaceRoot, mode: "direct", candidates: [] };
   const found = discoverCandidates(workspaceRoot);
@@ -40388,23 +40392,23 @@ var ZodEffects = class extends ZodType2 {
     }
     if (effect.type === "transform") {
       if (ctx.common.async === false) {
-        const base3 = this._def.schema._parseSync({
+        const base4 = this._def.schema._parseSync({
           data: ctx.data,
           path: ctx.path,
           parent: ctx
         });
-        if (!isValid(base3))
+        if (!isValid(base4))
           return INVALID2;
-        const result = effect.transform(base3.value, checkCtx);
+        const result = effect.transform(base4.value, checkCtx);
         if (result instanceof Promise) {
           throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
         }
         return { status: status.value, value: result };
       } else {
-        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base3) => {
-          if (!isValid(base3))
+        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base4) => {
+          if (!isValid(base4))
             return INVALID2;
-          return Promise.resolve(effect.transform(base3.value, checkCtx)).then((result) => ({
+          return Promise.resolve(effect.transform(base4.value, checkCtx)).then((result) => ({
             status: status.value,
             value: result
           }));
@@ -41813,19 +41817,19 @@ function parseNullableDef(def, refs) {
     };
   }
   if (refs.target === "openApi3") {
-    const base4 = parseDef(def.innerType._def, {
+    const base5 = parseDef(def.innerType._def, {
       ...refs,
       currentPath: [...refs.currentPath]
     });
-    if (base4 && "$ref" in base4)
-      return { allOf: [base4], nullable: true };
-    return base4 && { ...base4, nullable: true };
+    if (base5 && "$ref" in base5)
+      return { allOf: [base5], nullable: true };
+    return base5 && { ...base5, nullable: true };
   }
-  const base3 = parseDef(def.innerType._def, {
+  const base4 = parseDef(def.innerType._def, {
     ...refs,
     currentPath: [...refs.currentPath, "anyOf", "0"]
   });
-  return base3 && { anyOf: [base3, { type: "null" }] };
+  return base4 && { anyOf: [base4, { type: "null" }] };
 }
 
 // node_modules/zod-to-json-schema/dist/esm/parsers/number.js
@@ -43252,8 +43256,8 @@ var Protocol = class {
 function isPlainObject2(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
-function mergeCapabilities(base3, additional) {
-  const result = { ...base3 };
+function mergeCapabilities(base4, additional) {
+  const result = { ...base4 };
   for (const key in additional) {
     const k4 = key;
     const addValue = additional[k4];
@@ -48694,8 +48698,8 @@ function compositeOver(fg, bg) {
     b: f3.b * a + b.b * (1 - a)
   };
 }
-function contrast2(fg, bg, base3) {
-  const solidBg = alphaOf(bg) < 1 && base3 ? compositeOver(bg, base3) : bg;
+function contrast2(fg, bg, base4) {
+  const solidBg = alphaOf(bg) < 1 && base4 ? compositeOver(bg, base4) : bg;
   const solidFg = alphaOf(fg) < 1 ? compositeOver(fg, solidBg) : fg;
   return Math.round(contrast(solidFg, solidBg) * 100) / 100;
 }
@@ -49728,15 +49732,15 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     }
     return node2;
   }
-  stopParseSubscript(base3, state) {
-    const node2 = super.stopParseSubscript(base3, state);
+  stopParseSubscript(base4, state) {
+    const node2 = super.stopParseSubscript(base4, state);
     if (state.optionalChainMember) {
-      return this.estreeParseChainExpression(node2, base3);
+      return this.estreeParseChainExpression(node2, base4);
     }
     return node2;
   }
-  parseMember(base3, startLoc, state, computed, optional2) {
-    const node2 = super.parseMember(base3, startLoc, state, computed, optional2);
+  parseMember(base4, startLoc, state, computed, optional2) {
+    const node2 = super.parseMember(base4, startLoc, state, computed, optional2);
     if (node2.type === "OptionalMemberExpression") {
       this.castNodeTo(node2, "MemberExpression");
     } else {
@@ -52476,18 +52480,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
   parseParenAndDistinguishExpression(canStartArrow) {
     return super.parseParenAndDistinguishExpression(canStartArrow && !this.state.noArrowAt.includes(this.sourceToOffsetPos(this.state.start)));
   }
-  parseSubscripts(base3, startLoc, noCalls) {
-    if (base3.type === "Identifier" && base3.name === "async" && this.state.noArrowAt.includes(startLoc.index)) {
+  parseSubscripts(base4, startLoc, noCalls) {
+    if (base4.type === "Identifier" && base4.name === "async" && this.state.noArrowAt.includes(startLoc.index)) {
       this.next();
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base3;
+      node2.callee = base4;
       node2.arguments = super.parseCallExpressionArguments();
-      base3 = this.finishNode(node2, "CallExpression");
-    } else if (base3.type === "Identifier" && base3.name === "async" && this.match(43)) {
+      base4 = this.finishNode(node2, "CallExpression");
+    } else if (base4.type === "Identifier" && base4.name === "async" && this.match(43)) {
       const state = this.state.clone();
       const arrow = this.tryParse((abort) => this.parseAsyncArrowWithTypeParameters(startLoc) || abort(), state);
       if (!arrow.error && !arrow.aborted) return arrow.node;
-      const result = this.tryParse(() => super.parseSubscripts(base3, startLoc, noCalls), state);
+      const result = this.tryParse(() => super.parseSubscripts(base4, startLoc, noCalls), state);
       if (result.node && !result.error) return result.node;
       if (arrow.node) {
         this.state = arrow.failState;
@@ -52499,18 +52503,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       }
       throw arrow.error || result.error;
     }
-    return super.parseSubscripts(base3, startLoc, noCalls);
+    return super.parseSubscripts(base4, startLoc, noCalls);
   }
-  parseSubscript(base3, startLoc, noCalls, subscriptState) {
+  parseSubscript(base4, startLoc, noCalls, subscriptState) {
     if (this.match(14) && this.isLookaheadToken_lt()) {
       subscriptState.optionalChainMember = true;
       if (noCalls) {
         subscriptState.stop = true;
-        return base3;
+        return base4;
       }
       this.next();
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base3;
+      node2.callee = base4;
       node2.typeArguments = this.flowParseTypeParameterInstantiationInExpression();
       this.expect(6);
       node2.arguments = this.parseCallExpressionArguments();
@@ -52518,7 +52522,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       return this.finishCallExpression(node2, true);
     } else if (!noCalls && this.shouldParseTypes() && (this.match(43) || this.match(47))) {
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base3;
+      node2.callee = base4;
       const result = this.tryParse(() => {
         node2.typeArguments = this.flowParseTypeParameterInstantiationCallOrNew();
         this.expect(6);
@@ -52533,7 +52537,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
         return result.node;
       }
     }
-    return super.parseSubscript(base3, startLoc, noCalls, subscriptState);
+    return super.parseSubscript(base4, startLoc, noCalls, subscriptState);
   }
   parseNewCallee(node2) {
     super.parseNewCallee(node2);
@@ -56786,62 +56790,62 @@ var ExpressionParser = class extends LValParser {
     }
     return this.parseSubscripts(expr, startLoc);
   }
-  parseSubscripts(base3, startLoc, noCalls) {
+  parseSubscripts(base4, startLoc, noCalls) {
     const state = {
       optionalChainMember: false,
-      maybeAsyncArrow: this.atPossibleAsyncArrow(base3),
+      maybeAsyncArrow: this.atPossibleAsyncArrow(base4),
       stop: false
     };
     do {
-      base3 = this.parseSubscript(base3, startLoc, noCalls, state);
+      base4 = this.parseSubscript(base4, startLoc, noCalls, state);
       state.maybeAsyncArrow = false;
     } while (!state.stop);
-    return base3;
+    return base4;
   }
-  parseSubscript(base3, startLoc, noCalls, state) {
+  parseSubscript(base4, startLoc, noCalls, state) {
     const {
       type
     } = this.state;
     if (!noCalls && type === 11) {
-      return this.parseBind(base3, startLoc, state);
+      return this.parseBind(base4, startLoc, state);
     } else if (tokenIsTemplate(type)) {
-      return this.parseTaggedTemplateExpression(base3, startLoc, state);
+      return this.parseTaggedTemplateExpression(base4, startLoc, state);
     }
     let optional2 = false;
     if (type === 14) {
       if (noCalls) {
         this.raise(Errors.OptionalChainingNoNew, this.state.startLoc);
         if (this.lookaheadCharCode() === 40) {
-          return this.stopParseSubscript(base3, state);
+          return this.stopParseSubscript(base4, state);
         }
       }
       state.optionalChainMember = optional2 = true;
       this.next();
     }
     if (!noCalls && this.match(6)) {
-      return this.parseCoverCallAndAsyncArrowHead(base3, startLoc, state, optional2);
+      return this.parseCoverCallAndAsyncArrowHead(base4, startLoc, state, optional2);
     } else {
       const computed = this.eat(0);
       if (computed || optional2 || this.eat(12)) {
-        return this.parseMember(base3, startLoc, state, computed, optional2);
+        return this.parseMember(base4, startLoc, state, computed, optional2);
       } else {
-        return this.stopParseSubscript(base3, state);
+        return this.stopParseSubscript(base4, state);
       }
     }
   }
-  stopParseSubscript(base3, state) {
+  stopParseSubscript(base4, state) {
     state.stop = true;
-    return base3;
+    return base4;
   }
-  parseMember(base3, startLoc, state, computed, optional2) {
+  parseMember(base4, startLoc, state, computed, optional2) {
     const node2 = this.startNodeAt(startLoc);
-    node2.object = base3;
+    node2.object = base4;
     node2.computed = computed;
     if (computed) {
       node2.property = this.parseExpression();
       this.expect(1);
     } else if (this.match(134)) {
-      if (base3.type === "Super") {
+      if (base4.type === "Super") {
         this.raise(Errors.SuperPrivateField, startLoc);
       }
       this.classScope.usePrivateName(this.state.value, this.state.startLoc);
@@ -56856,12 +56860,12 @@ var ExpressionParser = class extends LValParser {
       return this.finishNode(node2, "MemberExpression");
     }
   }
-  parseBind(base3, startLoc, state) {
+  parseBind(base4, startLoc, state) {
     const node2 = this.startNodeAt(startLoc);
-    node2.object = base3;
+    node2.object = base4;
     this.next();
-    const callee = this.parseNoCallExpr((base4) => {
-      throw this.raise(Errors.UnsupportedBindRHS, base4);
+    const callee = this.parseNoCallExpr((base5) => {
+      throw this.raise(Errors.UnsupportedBindRHS, base5);
     });
     if (callee.type === "Super" || callee.type === "Import") {
       throw this.raise(Errors.UnsupportedBindRHS, callee);
@@ -56870,11 +56874,11 @@ var ExpressionParser = class extends LValParser {
     state.stop = true;
     return this.parseSubscripts(this.finishNode(node2, "BindExpression"), startLoc, false);
   }
-  parseCoverCallAndAsyncArrowHead(base3, startLoc, state, optional2) {
+  parseCoverCallAndAsyncArrowHead(base4, startLoc, state, optional2) {
     let refExpressionErrors = null;
     this.next();
     const node2 = this.startNodeAt(startLoc);
-    node2.callee = base3;
+    node2.callee = base4;
     const {
       maybeAsyncArrow,
       optionalChainMember
@@ -56889,7 +56893,7 @@ var ExpressionParser = class extends LValParser {
     if (optional2) {
       node2.arguments = this.parseCallExpressionArguments();
     } else {
-      node2.arguments = this.parseCallExpressionArguments(base3.type !== "Super", node2, refExpressionErrors);
+      node2.arguments = this.parseCallExpressionArguments(base4.type !== "Super", node2, refExpressionErrors);
     }
     let finishedNode = this.finishCallExpression(node2, optionalChainMember);
     if (maybeAsyncArrow && this.shouldParseAsyncArrow() && !optional2) {
@@ -56907,17 +56911,17 @@ var ExpressionParser = class extends LValParser {
     }
     return finishedNode;
   }
-  parseTaggedTemplateExpression(base3, startLoc, state) {
+  parseTaggedTemplateExpression(base4, startLoc, state) {
     const node2 = this.startNodeAt(startLoc);
-    node2.tag = base3;
+    node2.tag = base4;
     node2.quasi = this.parseTemplate(true);
     if (state.optionalChainMember) {
       this.raise(Errors.OptionalChainingNoTemplate, startLoc);
     }
     return this.finishNode(node2, "TaggedTemplateExpression");
   }
-  atPossibleAsyncArrow(base3) {
-    return base3.type === "Identifier" && base3.name === "async" && this.state.lastTokEndLoc.index === base3.end && !this.canInsertSemicolon() && base3.end - base3.start === 5 && this.state.canStartArrow;
+  atPossibleAsyncArrow(base4) {
+    return base4.type === "Identifier" && base4.name === "async" && this.state.lastTokEndLoc.index === base4.end && !this.canInsertSemicolon() && base4.end - base4.start === 5 && this.state.canStartArrow;
   }
   finishCallExpression(node2, optional2) {
     if (node2.callee.type === "Import") {
@@ -56971,11 +56975,11 @@ var ExpressionParser = class extends LValParser {
   parseNoCallExpr(onUnparenthesizedImportExpression) {
     const startLoc = this.state.startLoc;
     const isImport = this.match(79);
-    const base3 = this.parseExprAtom();
-    if (isImport && base3.type === "ImportExpression") {
-      onUnparenthesizedImportExpression(base3);
+    const base4 = this.parseExprAtom();
+    if (isImport && base4.type === "ImportExpression") {
+      onUnparenthesizedImportExpression(base4);
     }
-    return this.parseSubscripts(base3, startLoc, true);
+    return this.parseSubscripts(base4, startLoc, true);
   }
   parseExprAtom(refExpressionErrors) {
     let node2;
@@ -57050,8 +57054,8 @@ var ExpressionParser = class extends LValParser {
         node2 = this.startNode();
         this.next();
         node2.object = null;
-        const callee = node2.callee = this.parseNoCallExpr((base3) => {
-          throw this.raise(Errors.UnsupportedBind, base3);
+        const callee = node2.callee = this.parseNoCallExpr((base4) => {
+          throw this.raise(Errors.UnsupportedBind, base4);
         });
         if (callee.type === "MemberExpression") {
           return this.finishNode(node2, "BindExpression");
@@ -57423,8 +57427,8 @@ var ExpressionParser = class extends LValParser {
     return this.finishNode(node2, "NewExpression");
   }
   parseNewCallee(node2) {
-    const callee = this.parseNoCallExpr((base3) => {
-      this.raise(Errors.ImportCallNotNewExpression, base3, base3);
+    const callee = this.parseNoCallExpr((base4) => {
+      this.raise(Errors.ImportCallNotNewExpression, base4, base4);
     });
     node2.callee = callee;
     if (callee.type === "Import") {
@@ -61449,19 +61453,19 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     }
     return node2;
   }
-  parseSubscript(base3, startLoc, noCalls, state) {
+  parseSubscript(base4, startLoc, noCalls, state) {
     if (!this.hasPrecedingLineBreak() && this.match(31)) {
       this.state.canStartJSXElement = false;
       this.next();
       const nonNullExpression = this.startNodeAt(startLoc);
-      nonNullExpression.expression = base3;
+      nonNullExpression.expression = base4;
       return this.finishNode(nonNullExpression, "TSNonNullExpression");
     }
     let isOptionalCall = false;
     if (this.match(14) && this.lookaheadCharCode() === 60) {
       if (noCalls) {
         state.stop = true;
-        return base3;
+        return base4;
       }
       state.optionalChainMember = isOptionalCall = true;
       this.next();
@@ -61469,7 +61473,7 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     if (this.match(43) || this.match(47)) {
       let missingParenErrorLoc;
       const result = this.tsTryParseAndCatch(() => {
-        if (!noCalls && this.atPossibleAsyncArrow(base3)) {
+        if (!noCalls && this.atPossibleAsyncArrow(base4)) {
           const asyncArrowFn = this.tsTryParseGenericAsyncArrowFunction(startLoc);
           if (asyncArrowFn) {
             state.stop = true;
@@ -61483,13 +61487,13 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
           return;
         }
         if (tokenIsTemplate(this.state.type)) {
-          const result2 = super.parseTaggedTemplateExpression(base3, startLoc, state);
+          const result2 = super.parseTaggedTemplateExpression(base4, startLoc, state);
           result2.typeArguments = typeArguments;
           return result2;
         }
         if (!noCalls && this.eat(6)) {
           const node3 = this.startNodeAt(startLoc);
-          node3.callee = base3;
+          node3.callee = base4;
           node3.arguments = this.parseCallExpressionArguments();
           this.tsCheckForInvalidTypeCasts(node3.arguments);
           node3.typeArguments = typeArguments;
@@ -61503,7 +61507,7 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
           return;
         }
         const node2 = this.startNodeAt(startLoc);
-        node2.expression = base3;
+        node2.expression = base4;
         node2.typeArguments = typeArguments;
         return this.finishNode(node2, "TSInstantiationExpression");
       });
@@ -61516,13 +61520,13 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
             this.raise(TSErrors.InvalidPropertyAccessAfterInstantiationExpression, this.state.startLoc);
           }
           if (!this.match(12) && !this.match(14)) {
-            result.expression = super.stopParseSubscript(base3, state);
+            result.expression = super.stopParseSubscript(base4, state);
           }
         }
         return result;
       }
     }
-    return super.parseSubscript(base3, startLoc, noCalls, state);
+    return super.parseSubscript(base4, startLoc, noCalls, state);
   }
   parseNewCallee(node2) {
     super.parseNewCallee(node2);
@@ -63407,6 +63411,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
     return { name, text: parts.join(" ").slice(0, 80) };
   };
   const ancestors = [];
+  const ancestorClassStack = [];
   const visit2 = (n) => {
     if (!n || typeof n !== "object") return;
     if (Array.isArray(n)) {
@@ -63417,19 +63422,22 @@ function extractJsx(file2, code2, ext, classHelpers) {
     if (n.type === "JSXElement") {
       const opening = n.openingElement;
       const nm = elementName(opening);
-      if (nm.intrinsic) {
+      const attrs = nm.intrinsic ? attrsOf(opening) : null;
+      if (nm.intrinsic && attrs) {
         usages.push({
           kind: "element",
           tag: nm.tag,
-          ...attrsOf(opening),
+          ...attrs,
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
+          ancestorClasses: ancestorClassStack.flat(),
           file: file2,
           line: opening.loc.start.line,
           column: opening.loc.start.column + 1
         });
       }
       ancestors.push(nm.intrinsic ? nm.tag : "");
+      ancestorClassStack.push(attrs?.classes ?? []);
       pushed = true;
     }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
@@ -63462,7 +63470,10 @@ function extractJsx(file2, code2, ext, classHelpers) {
       const child = n[key];
       if (child && typeof child === "object") visit2(child);
     }
-    if (pushed) ancestors.pop();
+    if (pushed) {
+      ancestors.pop();
+      ancestorClassStack.pop();
+    }
   };
   visit2(ast);
   return usages;
@@ -63709,6 +63720,117 @@ function removesFocusOutline(property, value, selector, siblings) {
   if (!selector || !/:focus(?!-within)/.test(selector) || /:not\(:focus-visible\)/.test(selector)) return false;
   if (!/^outline(-style|-width)?$/.test(property) || !/^(none|0(px)?)$/.test(value.trim())) return false;
   return !(siblings ?? []).some((d) => /^(box-shadow|border|border-color|outline-color|background|background-color|text-decoration)$/.test(d.prop) && !/^(none|0)$/.test(d.value.trim()));
+}
+
+// src/responsive.ts
+var PHONE_WIDTH = 343;
+var BREAKPOINT = /^(sm|md|lg|xl|2xl|min-\[[^\]]+\]|@\w+):/;
+var SCROLLS = /^(overflow-x-auto|overflow-x-scroll|overflow-auto|overflow-scroll)$/;
+var base2 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
+var unprefixed = (cls) => !BREAKPOINT.test(cls);
+function lengthPx(value) {
+  const m = value.trim().match(/^(\d+(?:\.\d+)?)(px|rem)$/);
+  if (!m) return null;
+  return m[2] === "rem" ? Number(m[1]) * 16 : Number(m[1]);
+}
+function fixedWidthPx(cls) {
+  const m = base2(cls).match(/^(?:min-)?w-(?:(\d+(?:\.\d+)?)|\[([^\]]+)\])$/);
+  if (!m) return null;
+  if (m[1]) return Number(m[1]) * 4;
+  return lengthPx(m[2]);
+}
+function checkResponsive(usages, overflowClasses, report) {
+  for (const e4 of usages.filter((u) => u.kind === "element")) {
+    const where = { file: e4.file, line: e4.line, column: e4.column };
+    const own2 = e4.classes.filter(unprefixed);
+    const capped = own2.some((c2) => /^max-w-(full|screen|\[100%\]|\[100vw\])$/.test(base2(c2)));
+    for (const c2 of own2) {
+      const px = fixedWidthPx(c2);
+      if (px != null && px > PHONE_WIDTH && !capped) {
+        report(
+          "responsive-fixed-width",
+          "warning",
+          where,
+          c2,
+          `Fixed width of ${Math.round(px)}px: wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
+          `Use w-full with a max-w-\u2026 cap, or set the fixed width only from a breakpoint up (md:${base2(c2)}).`
+        );
+        break;
+      }
+    }
+    const cols = own2.map((c2) => base2(c2).match(/^grid-cols-(\d+)$/)).find(Boolean);
+    if (cols && Number(cols[1]) >= 3 && !e4.classes.some((c2) => BREAKPOINT.test(c2) && /grid-cols-/.test(c2))) {
+      report(
+        "responsive-grid-columns",
+        "warning",
+        where,
+        cols[0],
+        `${cols[1]} columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / Number(cols[1]))}px.`,
+        `Start with 1 column and add them from breakpoints up (grid-cols-1 md:grid-cols-${cols[1]}), or use auto-fit with a minimum.`
+      );
+    }
+    if (e4.tag === "table") {
+      const containers = [...e4.ancestorClasses, ...e4.classes].map(base2);
+      const scrolls = containers.some((c2) => SCROLLS.test(c2) || overflowClasses.has(c2));
+      if (!scrolls) {
+        report(
+          "responsive-table-scroll",
+          "info",
+          where,
+          "<table>",
+          "Table with no horizontal scroll container in this file: on a phone it overflows the page or gets clipped.",
+          "Wrap it in an element with overflow-x: auto (overflow-x-auto), or show the rows as cards below a breakpoint. If the wrapper is in another file, ignore this."
+        );
+      }
+    }
+    if (own2.some((c2) => base2(c2) === "h-screen")) {
+      report(
+        "responsive-viewport-height",
+        "info",
+        where,
+        "h-screen",
+        "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
+        "Use h-dvh (or min-h-dvh), which follows the visible height."
+      );
+    }
+  }
+}
+function responsiveDecl(u) {
+  if (u.context === "svg-attribute") return null;
+  if (u.selector && /@media|@container/.test(u.selector)) return null;
+  const value = u.value.trim();
+  if (u.property === "width" || u.property === "min-width") {
+    const px = lengthPx(value);
+    if (px != null && px > PHONE_WIDTH) {
+      return {
+        rule: "responsive-fixed-width",
+        base: "warning",
+        message: `${u.property}: ${value} is wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
+        fix: `Use max-width: ${value} with width: 100%, or move the fixed width into a min-width media query.`
+      };
+    }
+  }
+  if (u.property === "grid-template-columns" && !/auto-(fit|fill)/.test(value)) {
+    const rep = value.match(/^repeat\(\s*(\d+)\s*,/);
+    const tracks = rep ? Number(rep[1]) : value.split(/\s+(?![^(]*\))/).filter(Boolean).length;
+    if (tracks >= 3) {
+      return {
+        rule: "responsive-grid-columns",
+        base: "warning",
+        message: `${tracks} grid columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / tracks)}px.`,
+        fix: "Use repeat(auto-fit, minmax(<min>, 1fr)), or set the columns inside a min-width media query."
+      };
+    }
+  }
+  if ((u.property === "height" || u.property === "min-height") && /^100vh$/.test(value)) {
+    return {
+      rule: "responsive-viewport-height",
+      base: "info",
+      message: "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
+      fix: "Use 100dvh, which follows the visible height (keep 100vh before it as a fallback if needed)."
+    };
+  }
+  return null;
 }
 
 // src/suggest.ts
@@ -64674,12 +64796,12 @@ function index(ctx) {
       const selector = selectorContext(rule2);
       if (themeForSelector(selector, ctx.project.config.tokens.themes) !== null) return;
       rules.push({ rule: rule2, selector, file: file2 });
-      const { theme, base: base3 } = themeScope(ctx, selector);
-      if (!theme || !base3) return;
+      const { theme, base: base4 } = themeScope(ctx, selector);
+      if (!theme || !base4) return;
       for (const n of rule2.nodes ?? []) {
         if (n.type !== "decl") continue;
-        if (n.prop === "color") idx.overrides.add(`${theme}|${base3}|color`);
-        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base3}|background`);
+        if (n.prop === "color") idx.overrides.add(`${theme}|${base4}|color`);
+        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base4}|background`);
       }
     });
   }
@@ -64705,16 +64827,16 @@ function index(ctx) {
   return idx;
 }
 function textContrast(ctx, value, background, selector, minRatio, opts = { text: true }) {
-  const { theme: scoped, base: base3 } = themeScope(ctx, selector);
+  const { theme: scoped, base: base4 } = themeScope(ctx, selector);
   const idx = index(ctx);
   const themes = ctx.tokens.themes.map((t) => t.name).filter((t) => !scoped || t === scoped);
   const surf = surfaces(ctx);
   const ratios = {};
   const against = {};
   for (const th of themes) {
-    if (!scoped && base3 && th !== ctx.tokens.themes[0]?.name) {
-      if (idx.overrides.has(`${th}|${base3}|color`)) continue;
-      if (background && idx.overrides.has(`${th}|${base3}|background`)) continue;
+    if (!scoped && base4 && th !== ctx.tokens.themes[0]?.name) {
+      if (idx.overrides.has(`${th}|${base4}|color`)) continue;
+      if (background && idx.overrides.has(`${th}|${base4}|background`)) continue;
     }
     const fg = colorOf(ctx, value, th);
     if (!fg) return null;
@@ -64967,7 +65089,19 @@ var RULES = [
     summary: "The focus outline is removed (outline-none, focus:outline-none, or outline: none in a :focus rule) with no visible focus replacement."
   },
   { id: "a11y-target-size", severity: "warning", summary: "Button or link smaller than 24\xD724 px by its size utilities and without padding (WCAG 2.5.8)." },
-  { id: "a11y-heading-order", severity: "warning", summary: "A heading level is skipped inside a file (h2 \u2192 h4): the outline screen readers navigate has a hole." }
+  { id: "a11y-heading-order", severity: "warning", summary: "A heading level is skipped inside a file (h2 \u2192 h4): the outline screen readers navigate has a hole." },
+  {
+    id: "responsive-fixed-width",
+    severity: "warning",
+    summary: "A width or min-width wider than a phone (343px usable at 375px) outside a breakpoint or media query: the page scrolls sideways."
+  },
+  {
+    id: "responsive-grid-columns",
+    severity: "warning",
+    summary: "A grid of 3 or more columns at every width (grid-cols-N without a breakpoint, or grid-template-columns without auto-fit or a media query)."
+  },
+  { id: "responsive-table-scroll", severity: "info", summary: "A <table> with no horizontal scroll container in the same file: it overflows or gets clipped on a phone." },
+  { id: "responsive-viewport-height", severity: "info", summary: "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height." }
 ];
 var MESSAGES = {
   "color-literal": "Color literal outside the design tokens; it does not follow theme changes.",
@@ -64986,13 +65120,17 @@ var MESSAGES = {
   "a11y-tabindex": "Positive tabIndex.",
   "a11y-focus-visible": "Focus outline removed without a visible replacement.",
   "a11y-target-size": "Target smaller than 24\xD724 px.",
-  "a11y-heading-order": "Heading level skipped."
+  "a11y-heading-order": "Heading level skipped.",
+  "responsive-fixed-width": "Fixed width wider than a phone.",
+  "responsive-grid-columns": "Grid columns that never collapse on small screens.",
+  "responsive-table-scroll": "Table without a horizontal scroll container.",
+  "responsive-viewport-height": "100vh height on phones."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
-function effectiveSeverity(ctx, rule2, base3, soft = false) {
+function effectiveSeverity(ctx, rule2, base4, soft = false) {
   const override = ctx.project.config.rules?.[rule2];
   if (override === "off") return "off";
-  if (!override || soft) return base3;
+  if (!override || soft) return base4;
   return override;
 }
 function clip(s, n = 200) {
@@ -65004,8 +65142,8 @@ function checkUsages(ctx, usages) {
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
   const custom2 = customRules(ctx);
-  const push = (rule2, base3, loc2, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
-    const severity3 = rule2.startsWith("custom/") ? base3 : effectiveSeverity(ctx, rule2, base3, soft);
+  const push = (rule2, base4, loc2, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
+    const severity3 = rule2.startsWith("custom/") ? base4 : effectiveSeverity(ctx, rule2, base4, soft);
     if (severity3 === "off") return;
     violations.push({
       id: `${loc2.file}:${loc2.line}:${loc2.column}:${rule2}`,
@@ -65169,6 +65307,21 @@ function checkUsages(ctx, usages) {
         );
       }
     }
+    const narrow = responsiveDecl(u);
+    if (narrow) {
+      push(
+        narrow.rule,
+        narrow.base,
+        { file: u.file, line: u.line, column: u.column },
+        `${u.property}: ${u.value.trim()}`,
+        u.property,
+        context,
+        { match: "none", kind: "none", value: null, detail: narrow.fix, source: null },
+        [],
+        false,
+        narrow.message
+      );
+    }
     if (u.context === "css") {
       const siblings = ctx.componentClasses.find((c2) => c2.selector === u.selector)?.decls ?? null;
       if (removesFocusOutline(u.property, u.value, u.selector, siblings)) {
@@ -65202,9 +65355,17 @@ function checkUsages(ctx, usages) {
       }
     }
   }
+  const overflowClasses = new Set(
+    ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector) && c2.decls.some((d) => /^overflow(-x)?$/.test(d.prop) && /auto|scroll/.test(d.value))).map((c2) => c2.selector.slice(1))
+  );
+  checkResponsive(
+    usages,
+    overflowClasses,
+    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+  );
   checkA11y(
     usages,
-    (rule2, base3, loc2, found, message, fix) => push(rule2, base3, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   return { violations, unresolved };
 }
@@ -65388,8 +65549,8 @@ function health(ctx, usages) {
       for (const s of surfaces2) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
-        const base3 = tokenColor(ctx.tokens, surfaces2[0], th);
-        const r2 = contrast2(fg, bg, base3);
+        const base4 = tokenColor(ctx.tokens, surfaces2[0], th);
+        const r2 = contrast2(fg, bg, base4);
         if (r2 < worst) {
           worst = r2;
           worstName = s;
@@ -65675,15 +65836,15 @@ function scanStyles(ctx) {
       continue;
     }
     const part = partOf(v.property);
-    const { theme, base: base3 } = themeScope2(occ.selector);
+    const { theme, base: base4 } = themeScope2(occ.selector);
     if (theme) {
-      themed.push({ theme, part, base: base3, hex: hex4(c2), occ });
+      themed.push({ theme, part, base: base4, hex: hex4(c2), occ });
       continue;
     }
     const key = `${part}|${hex4(c2)}`;
     const g = groups.get(key) ?? { part, hex: hex4(c2), color: c2, occurrences: [], selectors: /* @__PURE__ */ new Set(), themeValues: /* @__PURE__ */ new Map() };
     g.occurrences.push(occ);
-    if (base3) g.selectors.add(base3);
+    if (base4) g.selectors.add(base4);
     groups.set(key, g);
   }
   for (const t of themed) {
@@ -65944,7 +66105,7 @@ var STATE_SIGNALS = {
   empty: /\.length\s*===?\s*0|!\s*[\w.?]+\.length\b|\b[eE]mpty|vac[ií]o|No hay|[sS]in resultados|no results/i,
   error: /\b[eE]rror\b|role=["']alert["']|\bcatch\s*\(/
 };
-var base2 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
+var base3 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
 var varRefs = (text) => [...text.matchAll(/var\(\s*(--[\w-]+)|\((--[\w-]+)\)/g)].map((m) => m[1] ?? m[2]);
 function isAction(e4) {
   return e4.tag === "button" || e4.tag === "a" && "href" in e4.attrs || e4.attrs.role === "button" || e4.tag === "input" && (e4.attrs.type === "submit" || e4.attrs.type === "button");
@@ -65971,7 +66132,7 @@ function reviewUi(ctx, input2) {
     const primary = elements.filter((e4) => {
       if (!isAction(e4)) return false;
       return e4.classes.some((c2) => {
-        const b = base2(c2);
+        const b = base3(c2);
         if (/^bg-/.test(b) && varRefs(b).some((t) => roleOf(t) === "accent.primary")) return true;
         const cc = classRule.get(b);
         if (!cc) return false;
@@ -65987,13 +66148,13 @@ function reviewUi(ctx, input2) {
       if (u.kind === "class") addRefs(u.raw);
       else if (u.kind === "decl") addRefs(u.value);
       else if (u.kind === "element") {
-        for (const c2 of u.classes) for (const t of classRule.get(base2(c2))?.tokens ?? []) if (roleOf(t).startsWith("accent")) accents.add(t);
+        for (const c2 of u.classes) for (const t of classRule.get(base3(c2))?.tokens ?? []) if (roleOf(t).startsWith("accent")) accents.add(t);
       }
     }
     const sizes = /* @__PURE__ */ new Set();
     for (const e4 of elements) {
       for (const c2 of e4.classes) {
-        const b = base2(c2);
+        const b = base3(c2);
         const typo = typography.get(b);
         if (typo != null) sizes.add(typo);
         const fs5 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
@@ -66105,7 +66266,7 @@ function reviewUi(ctx, input2) {
 }
 
 // src/server.ts
-var VERSION = "0.9.0";
+var VERSION = "0.10.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

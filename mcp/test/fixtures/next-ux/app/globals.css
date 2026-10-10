@@ -28,3 +28,8 @@ html.dark {
 .flag { color: var(--accent); }
 .field input:focus { outline: none; }
 .btn-secondary:focus { outline: none; box-shadow: 0 0 0 2px var(--brand); }
+.wide { width: 900px; }
+.grid4 { grid-template-columns: repeat(4, 1fr); }
+.grid-auto { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.tall { min-height: 100vh; }
+@media (min-width: 768px) { .wide-md { width: 900px; } }

@@ -264,7 +264,7 @@ Ejemplo:
    - **C, patrón alternativo:** otro patrón armado con piezas existentes.
 5. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje: `app/lab/layout.tsx`, `lab-theme.tsx`, el panel del modo en vivo (`lab-panel.tsx`) y su endpoint (`facha-live/`), que solo existe en desarrollo. Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
 6. **Guardián:** cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Si no lo logra, queda como `failed` y no se puede aplicar.
-7. **Capturas:** en light y en cada tema extra, y cada estado (cargando, vacío, error, datos extremos) con `?state=…`, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
+7. **Capturas:** en light y en cada tema extra, en celular (375) y tablet (768) con el medidor de responsive, y cada estado (cargando, vacío, error, datos extremos) con `?state=…`, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
 8. **Crítica senior:** `review_ui` más las capturas, contra una lista de 8 puntos (el objetivo se lee primero, una sola acción primaria, jerarquía, acentos, ritmo, agrupación, estados y accesibilidad). Arregla lo que está dentro de la variante y te deja lo demás con su recomendación.
 9. **Presentación:** para cada variante, hipótesis, resultado del guardián (accesibilidad incluida), sus estados, la crítica, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
 
@@ -323,6 +323,7 @@ En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la a
 - **⌖ Señalar:** en lugar de describir "el botón de abajo", hacé clic en él. Queda como `[1]` (hasta 3) y lo nombrás en el texto: *"mové [1] arriba de la tabla"*. Mientras señalás, la página no reacciona a los clics; ↑ elige el contenedor que lo envuelve, ↓ vuelve, Esc cancela. Claude recibe qué elemento es y qué componente lo dibuja.
 - **Paleta:** probá otra paleta sobre toda la app con un clic (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) o con tu propio color. Es solo una vista previa en tu navegador. El panel te muestra el contraste y, antes de que propongas, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "entregado", y qué paletas no tienen ese problema. *Proponer esta paleta* la guarda en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1).
 - **Elegir esta variante** no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code, como siempre.
+- **Ver en Móvil 375 / Tablet 768:** abre la variante a ese ancho, con el medidor de responsive encendido (desborde, contenido aplastado por una columna lateral, objetivos y textos chicos). Esc la cierra.
 - **El panel:** se arrastra por el título (doble clic lo vuelve a la esquina), se ajusta de tamaño desde la esquina inferior derecha, **–** lo minimiza a una pastilla abajo a la derecha y **×** lo oculta (vuelve al recargar o con Alt+Shift+F). No aparece en las capturas automáticas.
 
 ---
@@ -431,6 +432,7 @@ Atajos útiles:
 | `app/lab/<slug>/_shared/` | Código compartido entre las variantes de esa pantalla |
 | `app/lab/layout.tsx`, `lab-theme.tsx` | Andamiaje del lab: 404 en producción y temas con `?theme=` |
 | `app/lab/lab-state.ts` | Permite ver cada estado de una variante con `?state=loading\|empty\|error\|long`; `apply` lo saca al portar |
+| `app/lab/lab-responsive.tsx` | Medidor de responsive: con `?check=responsive` muestra desborde, ancho útil, objetivos y textos chicos |
 | `app/lab/lab-panel.tsx`, `app/lab/facha-live/` | Panel y endpoint del modo en vivo (solo en desarrollo) |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
