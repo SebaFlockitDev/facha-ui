@@ -517,3 +517,24 @@ describe("start · adding what is missing, only after an explicit yes", () => {
     expect(flat).toContain("never with Bash");
   });
 });
+
+describe("CHANGELOG footer links", () => {
+  const text = fs.readFileSync(path.join(REPO, "CHANGELOG.md"), "utf8");
+  const repoUrl = JSON.parse(fs.readFileSync(path.join(REPO, ".claude-plugin", "plugin.json"), "utf8")).repository.replace(/\/$/, "");
+  /** Versions in order, newest first, as their headings list them. */
+  const versions = [...text.matchAll(/^## \[(\d+\.\d+\.\d+)\] - \d{4}-\d{2}-\d{2}$/gm)].map((m) => m[1]!);
+  const links = new Map([...text.matchAll(/^\[([^\]]+)\]: (\S+)\s*$/gm)].map((m) => [m[1]!, m[2]!]));
+
+  it("[Unreleased] compares from the newest version", () => {
+    expect(links.get("Unreleased")).toBe(`${repoUrl}/compare/v${versions[0]}...HEAD`);
+  });
+
+  it("every version has its link, comparing with the previous one (the first links to its tag)", () => {
+    expect(versions.length).toBeGreaterThan(0);
+    versions.forEach((version, i) => {
+      const previous = versions[i + 1];
+      expect(links.get(version), version).toBe(previous ? `${repoUrl}/compare/v${previous}...v${version}` : `${repoUrl}/releases/tag/v${version}`);
+    });
+    expect([...links.keys()].sort()).toEqual(["Unreleased", ...versions].sort());
+  });
+});

@@ -186,7 +186,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.12.0...v0.13.0
