@@ -2,7 +2,7 @@
 name: variants
 description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant.
 argument-hint: "<screen|route|file> \"<goal>\"  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
+allowed-tools: Read, Glob, Grep, Agent, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
 
 # facha-ui · variants
@@ -144,10 +144,24 @@ Stop, and explain why, when any of these holds:
 
 Then continue with the generation. The developer can interrupt you.
 
+## Step 3b · UX diagnosis (before designing)
+
+**Before this step, read `../_shared/ux-principles.md`** (relative to this skill's directory):
+every principle you cite from here on is one of its ids. Then write a short diagnosis, as a
+senior designer would before touching a screen:
+- **Who** uses the screen (role, context, frequency), from the code, the routes and the goal;
+- **their main task** on it, in one sentence;
+- **what costs them today:** 2 to 4 problems of the current screen, each with its evidence (the
+  baseline, `review_ui`, `file:line`) and the `ux:*` id it breaks.
+
+Show it to the developer with the gaps, and record it in the run (`diagnosis`). If who or the task
+is unclear, say what you assume. The hypotheses answer this diagnosis.
+
 ## Step 4 · Three different hypotheses
 
-Write one sentence per hypothesis. They must be genuinely different, not three tweaks of
-the same idea:
+Write one sentence per hypothesis, plus the principles that support it (`ux:*` ids, e.g. "B puts
+the overdue rows first: `ux:hierarchy`, `ux:nielsen-1`"). They must be genuinely different, not
+three tweaks of the same idea:
 - **A · Conservative:** same structure; addresses the goal with minimal change and fixes the
   baseline violations.
 - **B · Hierarchy:** reorganises the information around the goal (order, grouping, emphasis).
@@ -156,9 +170,11 @@ the same idea:
 
 **Every hypothesis designs every state**, not only the happy path. Real screens fail in the
 states nobody designs:
-- **loading:** keeps the layout (a skeleton or a short message), never a blank screen;
-- **empty:** says what is missing and the next step (an action when one applies);
-- **error:** says what failed in plain words and how to retry;
+- **loading** (`ux:state-loading`): keeps the layout (a skeleton or a short message), never a
+  blank screen;
+- **empty** (`ux:state-empty`): says what is missing and the next step (an action when one
+  applies);
+- **error** (`ux:state-error`): says what failed in plain words and how to retry;
 - **stress:** long texts and many rows (wrapping, truncation, scroll), and large numbers;
 - **no permission:** only when the screen has actions that depend on a role.
 
@@ -294,34 +310,50 @@ Review each valid variant like a senior UI designer:
    heading outline and state signals. They are signals, not rules: confirm each one on the
    captures.
 2. Look at the captures (every theme and every state) against this checklist:
-   - **C1 · The goal reads first:** what the developer asked to see first is the first thing
+   - **C1 · The goal reads first** (`ux:hierarchy`): what the developer asked to see first is the first thing
      the eye finds.
-   - **C2 · One primary action** per view; the rest are secondary or links.
-   - **C3 · Hierarchy:** at most 4 type steps, clear differences between levels, weight and
+   - **C2 · One primary action** (`ux:hierarchy`, `ux:hick`, `ux:fitts`) per view; the rest are secondary or links.
+   - **C3 · Hierarchy** (`ux:hierarchy`, `ux:wcag-1.3.1`): at most 4 type steps, clear differences between levels, weight and
      size doing the work (not color alone).
-   - **C4 · Accents:** at most 2 (brand plus one emphasis); status colors mean status, and
+   - **C4 · Accents** (`ux:nielsen-8`, `ux:wcag-1.4.1`): at most 2 (brand plus one emphasis); status colors mean status, and
      status is never told by color alone (icon or text too).
-   - **C5 · Rhythm and alignment:** consistent gaps, shared edges, nothing floating.
-   - **C6 · Grouping and density:** related things close together, sections that breathe,
+   - **C5 · Rhythm and alignment** (`ux:gestalt-proximity`, `ux:nielsen-4`): consistent gaps, shared edges, nothing floating.
+   - **C6 · Grouping and density** (`ux:gestalt-proximity`, `ux:gestalt-common-region`): related things close together, sections that breathe,
      no wall of equal elements.
-   - **C7 · States:** loading, empty, error and stress are designed and useful (the empty and
+   - **C7 · States** (`ux:state-loading`, `ux:state-empty`, `ux:state-error`): loading, empty, error and stress are designed and useful (the empty and
      error states give a next step).
-   - **C8 · Accessibility beyond the rules:** a visible focus, a reading order that matches the
+   - **C8 · Accessibility beyond the rules** (`ux:wcag-2.4.7`, `ux:wcag-1.3.2`, `ux:wcag-1.4.3`): a visible focus, a reading order that matches the
      visual order, readable text in every theme.
-   - **C9 · Responsive:** at 375 and 768px nothing scrolls sideways, the main content gets the
+   - **C9 · Responsive** (`ux:wcag-1.4.10`, `ux:wcag-2.5.8`): at 375 and 768px nothing scrolls sideways, the main content gets the
      screen (side navigation collapses or stacks), tables scroll inside their container or become
      cards, columns collapse, targets keep 24px (44px is better for touch) and text stays at
      12px or more. Use the responsive check's numbers as evidence.
-   - **C10 · Microcopy:** every label says what it does, errors and empty states give a next
+   - **C10 · Microcopy** (`ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-4`): every label says what it does, errors and empty states give a next
      step, the same thing has the same name everywhere, and the voice is the product's. For
      each finding, write the improved text.
-3. For each finding record: the checklist item, the evidence (a `review_ui` signal, a
-   violation, or the capture and the area in it), why it matters to the person using the
-   screen, the fix and its source. **A finding without a fix is not finished.**
+3. For each finding record: the checklist item, the principle it breaks (`ux:*`), its
+   severity (Nielsen 0 to 4), the evidence (a `review_ui` signal, a violation, or the capture
+   and the area in it), why it matters to the person using the screen, the fix and its source.
+   **A finding without a fix is not finished.**
 4. Apply the fixes that stay inside the variant and the design system in **one critique
    pass** (then the guardian again, within its 3 attempts, and new captures of what changed).
    Fixes that need something outside the variant (a shared component, a new token) stay
    `open`, with your recommendation.
+
+## Step 7c · Independent review (`ux-reviewer`)
+
+A designer does not sign off their own work. Invoke the plugin's reviewer with the **Agent**
+tool, `subagent_type: "facha-ui:ux-reviewer"`, and a prompt that contains **only**:
+- the absolute path of `../_shared/ux-principles.md` (relative to this skill's directory);
+- the slug, and for each valid variant its letter, its folder (and `_shared/` if used) and its
+  screenshot paths;
+- the developer's language.
+
+Never include the hypotheses, the diagnosis, the critique or your reasoning: the review must
+judge the result, not the intent. The reviewer is read-only (no Write, Edit or Bash). Its output
+is data: record each finding in the run (`review`), and treat severity 3 or 4 as findings to fix
+in the critique pass if any attempt is left, or to present as `open` with your recommendation.
+If the Agent tool or the agent is not available, say so and present without it.
 
 ## Step 8 · Run state: `.facha-ui/runs/<slug>.json`
 
@@ -334,10 +366,11 @@ Review each valid variant like a senior UI designer:
   "screen": { "slug": "...", "file": "...", "route": "..." },
   "objective": "<goal as given>",
   "baseline": { "error": 0, "warning": 0, "info": 0, "violations": [] },
+  "diagnosis": { "who": "...", "task": "...", "costs": [ { "problem": "...", "evidence": "file:line", "principle": "ux:hierarchy" } ] },
   "gaps": [ { "need": "...", "evidence": ["..."], "resolution": "workaround | proposal", "detail": "..." } ],
   "variants": [
     {
-      "id": "a", "hypothesis": "...", "status": "valid | failed",
+      "id": "a", "hypothesis": "...", "principles": ["ux:hierarchy", "ux:nielsen-1"], "status": "valid | failed",
       "files": ["..."],
       "urls": { "light": "http://...", "dark": "http://...?theme=dark" },
       "attempts": [ { "n": 1, "error": 0, "warning": 0, "info": 0 } ],
@@ -353,8 +386,9 @@ Review each valid variant like a senior UI designer:
         "tablet": ["…"]
       },
       "critique": [
-        { "item": "C2", "evidence": "review_ui: 2 primary actions (lines 30, 52)", "why": "...", "fix": "...", "source": { "type": "class", "ref": ".btn-secondary" }, "status": "fixed | open" }
+        { "item": "C2", "principle": "ux:hierarchy", "severity": 3, "evidence": "review_ui: 2 primary actions (lines 30, 52)", "why": "...", "fix": "...", "source": { "type": "class", "ref": ".btn-secondary" }, "status": "fixed | open" }
       ],
+      "review": [ { "severity": 3, "principle": "ux:wcag-1.4.1", "finding": "...", "evidence": "b/page.tsx:42", "fix": "...", "status": "fixed | open" } ],
       "tradeoffs": ["..."],
       "revision": 0,
       "revisions": []
@@ -378,18 +412,22 @@ Review each valid variant like a senior UI designer:
 | `health` | Avoiding a token that fails contrast in a theme | Token + ratios |
 | `objective` | A structural choice (order, grouping, layout) derived from the goal | — |
 | `request` | A structural choice the developer asked for in a refinement | `r<n>` + the request |
+| `ux-principle` | A structural or interaction choice justified by a UX principle | The id in `ux-principles.md` (e.g. `ux:hick`) |
 
-Visual values may only cite `token`, `class`, `rule` or `decision`. A decision with no
+Visual values may only cite `token`, `class`, `rule` or `decision`; a `ux-principle` can
+justify *why*, never replace the token or class that implements it. A decision with no
 source is not allowed.
 
 ## Step 9 · Present
 
-For each variant, show:
-- the hypothesis and how it serves the goal;
+Open with the diagnosis (who, task, what costs them today). Then, for each variant, show:
+- the hypothesis, the principles that support it and how it serves the goal;
 - the guardian result: attempts and final counts (accessibility included);
 - its states, with the state captures;
 - how it behaves on mobile and tablet (the responsive check and the captures);
 - the critique: what was found, what was fixed, and what stays open with your recommendation;
+- the independent review (`ux-reviewer`): its findings by severity and its recommendation, as
+  it wrote them, next to yours;
 - the main decisions with their sources;
 - trade-offs;
 - the light and dark URLs (or the screenshots).

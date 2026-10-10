@@ -54,7 +54,9 @@ describe("help skill", () => {
 
   it("lists every skill the plugin ships", () => {
     const text = fs.readFileSync(path.join(REPO, "skills", "help", "SKILL.md"), "utf8");
-    for (const skill of fs.readdirSync(path.join(REPO, "skills"))) expect(text, skill).toContain(`/facha-ui:${skill}`);
+    const skills = fs.readdirSync(path.join(REPO, "skills")).filter((d) => fs.existsSync(path.join(REPO, "skills", d, "SKILL.md")));
+    expect(skills.length).toBeGreaterThan(0);
+    for (const skill of skills) expect(text, skill).toContain(`/facha-ui:${skill}`);
   });
 });
 
@@ -92,7 +94,7 @@ describe("states and senior critique", () => {
 
   it("variants measures responsive in the lab and captures mobile and tablet (C9)", () => {
     const text = read("variants");
-    expect(text).toContain("**C9 · Responsive:**");
+    expect(text).toContain("**C9 · Responsive**");
     expect(text).toContain("?check=responsive");
     expect(text).toContain("<x>-mobile-<theme>.png");
     const layout = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "layout.tsx"), "utf8");
@@ -102,7 +104,7 @@ describe("states and senior critique", () => {
 
   it("variants writes in the product's voice and critiques the microcopy (C10)", () => {
     const text = read("variants");
-    expect(text).toContain("**C10 · Microcopy:**");
+    expect(text).toContain("**C10 · Microcopy**");
     expect(text).toContain("Read `copy` from `get_design_system`");
   });
 
@@ -153,5 +155,84 @@ describe("init skill", () => {
     const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
     expect(allowed.filter((t) => /^(Write|Edit|Bash|MultiEdit|NotebookEdit)\b/.test(t))).toEqual([]);
     expect(allowed).toContain("mcp__plugin_facha-ui_facha-ui__scan_styles");
+  });
+});
+
+/** Every Markdown file under a folder, recursively. */
+function markdownUnder(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return e.name === "node_modules" ? [] : markdownUnder(full);
+    return e.name.endsWith(".md") ? [full] : [];
+  });
+}
+
+const UX_ID = /\bux:[a-z0-9][a-z0-9.-]*[a-z0-9]/g;
+
+describe("UX principles", () => {
+  const principles = path.join(REPO, "skills", "_shared", "ux-principles.md");
+  const text = fs.existsSync(principles) ? fs.readFileSync(principles, "utf8") : "";
+  const defined = new Set([...text.matchAll(/^### (ux:[a-z0-9.-]+) · /gm)].map((m) => m[1]));
+
+  it("defines each principle once, with what it is, how it is violated and how it is verified", () => {
+    expect(defined.size).toBeGreaterThanOrEqual(30);
+    for (const id of ["ux:nielsen-1", "ux:nielsen-10", "ux:wcag-1.4.3", "ux:wcag-1.4.11", "ux:wcag-2.4.7", "ux:wcag-2.5.8", "ux:wcag-3.3.2", "ux:wcag-1.4.1", "ux:hierarchy", "ux:gestalt-proximity", "ux:gestalt-similarity", "ux:gestalt-common-region", "ux:fitts", "ux:hick", "ux:jakob", "ux:state-empty", "ux:state-loading", "ux:state-error", "ux:copy-verbs", "ux:copy-actionable-errors"])
+      expect(defined, id).toContain(id);
+    const headings = [...text.matchAll(/^### (ux:[a-z0-9.-]+) · /gm)].map((m) => m[1]);
+    expect(new Set(headings).size).toBe(headings.length);
+    for (const block of text.split(/^### /m).slice(1).filter((b) => b.startsWith("ux:"))) {
+      const id = block.split(" ")[0];
+      for (const field of ["- **What:**", "- **Violated:**", "- **Verify:**"]) expect(block, `${id} ${field}`).toContain(field);
+    }
+  });
+
+  it("every ux:* id cited by a skill or an agent exists", () => {
+    const files = [...markdownUnder(path.join(REPO, "skills")), ...markdownUnder(path.join(REPO, "agents"))];
+    const missing: string[] = [];
+    for (const f of files) {
+      for (const m of fs.readFileSync(f, "utf8").matchAll(UX_ID)) {
+        if (!defined.has(m[0])) missing.push(`${path.relative(REPO, f)}: ${m[0]}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it("variants diagnoses with the principles and each critique item cites them", () => {
+    const variants = fs.readFileSync(path.join(REPO, "skills", "variants", "SKILL.md"), "utf8");
+    expect(variants).toContain("read `../_shared/ux-principles.md`");
+    expect(variants).toContain("| `ux-principle` |");
+    for (const item of ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"]) {
+      const line = variants.split(/\r?\n/).find((l) => l.includes(`**${item} ·`)) ?? "";
+      expect(line.match(UX_ID), item).not.toBeNull();
+    }
+  });
+});
+
+describe("ux-reviewer agent", () => {
+  const file = path.join(REPO, "agents", "ux-reviewer.md");
+  const text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const list = (key: string) => (frontmatter.match(new RegExp(`^${key}:\\s*(.*)$`, "m"))?.[1] ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+
+  it("exists and is named ux-reviewer", () => {
+    expect(fs.existsSync(file)).toBe(true);
+    expect(frontmatter).toMatch(/^name:\s*ux-reviewer\s*$/m);
+    expect(frontmatter).toMatch(/^description:\s*\S/m);
+  });
+
+  it("declares only reading tools and denies every writing one", () => {
+    const tools = list("tools");
+    expect(tools.length).toBeGreaterThan(0);
+    expect(tools.filter((t) => /^(Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell)\b/.test(t))).toEqual([]);
+    for (const t of tools) expect(t, t).toMatch(/^(Read|Glob|Grep|mcp__plugin_facha-ui_facha-ui__(get_design_system|check_ui))$/);
+    expect(list("disallowedTools")).toEqual(expect.arrayContaining(["Write", "Edit", "NotebookEdit", "Bash"]));
+  });
+
+  it("is invoked by variants with only the variants, the screenshots and the principles", () => {
+    const variants = fs.readFileSync(path.join(REPO, "skills", "variants", "SKILL.md"), "utf8");
+    expect(variants).toContain('subagent_type: "facha-ui:ux-reviewer"');
+    expect(variants).toMatch(/Never include the hypotheses/);
+    expect(text).toContain("Nielsen's 0 to 4");
   });
 });

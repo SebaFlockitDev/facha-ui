@@ -613,7 +613,11 @@ facha-ui/
 │   ├── plugin.json
 │   └── marketplace.json          # el repo es su propio marketplace
 ├── .mcp.json                     # facha-ui MCP + Playwright MCP, versiones fijas
+├── CLAUDE.md                     # rol y reglas de trabajo para quien desarrolla el plugin
+├── agents/
+│   └── ux-reviewer.md            # subagente crítico, solo lectura (facha-ui:ux-reviewer)
 ├── skills/
+│   ├── _shared/ux-principles.md  # principios de UX con ids estables (ux:nielsen-1, ux:wcag-2.5.8…)
 │   ├── variants/
 │   │   ├── SKILL.md              # variantes, ajustes (revisiones) y modo en vivo
 │   │   ├── templates/next-app/   # layout.tsx, lab-theme.tsx, lab-panel.tsx, facha-live/{route,live-core}.ts
@@ -693,6 +697,7 @@ Decisiones:
 - **`run-pinned.mjs`:** en Windows nativo, `npx` como `command` necesita `cmd /c`. Para que el mismo `.mcp.json` sirva en todos los sistemas, ambos servidores se lanzan con `node`. El script invoca `npx -y <paquete@versión>` con `shell: true` solo en `win32`, rechaza especificadores sin versión exacta y reenvía stdio sin tocarlo.
 - **Playwright** corre con ventana visible (headed) para que el dev pueda iniciar sesión cuando `preview.auth = manual`, y con `--isolated` (perfil en memoria: no persisten cookies entre sesiones). `--allowed-origins` no es un límite de seguridad según la documentación de Playwright y el puerto depende de cada proyecto, así que no se fija en el plugin: la restricción a `preview.baseUrl` la aplica la skill (§4).
 - **Nombres de tools en Claude Code:** `mcp__plugin_facha-ui_facha-ui__<tool>` y `mcp__plugin_facha-ui_playwright__<tool>`.
+- **Subagentes del plugin** (verificado en la documentación de Claude Code 2.1, 2026-10-10): viven en `agents/` (Markdown con frontmatter) y se nombran `<plugin>:<name>`, así que el revisor es `facha-ui:ux-reviewer`. Se invoca con la herramienta Agent y `subagent_type: "facha-ui:ux-reviewer"`. En plugins se ignoran `permissionMode`, `hooks` y `mcpServers`. Si `tools` se omite, el agente hereda todas las herramientas (Write, Edit y Bash incluidas). Por eso `ux-reviewer` declara `tools` (Read, Glob, Grep, `get_design_system`, `check_ui`) y además `disallowedTools` (Write, Edit, NotebookEdit, Bash), que prevalece. `claude plugin validate` revisa los archivos de agentes.
 
 #### 2.d.5 Uso desde otros clientes MCP (Cursor, agentes propios)
 
@@ -897,6 +902,15 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 | i18n | Mensajes de violaciones en español (`locale`) |
 | Diff visual entre pantallas | El de `apply` (antes/después de la pantalla) existe desde 0.12.0; falta el de las pantallas que comparten un componente modificado |
 | Export para Cursor | Flujos de `variants`/`apply` como reglas de Cursor |
+
+**Reglas UX verificables para el guardián.** Ya son reglas desde 0.9.0: objetivo táctil menor a 24 px (`a11y-target-size`), input sin label (`a11y-control-label`), salto de nivel de encabezado (`a11y-heading-order`) y `outline: none` sin foco alternativo (`a11y-focus-visible`). Hoy se verifican solo en revisión o como señal, y pasarían a regla:
+
+| Regla propuesta | Principio | Qué detectaría |
+|---|---|---|
+| `a11y-color-only` | `ux:wcag-1.4.1` | Un estado (chip, punto, fila) que se distingue solo por una clase de color, sin texto ni ícono en el mismo elemento |
+| `ux-too-many-choices` | `ux:hick` | Más de 7 acciones hermanas al mismo nivel (botones en una barra, ítems de un menú sin agrupar) |
+| `ux-missing-states` | `ux:state-empty`, `ux:state-error` | Una pantalla que renderiza una lista (`.map`) sin rama de vacío ni de error (hoy, señal de `review_ui`) |
+| `copy-error-action` | `ux:copy-actionable-errors` | Un mensaje de error sin acción ni siguiente paso cerca (botón de reintentar, enlace) |
 
 **Postergado del MVP AI Day (§7.2).** Es parte de la visión v0.1 y se implementa después del MVP:
 
