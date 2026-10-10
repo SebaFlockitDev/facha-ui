@@ -1,6 +1,6 @@
 ---
 name: flow
-description: Reviews a user journey across screens (for example create → review → done) like a senior UI designer - consistency of names and actions between steps, feedback, errors, destructive actions, a way back, and a clear next step at every step - with the screens' captures on desktop and mobile. It does not change code - it writes captures and a report, and proposes the variants command for the step that needs it most. Use when the developer asks to review a flow, a journey, a process or several screens together.
+description: Reviews a user journey across screens (for example create → review → done) like a senior UI designer - consistency of names and actions between steps, feedback, errors, destructive actions, a way back, and a clear next step at every step - with the screens' captures on desktop and mobile. It does not change code - it writes captures and a report, and proposes the variants command for the step that needs it most. Use when the developer asks to review a flow, a journey, a process or several screens together, also in plain words - "revisá el recorrido de alta", "¿se entiende el flujo de compra?", "mirá el proceso de checkout de punta a punta".
 argument-hint: "\"<flow goal>\" <screen> <screen> [<screen>…]"
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__review_ui, mcp__plugin_facha-ui_facha-ui__review_flow, mcp__plugin_facha-ui_facha-ui__ux_score
 ---

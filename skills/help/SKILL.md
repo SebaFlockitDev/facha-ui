@@ -13,8 +13,8 @@ Show the reference below to the developer. Rules:
 - If `$ARGUMENTS` is `variants`, `flow`, `apply`, `init`, `learn`, `tools` or `files`, show only that section,
   plus the last line ("Guía completa…").
   With no argument (or an unknown one), show everything.
-- Show it in the developer's language. The text below is in Spanish; translate it if
-  they write in another language. Keep commands, paths and tool names exactly as written.
+- Show it in the developer's language and register. The text below is in Spanish with vos;
+  translate it if they write in another language, and adapt it to tú or usted if they use it. Keep commands, paths and tool names exactly as written.
 - Do not add anything about the current project: no counts, no file names of theirs.
 
 ---
@@ -23,9 +23,29 @@ Show the reference below to the developer. Rules:
 
 Generás con IA variantes de una pantalla o de un componente, y facha-ui las ajusta hasta que respetan los tokens y las reglas de tu design system. Si el design system falta o está incompleto, te ayuda a armarlo.
 
+**Pedíselo con tus palabras.** No hace falta saber los comandos: Claude elige la herramienta.
+
+| Decile a Claude | Qué hace | Atajo |
+|---|---|---|
+| "¿Cómo está la UI de mi proyecto?" | Primer vistazo: puntaje, los 3 problemas más graves y qué hacer primero | `/facha-ui:start` |
+| "Mejorá la pantalla de pedidos" | 3 variantes con el design system, validadas por el guardián | `/facha-ui:variants /orders "<objetivo>"` |
+| "Hacelo rápido" · "una sola variante" | Una variante, la mejor hipótesis, con las mismas reglas | `… --rapido` |
+| "En la B mové los filtros arriba" | Ajusta esa variante y guarda el cambio como revisión | `/facha-ui:variants orders b "<cambio>"` |
+| "Probá colores más cálidos" | Paletas en vivo sobre las variantes, con contraste y conflictos | `/facha-ui:variants orders live` |
+| "Revisá el recorrido de alta" | Revisa el flujo entre pantallas, con capturas, sin tocar código | `/facha-ui:flow "<objetivo>" <pantallas>` |
+| "Enseñame a usar facha-ui" | Curso de 9 lecciones sobre tu proyecto | `/facha-ui:learn` |
+| "Aplicá la B" | Claude te responde con el comando exacto: aplicar lo lanzás vos | `/facha-ui:apply orders b` |
+| "Armá los tokens que faltan" | Claude te da el comando: crear tokens lo lanzás vos | `/facha-ui:init` |
+
+Además, cada vez que Claude escribe un archivo de UI, el guardián automático lo chequea solo (ver **tools**).
+
+**Los comandos, como atajos:**
+
 | Comando | Para qué |
 |---|---|
+| `/facha-ui:start` | Primer vistazo, sin configurar nada: tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves, lo próximo que conviene hacer y qué te falta (config, `.gitignore`, dev server). El análisis solo lee; al final te ofrece agregar lo que falta y lo hace solo si decís que sí |
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
+| `/facha-ui:variants <pantalla> "<objetivo>" --rapido` | Modo rápido: una sola variante (la hipótesis que mejor resuelve el diagnóstico), con las mismas reglas y el guardián en 0 errores, captura de escritorio y sin revisor independiente |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Ajusta una variante que te gustó (por ejemplo, agregar o mover algo), con historial de revisiones |
 | `/facha-ui:variants <slug> live [stop]` | Modo en vivo: pedís los cambios desde un panel en el navegador y los ves al instante |
 | `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Revisa un recorrido entre pantallas (nombres, confirmaciones, errores, salida, próximo paso) con capturas; no cambia código y te propone qué paso rediseñar |
@@ -38,11 +58,11 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 **Flujo en 4 pasos**
 
 1. Levantá la app (`npm run dev`).
-2. `/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"`
+2. *"Mejorá la pantalla de pedidos: que se vean primero los pendientes de revisión"* (atajo: `/facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"`).
 3. Mirá las variantes en `http://localhost:3000/lab/orders/<a|b|c>` (y con `?theme=dark`).
 4. `/facha-ui:apply orders b` → revisá el plan, aprobalo con el motivo y commiteá vos.
 
-Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/facha-ui:variants orders live`.
+Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"ajustá la B en vivo"* (atajo: `/facha-ui:variants orders live`).
 
 ### variants
 
@@ -67,6 +87,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
 - Después, una crítica senior con `review_ui` y las capturas: arregla lo que puede y te deja lo demás con su recomendación. Un revisor independiente de solo lectura (`facha-ui:ux-reviewer`) revisa las variantes sin conocer el razonamiento, con severidad de 0 a 4.
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
+- **Modo rápido:** agregá `--rapido` (o pedí "hacelo rápido", "una sola variante"). Piensa las 3 hipótesis en una línea, construye la mejor y te dice por qué. Igual avisa brechas, diseña los estados y pasa el guardián hasta 0 errores (máximo 2 intentos), con una captura de escritorio y sin revisor independiente. Para 3 alternativas con revisión completa, corré sin `--rapido`.
 - **Ajustar una variante:** `/facha-ui:variants orders b "agregá un contador al lado del título"`, o pedíselo en la misma conversación. Cambia esa variante y nada más, avisa brechas antes de tocar, vuelve a pasar el guardián, saca capturas nuevas y guarda cada ajuste como revisión (r1, r2…) con tu pedido. Si preferís conservar la original, pedí el ajuste "como variante nueva" (b2).
 - **Comparar y votar:** `http://localhost:3000/lab/compare/<slug>` muestra las variantes lado a lado (escritorio, tablet o móvil, cualquier tema y estado); con el modo en vivo, cada persona vota con un motivo. Pedile a Claude el reporte HTML para compartir.
 - **Modo en vivo:** `/facha-ui:variants orders live`. El panel abre en **Mejorar**: ver la variante en escritorio, móvil o tablet, cambiar tema y estado, mejoras con un clic (arreglar en el celular, accesibilidad, textos, estados, revisión senior completa), comparar y elegir. En la vista Móvil, **Pedir que lo arregle** manda el pedido con lo que midió el laboratorio. La vista queda abierta y muestra el avance hasta medir de nuevo. Los arreglos fuera del laboratorio se confirman en el chat de Claude Code, con la frase que da el panel. En cada variante aparece un panel **facha-ui** abajo a la derecha: escribís el cambio, Claude lo aplica como revisión y la página se recarga sola. "Elegir esta variante" no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code. Dura 2 horas o hasta `/facha-ui:variants orders live stop`. Necesita la sesión de Claude Code abierta y la app corriendo.
@@ -147,6 +168,8 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `review_ui` | "¿Qué mejorarías de esta pantalla?" · "Revisala como un senior" | Acciones primarias que compiten, acentos, tamaños de texto, títulos y estados que faltan, con por qué importa y cómo arreglarlo. No bloquea |
 | `ux_score` | "¿Qué puntaje de UX tiene cada pantalla?" | De 0 a 100 por pantalla en consistencia, accesibilidad, responsive, microcopy y jerarquía, con los hallazgos que más cuestan. También para CI: `facha-ui-mcp.js score --baseline …` |
 | `review_flow` | "Revisá el flujo de alta" | Nombres distintos para la misma acción, borrados sin confirmación, formularios sin salida, feedback o error, pasos sin acción principal |
+
+**Guardián automático:** cada vez que Claude escribe o edita un `.tsx`, `.jsx` o `.css` del proyecto, facha-ui lo chequea solo (fuera del laboratorio y si hay design system). Si encuentra errores o advertencias, te avisa ("facha-ui ⚠ N problemas en …") y Claude corrige lo que escribió en ese turno, una sola vez; lo que ya estaba te lo informa y te ofrece corregirlo. Solo lee. En `facha-ui.config.json`: `"guard": "quiet"` (por defecto, habla solo si hay problemas), `"on"` (también confirma "✓ 0 violaciones") u `"off"`.
 
 ### files
 

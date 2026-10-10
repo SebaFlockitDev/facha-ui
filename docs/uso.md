@@ -2,17 +2,19 @@
 
 Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalación hasta aplicar una variante. La idea central: generás con IA variantes de un componente o de una pantalla, y facha-ui las ajusta hasta que respetan los tokens y las reglas del design system de tu equipo; si ese design system falta o está incompleto, te ayuda a armarlo. Para qué es y qué garantiza: [README](../README.md). Detalle técnico: [SPEC](../SPEC.md).
 
-**¿Empezás de cero?** Corré `/facha-ui:learn`: un curso de 9 lecciones sobre tu propio proyecto que explica cada idea, la muestra con tus datos reales y termina con un ejercicio. No escribe nada. Después volvé a esta guía.
+**Empezá en 2 minutos:** instalá el plugin (sección 2), abrí Claude Code en tu proyecto y preguntá *"¿cómo está la UI de mi proyecto?"* (atajo: `/facha-ui:start`). Sin configurar nada, te muestra tu design system en palabras simples, el puntaje de UX, los 3 problemas más graves y lo próximo que conviene hacer. En toda esta guía, primero va el pedido con tus palabras y después el comando, que es un atajo.
+
+**¿Empezás de cero?** Pedí *"enseñame a usar facha-ui"* (`/facha-ui:learn`): un curso de 9 lecciones sobre tu propio proyecto que explica cada idea, la muestra con tus datos reales y termina con un ejercicio. No escribe nada. Después volvé a esta guía.
 
 **Resumen del flujo:**
 
 1. Instalar el plugin.
 2. Verificar que los servidores MCP conecten.
 3. Preparar el proyecto (raíz, config, `.gitignore`).
-4. Diagnosticar el design system y las violaciones. Si faltan tokens, `/facha-ui:init` los propone desde lo que ya usás.
-5. `/facha-ui:variants <pantalla> "<objetivo>"` → revisar las 3 variantes.
-6. Ajustar la que te gusta, si hace falta: `/facha-ui:variants <slug> <a|b|c> "<cambio>"`, o en vivo desde el navegador con `/facha-ui:variants <slug> live` (señalar elementos, probar paletas → `/facha-ui:init palette`).
-7. `/facha-ui:apply <slug> <a|b|c>` → aprobar el plan → revisar y commitear vos.
+4. Diagnosticar: *"¿cómo está la UI de mi proyecto?"* (`/facha-ui:start`). Si faltan tokens, `/facha-ui:init` los propone desde lo que ya usás.
+5. *"Mejorá la pantalla de pedidos"* (`/facha-ui:variants <pantalla> "<objetivo>"`) → revisar las 3 variantes. Con *"hacelo rápido"* (`--rapido`), una sola.
+6. Ajustar la que te gusta, si hace falta: *"en la B mové los filtros arriba"* (`/facha-ui:variants <slug> <a|b|c> "<cambio>"`), o en vivo desde el navegador con *"ajustá la B en vivo"* (`/facha-ui:variants <slug> live`: señalar elementos, probar paletas → `/facha-ui:init palette`).
+7. *"Aplicá la B"* → Claude te da el comando, `/facha-ui:apply <slug> <a|b|c>`, que lanzás vos → aprobar el plan → revisar y commitear vos.
 
 ![Flujo de facha-ui: vos pedís variantes, get_design_system lee el design system, la IA escribe 3 variantes en el laboratorio, check_ui las valida, Playwright las captura, vos elegís con apply y la decisión queda en decisions.md](img/flujo.svg)
 
@@ -183,7 +185,7 @@ El laboratorio igual devuelve 404 en producción, pero no conviene que llegue a 
 
 ## 5. Diagnosticar
 
-Antes de pedir variantes, conviene saber en qué estado está el design system. Ejemplos de pedidos:
+Antes de pedir variantes, conviene saber en qué estado está el design system. Lo más rápido: *"¿cómo está la UI de mi proyecto?"* (`/facha-ui:start`), que junta todo lo de abajo en un primer vistazo con una recomendación. Ejemplos de pedidos más puntuales:
 
 | Pedido | Tool | Qué devuelve |
 |---|---|---|
@@ -259,8 +261,12 @@ Verifica que la propuesta siga vigente, te muestra cada token antes y después, 
 
 ### 6.2 Pedirlas
 
+Con tus palabras: *"mejorá la pantalla de pedidos"* o *"dame alternativas para /orders: que se vea primero lo que espera revisión"*. Si no decís el objetivo, la skill toma el diagnóstico de la pantalla como objetivo y te lo dice. Si querés una sola variante, *"hacelo rápido"*: piensa las 3 hipótesis, construye la mejor y te dice por qué, con las mismas reglas y el guardián en 0 errores.
+
+El atajo:
+
 ```text
-/facha-ui:variants <pantalla> "<objetivo>"
+/facha-ui:variants <pantalla> "<objetivo>" [--rapido]
 ```
 
 - `<pantalla>` puede ser una ruta (`/orders`), un archivo (`app/orders/page.tsx`) o un componente (`components/OrderCard.tsx`).
@@ -312,13 +318,13 @@ Revisá siempre el tema oscuro (`?theme=dark`). En la variante B en dark, el bad
 
 ### 6.5 Ajustar una variante
 
-Si te gusta una variante pero querés agregarle o cambiarle algo, pedíselo. Hay dos formas:
+Si te gusta una variante pero querés agregarle o cambiarle algo, pedíselo con tus palabras: *"en la B, poné los filtros arriba de la tabla"*. El atajo:
 
 ```text
 /facha-ui:variants orders b "agregá un contador de pendientes al lado del título"
 ```
 
-O en la misma conversación, en lenguaje natural: *"en la B, poné los filtros arriba de la tabla"*. El comando sirve también en una sesión nueva, porque retoma el run guardado.
+El comando sirve también en una sesión nueva, porque retoma el run guardado.
 
 Qué hace:
 
@@ -368,11 +374,13 @@ Abrí `http://localhost:3000/lab/compare/<pantalla>`: las variantes aparecen lad
 
 ### 7.1 Pedirlo
 
+Si le decís *"aplicá la B"*, Claude no la aplica: te responde con el comando exacto, porque aplicar lo lanzás vos (Claude no puede invocarlo por su cuenta):
+
 ```text
 /facha-ui:apply <slug> <a|b|c>
 ```
 
-Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede invocarla por su cuenta.
+Ejemplo: `/facha-ui:apply orders b`.
 
 ### 7.2 Qué pasa
 
@@ -411,6 +419,8 @@ Si la app está corriendo, `apply` captura la pantalla real antes de tocar nada 
 
 ## 7b. Revisar un flujo completo
 
+Con tus palabras: *"revisá el recorrido de alta de un pedido"*. El atajo, con las pantallas en orden:
+
 ```text
 /facha-ui:flow "dar de alta un pedido y confirmarlo" /orders/new /orders/review /orders/done
 ```
@@ -438,6 +448,8 @@ Sale con 1 si una pantalla bajó (o quedó por debajo de `--min <n>`). Si versio
 ## 8. Uso cotidiano
 
 No hace falta usar `variants` para todo. Con el plugin activo, el MCP le indica a Claude que consulte `get_design_system` antes de escribir UI y que corra `check_ui` después. Un pedido común ("agregá un filtro por canal") ya sale con tokens del proyecto y validado.
+
+**Guardián automático.** Cada vez que Claude escribe o edita un `.tsx`, `.jsx` o `.css` del proyecto, un hook de facha-ui lo chequea solo (fuera del laboratorio y si hay design system). Si encuentra errores o advertencias te avisa (*"facha-ui ⚠ 3 problemas en app/orders/page.tsx"*) y Claude corrige lo que escribió en ese turno, una sola vez; lo que ya estaba te lo informa y te ofrece corregirlo. Solo lee. Con `"guard": "on"` en la config también confirma los archivos limpios; con `"off"` se apaga.
 
 Atajos útiles:
 
@@ -474,15 +486,16 @@ Atajos útiles:
 
 | Comando | Quién lo invoca | Escribe |
 |---|---|---|
-| `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
+| `/facha-ui:start` | Vos, o Claude cuando preguntás "¿cómo está la UI de mi proyecto?" | Nada, salvo que digas que sí al final: entonces agrega las líneas que faltan al `.gitignore` y crea `facha-ui.config.json` si no existe |
+| `/facha-ui:variants <pantalla> "<objetivo>" [--rapido]` | Vos, o Claude cuando pedís "mejorá la pantalla de…", "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Vos, o Claude cuando pedís un cambio en una variante | Solo esa variante, el run y sus capturas |
 | `/facha-ui:variants <slug> live [stop]` | Vos | Lo mismo que un ajuste, más el panel del lab y `.facha-ui/live/`; las paletas propuestas en `.facha-ui/proposals/` |
 | `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Vos, o Claude cuando pedís revisar un flujo | Solo capturas y `.facha-ui/flows/<slug>.json` |
-| `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
+| `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos (si le pedís "aplicá la B", Claude te da el comando) | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
 | `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
 | `/facha-ui:learn [1-9\|<tema>]` | Vos, o Claude cuando pedís que te enseñe | Nada: solo lee y explica |
-| `/facha-ui:help [variants\|apply\|init\|learn\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
+| `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
 
 | Tool MCP | Hace |
 |---|---|

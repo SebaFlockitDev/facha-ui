@@ -35,7 +35,9 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 - **CHANGELOG:** cada cambio que note quien usa el plugin se anota en `CHANGELOG.md`, en
   Unreleased. Cada release actualiza `CHANGELOG.md`: lo de Unreleased pasa a la versión nueva, con
   fecha (AAAA-MM-DD), y la versión coincide con `plugin.json`, `mcp/package.json` y el server
-  (hay un test que lo controla).
+  (hay un test que lo controla). Además, actualizar los enlaces del pie del CHANGELOG: uno nuevo
+  para la versión (`compare/v<anterior>...v<nueva>`) y `[Unreleased]` comparando desde la nueva
+  (`compare/v<nueva>...HEAD`); también lo controla un test.
 - **Bundle:** cada cambio en `mcp/src` se acompaña de `npm run build` en `mcp/`, y
   `mcp/dist/facha-ui-mcp.js` va en el mismo commit.
 - **Nada hardcodeado de proyectos de prueba:** ni nombres, ni rutas, ni términos de dominio, ni
@@ -48,9 +50,10 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 
 | Ruta | Qué es |
 |---|---|
-| `mcp/src/` | MCP determinístico (solo lectura): `get_design_system`, `check_ui`, `audit_project`, `scan_styles`, `review_ui`, `ux_score`, `review_flow` |
+| `mcp/src/` | MCP determinístico (solo lectura): `get_design_system`, `check_ui`, `audit_project`, `scan_styles`, `review_ui`, `ux_score`, `review_flow`; modos de línea de comandos `score` (CI) y `guard` (`guard.ts`, el hook) |
+| `hooks/hooks.json` | guardián automático: PostToolUse que corre `facha-ui-mcp.js guard` sobre cada archivo de UI que escribe Claude |
 | `mcp/test/` | vitest; `plugin.test.ts` controla los contratos del plugin (skills, agente, ids `ux:*`) |
-| `skills/<skill>/SKILL.md` | variants, apply, init, flow, learn, help |
+| `skills/<skill>/SKILL.md` | start, variants (con `quick.md` para el modo rápido), apply, init, flow, learn, help |
 | `skills/_shared/ux-principles.md` | principios de UX con ids estables; los citan las skills y el agente |
 | `skills/variants/templates/next-app/` | laboratorio (layout, panel en vivo, medición responsive, comparar) |
 | `agents/ux-reviewer.md` | subagente crítico, solo lectura (`facha-ui:ux-reviewer`) |

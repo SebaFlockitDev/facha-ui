@@ -1,0 +1,18 @@
+{
+  "description": "facha-ui automatic guardian: checks each UI file Claude writes against the project's design system (read-only, silent when there is nothing to say).",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/facha-ui-mcp.js", "guard"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

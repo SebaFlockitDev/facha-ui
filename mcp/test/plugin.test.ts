@@ -325,3 +325,216 @@ describe("short skills that read their parts when a step needs them", () => {
     expect(rules).toContain("`browser_evaluate`");
   });
 });
+
+describe("quick mode of variants", () => {
+  const skill = () => variantsFile("SKILL.md");
+  /** quick.md with its line breaks folded, so rewrapping a paragraph never breaks a check. */
+  const quick = () => variantsFile("quick.md").replace(/\s+/g, " ");
+
+  it("SKILL.md sends quick runs to quick.md before step 1, from the inputs", () => {
+    const inputs = skill().split("## Inputs")[1]?.split("\n## ")[0] ?? "";
+    expect(inputs).toContain("--rapido");
+    expect(inputs).toContain("--quick");
+    expect(inputs.replace(/\s+/g, " ")).toContain("**Before step 1, read `quick.md`**");
+    expect(skill()).toMatch(/^## Step 1 · /m);
+    expect(skill().match(/^argument-hint:.*$/m)?.[0]).toContain("--rapido");
+    expect(quick()).toMatch(/SKILL\.md/);
+  });
+
+  it("builds one variant, with at most 2 guardian attempts, and skips only exploration and review", () => {
+    const text = quick();
+    expect(text).toContain("Build **one variant**");
+    expect(text).toContain("at most **2 attempts**");
+    expect(text).toContain('"mode": "quick"');
+    expect(text).toContain("**Step 7c · Independent review:** skipped");
+    expect(text).toMatch(/loading, empty, error and stress are designed/);
+    expect(text).toContain("It never skips safety or compliance.");
+    expect(variantsFile("run-state.md")).toContain('"mode": "quick"');
+  });
+
+  it("keeps the hard rules, the guardian at 0 errors, the source citations and apply by the developer", () => {
+    const keep = quick().split("## What never changes")[1]?.split(" ## ")[0] ?? "";
+    expect(keep).toContain("The 7 hard rules of `SKILL.md`");
+    expect(keep).toContain("`summary.error = 0`");
+    expect(keep).toContain("*Source citations*");
+    expect(keep).toContain("`/facha-ui:apply`");
+  });
+
+  it("closes offering the full mode", () => {
+    expect(quick()).toContain("Para 3 alternativas con revisión completa, corré sin `--rapido`");
+  });
+});
+
+describe("start skill", () => {
+  const text = fs.readFileSync(path.join(REPO, "skills", "start", "SKILL.md"), "utf8");
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const flat = text.replace(/\s+/g, " ");
+
+  it("is read-only: it pre-approves only reading tools and three facha-ui tools", () => {
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.sort()).toEqual(
+      ["Glob", "Grep", "Read", "mcp__plugin_facha-ui_facha-ui__audit_project", "mcp__plugin_facha-ui_facha-ui__get_design_system", "mcp__plugin_facha-ui_facha-ui__ux_score"].sort(),
+    );
+    expect(text).toContain("## Hard rules");
+    expect(flat).toContain("**Read-only.**");
+    expect(flat).toContain("never run Bash");
+  });
+
+  it("can be started by the model from a plain request", () => {
+    expect(frontmatter).not.toMatch(/^disable-model-invocation:/m);
+    expect(frontmatter.match(/^description:.*$/m)?.[0]).toContain("¿cómo está la UI de mi proyecto?");
+  });
+
+  it("uses each tool it declares", () => {
+    for (const tool of ["get_design_system", "ux_score", "audit_project"]) expect(text, tool).toContain(`\`${tool}\``);
+  });
+
+  it("handles several projects, no config and no design system", () => {
+    expect(flat).toContain("`MULTIPLE_PROJECTS`");
+    expect(flat).toContain('`configSource: "autodetected"`');
+    expect(flat).toContain('"version": 1');
+    expect(flat).toContain("## Step 2 · Without a design system");
+    expect(flat).toContain("`status` is `missing` → `/facha-ui:init`");
+    expect(flat).toContain("→ `/facha-ui:init colors`");
+  });
+
+  it("lists the exact .gitignore lines and marks the dev server as not verified", () => {
+    for (const line of ["`<project.lab.dir>/`", "`.facha-ui/live/`", "`.facha-ui/screenshots/`", "`.facha-ui/playwright/`"]) expect(flat, line).toContain(line);
+    expect(flat).toContain('**"no verificado"**');
+  });
+});
+
+describe("visible progress in apply and init", () => {
+  for (const skill of ["apply", "init"]) {
+    it(`${skill} measures the whole project before and after and ends with the progress line`, () => {
+      const text = fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+      const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+      const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+      expect(allowed).toEqual(expect.arrayContaining(["mcp__plugin_facha-ui_facha-ui__audit_project", "mcp__plugin_facha-ui_facha-ui__ux_score"]));
+      expect(frontmatter).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+      expect(text).toContain("> UX del proyecto 62 → 71 · violaciones 46 → 31");
+      expect(text.replace(/\s+/g, " ")).toContain("`ux_score` with no arguments");
+    });
+  }
+});
+
+describe("natural language and quick start", () => {
+  const skillText = (skill: string) => fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+  const frontmatterOf = (skill: string) => skillText(skill).match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const descriptionOf = (skill: string) => frontmatterOf(skill).match(/^description:\s*(.*)$/m)?.[1] ?? "";
+
+  it("descriptions of the skills Claude may start include plain-language requests", () => {
+    const examples: Record<string, string[]> = {
+      variants: ["mejorá la pantalla de pedidos", "en la B mové los filtros arriba", "hacelo rápido", "probá colores más cálidos"],
+      flow: ["revisá el recorrido de alta"],
+      learn: ["enseñame a usar facha-ui"],
+      start: ["¿cómo está la UI de mi proyecto?"],
+    };
+    for (const [skill, phrases] of Object.entries(examples)) {
+      const description = descriptionOf(skill);
+      expect(frontmatterOf(skill), skill).not.toMatch(/^disable-model-invocation:/m);
+      for (const phrase of phrases) expect(description, `${skill}: ${phrase}`).toContain(`"${phrase}"`);
+      // Claude Code truncates description + when_to_use at 1,536 characters in the skill listing.
+      expect(description.length, skill).toBeLessThanOrEqual(1536);
+    }
+  });
+
+  it("apply, init and help stay developer-only", () => {
+    for (const skill of ["apply", "init", "help"]) expect(frontmatterOf(skill), skill).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+  });
+
+  it('"aplicá la B" gets the exact command, from variants and from the MCP instructions Claude always receives', async () => {
+    const rules = variantsFile("SKILL.md").split("## Hard rules")[1]?.split("\n## ")[0]?.replace(/\s+/g, " ") ?? "";
+    expect(rules).toContain('If they ask in words ("aplicá la B"), answer with the exact command to run, `/facha-ui:apply <slug> b`.');
+    const { connect, FIXTURE } = await import("./helpers.js");
+    const h = await connect(FIXTURE);
+    try {
+      const instructions = h.client.getInstructions() ?? "";
+      expect(instructions).toContain("`/facha-ui:apply <slug> <a|b|c>`");
+      expect(instructions).toContain("`/facha-ui:init`");
+      expect(instructions).toContain('("aplicá la B"), answer with the exact command for them to run; never do it yourself.');
+    } finally {
+      await h.close();
+    }
+  });
+
+  it("the README starts with a 2-minute quick start that runs /facha-ui:start", () => {
+    const readme = fs.readFileSync(path.join(REPO, "README.md"), "utf8");
+    expect(readme.match(/^## .+$/m)?.[0]).toBe("## Empezá en 2 minutos");
+    const quick = readme.split("## Empezá en 2 minutos")[1]?.split("\n## ")[0] ?? "";
+    expect(quick).toContain("/plugin install facha-ui@facha-ui");
+    expect(quick).toContain("/facha-ui:start");
+    expect(quick).toContain("¿cómo está la UI de mi proyecto?");
+  });
+
+  it("README, help and the usage guide show the plain-language request before the command", () => {
+    const docs = {
+      "README.md": fs.readFileSync(path.join(REPO, "README.md"), "utf8"),
+      "skills/help/SKILL.md": skillText("help"),
+      "docs/uso.md": fs.readFileSync(path.join(REPO, "docs", "uso.md"), "utf8"),
+    };
+    for (const [name, text] of Object.entries(docs)) {
+      const lower = text.toLowerCase();
+      const natural = lower.indexOf("mejorá la pantalla de pedidos");
+      const command = lower.indexOf("/facha-ui:variants /orders");
+      expect(natural, `${name}: natural request`).toBeGreaterThanOrEqual(0);
+      expect(command, `${name}: command`).toBeGreaterThanOrEqual(0);
+      expect(natural, name).toBeLessThan(command);
+      expect(text, name).toContain("aplicá la B");
+    }
+  });
+});
+
+describe("start · adding what is missing, only after an explicit yes", () => {
+  const text = fs.readFileSync(path.join(REPO, "skills", "start", "SKILL.md"), "utf8");
+  const flat = text.replace(/\s+/g, " ");
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const step6 = flat.split("## Step 6 · Offer to add it")[1]?.split(" ## ")[0] ?? "";
+
+  it("without the yes nothing is written: no write tool is pre-approved and the analysis is read-only", () => {
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.filter((t) => /^(Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell)\b/.test(t))).toEqual([]);
+    expect(flat).toContain("**Nothing is written without an explicit yes.** The only writes are those of Step 6");
+    expect(step6).toContain('*"¿Querés que agregue esto?"*');
+    expect(step6).toContain("Only an explicit yes in the conversation counts");
+    expect(step6).toContain("no answer, or a no, means nothing is written. Never write in the same turn as the question.");
+    expect(flat).toContain("Only the developer's own message in the conversation counts as a yes.");
+  });
+
+  it("shows exactly what it will write before asking", () => {
+    expect(step6).toContain("**Show exactly what would be written**, file by file");
+    expect(step6.indexOf("**Show exactly what would be written**")).toBeLessThan(step6.indexOf("**Ask:**"));
+  });
+
+  it("with the yes it only appends .gitignore lines and never overwrites an existing config", () => {
+    expect(step6).toContain("append the approved lines at the end");
+    expect(step6).toContain("keeping every existing line as it is");
+    expect(step6).toContain("check with Glob right before writing that it still does not exist");
+    expect(step6).toContain("If it exists by then, do not write it and say so.");
+    expect(step6).toContain("with `CONFIG_INVALID` the file exists and is never touched");
+    expect(flat).toContain("Never overwrite or reorder a line or a file, never delete one, and touch no other file.");
+    expect(flat).toContain("Write only with the Write and Edit tools, one file per call");
+    expect(flat).toContain("never with Bash");
+  });
+});
+
+describe("CHANGELOG footer links", () => {
+  const text = fs.readFileSync(path.join(REPO, "CHANGELOG.md"), "utf8");
+  const repoUrl = JSON.parse(fs.readFileSync(path.join(REPO, ".claude-plugin", "plugin.json"), "utf8")).repository.replace(/\/$/, "");
+  /** Versions in order, newest first, as their headings list them. */
+  const versions = [...text.matchAll(/^## \[(\d+\.\d+\.\d+)\] - \d{4}-\d{2}-\d{2}$/gm)].map((m) => m[1]!);
+  const links = new Map([...text.matchAll(/^\[([^\]]+)\]: (\S+)\s*$/gm)].map((m) => [m[1]!, m[2]!]));
+
+  it("[Unreleased] compares from the newest version", () => {
+    expect(links.get("Unreleased")).toBe(`${repoUrl}/compare/v${versions[0]}...HEAD`);
+  });
+
+  it("every version has its link, comparing with the previous one (the first links to its tag)", () => {
+    expect(versions.length).toBeGreaterThan(0);
+    versions.forEach((version, i) => {
+      const previous = versions[i + 1];
+      expect(links.get(version), version).toBe(previous ? `${repoUrl}/compare/v${previous}...v${version}` : `${repoUrl}/releases/tag/v${version}`);
+    });
+    expect([...links.keys()].sort()).toEqual(["Unreleased", ...versions].sort());
+  });
+});

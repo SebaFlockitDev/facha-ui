@@ -1,6 +1,6 @@
 ---
 name: learn
-description: A guided, hands-on course on building front-end UI with AI and facha-ui, taught on the developer's own project. Each lesson explains one idea, shows it live with facha-ui's read-only tools, points out what to notice and ends with a short exercise. Read-only, it never writes files. Use when the developer asks to learn or be taught how to use facha-ui or how to work with AI on UI, or asks "where do I start".
+description: A guided, hands-on course on building front-end UI with AI and facha-ui, taught on the developer's own project. Each lesson explains one idea, shows it live with facha-ui's read-only tools, points out what to notice and ends with a short exercise. Read-only, it never writes files. Use when the developer asks to learn or be taught how to use facha-ui or how to work with AI on UI, also in plain words - "enseñame a usar facha-ui", "explicame qué es un design system", "¿por qué la IA inventa colores?". For a first look at the project ("¿por dónde empiezo?"), /facha-ui:start comes first.
 argument-hint: "[1-9 | <tema>]"
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
@@ -15,8 +15,8 @@ appears, in one plain sentence.
 The method you teach, in one line: **the AI proposes, deterministic code verifies, the
 developer decides.** Every lesson shows one piece of it.
 
-Talk to the developer in their language (Spanish by default if they write in Spanish, with
-the rioplatense "vos").
+Talk to the developer in their language and their register: mirror how they address you (vos,
+tú or usted) and never switch it; the Spanish phrases below are in vos, adapt them.
 
 ## Hard rules
 

@@ -186,14 +186,17 @@ export function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** Files that audit_project scans: include − exclude − lab directory. */
-export function listProjectFiles(project: Project): string[] {
+/** Whether a project-relative path is one audit_project scans: include − exclude − lab directory. */
+export function auditMatcher(project: Project): (relPath: string) => boolean {
   const inc = picomatch(project.include, { dot: false });
   const exc = picomatch([...project.exclude, `${project.labDir}/**`], { dot: true });
-  return walk(project.root).filter((abs) => {
-    const r = rel(project, abs);
-    return inc(r) && !exc(r);
-  });
+  return (r) => inc(r) && !exc(r);
+}
+
+/** Files that audit_project scans: include − exclude − lab directory. */
+export function listProjectFiles(project: Project): string[] {
+  const audited = auditMatcher(project);
+  return walk(project.root).filter((abs) => audited(rel(project, abs)));
 }
 
 export function isInLab(project: Project, relPath: string): boolean {

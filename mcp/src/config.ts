@@ -145,6 +145,12 @@ export const ConfigSchema = z
       .object({ decisionsFile: z.string().min(1).default("design-system/decisions.md") })
       .strict()
       .default({ decisionsFile: "design-system/decisions.md" }),
+    /**
+     * The automatic guardian (0.16.0): a PostToolUse hook that checks each UI file Claude writes.
+     * "quiet" (the default when absent) speaks only when there are problems; "on" also confirms a
+     * clean file; "off" silences it.
+     */
+    guard: z.enum(["off", "quiet", "on"]).optional(),
   })
   .strict();
 

@@ -49,6 +49,8 @@ Write and Edit tools only.
 }
 ```
 
+- `mode`: add `"mode": "quick"` next to `status` in a quick run (`quick.md`), which has one
+  variant; a full run has no `mode`.
 - `attempts`: one entry per guardian attempt (Step 6); `finalCheck` is the last one.
 - `screenshots`: paths relative to the workspace, exactly as captured; never move them.
 - `critique` comes from Step 7b and `review` from the `ux-reviewer` agent (Step 7c), as it wrote

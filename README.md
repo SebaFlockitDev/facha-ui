@@ -2,6 +2,36 @@
 
 Plugin de Claude Code que trabaja como un diseñador UI senior dentro de tu proyecto: arma o completa tu design system, diseña pantallas con él, te deja ajustarlas y probar paletas en vivo, valida cada resultado con reglas objetivas y no aplica nada sin tu aprobación.
 
+## Empezá en 2 minutos
+
+1. **Instalá el plugin** (en Claude Code):
+   ```text
+   /plugin marketplace add SebaFlockitDev/facha-ui
+   /plugin install facha-ui@facha-ui
+   ```
+2. **Abrí Claude Code en tu proyecto** (Next.js con App Router). No hace falta configurar nada.
+3. **Preguntá** *"¿cómo está la UI de mi proyecto?"*, o corré `/facha-ui:start`.
+
+Vas a ver, en menos de un minuto y sin que se escriba nada:
+- tu proyecto y su design system en palabras simples (tokens, temas, qué falta);
+- el puntaje de UX del proyecto y los 3 problemas más graves, cada uno con archivo, línea y por qué importa;
+- **una** recomendación: lo próximo que más mejora tu UI, listo para pedir;
+- lo que falta para el resto (config, líneas del `.gitignore`, dev server). Al final te pregunta *"¿Querés que agregue esto?"*: solo si decís que sí agrega las líneas que faltan al `.gitignore` y crea la config mínima (nunca sobrescribe una existente).
+
+Desde ahí, pedíselo con tus palabras. Los comandos son atajos:
+
+| Decile a Claude | Atajo |
+|---|---|
+| *"Mejorá la pantalla de pedidos"* | `/facha-ui:variants /orders "<objetivo>"` |
+| *"Hacelo rápido"* · *"una sola variante"* | `… --rapido` |
+| *"En la B mové los filtros arriba"* | `/facha-ui:variants orders b "<cambio>"` |
+| *"Probá colores más cálidos"* | `/facha-ui:variants orders live` |
+| *"Revisá el recorrido de alta"* | `/facha-ui:flow "<objetivo>" <pantallas>` |
+| *"Enseñame a usar facha-ui"* | `/facha-ui:learn` |
+| *"Aplicá la B"* | Claude te da el comando, `/facha-ui:apply orders b`: aplicar lo lanzás vos |
+
+Y aunque no lo invoques, cada archivo de UI que Claude escribe pasa por el **guardián automático**: si algo no respeta tu design system, te avisa y Claude lo corrige.
+
 En su núcleo es un **optimizador de UI con el design system**: generás con IA variantes de un componente o de una pantalla, y facha-ui las ajusta hasta que respetan los tokens y las reglas de tu equipo. Todo lo demás se construye sobre esa base.
 
 **Desde cero o sobre lo que ya tenés**
@@ -36,7 +66,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Versión 0.15.0** · Next.js App Router, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
+> **Versión 0.16.0** · Next.js App Router, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
 
 ## Requisitos
 
@@ -96,21 +126,23 @@ El plugin trae dos servidores MCP con versiones fijas (`.mcp.json`):
    ```
    Lo demás es opcional: temas, `include`/`exclude`, `guidelines`, la voz del producto (`copy`: `voice` y `terms`), `lab.dir`, `preview.auth` y `memory.decisionsFile`. Hay un ejemplo completo en SPEC, Anexo A.
 4. **`.gitignore`:** agregar el laboratorio (`app/lab/`) y `.facha-ui/` (como mínimo `.facha-ui/live/`, que guarda el token de la sesión en vivo). El plugin en sí no entra en tu repo: vive en `~/.claude/plugins`. facha-ui nunca edita el `.gitignore`.
-5. **Diagnóstico:** *"¿cuántas violaciones tiene el proyecto?"* → `audit_project`.
+5. **Diagnóstico:** *"¿cómo está la UI de mi proyecto?"* (`/facha-ui:start`) o *"¿cuántas violaciones tiene el proyecto?"* (`audit_project`).
+6. **Guardián automático:** cada `.tsx`, `.jsx` o `.css` que Claude escribe se chequea solo. Por defecto avisa solo si hay problemas; `"guard": "on"` en la config también confirma los archivos limpios y `"off"` lo apaga.
 
 ## Demo
 
 Guion sobre una pantalla de listado con estados, por ejemplo `/orders` en una app de pedidos:
 
 1. Levantar la app (`npm run dev`) y, si la pantalla tiene login, iniciar sesión vos en la ventana de Playwright cuando la skill lo pida. facha-ui nunca escribe credenciales.
-2. Pedir variantes:
+2. Pedir variantes con tus palabras: *"mejorá la pantalla de pedidos: que se vea primero lo que espera revisión"*. El atajo es:
    ```text
    /facha-ui:variants /orders "que se vea primero lo que espera revisión"
    ```
+   Con *"hacelo rápido"* (o `--rapido`) sale una sola variante: la mejor hipótesis, con las mismas reglas.
    Antes de generar, la skill avisa las brechas: por ejemplo, que no hay tokens de estado y que el badge "pendiente" usa colores literales. Después escribe las variantes A, B y C en `app/lab/orders/`, las valida con `check_ui` (hasta 3 intentos cada una) y saca capturas en light y dark.
 3. Revisar las variantes en `http://localhost:3000/lab/orders/<a|b|c>` (agregá `?theme=dark` para el tema oscuro) y el run en `.facha-ui/runs/orders.json`, con hipótesis, intentos, decisiones con fuente y trade-offs.
-4. Ajustar la que te gusta, si hace falta: `/facha-ui:variants orders b "<cambio>"`, o en vivo con `/facha-ui:variants orders live`, que muestra un panel en cada variante para pedir cambios, señalar elementos con un clic y probar paletas de colores para toda la app, con el contraste y los conflictos (y su solución) a la vista.
-5. Aplicar la elegida:
+4. Ajustar la que te gusta, si hace falta: *"en la B mové los filtros arriba"* (atajo: `/facha-ui:variants orders b "<cambio>"`), o en vivo con *"ajustá la B en vivo"* (`/facha-ui:variants orders live`), que muestra un panel en cada variante para pedir cambios, señalar elementos con un clic y probar paletas de colores para toda la app, con el contraste y los conflictos (y su solución) a la vista.
+5. Aplicar la elegida. Si le decís *"aplicá la B"*, Claude te da el comando, porque aplicar lo lanzás vos:
    ```text
    /facha-ui:apply orders b
    ```

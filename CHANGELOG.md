@@ -7,6 +7,24 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-10
+
+### Added
+- Modo rápido de `/facha-ui:variants` (`--rapido`, `--quick`, o "hacelo rápido"): una sola variante, la hipótesis que mejor resuelve el diagnóstico, con las mismas reglas duras, el guardián en 0 errores (hasta 2 intentos) y las citas de fuente; captura de escritorio y sin revisor independiente (§2.b.6).
+- `/facha-ui:start`: primer vistazo sin configurar nada. Tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves con su archivo, línea y principio, una sola recomendación de mayor impacto y lo que falta (config, líneas del `.gitignore`, dev server). El análisis solo lee; al final pregunta "¿Querés que agregue esto?" y, solo con tu sí, agrega las líneas que faltan al final del `.gitignore` y crea `facha-ui.config.json` si no existe, sin sobrescribir nada. También se activa con "¿cómo está la UI de mi proyecto?" (§2.e).
+- Guardián automático: un hook del plugin chequea cada `.tsx`, `.jsx` o `.css` del proyecto que Claude escribe o edita, sin que lo pidas. Si hay problemas te avisa ("facha-ui ⚠ N problemas en …"), y Claude corrige lo que escribió en ese turno, una sola vez, e informa lo que ya estaba. Calla en el laboratorio, sin design system o con varios proyectos (§2.f).
+- `"guard": "off" | "quiet" | "on"` en `facha-ui.config.json` para el guardián automático (por defecto `quiet`).
+
+### Changed
+- `start`, `learn` y `help` copian el registro de quien los usa (vos, tú o usted) en lugar de usar siempre el voseo.
+- `/facha-ui:apply` y `/facha-ui:init` terminan con el progreso de todo el proyecto, antes y después: "UX del proyecto 62 → 71 · violaciones 46 → 31" (§2.c.1).
+- Se puede pedir todo con palabras: "mejorá la pantalla de pedidos" (sin objetivo, toma el diagnóstico), "hacelo rápido", "en la B mové los filtros arriba", "probá colores más cálidos", "revisá el recorrido de alta", "enseñame a usar facha-ui". Los comandos quedan como atajos (§2.b).
+- Si pedís "aplicá la B" o "armá los tokens", Claude te responde con el comando exacto (`/facha-ui:apply`, `/facha-ui:init`): aplicar y crear tokens los seguís lanzando vos. Lo indican las `instructions` del MCP (punto 4, §2.a.2).
+- El README arranca con "Empezá en 2 minutos" (instalar, abrir Claude Code en tu proyecto, `/facha-ui:start`), y el README, `help` y la guía de uso muestran primero el pedido con palabras y después el comando.
+
+### Security
+- El guardián automático solo lee: mismo bundle sin escritura, red ni ejecución de código del proyecto; el texto del proyecto que le pasa a Claude va cortado a 200 caracteres y marcado como dato; cualquier error interno es silencio y nunca rompe la edición (§2.f).
+
 ## [0.15.0] - 2026-10-10
 
 ### Added
@@ -168,7 +186,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.12.0...v0.13.0
