@@ -1110,7 +1110,7 @@ export function LabPanel() {
         ))}
       </div>
       {picking ? (
-        <p className="muted">Hacé clic en un elemento. ↑ elige el contenedor que lo envuelve, ↓ vuelve, Enter confirma, Esc cancela.</p>
+        <p className="muted">Hacé clic en un elemento. Con ↑ elegís el contenedor que lo envuelve, con ↓ volvés, Enter confirma y Esc cancela.</p>
       ) : targets.length > 0 ? (
         <p className="muted">Nombralos en el texto como [1], [2]… Se envían junto con el cambio.</p>
       ) : null}

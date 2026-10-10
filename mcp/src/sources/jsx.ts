@@ -262,6 +262,32 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
       ancestors.push(nm.intrinsic ? nm.tag : "");
       ancestorClassStack.push(attrs?.classes ?? []);
       pushed = true;
+
+      // UI text, for the microcopy rules: content of intrinsic and component elements alike, and
+      // copy attributes (placeholder, title, aria-label, alt, label, *Text, *Label, *Message, *Title).
+      const tag = nm.tag || "?";
+      for (const c of n.children as Node[]) {
+        if (c.type === "JSXText") {
+          const raw = String(c.value);
+          const lead = raw.search(/\S/);
+          if (lead < 0) continue;
+          const at = makeLocAt(file, c.loc!.start.line, c.loc!.start.column + 1, raw)(lead);
+          usages.push({ kind: "text", text: raw.replace(/\s+/g, " ").trim(), tag, attr: null, ...at });
+        } else if (c.type === "JSXExpressionContainer" && c.expression?.type === "StringLiteral" && c.expression.value.trim()) {
+          const s = inner(c.expression);
+          usages.push({ kind: "text", text: c.expression.value.trim(), tag, attr: null, file, line: s.line, column: s.column });
+        }
+      }
+      for (const a of opening.attributes as Node[]) {
+        if (a.type !== "JSXAttribute" || a.name?.type !== "JSXIdentifier") continue;
+        const name: string = a.name.name;
+        if (!/^(placeholder|title|aria-label|alt|label)$|(Text|Label|Message|Title)$/.test(name)) continue;
+        const v = a.value as Node | null;
+        const lit = v?.type === "StringLiteral" ? v : v?.type === "JSXExpressionContainer" && v.expression?.type === "StringLiteral" ? v.expression : null;
+        if (!lit || !String(lit.value).trim()) continue;
+        const s = inner(lit);
+        usages.push({ kind: "text", text: String(lit.value).trim(), tag, attr: name, file, line: s.line, column: s.column });
+      }
     }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
       const name: string = n.name.name;

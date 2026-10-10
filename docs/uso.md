@@ -147,6 +147,24 @@ Claves útiles:
 
 Ejemplo completo: SPEC, Anexo A. Si la config tiene un error (incluida una expresión regular inválida), las tools responden `CONFIG_INVALID` con la ruta exacta del campo.
 
+### 4.2b La voz del producto (opcional)
+
+Igual que los tokens definen los colores, `copy` define cómo habla el producto. Con esto, las variantes escriben con tu voz y el guardián marca lo que se sale:
+
+```json
+{
+  "copy": {
+    "voice": "vos",
+    "terms": [{ "use": "pedido", "avoid": ["orden", "compra"] }]
+  }
+}
+```
+
+- `voice`: `vos`, `tú` o `usted`. Marca, por ejemplo, "Puedes" en un producto que dice "Podés".
+- `terms`: la palabra del producto y las que no se usan, para que lo mismo se llame igual en todas las pantallas.
+
+Sin `copy`, las reglas que no dependen de la voz igual corren: etiquetas vagas ("Click aquí", "OK"), errores que no dicen qué pasó ni qué hacer y textos en mayúsculas.
+
 ### 4.3 `.gitignore`
 
 facha-ui nunca edita el `.gitignore`. Agregá a mano lo que no quieras versionar:

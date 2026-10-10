@@ -274,7 +274,10 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
     out.health = health(ctx, scan.usages);
   }
   if (want.has("rules")) out.rules = rulesInfo(ctx);
-  if (want.has("guidelines")) out.guidelines = ctx.project.config.guidelines.map((text, i) => ({ id: `g${i + 1}`, text }));
+  if (want.has("guidelines")) {
+    out.guidelines = ctx.project.config.guidelines.map((text, i) => ({ id: `g${i + 1}`, text }));
+    out.copy = ctx.project.config.copy ?? null;
+  }
   if (want.has("decisions")) out.decisions = parseDecisions(ctx);
   return out;
 }

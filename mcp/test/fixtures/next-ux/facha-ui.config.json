@@ -1,4 +1,5 @@
 {
   "version": 1,
-  "tokens": { "sources": ["app/globals.css"], "themes": { "light": ":root", "dark": "html.dark" } }
+  "tokens": { "sources": ["app/globals.css"], "themes": { "light": ":root", "dark": "html.dark" } },
+  "copy": { "voice": "vos", "terms": [{ "use": "pedido", "avoid": ["orden", "compra"] }] }
 }

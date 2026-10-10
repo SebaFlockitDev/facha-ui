@@ -4018,8 +4018,8 @@ var require_resolve = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id = "", normalize) {
-      if (normalize !== false)
+    function getFullPath(resolver, id = "", normalize2) {
+      if (normalize2 !== false)
         id = normalizeId(id);
       const p4 = resolver.parse(id);
       return _getFullPath(resolver, p4);
@@ -5614,7 +5614,7 @@ var require_fast_uri = __commonJS({
       }
       return decodedScheme;
     }
-    function normalize(uri, options) {
+    function normalize2(uri, options) {
       if (typeof uri === "string") {
         uri = /** @type {T} */
         normalizeString(uri, options);
@@ -5992,7 +5992,7 @@ var require_fast_uri = __commonJS({
     }
     var fastUri = {
       SCHEMES,
-      normalize,
+      normalize: normalize2,
       resolve,
       resolveComponent,
       equal,
@@ -11001,7 +11001,7 @@ var require_util2 = __commonJS({
         return result;
       };
     }
-    var normalize = lruMemoize(function normalize2(aPath) {
+    var normalize2 = lruMemoize(function normalize3(aPath) {
       var path8 = aPath;
       var url2 = urlParse(aPath);
       if (url2) {
@@ -11053,7 +11053,7 @@ var require_util2 = __commonJS({
       }
       return path8;
     });
-    exports.normalize = normalize;
+    exports.normalize = normalize2;
     function join(aRoot, aPath) {
       if (aRoot === "") {
         aRoot = ".";
@@ -11079,7 +11079,7 @@ var require_util2 = __commonJS({
         aRootUrl.host = aPath;
         return urlGenerate(aRootUrl);
       }
-      var joined = aPath.charAt(0) === "/" ? aPath : normalize(aRoot.replace(/\/+$/, "") + "/" + aPath);
+      var joined = aPath.charAt(0) === "/" ? aPath : normalize2(aRoot.replace(/\/+$/, "") + "/" + aPath);
       if (aRootUrl) {
         aRootUrl.path = joined;
         return urlGenerate(aRootUrl);
@@ -11302,7 +11302,7 @@ var require_util2 = __commonJS({
         }
         sourceURL = join(urlGenerate(parsed), sourceURL);
       }
-      return normalize(sourceURL);
+      return normalize2(sourceURL);
     }
     exports.computeSourceURL = computeSourceURL;
   }
@@ -36533,7 +36533,12 @@ var RULE_IDS = [
   "responsive-fixed-width",
   "responsive-grid-columns",
   "responsive-table-scroll",
-  "responsive-viewport-height"
+  "responsive-viewport-height",
+  "copy-vague-label",
+  "copy-error-text",
+  "copy-all-caps",
+  "copy-term",
+  "copy-voice"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36583,6 +36588,14 @@ var ConfigSchema = external_exports.object({
     statusMinDeltaE: external_exports.number().positive().default(10)
   }).strict().optional(),
   guidelines: external_exports.array(external_exports.string()).default([]),
+  // The product's voice (0.11.0): how it addresses people and the words it uses. The guardian
+  // checks the UI text against it (copy-voice, copy-term).
+  copy: external_exports.object({
+    /** How the UI addresses the person: Spanish "vos", "tú" or "usted". */
+    voice: external_exports.enum(["vos", "t\xFA", "usted"]).optional(),
+    /** Product terms: say `use`, never the words in `avoid` (case-insensitive, whole words). */
+    terms: external_exports.array(external_exports.object({ use: external_exports.string().min(1), avoid: external_exports.array(external_exports.string().min(1)).min(1) }).strict()).default([])
+  }).strict().optional(),
   lab: external_exports.object({
     dir: external_exports.string().min(1).default("app/lab"),
     // Vision key (SPEC §2.0.2), accepted but not used by the MVP.
@@ -63439,6 +63452,29 @@ function extractJsx(file2, code2, ext, classHelpers) {
       ancestors.push(nm.intrinsic ? nm.tag : "");
       ancestorClassStack.push(attrs?.classes ?? []);
       pushed = true;
+      const tag = nm.tag || "?";
+      for (const c2 of n.children) {
+        if (c2.type === "JSXText") {
+          const raw = String(c2.value);
+          const lead = raw.search(/\S/);
+          if (lead < 0) continue;
+          const at = makeLocAt(file2, c2.loc.start.line, c2.loc.start.column + 1, raw)(lead);
+          usages.push({ kind: "text", text: raw.replace(/\s+/g, " ").trim(), tag, attr: null, ...at });
+        } else if (c2.type === "JSXExpressionContainer" && c2.expression?.type === "StringLiteral" && c2.expression.value.trim()) {
+          const s = inner(c2.expression);
+          usages.push({ kind: "text", text: c2.expression.value.trim(), tag, attr: null, file: file2, line: s.line, column: s.column });
+        }
+      }
+      for (const a of opening.attributes) {
+        if (a.type !== "JSXAttribute" || a.name?.type !== "JSXIdentifier") continue;
+        const name = a.name.name;
+        if (!/^(placeholder|title|aria-label|alt|label)$|(Text|Label|Message|Title)$/.test(name)) continue;
+        const v = a.value;
+        const lit = v?.type === "StringLiteral" ? v : v?.type === "JSXExpressionContainer" && v.expression?.type === "StringLiteral" ? v.expression : null;
+        if (!lit || !String(lit.value).trim()) continue;
+        const s = inner(lit);
+        usages.push({ kind: "text", text: String(lit.value).trim(), tag, attr: name, file: file2, line: s.line, column: s.column });
+      }
     }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
       const name = n.name.name;
@@ -63720,6 +63756,211 @@ function removesFocusOutline(property, value, selector, siblings) {
   if (!selector || !/:focus(?!-within)/.test(selector) || /:not\(:focus-visible\)/.test(selector)) return false;
   if (!/^outline(-style|-width)?$/.test(property) || !/^(none|0(px)?)$/.test(value.trim())) return false;
   return !(siblings ?? []).some((d) => /^(box-shadow|border|border-color|outline-color|background|background-color|text-decoration)$/.test(d.prop) && !/^(none|0)$/.test(d.value.trim()));
+}
+
+// src/copy.ts
+var normalize = (s) => s.toLowerCase().replace(/[¡!¿?.,:;…"'«»()[\]]/g, " ").replace(/\s+/g, " ").trim();
+var VAGUE_LINKS = /* @__PURE__ */ new Set([
+  "aqu\xED",
+  "aqui",
+  "ac\xE1",
+  "aca",
+  "click aqu\xED",
+  "clic aqu\xED",
+  "click ac\xE1",
+  "clic ac\xE1",
+  "haz clic aqu\xED",
+  "hac\xE9 clic ac\xE1",
+  "hace clic ac\xE1",
+  "haga clic aqu\xED",
+  "m\xE1s",
+  "mas",
+  "leer m\xE1s",
+  "ver",
+  "link",
+  "enlace",
+  "here",
+  "click here",
+  "more",
+  "read more",
+  "this link"
+]);
+var VAGUE_BUTTONS = /* @__PURE__ */ new Set(["ok", "okay", "submit", "click", "click aqu\xED", "clic aqu\xED", "aqu\xED", "ac\xE1", "here", "click here", "go", "ir"]);
+var GENERIC_ERRORS = /* @__PURE__ */ new Set([
+  "error",
+  "error inesperado",
+  "ocurri\xF3 un error",
+  "ha ocurrido un error",
+  "hubo un error",
+  "se produjo un error",
+  "algo sali\xF3 mal",
+  "error desconocido",
+  "something went wrong",
+  "an error occurred",
+  "an error has occurred",
+  "unknown error",
+  "unexpected error",
+  "oops",
+  "ups",
+  "uy",
+  "failed",
+  "request failed",
+  "failed to fetch",
+  "internal server error",
+  "bad request",
+  "undefined",
+  "null",
+  "nan",
+  "object object"
+]);
+var TECHNICAL_ERROR = /\berror\s*\d{3}\b|\bexception\b|\bstack ?trace\b|\bstatus code\b|\bstatus \d{3}\b/i;
+var INDICATIVE = [
+  ["pod\xE9s", "puedes", null],
+  ["ten\xE9s", "tienes", null],
+  ["quer\xE9s", "quieres", null],
+  ["deb\xE9s", "debes", null],
+  ["sab\xE9s", "sabes", null],
+  ["sos", "eres", null],
+  ["necesit\xE1s", "necesitas", null]
+];
+var IMPERATIVE = [
+  ["hac\xE9", "haz", "haga"],
+  ["ingres\xE1", "ingresa", "ingrese"],
+  ["seleccion\xE1", "selecciona", "seleccione"],
+  ["eleg\xED", "elige", "elija"],
+  ["escrib\xED", "escribe", "escriba"],
+  ["complet\xE1", "completa", "complete"],
+  ["revis\xE1", "revisa", "revise"],
+  ["confirm\xE1", "confirma", "confirme"],
+  ["agreg\xE1", "agrega", "agregue"],
+  ["busc\xE1", "busca", "busque"],
+  ["prob\xE1", "prueba", "pruebe"],
+  ["intent\xE1", "intenta", "intente"],
+  ["volv\xE9", "vuelve", "vuelva"],
+  ["toc\xE1", "toca", "toque"],
+  ["guard\xE1", "guarda", "guarde"],
+  ["inici\xE1", "inicia", "inicie"],
+  ["cerr\xE1", "cierra", "cierre"],
+  ["abr\xED", "abre", "abra"],
+  ["sub\xED", "sube", "suba"],
+  ["descarg\xE1", "descarga", "descargue"],
+  ["carg\xE1", "carga", "cargue"],
+  ["edit\xE1", "edita", "edite"],
+  ["elimin\xE1", "elimina", "elimine"],
+  ["cre\xE1", "crea", "cree"],
+  ["us\xE1", "usa", "use"],
+  ["verific\xE1", "verifica", "verifique"],
+  ["contact\xE1", "contacta", "contacte"]
+];
+var VOICES = ["vos", "t\xFA", "usted"];
+var words = (s) => s.toLowerCase().match(/[\p{L}]+/gu) ?? [];
+var sentenceStarts = (s) => s.split(/[.!?¡¿\n]+/).map((part) => words(part)[0]).filter((w) => !!w);
+function voiceBreaks(text, voice) {
+  if (!voice) return null;
+  const want = VOICES.indexOf(voice);
+  const all = new Set(words(text));
+  const starts = new Set(sentenceStarts(text));
+  if (voice !== "usted" && all.has("usted")) return { found: "usted", expected: voice };
+  for (const triple of INDICATIVE) {
+    for (let v = 0; v < 2; v++) {
+      if (v === want || !triple[v]) continue;
+      if (all.has(triple[v])) return { found: triple[v], expected: triple[want] ?? voice };
+    }
+  }
+  for (const triple of IMPERATIVE) {
+    for (let v = 0; v < 3; v++) {
+      if (v === want) continue;
+      if (starts.has(triple[v])) return { found: triple[v], expected: triple[want] };
+    }
+  }
+  return null;
+}
+var escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function checkCopy(usages, config2, report) {
+  const terms = (config2?.terms ?? []).map((t) => ({
+    use: t.use,
+    avoid: t.avoid.map((a) => ({ word: a, re: new RegExp(`(^|[^\\p{L}])(${escapeRe(a)})(?=$|[^\\p{L}])`, "iu") }))
+  }));
+  for (const u of usages) {
+    if (u.kind === "element") {
+      const e4 = u;
+      const isLink = e4.tag === "a" && "href" in e4.attrs;
+      const isButton = e4.tag === "button" || e4.attrs.role === "button";
+      if (!isLink && !isButton) continue;
+      const label = normalize(e4.attrs["aria-label"] && e4.attrs["aria-label"] !== "{}" ? e4.attrs["aria-label"] : e4.text);
+      if (!label) continue;
+      if (isLink && VAGUE_LINKS.has(label)) {
+        report(
+          "copy-vague-label",
+          "warning",
+          { file: e4.file, line: e4.line, column: e4.column },
+          `<a> \xAB${e4.text || label}\xBB`,
+          "The link text does not say where it goes: out of context (screen readers list links alone) it means nothing (WCAG 2.4.4).",
+          'Name the destination or the action: "Ver el detalle del pago" instead of "Click aqu\xED".'
+        );
+      } else if (isButton && VAGUE_BUTTONS.has(label)) {
+        report(
+          "copy-vague-label",
+          "info",
+          { file: e4.file, line: e4.line, column: e4.column },
+          `<button> \xAB${e4.text || label}\xBB`,
+          "The button does not say what it does: people hesitate before pressing it.",
+          'Use a verb and its object: "Guardar pedido", "Enviar recibo".'
+        );
+      }
+      continue;
+    }
+    if (u.kind !== "text") continue;
+    const t = u;
+    const at = { file: t.file, line: t.line, column: t.column };
+    const plain = normalize(t.text);
+    if (GENERIC_ERRORS.has(plain) || TECHNICAL_ERROR.test(t.text)) {
+      report(
+        "copy-error-text",
+        "info",
+        at,
+        t.text.slice(0, 80),
+        "The error message does not say what happened or what to do next, or it shows technical details to the person using the app.",
+        'Say what failed in plain words and how to fix or retry it: "No pudimos guardar el pago. Revis\xE1 tu conexi\xF3n y prob\xE1 de nuevo."'
+      );
+    }
+    const letters = t.text.replace(/[^\p{L}]/gu, "");
+    if (!t.attr && letters.length >= 8 && words(t.text).length >= 2 && letters === letters.toUpperCase() && letters !== letters.toLowerCase()) {
+      report(
+        "copy-all-caps",
+        "info",
+        at,
+        t.text.slice(0, 80),
+        "Text written in capitals is harder to read and sounds like shouting; screen readers may spell it out.",
+        "Write it in sentence case and, if the design wants capitals, apply them with CSS (text-transform: uppercase)."
+      );
+    }
+    for (const term of terms) {
+      for (const a of term.avoid) {
+        const m = t.text.match(a.re);
+        if (!m) continue;
+        report(
+          "copy-term",
+          "warning",
+          at,
+          m[2],
+          `"${m[2]}" is not the product's word for this (copy.terms).`,
+          `Use "${term.use}", as the team decided, so the same thing has the same name everywhere.`
+        );
+      }
+    }
+    const broken = voiceBreaks(t.text, config2?.voice);
+    if (broken) {
+      report(
+        "copy-voice",
+        "warning",
+        at,
+        broken.found,
+        `"${broken.found}" breaks the product's form of address (copy.voice = ${config2.voice}).`,
+        `Use the ${config2.voice} form${broken.expected !== config2.voice ? `: "${broken.expected}"` : ""}, so the whole product speaks with one voice.`
+      );
+    }
+  }
 }
 
 // src/responsive.ts
@@ -65101,7 +65342,16 @@ var RULES = [
     summary: "A grid of 3 or more columns at every width (grid-cols-N without a breakpoint, or grid-template-columns without auto-fit or a media query)."
   },
   { id: "responsive-table-scroll", severity: "info", summary: "A <table> with no horizontal scroll container in the same file: it overflows or gets clipped on a phone." },
-  { id: "responsive-viewport-height", severity: "info", summary: "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height." }
+  { id: "responsive-viewport-height", severity: "info", summary: "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height." },
+  {
+    id: "copy-vague-label",
+    severity: "warning",
+    summary: 'Link or button text that does not say what it does ("Click aqu\xED", "M\xE1s", "OK", "Submit"): warning for links (WCAG 2.4.4), info for buttons.'
+  },
+  { id: "copy-error-text", severity: "info", summary: 'Error text that does not say what happened or what to do ("Ocurri\xF3 un error", "Something went wrong"), or shows technical details (status codes, exceptions).' },
+  { id: "copy-all-caps", severity: "info", summary: "UI text written in capitals in the code (2+ words): harder to read; use CSS text-transform when it is a style." },
+  { id: "copy-term", severity: "warning", summary: "A word the team decided not to use (copy.terms in the config), with the product's word for it." },
+  { id: "copy-voice", severity: "warning", summary: `A form of address that breaks the product's voice (copy.voice: vos, t\xFA or usted), e.g. "puedes" in a product that says "pod\xE9s".` }
 ];
 var MESSAGES = {
   "color-literal": "Color literal outside the design tokens; it does not follow theme changes.",
@@ -65124,7 +65374,12 @@ var MESSAGES = {
   "responsive-fixed-width": "Fixed width wider than a phone.",
   "responsive-grid-columns": "Grid columns that never collapse on small screens.",
   "responsive-table-scroll": "Table without a horizontal scroll container.",
-  "responsive-viewport-height": "100vh height on phones."
+  "responsive-viewport-height": "100vh height on phones.",
+  "copy-vague-label": "Label that does not say what it does.",
+  "copy-error-text": "Error text without what happened or what to do.",
+  "copy-all-caps": "Text written in capitals.",
+  "copy-term": "Word the product does not use.",
+  "copy-voice": "Form of address outside the product's voice."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
 function effectiveSeverity(ctx, rule2, base4, soft = false) {
@@ -65267,7 +65522,7 @@ function checkUsages(ctx, usages) {
       push("tailwind-arbitrary-value", severity3, loc2, u.raw, a.property, "className", suggestArbitrary(ctx, a));
       continue;
     }
-    if (u.kind === "element") continue;
+    if (u.kind === "element" || u.kind === "text") continue;
     const context = u.context === "css" ? "css" : u.context;
     for (const lit of findColorLiterals(u.value, u.property)) {
       if (allowed.has(lit.text.toLowerCase())) continue;
@@ -65361,6 +65616,11 @@ function checkUsages(ctx, usages) {
   checkResponsive(
     usages,
     overflowClasses,
+    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+  );
+  checkCopy(
+    usages,
+    ctx.project.config.copy,
     (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   checkA11y(
@@ -65736,7 +65996,10 @@ function getDesignSystem(ctx, sections = SECTIONS) {
     out.health = health(ctx, scan.usages);
   }
   if (want.has("rules")) out.rules = rulesInfo(ctx);
-  if (want.has("guidelines")) out.guidelines = ctx.project.config.guidelines.map((text, i) => ({ id: `g${i + 1}`, text }));
+  if (want.has("guidelines")) {
+    out.guidelines = ctx.project.config.guidelines.map((text, i) => ({ id: `g${i + 1}`, text }));
+    out.copy = ctx.project.config.copy ?? null;
+  }
   if (want.has("decisions")) out.decisions = parseDecisions(ctx);
   return out;
 }
@@ -66266,7 +66529,7 @@ function reviewUi(ctx, input2) {
 }
 
 // src/server.ts
-var VERSION = "0.10.0";
+var VERSION = "0.11.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

@@ -85,6 +85,33 @@ describe("responsive rules", () => {
   });
 });
 
+describe("microcopy rules", () => {
+  const COPY = ["copy-vague-label", "copy-error-text", "copy-all-caps", "copy-term", "copy-voice"];
+
+  it("flag copy that says nothing, and the team's words and voice; accept copy that helps", async () => {
+    const r = await h.call("check_ui", { path: "app/copy/page.tsx", rules: COPY });
+    expect(r.structuredContent.violations.map(brief)).toEqual([
+      "6 copy-vague-label warning <a> «Click aquí»",
+      "7 copy-vague-label info <button> «OK»",
+      "8 copy-error-text info Ocurrió un error",
+      "9 copy-error-text info Error 500: Internal Server Error",
+      "10 copy-all-caps info IMPORTE TOTAL DEL MES",
+      "11 copy-term warning orden",
+      "12 copy-voice warning puedes",
+      "14 copy-voice warning ingresa",
+    ]);
+    const term = r.structuredContent.violations.find((v: any) => v.rule === "copy-term");
+    expect(term.suggestion.detail).toContain('"pedido"');
+    const voice = r.structuredContent.violations.find((v: any) => v.found === "puedes");
+    expect(voice.suggestion.detail).toContain('"podés"');
+  });
+
+  it("expose the product's voice in get_design_system", async () => {
+    const r = await h.call("get_design_system", { sections: ["guidelines"] });
+    expect(r.structuredContent.copy).toEqual({ voice: "vos", terms: [{ use: "pedido", avoid: ["orden", "compra"] }] });
+  });
+});
+
 describe("review_ui", () => {
   it("measures competing primary actions, accents and font sizes", async () => {
     const r = await h.call("review_ui", { path: "app/orders/page.tsx" });

@@ -56,7 +56,17 @@ export interface ElementUsage extends Loc {
   ancestorClasses: string[];
 }
 
-export type Usage = ClassUsage | DynamicClassUsage | InlineStyleUsage | DeclUsage | ElementUsage;
+/** Static UI text: an element's text content, or a copy attribute (placeholder, title, aria-label, alt, label). */
+export interface TextUsage extends Loc {
+  kind: "text";
+  text: string;
+  /** The element the text belongs to. */
+  tag: string;
+  /** The attribute, when the text is not content. */
+  attr: string | null;
+}
+
+export type Usage = ClassUsage | DynamicClassUsage | InlineStyleUsage | DeclUsage | ElementUsage | TextUsage;
 
 /** Maps an offset inside a multi-line string that starts at (line, column) to a location. */
 export function makeLocAt(file: string, startLine: number, startColumn: number, text: string) {

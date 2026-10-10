@@ -23,6 +23,11 @@ export const RULE_IDS = [
   "responsive-grid-columns",
   "responsive-table-scroll",
   "responsive-viewport-height",
+  "copy-vague-label",
+  "copy-error-text",
+  "copy-all-caps",
+  "copy-term",
+  "copy-voice",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

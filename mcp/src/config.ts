@@ -52,6 +52,19 @@ export const ConfigSchema = z
       .strict()
       .optional(),
     guidelines: z.array(z.string()).default([]),
+    // The product's voice (0.11.0): how it addresses people and the words it uses. The guardian
+    // checks the UI text against it (copy-voice, copy-term).
+    copy: z
+      .object({
+        /** How the UI addresses the person: Spanish "vos", "tú" or "usted". */
+        voice: z.enum(["vos", "tú", "usted"]).optional(),
+        /** Product terms: say `use`, never the words in `avoid` (case-insensitive, whole words). */
+        terms: z
+          .array(z.object({ use: z.string().min(1), avoid: z.array(z.string().min(1)).min(1) }).strict())
+          .default([]),
+      })
+      .strict()
+      .optional(),
     lab: z
       .object({
         dir: z.string().min(1).default("app/lab"),

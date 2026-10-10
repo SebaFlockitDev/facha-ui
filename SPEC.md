@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.10.0** (§7.10–§7.18). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.11.0** (§7.10–§7.19). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 > **Prompts de origen:** [`docs/prompts/01-spec.md`](docs/prompts/01-spec.md) · [`docs/prompts/02-mvp-plan.md`](docs/prompts/02-mvp-plan.md)
 
@@ -137,6 +137,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `contrast` | `{ surfaces: string[], minRatio: number, nonTextMinRatio: number, statusMinDeltaE: number }` | `surfaces`: tokens con rol `surface`; `minRatio`: 4.5; `nonTextMinRatio`: 3; `statusMinDeltaE`: 10 | Base para `theme-contrast`, `class-contrast`, `non-text-contrast` y `status-confusable` (desde 0.3.0). Declarar `surfaces` hace que los contrastes medidos contra ellas sean `error` |
 | `suggest.maxDeltaE` | `number` | `2.0` (ΔE OKLab×100) | Distancia máxima para sugerir un token "cercano" |
 | `guidelines` | `string[]` | `[]` | Reglas en lenguaje natural para la IA (no verificables; se citan como fuente) |
+| `copy` | `{ voice?: "vos" \| "tú" \| "usted", terms: { use, avoid[] }[] }` | — | Voz del producto (desde 0.11.0, §7.19): cómo trata a las personas y qué palabras usa. Activa `copy-voice` y `copy-term`, y `get_design_system` la devuelve en `copy` (sección `guidelines`) |
 | `lab.dir` | `string` | `app/lab` (next; `facha-lab` en vite, *roadmap*) | Directorio del laboratorio de variantes |
 | `lab.viewports` | `{name,width,height}[]` | `[{ "name": "desktop", "width": 1440, "height": 900 }]` | Capturas |
 | `preview.baseUrl` | `string` | `http://localhost:3000` | Debe ser loopback (`localhost`, `127.0.0.1`, `::1`). El panel en vivo solo acepta pedidos de este origen |
@@ -374,6 +375,11 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `responsive-grid-columns` | warning (0.10.0) | Grilla de 3+ columnas en todos los anchos: `grid-cols-N` sin variante de breakpoint, o `grid-template-columns` sin `auto-fit`/`auto-fill` ni media query | `grid-cols-4` |
 | `responsive-table-scroll` | info (0.10.0) | `<table>` sin contenedor con scroll horizontal en el mismo archivo (Tailwind `overflow-x-auto` o una clase del proyecto con `overflow-x: auto`) | `<div className="card overflow-hidden"><table>` |
 | `responsive-viewport-height` | info (0.10.0) | `h-screen` o `100vh`: en celulares incluye la zona bajo la barra del navegador; `dvh` sigue la altura visible | `min-height: 100vh` |
+| `copy-vague-label` | warning en enlaces, info en botones (desde 0.11.0, §7.19) | Texto de enlace o botón que no dice qué hace: "Click aquí", "Más", "OK", "Submit" (WCAG 2.4.4 para enlaces) | `<a>Click aquí</a>` |
+| `copy-error-text` | info (0.11.0) | Mensaje de error que no dice qué pasó ni qué hacer, o muestra detalles técnicos (códigos, excepciones) | `Ocurrió un error`, `Error 500` |
+| `copy-all-caps` | info (0.11.0) | Texto de 2+ palabras escrito en mayúsculas en el código (usar `text-transform` si es estilo) | `IMPORTE TOTAL DEL MES` |
+| `copy-term` | warning (0.11.0) | Una palabra que el equipo decidió no usar (`copy.terms`), con la palabra del producto | `orden` → `pedido` |
+| `copy-voice` | warning (0.11.0) | Un tratamiento fuera de la voz del producto (`copy.voice`): formas de vos, tú o usted | `Puedes` en un producto que dice `podés` |
 
 **Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas. Desde 0.5.0 suma la **paleta inflada**: `near-duplicate-tokens` (tokens de color casi iguales en todos los temas), `near-duplicate-literals` (colores escritos a mano casi iguales) y `near-duplicate-steps` (tamaños de letra a ±0,5 px y radios a ±1 px).
 
@@ -1176,6 +1182,14 @@ Pedido del dev, actuando "como experto en UX": que el plugin juzgue si una panta
 - **Panel en vivo:** "Ver en Móvil 375 / Tablet 768" abre la variante en un iframe de ese ancho con el medidor; el panel no se dibuja dentro del iframe y se ocultan las barras de scroll para emular un celular.
 - **Calibrado en un proyecto real:** 0 falsos positivos en las reglas; el medidor encontró a 375 px un desborde de 107 px, tablas recortadas por `overflow-hidden`, la barra lateral de 232 px dejando 143 px al contenido y encabezados de 11 px.
 - **Tests:** casos que rompen y casos que se adaptan (tope, breakpoint, grilla que colapsa, tabla con scroll, `auto-fit`, media query).
+
+### 7.19 Versión 0.11.0: microcopy
+
+- **La voz como parte del design system:** `copy.voice` (vos, tú o usted) y `copy.terms` (la palabra del producto y las que evita) en la config, igual que los tokens: el equipo la define una vez y el guardián la cuida. `get_design_system` la devuelve para que la IA escriba con ella.
+- **Guardián:** 5 reglas `copy-*` sobre el texto de la UI (contenido de elementos y componentes, y atributos de copy: `placeholder`, `title`, `aria-label`, `alt`, `label`, `*Text`, `*Label`, `*Message`, `*Title`). Léxicos en español e inglés; el tratamiento se detecta por formas inequívocas (indicativos en cualquier lugar, imperativos al inicio de una oración) para no confundir "revisa" (él revisa) con un imperativo.
+- **`variants`:** los textos siguen la voz del producto (o la de la pantalla) y se escriben con criterio: verbo y objeto en botones, destino en enlaces, qué pasó y qué hacer en errores, próximo paso en vacíos. La crítica suma **C10 · Microcopy**, con el texto mejorado.
+- **Calibrado en un proyecto real con `voice: vos`:** 0 falsos positivos en la app; encontró un tuteo en el propio panel de facha-ui ("elige"), corregido.
+- **Tests:** casos que fallan y casos que ayudan, sin confundir "Ordenar" con "orden" ni una sigla con mayúsculas.
 ---
 
 ## Anexo A · Config completa de ejemplo

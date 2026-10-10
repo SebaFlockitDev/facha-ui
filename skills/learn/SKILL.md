@@ -59,7 +59,7 @@ Show it like this, marking the recommended start:
 | 3 | El guardián | Qué verifica el código determinista y por qué no lo decide la IA |
 | 4 | Calidad visual que se mide | Contraste WCAG, accesibilidad, responsive, jerarquía y estados |
 | 5 | Si falta el design system | Cómo se arma desde lo que el código ya usa |
-| 6 | Pedirle diseño a la IA | Objetivos (no valores), 3 hipótesis, decisiones con fuente |
+| 6 | Pedirle diseño a la IA | Objetivos (no valores), 3 hipótesis, decisiones con fuente, textos con la voz del producto |
 | 7 | Ajustar con criterio | Revisiones, modo en vivo, señalar elementos, paletas |
 | 8 | Aplicar y recordar | Aprobación con motivo y la memoria de decisiones |
 | 9 | Tu método de trabajo | Quién decide qué, buenas prácticas y checklist |
@@ -153,6 +153,9 @@ Every lesson has the same five parts, short:
   objective) and what it means when a variant warns about a gap before designing; why each
   variant designs its loading, empty, error and stress states (`?state=` in the lab), and how
   the senior critique (C1–C8) reviews the captures and fixes what it finds.
+- Microcopy: run `check_ui` with the `copy-*` rules on that screen and show its labels and
+  messages. Explain why "Guardar pedido" beats "OK", why an error must say what to do, and how
+  `copy.voice` and `copy.terms` in the config make the whole product speak with one voice.
 - Show the command for that screen, for the developer to run:
   `/facha-ui:variants <ruta> "<objetivo>"`. Do not run it.
 - Exercise: "Escribí un objetivo para esa pantalla." Give feedback: is it a goal or a value?

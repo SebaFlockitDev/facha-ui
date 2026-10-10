@@ -1,4 +1,5 @@
 import { checkA11y, removesFocusOutline } from "./a11y.js";
+import { checkCopy } from "./copy.js";
 import { checkResponsive, responsiveDecl } from "./responsive.js";
 import { findColorLiterals } from "./color.js";
 import type { Context } from "./context.js";
@@ -91,6 +92,15 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
   },
   { id: "responsive-table-scroll", severity: "info", summary: "A <table> with no horizontal scroll container in the same file: it overflows or gets clipped on a phone." },
   { id: "responsive-viewport-height", severity: "info", summary: "h-screen or height: 100vh: on phones it includes the area under the address bar; dvh follows the visible height." },
+  {
+    id: "copy-vague-label",
+    severity: "warning",
+    summary: "Link or button text that does not say what it does (\"Click aquí\", \"Más\", \"OK\", \"Submit\"): warning for links (WCAG 2.4.4), info for buttons.",
+  },
+  { id: "copy-error-text", severity: "info", summary: "Error text that does not say what happened or what to do (\"Ocurrió un error\", \"Something went wrong\"), or shows technical details (status codes, exceptions)." },
+  { id: "copy-all-caps", severity: "info", summary: "UI text written in capitals in the code (2+ words): harder to read; use CSS text-transform when it is a style." },
+  { id: "copy-term", severity: "warning", summary: "A word the team decided not to use (copy.terms in the config), with the product's word for it." },
+  { id: "copy-voice", severity: "warning", summary: "A form of address that breaks the product's voice (copy.voice: vos, tú or usted), e.g. \"puedes\" in a product that says \"podés\"." },
 ];
 
 const MESSAGES: Record<RuleId, string> = {
@@ -115,6 +125,11 @@ const MESSAGES: Record<RuleId, string> = {
   "responsive-grid-columns": "Grid columns that never collapse on small screens.",
   "responsive-table-scroll": "Table without a horizontal scroll container.",
   "responsive-viewport-height": "100vh height on phones.",
+  "copy-vague-label": "Label that does not say what it does.",
+  "copy-error-text": "Error text without what happened or what to do.",
+  "copy-all-caps": "Text written in capitals.",
+  "copy-term": "Word the product does not use.",
+  "copy-voice": "Form of address outside the product's voice.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -281,7 +296,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       push("tailwind-arbitrary-value", severity, loc, u.raw, a.property, "className", suggestArbitrary(ctx, a));
       continue;
     }
-    if (u.kind === "element") continue; // accessibility rules, below
+    if (u.kind === "element" || u.kind === "text") continue; // accessibility, responsive and copy rules, below
     // decl: CSS declaration, inline style property or SVG attribute
     const context: Violation["context"] = u.context === "css" ? "css" : u.context;
     for (const lit of findColorLiterals(u.value, u.property)) {
@@ -367,6 +382,9 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       .map((c) => c.selector.slice(1)),
   );
   checkResponsive(usages, overflowClasses, (rule, base, loc, found, message, fix) =>
+    push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
+  );
+  checkCopy(usages, ctx.project.config.copy, (rule, base, loc, found, message, fix) =>
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
   );
   checkA11y(usages, (rule, base, loc, found, message, fix) =>

@@ -100,6 +100,12 @@ describe("states and senior critique", () => {
     expect(read("apply")).toContain("`<lab.dir>/lab-responsive.tsx`");
   });
 
+  it("variants writes in the product's voice and critiques the microcopy (C10)", () => {
+    const text = read("variants");
+    expect(text).toContain("**C10 · Microcopy:**");
+    expect(text).toContain("Read `copy` from `get_design_system`");
+  });
+
   it("apply removes the state preview lines and the state scaffold", () => {
     const text = read("apply");
     expect(text).toContain("`// facha-ui lab: state preview`");

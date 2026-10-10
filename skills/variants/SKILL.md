@@ -219,6 +219,12 @@ automated browsers, so captures stay clean.
   phone, grids that collapse to one column, tables inside a horizontal scroll container (or as
   cards on small screens), side columns that stack or collapse. The guardian reports what a
   static read can see (`responsive-*` rules); the lab measures the rest (Step 7).
+- **Microcopy is design too:** every label, message and empty or error state is written in the
+  product's voice. Read `copy` from `get_design_system` (`guidelines` section): `voice` (vos, tú
+  or usted) and `terms` (the product's words and the ones it avoids). Without it, follow the
+  voice and the words the screen already uses. Buttons say a verb and its object ("Guardar
+  pedido"), links say where they go, errors say what happened and what to do, empty states
+  say what is missing and the next step. The guardian checks what it can (`copy-*` rules).
 - **Accessibility is part of the guardian:** images with `alt`, labelled controls, buttons
   with a name, keyboard-reachable actions, a visible focus, targets of at least 24×24 px and a
   heading outline without holes (`a11y-*` rules). Fix them like any other violation.
@@ -305,6 +311,9 @@ Review each valid variant like a senior UI designer:
      screen (side navigation collapses or stacks), tables scroll inside their container or become
      cards, columns collapse, targets keep 24px (44px is better for touch) and text stays at
      12px or more. Use the responsive check's numbers as evidence.
+   - **C10 · Microcopy:** every label says what it does, errors and empty states give a next
+     step, the same thing has the same name everywhere, and the voice is the product's. For
+     each finding, write the improved text.
 3. For each finding record: the checklist item, the evidence (a `review_ui` signal, a
    violation, or the capture and the area in it), why it matters to the person using the
    screen, the fix and its source. **A finding without a fix is not finished.**
