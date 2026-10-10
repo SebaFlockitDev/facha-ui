@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.13.0** (§7.10–§7.21). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.14.0** (§7.10–§7.22). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 > **Prompts de origen:** [`docs/prompts/01-spec.md`](docs/prompts/01-spec.md) · [`docs/prompts/02-mvp-plan.md`](docs/prompts/02-mvp-plan.md)
 
@@ -509,7 +509,7 @@ Los valores visuales solo aceptan `token`, `class`, `rule` o `decision`. `object
 
 #### 2.b.5 Estado: `.facha-ui/runs/<slug>.json`
 
-El esquema queda fijado en la skill (`skills/variants/SKILL.md`, paso 8); publicarlo como `schema/run.schema.json` es *roadmap*:
+El esquema queda fijado en la skill (`skills/variants/run-state.md`, que la skill lee en el paso 8); publicarlo como `schema/run.schema.json` es *roadmap*:
 
 ```jsonc
 {
@@ -647,7 +647,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.7.0",
+  "version": "0.14.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast) and applies nothing without your approval.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1239,6 +1239,20 @@ Pedido del dev: "esto debe ser sencillo de usar; el popup debería tener todos l
 - **Confirmación en el chat:** un `needs-input` con `confirmInChat` (un arreglo fuera del laboratorio) muestra la frase con un botón para copiarla en lugar de opciones. El aviso sigue visible aunque llegue una respuesta desde el panel, porque solo el chat de Claude Code aprueba cambios en el código real.
 - Sin el modo en vivo, *Ver* y *Decidir* funcionan igual, y donde haría falta enviar un pedido, el panel dice cómo activarlo.
 - **Calibración propia:** el enlace "Comparar las variantes" del panel tenía bajo contraste (estilo del navegador); corregido.
+
+### 7.22 Versión 0.14.0: consolidación del rol de experto UX/UI
+
+Pedido del dev (prompt 13): una versión sin features nuevas, para que el plugin actúe como un diseñador UX/UI senior por lo que dicen sus archivos versionados y no por la memoria de la conversación.
+
+- **`CLAUDE.md`** (para quien desarrolla el plugin): el rol, la regla "toda decisión de UI tiene una fuente; sin fuente, no va", SDD, commits chicos sin trailers, push solo con OK, bundle con cada cambio en `mcp/src`, nada de proyectos de prueba y prompts en `docs/prompts/`. `claude plugin validate` avisa que un `CLAUDE.md` en la raíz del plugin no se carga para quien lo instala: es lo esperado, es para quien desarrolla este repo.
+- **`skills/_shared/ux-principles.md`:** 37 principios con id estable (`ux:nielsen-1`…`10`, 14 criterios WCAG 2.2 AA, `ux:hierarchy`, Gestalt, `ux:fitts`, `ux:hick`, `ux:jakob`, `ux:state-*`, `ux:copy-*`). Cada uno dice qué es, cómo se ve violado y cómo se verifica: guardián (con la regla), laboratorio o herramienta, o revisión. Incluye la cobertura, el mapeo de C1–C10 y la escala de severidad de Nielsen.
+- **Método en `variants`:** diagnóstico UX antes de diseñar (paso 3b: quién, tarea, qué le cuesta hoy con evidencia e id); cada hipótesis con sus principios; estados con `ux:state-*`; crítica con principio y severidad; fuente nueva `ux-principle`, que justifica el porqué pero nunca reemplaza al token o la clase; el run guarda `diagnosis`, `principles` y `review`.
+- **`agents/ux-reviewer.md`** (`facha-ui:ux-reviewer`, §2.d.4): crítico de solo lectura. Declara `tools` (Read, Glob, Grep, `get_design_system`, `check_ui`) y también `disallowedTools` (Write, Edit, NotebookEdit, Bash), porque sin `tools` heredaría todo. `variants` lo invoca en el paso 7c con solo las variantes, las capturas y los principios, nunca las hipótesis ni el razonamiento. Devuelve hallazgos con severidad 0–4, principio y evidencia, más una recomendación, y se muestra junto a la crítica propia. Que el subagente lea los PNG queda por confirmar en una sesión con el plugin recargado.
+- **`variants` en partes:** `SKILL.md` bajó de 679 a 250 líneas, con el flujo del run nuevo, las 7 reglas duras y el método. `refine.md`, `live.md`, `lab.md` y `run-state.md` se leen con una instrucción explícita en el paso que los usa ("Before step R1, read `refine.md`", "Before this step, read `lab.md`"). Al moverlas, las reglas duras ganaron: el alcance de escritura con todo el scaffold, "el navegador solo captura" y "nunca aplicar" como reglas propias, y `git check-ignore` (solo lectura) como único comando de git.
+- **Sin rastros de proyectos reales:** el color de marca de un ejemplo y de un fixture pasó a valores neutros, y el test de términos prohibidos (`FACHA_UI_BANNED_TERMS`) también revisa `mcp/test`, `agents/`, `docs/` y los MD de la raíz.
+- **Prompts 04 a 13:** el texto original de la transcripción, con marcadores para el proyecto de prueba; `[reconstruido]` solo para el contexto que nunca fue un prompt, y `[omitido]` para salidas pegadas que describen el proyecto privado.
+- **Roadmap (§6):** las 4 reglas UX pedidas ya existían desde 0.9.0. Quedan propuestas `a11y-color-only`, `ux-too-many-choices`, `ux-missing-states` y `copy-error-action`.
+- **Tests:** 115. Nuevos: principios bien formados, todo `ux:*` citado existe, el agente no puede escribir y `variants` lo invoca sin el razonamiento; toda `SKILL.md` en 250 líneas o menos; cada parte se lee desde un paso concreto y existe; las reglas duras siguen en `SKILL.md`; los prompts sin huecos y con su origen.
 ---
 
 ## Anexo A · Config completa de ejemplo

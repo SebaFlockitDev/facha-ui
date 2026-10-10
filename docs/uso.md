@@ -276,15 +276,17 @@ Ejemplo:
 1. **Preflight:** lee el design system. Si no hay tokens, si el framework no es Next o si ya hay un run sin aplicar de esa pantalla, frena y te pregunta.
 2. **Línea base:** lee la pantalla y sus dependencias, y corre `check_ui` sobre el original.
 3. **Brechas, antes de generar:** si el objetivo necesita algo que no tiene token (p. ej. un color de estado), te lo dice con evidencia y explica cómo lo van a resolver las variantes con tokens existentes. Crear tokens es una decisión del equipo; la skill nunca lo hace (para eso está `/facha-ui:init`, ver 5.1).
-4. **Tres hipótesis distintas:**
+4. **Diagnóstico UX, antes de diseñar:** quién usa la pantalla, cuál es su tarea principal y qué le cuesta hoy (2 a 4 problemas, cada uno con evidencia y el principio que rompe, por ejemplo `ux:hierarchy` o `ux:wcag-1.4.1`). Los principios están en [`skills/_shared/ux-principles.md`](../skills/_shared/ux-principles.md): Nielsen, WCAG 2.2 AA, jerarquía, Gestalt, Fitts, Hick, Jakob, estados y escritura de interfaz.
+5. **Tres hipótesis distintas,** cada una con los principios que la sostienen:
    - **A, conservadora:** misma estructura, con el objetivo resuelto y la línea base corregida;
    - **B, jerarquía:** reorganiza la información según el objetivo;
    - **C, patrón alternativo:** otro patrón armado con piezas existentes.
-5. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje: `app/lab/layout.tsx`, `lab-theme.tsx`, el panel del modo en vivo (`lab-panel.tsx`) y su endpoint (`facha-live/`), que solo existe en desarrollo. Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
-6. **Guardián:** cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Si no lo logra, queda como `failed` y no se puede aplicar.
-7. **Capturas:** en light y en cada tema extra, en celular (375) y tablet (768) con el medidor de responsive, y cada estado (cargando, vacío, error, datos extremos) con `?state=…`, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
-8. **Crítica senior:** `review_ui` más las capturas, contra una lista de 8 puntos (el objetivo se lee primero, una sola acción primaria, jerarquía, acentos, ritmo, agrupación, estados y accesibilidad). Arregla lo que está dentro de la variante y te deja lo demás con su recomendación.
-9. **Presentación:** para cada variante, hipótesis, resultado del guardián (accesibilidad incluida), sus estados, la crítica, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
+6. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje: `app/lab/layout.tsx`, `lab-theme.tsx`, el panel del modo en vivo (`lab-panel.tsx`) y su endpoint (`facha-live/`), que solo existe en desarrollo. Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
+7. **Guardián:** cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Si no lo logra, queda como `failed` y no se puede aplicar.
+8. **Capturas:** en light y en cada tema extra, en celular (375) y tablet (768) con el medidor de responsive, y cada estado (cargando, vacío, error, datos extremos) con `?state=…`, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
+9. **Crítica senior:** `review_ui` más las capturas, contra una lista de 10 puntos (el objetivo se lee primero, una sola acción primaria, jerarquía, acentos, ritmo, agrupación, estados, accesibilidad, responsive y microcopy), cada uno con sus principios. Cada hallazgo lleva severidad (Nielsen, 0 a 4), evidencia y arreglo. Arregla lo que está dentro de la variante y te deja lo demás con su recomendación.
+10. **Revisión independiente:** un subagente de solo lectura, `facha-ui:ux-reviewer`, revisa las variantes y las capturas sin conocer las hipótesis ni el razonamiento. Devuelve hallazgos con severidad, principio y evidencia, más una recomendación. Lo grave se arregla antes de presentar.
+11. **Presentación:** el diagnóstico y, para cada variante, hipótesis y principios, resultado del guardián (accesibilidad incluida), sus estados, la crítica, la revisión independiente tal como la escribió, decisiones con su fuente (token, clase, guideline, decisión previa, principio de UX…) y trade-offs.
 
 Así se ve una corrida en la terminal. En este ejemplo, la brecha aparece antes de generar: no hay tokens de estado. Además, el guardián rechaza el primer intento de A y de C, y los dos pasan en el segundo.
 

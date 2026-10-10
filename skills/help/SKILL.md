@@ -63,7 +63,8 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
 - Cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Incluye accesibilidad: `alt`, etiquetas, nombres de botones, teclado, foco visible, objetivos de 24 px y orden de títulos.
 - Microcopy: los textos siguen la voz del producto (`copy.voice` y `copy.terms` en la config); el guardián marca etiquetas vagas ("Click aquí", "OK"), errores que no dicen qué pasó ni qué hacer, textos en mayúsculas y palabras o tratamientos fuera de la voz.
 - Responsive: el guardián marca anchos fijos, grillas que no colapsan, tablas sin scroll y `100vh`; además captura cada variante en celular (375) y tablet (768) y mide la página real con `?check=responsive` (desborde, contenido aplastado, objetivos y textos chicos).
-- Después, una crítica senior con `review_ui` y las capturas: arregla lo que puede y te deja lo demás con su recomendación.
+- Antes de diseñar, un diagnóstico UX: quién usa la pantalla, su tarea y qué le cuesta hoy. Cada hipótesis y cada hallazgo citan un principio (`ux:*`, en `skills/_shared/ux-principles.md`).
+- Después, una crítica senior con `review_ui` y las capturas: arregla lo que puede y te deja lo demás con su recomendación. Un revisor independiente de solo lectura (`facha-ui:ux-reviewer`) revisa las variantes sin conocer el razonamiento, con severidad de 0 a 4.
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
 - **Ajustar una variante:** `/facha-ui:variants orders b "agregá un contador al lado del título"`, o pedíselo en la misma conversación. Cambia esa variante y nada más, avisa brechas antes de tocar, vuelve a pasar el guardián, saca capturas nuevas y guarda cada ajuste como revisión (r1, r2…) con tu pedido. Si preferís conservar la original, pedí el ajuste "como variante nueva" (b2).
