@@ -7,6 +7,9 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+- Modo rápido de `/facha-ui:variants` (`--rapido`, `--quick`, o "hacelo rápido"): una sola variante, la hipótesis que mejor resuelve el diagnóstico, con las mismas reglas duras, el guardián en 0 errores (hasta 2 intentos) y las citas de fuente; captura de escritorio y sin revisor independiente (§2.b.6).
+
 ## [0.15.0] - 2026-10-10
 
 ### Added

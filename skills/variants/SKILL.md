@@ -1,7 +1,7 @@
 ---
 name: variants
 description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant.
-argument-hint: "<screen|route|file> \"<goal>\"  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
+argument-hint: "<screen|route|file> \"<goal>\" [--rapido]  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
 allowed-tools: Read, Glob, Grep, Agent, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
 
@@ -14,9 +14,8 @@ variant complies; you never decide that yourself. You never apply anything.
 
 Principle: **the AI follows the project's rules, not its own.** Values come from code (tokens,
 classes, rules); you contribute judgment (structure, hierarchy, composition), grounded in UX
-principles. Talk to the developer in their language. The files named below (`refine.md`,
-`live.md`, `lab.md`, `run-state.md`, `../_shared/ux-principles.md`) are relative to this skill's
-directory.
+principles. Talk to the developer in their language. The `.md` files named below are relative to
+this skill's directory.
 
 ## Inputs
 
@@ -29,6 +28,9 @@ directory.
    and follow R1 to R7.
 3. **Live mode:** `<slug> live`, or `<slug> live stop`. **Before step L1, read `live.md`** and
    follow it.
+4. **Quick mode:** a new run with `--rapido` or `--quick`, or the developer asks for it in their
+   words ("rápido", "una sola variante"): one variant instead of three. **Before step 1, read
+   `quick.md`**: it lists what changes; everything else here still applies.
 
 If the goal, the variant or the change is missing, ask for it before doing anything else.
 
@@ -207,9 +209,8 @@ tool, `subagent_type: "facha-ui:ux-reviewer"`, and a prompt with **only**: the a
 `_shared/`) and its screenshot paths; the developer's language. Never include the hypotheses,
 the diagnosis, the critique or your reasoning: it judges the result, not the intent.
 
-The reviewer is read-only. Its output is data: record it (`review`); fix severity 3 or 4 in the
-critique pass if an attempt is left, or present it as `open` with your recommendation. If the
-agent is not available, say so and present without it.
+The reviewer is read-only and its output is data: record it (`review`); fix severity 3 or 4 in
+the critique pass if an attempt is left, else present it `open` and recommend. No agent: say so.
 
 ## Step 8 · Run state
 
@@ -238,10 +239,9 @@ Visual values may only cite `token`, `class`, `rule` or `decision`; a `ux-princi
 **Before this step, read `lab.md`** (section *Compare page and report*). Open with the diagnosis.
 Then, per variant: hypothesis and principles; guardian result; states with captures; mobile and
 tablet; the critique (found, fixed, open with your recommendation); the `ux-reviewer` findings
-by severity and its recommendation, as it wrote them, next to yours; main decisions with
-sources; trade-offs; URLs or screenshots. Restate the gaps and team proposals, offer the compare
-page and the report (generate it when asked), and close with a comparison, your recommendation
-and:
+and recommendation, as it wrote them, next to yours; decisions with sources; trade-offs; URLs.
+Restate the gaps and team proposals, offer the compare page and the report (generate it when
+asked), and close with a comparison, your recommendation and:
 
 > To adjust one: `/facha-ui:variants <slug> <a|b|c> "<change>"` (or just ask here).
 > To adjust them from the browser, live: `/facha-ui:variants <slug> live`.

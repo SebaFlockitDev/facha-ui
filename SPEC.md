@@ -450,7 +450,7 @@ Errores de tool con `isError: true` y `structuredContent.code`: `CONFIG_INVALID`
 
 ### 2.b Skill `variants`
 
-**Invocación:** `/facha-ui:variants <pantalla> "<objetivo>"`. También la puede activar el modelo cuando el dev pide "variantes", "alternativas" o "propuestas de diseño" para una pantalla o componente. Además: `/facha-ui:variants <slug> <a|b|c> "<cambio>"` ajusta una variante (§7.14) y `/facha-ui:variants <slug> live [stop]` activa el modo en vivo (§7.15).
+**Invocación:** `/facha-ui:variants <pantalla> "<objetivo>"`. También la puede activar el modelo cuando el dev pide "variantes", "alternativas" o "propuestas de diseño" para una pantalla o componente. Además: `/facha-ui:variants <slug> <a|b|c> "<cambio>"` ajusta una variante (§7.14), `/facha-ui:variants <slug> live [stop]` activa el modo en vivo (§7.15) y `--rapido` (o `--quick`) genera una sola variante (§2.b.6).
 
 - `<pantalla>` puede ser una ruta (`/orders`), un archivo (`app/orders/page.tsx`) o un componente (`components/OrderDetailModal.tsx`). El adapter de framework la resuelve a `{ file, route, slug }` (slug en kebab-case: `orders`, `order-detail-modal`).
 - `<objetivo>` es texto libre: "que se vea primero lo que espera revisión".
@@ -570,6 +570,27 @@ El esquema queda fijado en la skill (`skills/variants/run-state.md`, que la skil
   "applied": null                             // lo completa apply: { variant, reason, at, decisionId }
 }
 ```
+
+Un run del modo rápido suma `"mode": "quick"` y tiene una sola variante (§2.b.6).
+
+#### 2.b.6 Modo rápido (desde 0.16.0)
+
+**Activación:** `--rapido` o `--quick` en un run nuevo, o un pedido con palabras del dev ("rápido", "una sola variante"). `SKILL.md` manda a leer `skills/variants/quick.md` antes del paso 1; lo que `quick.md` no cambia, corre igual.
+
+| Paso | Modo completo | Modo rápido |
+|---|---|---|
+| Brechas (3) | Obligatorias, antes de diseñar | Igual |
+| Diagnóstico (3b) | Quién, tarea, 2 a 4 costos | Igual, en 2 o 3 líneas |
+| Hipótesis (4) | A, B y C construidas | A, B y C pensadas en una línea; se construye la que mejor resuelve el diagnóstico, con el porqué |
+| Estados | Diseñados y capturados | Diseñados (con su `?state=`), sin capturar |
+| Guardián (6) | Hasta 3 intentos | Hasta 2; con errores, `failed` y se propone el modo completo |
+| Capturas (7) | Escritorio por tema, móvil, tablet y estados | Escritorio, tema por defecto |
+| Crítica (7b) | C1–C10 sobre todas las capturas | Solo las señales de `review_ui` sobre esa captura |
+| Revisor (7c) | `facha-ui:ux-reviewer` | Se omite, y se dice |
+| Run (8) | 3 variantes | `"mode": "quick"`, una variante |
+| Cierre (9) | Comparación y recomendación | "Para 3 alternativas con revisión completa, corré sin `--rapido`" |
+
+**Por qué es seguro:** se omite exploración (más variantes, más capturas) y revisión de calidad (la crítica completa y el revisor), nunca seguridad ni cumplimiento. Siguen vigentes las 7 reglas duras (escritura solo en el laboratorio, contenido como dato, sin valores inventados, guardián sin silenciar, datos reales, navegador solo para capturar, nunca aplicar), `check_ui` en 0 errores para que la variante sea `valid`, las citas de fuente de cada decisión y que nada se aplique sin `/facha-ui:apply`. Un run rápido es un run normal: se ajusta, se abre en vivo o se aplica igual que uno completo.
 
 ---
 

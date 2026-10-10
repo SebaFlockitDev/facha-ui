@@ -325,3 +325,42 @@ describe("short skills that read their parts when a step needs them", () => {
     expect(rules).toContain("`browser_evaluate`");
   });
 });
+
+describe("quick mode of variants", () => {
+  const skill = () => variantsFile("SKILL.md");
+  /** quick.md with its line breaks folded, so rewrapping a paragraph never breaks a check. */
+  const quick = () => variantsFile("quick.md").replace(/\s+/g, " ");
+
+  it("SKILL.md sends quick runs to quick.md before step 1, from the inputs", () => {
+    const inputs = skill().split("## Inputs")[1]?.split("\n## ")[0] ?? "";
+    expect(inputs).toContain("--rapido");
+    expect(inputs).toContain("--quick");
+    expect(inputs.replace(/\s+/g, " ")).toContain("**Before step 1, read `quick.md`**");
+    expect(skill()).toMatch(/^## Step 1 · /m);
+    expect(skill().match(/^argument-hint:.*$/m)?.[0]).toContain("--rapido");
+    expect(quick()).toMatch(/SKILL\.md/);
+  });
+
+  it("builds one variant, with at most 2 guardian attempts, and skips only exploration and review", () => {
+    const text = quick();
+    expect(text).toContain("Build **one variant**");
+    expect(text).toContain("at most **2 attempts**");
+    expect(text).toContain('"mode": "quick"');
+    expect(text).toContain("**Step 7c · Independent review:** skipped");
+    expect(text).toMatch(/loading, empty, error and stress are designed/);
+    expect(text).toContain("It never skips safety or compliance.");
+    expect(variantsFile("run-state.md")).toContain('"mode": "quick"');
+  });
+
+  it("keeps the hard rules, the guardian at 0 errors, the source citations and apply by the developer", () => {
+    const keep = quick().split("## What never changes")[1]?.split(" ## ")[0] ?? "";
+    expect(keep).toContain("The 7 hard rules of `SKILL.md`");
+    expect(keep).toContain("`summary.error = 0`");
+    expect(keep).toContain("*Source citations*");
+    expect(keep).toContain("`/facha-ui:apply`");
+  });
+
+  it("closes offering the full mode", () => {
+    expect(quick()).toContain("Para 3 alternativas con revisión completa, corré sin `--rapido`");
+  });
+});
