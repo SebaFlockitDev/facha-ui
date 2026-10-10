@@ -619,7 +619,9 @@ facha-ui/
 ├── skills/
 │   ├── _shared/ux-principles.md  # principios de UX con ids estables (ux:nielsen-1, ux:wcag-2.5.8…)
 │   ├── variants/
-│   │   ├── SKILL.md              # variantes, ajustes (revisiones) y modo en vivo
+│   │   ├── SKILL.md              # flujo de un run nuevo, reglas duras y método UX (≤ 250 líneas)
+│   │   ├── refine.md · live.md   # ajustes (revisiones) y modo en vivo: se leen antes de R1 / L1
+│   │   ├── lab.md · run-state.md # scaffold, capturas y esquema del run: se leen antes del paso que los usa
 │   │   ├── templates/next-app/   # layout.tsx, lab-theme.tsx, lab-panel.tsx, facha-live/{route,live-core}.ts
 │   │   └── scripts/              # live-watch.mjs (Monitor), palette-base.mjs (base de paletas)
 │   ├── apply/SKILL.md
