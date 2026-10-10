@@ -142,6 +142,17 @@ export function LabResponsive() {
     };
   }, []);
   if (!report) return null;
+  // Inside the panel's preview the panel shows the results next to the phone: here they stay as
+  // data only, so nothing covers the page being previewed.
+  if (window.self !== window.top) {
+    return (
+      <div hidden data-facha-ui="responsive-check">
+        {summarize(report).map((line, i) => (
+          <div key={i}>{line}</div>
+        ))}
+      </div>
+    );
+  }
   const ok = report.overflow === 0 && !report.content && report.offenders.length === 0 && report.smallTargets.length === 0 && report.tinyText.length === 0;
   return (
     <div

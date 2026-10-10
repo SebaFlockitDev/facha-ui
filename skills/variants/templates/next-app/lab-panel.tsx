@@ -268,14 +268,20 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 a.act.link { display: inline-block; text-decoration: none; border-radius: 9px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 7px 12px; font-weight: 600; }
 a.act.link:focus-visible { outline: 2px solid #ff8a4c; outline-offset: 2px; }
 select { font: inherit; font-size: 12px; color: #e8eaf2; background: #0e1119; border: 1px solid #3a4256; border-radius: 8px; padding: 3px 6px; }
-.device-report { display: grid; gap: 4px; max-width: min(760px, calc(100vw - 48px)); background: #161a25; border: 1px solid #3a4256; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
-.device-report button { justify-self: start; margin-top: 4px; }
+.liveoff { display: grid; gap: 6px; border: 1px solid #ff8a4c; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+.liveoff .row { gap: 6px; }
 button.view { border-radius: 999px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
 button.view[aria-pressed="true"] { border-color: #ff8a4c; }
 .device { position: fixed; inset: 0; z-index: 2147483001; box-sizing: border-box; padding: 16px; display: flex; align-items: center; justify-content: center; background: rgba(8,10,16,.72); font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: #e8eaf2; }
-.device-frame { display: grid; gap: 8px; max-width: 100%; }
+.device-frame { display: flex; gap: 16px; align-items: flex-start; max-width: 100%; max-height: calc(100vh - 32px); }
+.device-phone { flex-shrink: 0; }
+.device-side { width: 300px; max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; display: grid; gap: 10px; align-content: start; background: #161a25; border: 1px solid #3a4256; border-radius: 12px; padding: 12px; font-size: 12.5px; }
+.device-side button.primary { justify-self: start; }
 .device-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.issue { margin: 0; border-left: 3px solid #ff8a4c; padding-left: 8px; }
+.issue.ok { border-left-color: #4fd17f; }
 .device iframe { display: block; max-width: calc(100vw - 48px); border: 8px solid #161a25; border-radius: 18px; background: #ffffff; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+@media (max-width: 760px) { .device-frame { flex-direction: column; overflow: auto; } .device-side { width: auto; max-height: none; } }
 .layer { position: fixed; inset: 0; pointer-events: none; z-index: 2147482999; }
 .box { position: absolute; left: 0; top: 0; box-sizing: border-box; border-radius: 3px; }
 .box.hover { border: 2px solid #ff8a4c; background: rgba(255,138,76,.12); }
@@ -724,6 +730,47 @@ function RequestItem({ r }: { r: LiveRequest }) {
   );
 }
 
+/** Shown where a button needs live mode: what is missing and the command, ready to copy. */
+function LiveOff({ slug }: { slug: string }) {
+  const command = `/facha-ui:variants ${slug} live`;
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="liveoff" role="note">
+      <span>
+        <b>El modo en vivo está apagado.</b> Para que estos botones funcionen, pegá esto en Claude Code:
+      </span>
+      <span className="row">
+        <code>{command}</code>
+        <button
+          className="act"
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(command);
+              setCopied(true);
+            } catch {
+              /* clipboard blocked: the command is visible to copy by hand */
+            }
+          }}
+        >
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </span>
+    </div>
+  );
+}
+
+/** The responsive check's lines as problems in plain words (what passes is left out). */
+function issuesOf(lines: string[]): string[] {
+  return lines.flatMap((line) => {
+    const l = line.replace(/^facha-ui responsive · /, "");
+    const over = l.match(/desborde horizontal: (\d+)px/);
+    if (over) return Number(over[1]) > 0 ? [`La página se mueve ${over[1]} px de costado (scroll horizontal).`] : [];
+    if (/^(Nada más ancho|Objetivos táctiles de al menos|Texto de al menos)/.test(l)) return [];
+    return [l];
+  });
+}
+
 function Swatches({ colors }: { colors: (string | undefined)[] }) {
   return (
     <span className="swatches" aria-hidden="true">
@@ -1152,6 +1199,7 @@ export function LabPanel() {
   const cardStyle: React.CSSProperties = sized ? { width: layout.width ?? undefined, height: layout.height ?? undefined } : {};
   const liveHere = live.active && live.slug === here.slug;
   const showTab = tab === "palette" && !paletteBase ? "improve" : tab;
+  const deviceIssues = issuesOf(deviceReport ?? []);
   const params = new URLSearchParams(window.location.search);
   const currentTheme = params.get("theme") ?? "";
   const currentState = params.get("state") ?? "";
@@ -1205,19 +1253,14 @@ export function LabPanel() {
       </div>
       <div className="section">
         <span className="label">Mejorar con un clic</span>
-        {liveHere ? (
-          <div className="quick">
-            {QUICK.map((q) => (
-              <button key={q.id} className="act" type="button" disabled={sending} title={q.text} onClick={() => void quick(q.label, q.text)}>
-                {q.label}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="muted">
-            Para pedir mejoras desde acá, activá el modo en vivo en Claude Code: <code>/facha-ui:variants {here.slug} live</code>
-          </p>
-        )}
+        {!liveHere && <LiveOff slug={here.slug} />}
+        <div className="quick">
+          {QUICK.map((q) => (
+            <button key={q.id} className="act" type="button" disabled={sending || !liveHere} title={q.text} onClick={() => void quick(q.label, q.text)}>
+              {q.label}
+            </button>
+          ))}
+        </div>
         <p className="muted">Claude Code aplica cada mejora como una revisión de esta variante, con todas las reglas. Para algo puntual, usá la pestaña Cambios.</p>
       </div>
       <div className="section">
@@ -1510,43 +1553,51 @@ export function LabPanel() {
           }}
         >
           <div className="device-frame">
-            <div className="device-head">
-              <span>
-                <b>
-                  {viewport.label} · {viewport.width} × {viewport.height}
-                </b>{" "}
-                <span className="muted">
-                  medidor de responsive encendido{choice ? " · sin la paleta de prueba" : ""}
-                </span>
-              </span>
-              <button className="icon" type="button" onClick={() => setViewport(null)} aria-label="Cerrar la vista">
-                ×
-              </button>
+            <div className="device-phone">
+              <iframe
+                ref={deviceFrame}
+                title={`Variante ${letter} en ${viewport.label}`}
+                src={previewUrl()}
+                onLoad={readDeviceReport}
+                style={{ width: viewport.width, height: `min(${viewport.height}px, calc(100vh - 48px))` }}
+              />
             </div>
-            {deviceReport && (
-              <div className="device-report" role="status">
-                {deviceReport.map((line, i) => (
-                  <span key={i}>{line.replace(/^facha-ui responsive · /, "")}</span>
-                ))}
-                {deviceReport.some((l) => /desborde horizontal: [1-9]|Contenido principal|Más anchos|menos de 24|menos de 12/.test(l)) &&
-                  (liveHere ? (
-                    <button className="act primary" type="button" disabled={sending} onClick={() => void fixDevice()}>
-                      Pedir que lo arregle
-                    </button>
-                  ) : (
-                    <span className="muted">
-                      Para pedir el arreglo desde acá, activá el modo en vivo: <code>/facha-ui:variants {here.slug} live</code>
-                    </span>
-                  ))}
+            <aside className="device-side" aria-label="Lo que midió el laboratorio">
+              <div className="device-head">
+                <b>
+                  {viewport.label} · {viewport.width} px
+                </b>
+                <button className="icon" type="button" onClick={() => setViewport(null)} aria-label="Cerrar la vista (Esc)">
+                  ×
+                </button>
               </div>
-            )}
-            <iframe
-              ref={deviceFrame}
-              title={`Variante ${letter} en ${viewport.label}`}
-              src={previewUrl()}
-              onLoad={readDeviceReport}
-              style={{ width: viewport.width, height: `min(${viewport.height}px, calc(100vh - 140px))` }}
-            />
+              <div className="views">
+                {VIEWPORTS.map((v) => (
+                  <button key={v.name} className="view" type="button" aria-pressed={viewport.name === v.name} onClick={() => setViewport(v)}>
+                    {v.label} {v.width}
+                  </button>
+                ))}
+              </div>
+              {!deviceReport ? (
+                <p className="muted">Midiendo la página…</p>
+              ) : deviceIssues.length === 0 ? (
+                <p className="issue ok">Se ve bien en este tamaño: nada se sale de la pantalla, el contenido tiene el ancho, los objetivos y los textos alcanzan el mínimo.</p>
+              ) : (
+                <>
+                  <span className="label">Lo que falla en {viewport.width} px</span>
+                  {deviceIssues.map((issue, i) => (
+                    <p className="issue" key={i}>
+                      {issue}
+                    </p>
+                  ))}
+                  <button className="act primary" type="button" disabled={sending || !liveHere} onClick={() => void fixDevice()}>
+                    Pedir que lo arregle
+                  </button>
+                  {!liveHere && <LiveOff slug={here.slug} />}
+                </>
+              )}
+              {choice && <p className="muted">La vista previa no aplica la paleta de prueba.</p>}
+            </aside>
           </div>
         </div>
       )}
