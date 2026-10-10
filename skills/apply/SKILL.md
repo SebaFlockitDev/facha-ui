@@ -3,7 +3,7 @@ name: apply
 description: Applies a facha-ui variant that the developer has explicitly approved, checks the result with a before/after visual diff and UX score, removes the lab files and records the decision in the design-decisions memory.
 argument-hint: "<screen-slug> <a|b|c>"
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__ux_score
+allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__audit_project
 ---
 
 # facha-ui · apply
@@ -82,6 +82,8 @@ variant yourself, not even "the obvious one".
 5. Read the variant, everything it imports from `_shared/`, and the original screen.
 6. **The before** (read-only for the project):
    - `ux_score` on `run.screen.file`: keep the score and its categories;
+   - **the project's before:** `ux_score` with no arguments (keep `average`) and `audit_project`
+     (keep `totals.all`), so the report shows the whole project's progress, not only the screen's;
    - capture the **real screen** (`preview.baseUrl` + `run.screen.route`) with Playwright, with the
      same restrictions as `/facha-ui:variants` (only navigate, resize, wait, snapshot, screenshot
      and close; never evaluate, click or type; the developer signs in if needed): desktop in the
@@ -133,6 +135,8 @@ Run `check_ui` on every modified or created file. Compare with `run.baseline`:
 - the result must have **no new errors** compared with the baseline violations, and
   `error ≤ baseline.error`;
 - warnings and info are reported but do not block.
+
+Then take **the project's after**: `ux_score` with no arguments and `audit_project`, as in step 1.6.
 
 ## Step 4b · Visual regression and UX score
 
@@ -206,7 +210,7 @@ what the team explicitly wanted.
 In `.facha-ui/runs/<slug>.json`, change only:
 
 - `status`: `"applied"`;
-- `applied`: `{ "variant": "<x>", "reason": "<developer's reason>", "at": "<ISO-8601 with offset>", "decisionId": "<id>", "files": ["<modified/created files>"], "uxScore": { "before": 63, "after": 81 }, "visualDiff": [ { "viewport": "desktop", "theme": "light", "diff": "<path>", "changedPercent": 12.4, "regions": [] } ] }`.
+- `applied`: `{ "variant": "<x>", "reason": "<developer's reason>", "at": "<ISO-8601 with offset>", "decisionId": "<id>", "files": ["<modified/created files>"], "uxScore": { "before": 63, "after": 81 }, "project": { "uxBefore": 62, "uxAfter": 71, "violationsBefore": 46, "violationsAfter": 31 }, "visualDiff": [ { "viewport": "desktop", "theme": "light", "diff": "<path>", "changedPercent": 12.4, "regions": [] } ] }`.
 
 ## Step 9 · Report
 
@@ -219,7 +223,10 @@ Summarise:
 - the decision id.
 
 Remind the developer that nothing was committed, and that the next `/facha-ui:variants`
-will see this decision in `get_design_system` → `decisions`.
+will see this decision in `get_design_system` → `decisions`. End with the project's progress, in
+one line, from steps 1.6 and 4 (`average` and `totals.all`; "–" when there are no screens):
+
+> UX del proyecto 62 → 71 · violaciones 46 → 31
 
 ## Not in this version
 

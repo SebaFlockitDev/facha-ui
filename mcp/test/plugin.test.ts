@@ -403,3 +403,17 @@ describe("start skill", () => {
     expect(flat).toContain('**"no verificado"**');
   });
 });
+
+describe("visible progress in apply and init", () => {
+  for (const skill of ["apply", "init"]) {
+    it(`${skill} measures the whole project before and after and ends with the progress line`, () => {
+      const text = fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+      const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+      const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+      expect(allowed).toEqual(expect.arrayContaining(["mcp__plugin_facha-ui_facha-ui__audit_project", "mcp__plugin_facha-ui_facha-ui__ux_score"]));
+      expect(frontmatter).toMatch(/^disable-model-invocation:\s*true\s*$/m);
+      expect(text).toContain("> UX del proyecto 62 → 71 · violaciones 46 → 31");
+      expect(text.replace(/\s+/g, " ")).toContain("`ux_score` with no arguments");
+    });
+  }
+});

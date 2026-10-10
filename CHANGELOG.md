@@ -15,6 +15,7 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ### Changed
 - `start`, `learn` y `help` copian el registro de quien los usa (vos, tú o usted) en lugar de usar siempre el voseo.
+- `/facha-ui:apply` y `/facha-ui:init` terminan con el progreso de todo el proyecto, antes y después: "UX del proyecto 62 → 71 · violaciones 46 → 31" (§2.c.1).
 
 ### Security
 - El guardián automático solo lee: mismo bundle sin escritura, red ni ejecución de código del proyecto; el texto del proyecto que le pasa a Claude va cortado a 200 caracteres y marcado como dato; cualquier error interno es silencio y nunca rompe la edición (§2.f).
