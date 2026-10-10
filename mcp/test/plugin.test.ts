@@ -364,3 +364,42 @@ describe("quick mode of variants", () => {
     expect(quick()).toContain("Para 3 alternativas con revisión completa, corré sin `--rapido`");
   });
 });
+
+describe("start skill", () => {
+  const text = fs.readFileSync(path.join(REPO, "skills", "start", "SKILL.md"), "utf8");
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const flat = text.replace(/\s+/g, " ");
+
+  it("is read-only: it pre-approves only reading tools and three facha-ui tools", () => {
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.sort()).toEqual(
+      ["Glob", "Grep", "Read", "mcp__plugin_facha-ui_facha-ui__audit_project", "mcp__plugin_facha-ui_facha-ui__get_design_system", "mcp__plugin_facha-ui_facha-ui__ux_score"].sort(),
+    );
+    expect(text).toContain("## Hard rules");
+    expect(flat).toContain("**Read-only.**");
+    expect(flat).toContain("never run Bash");
+  });
+
+  it("can be started by the model from a plain request", () => {
+    expect(frontmatter).not.toMatch(/^disable-model-invocation:/m);
+    expect(frontmatter.match(/^description:.*$/m)?.[0]).toContain("¿cómo está la UI de mi proyecto?");
+  });
+
+  it("uses each tool it declares", () => {
+    for (const tool of ["get_design_system", "ux_score", "audit_project"]) expect(text, tool).toContain(`\`${tool}\``);
+  });
+
+  it("handles several projects, no config and no design system", () => {
+    expect(flat).toContain("`MULTIPLE_PROJECTS`");
+    expect(flat).toContain('`configSource: "autodetected"`');
+    expect(flat).toContain('"version": 1');
+    expect(flat).toContain("## Step 2 · Without a design system");
+    expect(flat).toContain("`status` is `missing` → `/facha-ui:init`");
+    expect(flat).toContain("→ `/facha-ui:init colors`");
+  });
+
+  it("lists the exact .gitignore lines and marks the dev server as not verified", () => {
+    for (const line of ["`<project.lab.dir>/`", "`.facha-ui/live/`", "`.facha-ui/screenshots/`", "`.facha-ui/playwright/`"]) expect(flat, line).toContain(line);
+    expect(flat).toContain('**"no verificado"**');
+  });
+});

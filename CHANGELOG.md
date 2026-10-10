@@ -9,6 +9,7 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ### Added
 - Modo rápido de `/facha-ui:variants` (`--rapido`, `--quick`, o "hacelo rápido"): una sola variante, la hipótesis que mejor resuelve el diagnóstico, con las mismas reglas duras, el guardián en 0 errores (hasta 2 intentos) y las citas de fuente; captura de escritorio y sin revisor independiente (§2.b.6).
+- `/facha-ui:start`: primer vistazo sin configurar nada. Tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves con su archivo, línea y principio, una sola recomendación de mayor impacto y lo que falta (config, líneas del `.gitignore`, dev server). Solo lee; también se activa con "¿cómo está la UI de mi proyecto?" (§2.e).
 
 ## [0.15.0] - 2026-10-10
 
