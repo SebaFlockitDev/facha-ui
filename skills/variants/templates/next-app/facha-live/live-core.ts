@@ -74,7 +74,9 @@ interface PaletteProposal {
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette";
+  kind: "change" | "choose" | "palette" | "vote";
+  /** Who voted, for a "vote" (the reason goes in `text`). */
+  voter?: string;
   slug: string;
   variant: string;
   text: string;
@@ -263,13 +265,41 @@ function readRequests(root: string): LiveRequest[] {
   return out;
 }
 
+const RUN_STATUS = new Set(["valid", "failed"]);
+
+/** What the compare page needs from a run: the goal and each variant's hypothesis and status. */
+function runInfo(root: string, slug: string) {
+  const run = readJson<Record<string, unknown>>(path.join(root, ".facha-ui", "runs", `${slug}.json`));
+  if (!run || !Array.isArray(run.variants)) return null;
+  const variants = (run.variants as Record<string, unknown>[])
+    .filter((v) => typeof v?.id === "string" && VARIANT.test(v.id))
+    .slice(0, 12)
+    .map((v) => ({
+      id: v.id as string,
+      hypothesis: oneLine(v.hypothesis, 300) ?? "",
+      status: typeof v.status === "string" && RUN_STATUS.has(v.status) ? v.status : "valid",
+      revision: typeof v.revision === "number" ? v.revision : 0,
+    }));
+  return { slug, objective: oneLine(run.objective, 300) ?? "", status: oneLine(run.status, 20) ?? "", variants };
+}
+
+/** The votes recorded for a screen, newest last. */
+function votesOf(root: string, slug: string) {
+  return readRequests(root)
+    .filter((r) => r.kind === "vote" && r.slug === slug)
+    .map((r) => ({ id: r.id, at: r.at, voter: r.voter ?? "", variant: r.variant, reason: r.text }));
+}
+
 export function handleGet(req: Request, opts: LiveOptions): Response {
   if (opts.production) return new Response("Not found", { status: 404 });
   if (!sameOrigin(req, baseUrlOf(opts.root))) return json(403, { error: "forbidden" });
   const now = opts.now?.() ?? new Date();
   const session = activeSession(opts.root, now);
   const palette = readPalette(opts.root);
-  if (!session) return json(200, { active: false, palette });
+  // The compare page asks for one run: its variants and the team's votes.
+  const runSlug = new URL(req.url).searchParams.get("run");
+  const compare = runSlug && SLUG.test(runSlug) ? { run: runInfo(opts.root, runSlug), votes: votesOf(opts.root, runSlug) } : {};
+  if (!session) return json(200, { active: false, palette, ...compare });
   if (!session.token) {
     session.token = randomUUID();
     fs.writeFileSync(path.join(liveDir(opts.root), "session.json"), JSON.stringify(session, null, 2) + "\n");
@@ -279,7 +309,7 @@ export function handleGet(req: Request, opts: LiveOptions): Response {
     .filter((r) => r.slug === session.slug)
     .slice(-20)
     .map((r) => ({ ...r, status: status[r.id] ?? { state: "queued" } }));
-  return json(200, { active: true, token: session.token, slug: session.slug, expiresAt: session.expiresAt ?? null, requests, palette });
+  return json(200, { active: true, token: session.token, slug: session.slug, expiresAt: session.expiresAt ?? null, requests, palette, ...compare });
 }
 
 export async function handlePost(req: Request, opts: LiveOptions): Promise<Response> {
@@ -303,7 +333,13 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
   const slug = body.slug;
   const variant = body.variant;
   const text = typeof body.text === "string" ? body.text.trim() : "";
-  if (kind !== "change" && kind !== "choose" && kind !== "palette") return json(400, { error: "kind must be change, choose or palette" });
+  if (kind !== "change" && kind !== "choose" && kind !== "palette" && kind !== "vote") {
+    return json(400, { error: "kind must be change, choose, palette or vote" });
+  }
+  const voter = kind === "vote" ? oneLine(body.voter, 40) : undefined;
+  if (kind === "vote" && (!voter || text.length === 0 || text.length > 500)) {
+    return json(400, { error: "A vote needs your name and a reason (up to 500 characters)" });
+  }
   if (typeof slug !== "string" || !SLUG.test(slug) || slug !== session.slug) return json(400, { error: "Unknown screen" });
   if (typeof variant !== "string" || !VARIANT.test(variant)) return json(400, { error: "Unknown variant" });
   if (text.length > MAX_TEXT || (kind === "change" && text.length === 0)) {
@@ -324,6 +360,7 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
   };
   if (targets.length) entry.targets = targets;
   if (palette) entry.palette = palette;
+  if (voter) entry.voter = voter;
   fs.mkdirSync(liveDir(opts.root), { recursive: true });
   fs.appendFileSync(path.join(liveDir(opts.root), "requests.jsonl"), JSON.stringify(entry) + "\n");
   return json(202, { id: entry.id });

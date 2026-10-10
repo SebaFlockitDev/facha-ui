@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -298,5 +298,60 @@ describe("live watcher", () => {
     const w = watch(root);
     expect(await w.exited).toBe(0);
     expect(w.lines).toEqual([{ kind: "stopped" }]);
+  });
+});
+
+describe("compare and team votes", () => {
+  const withRun = () => {
+    const root = project();
+    fs.mkdirSync(path.join(root, ".facha-ui", "runs"), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, ".facha-ui", "runs", "orders.json"),
+      JSON.stringify({
+        runId: "orders-20261010-1000",
+        objective: "que se vea primero lo pendiente",
+        status: "generated",
+        variants: [
+          { id: "a", hypothesis: "Conservadora <b>", status: "valid", revision: 0, finalCheck: { error: 0, warning: 1, info: 0 }, screenshots: [".facha-ui/screenshots/orders/a-desktop-light.png"] },
+          { id: "b", hypothesis: "Jerarquía", status: "failed", revision: 2 },
+          { id: "../x", hypothesis: "bad id" },
+        ],
+      }),
+    );
+    return root;
+  };
+
+  it("serves the run's variants for the compare page, without live mode", async () => {
+    const root = withRun();
+    fs.writeFileSync(path.join(root, ".facha-ui", "live", "session.json"), JSON.stringify({ slug: "orders", active: false }));
+    const body = (await core.handleGet(get({}, "http://localhost:3000/lab/facha-live?run=orders"), { root, production: false }).json()) as any;
+    expect(body.active).toBe(false);
+    expect(body.run.variants).toEqual([
+      { id: "a", hypothesis: "Conservadora <b>", status: "valid", revision: 0 },
+      { id: "b", hypothesis: "Jerarquía", status: "failed", revision: 2 },
+    ]);
+    expect(body.votes).toEqual([]);
+  });
+
+  it("records a vote with a name and a reason, and lists it for the run", async () => {
+    const root = withRun();
+    const token = await tokenOf(root);
+    const opts = { root, production: false };
+    const res = await core.handlePost(post({ token, kind: "vote", slug: "orders", variant: "a", voter: "Ana", text: "Lo pendiente se ve primero" }), opts);
+    expect(res.status).toBe(202);
+    const body = (await core.handleGet(get({}, "http://localhost:3000/lab/facha-live?run=orders"), opts).json()) as any;
+    expect(body.votes).toEqual([expect.objectContaining({ voter: "Ana", variant: "a", reason: "Lo pendiente se ve primero" })]);
+    expect((await core.handlePost(post({ token, kind: "vote", slug: "orders", variant: "a", voter: "", text: "x" }), opts)).status).toBe(400);
+    expect((await core.handlePost(post({ token, kind: "vote", slug: "orders", variant: "a", voter: "Ana", text: "" }), opts)).status).toBe(400);
+  });
+
+  it("builds a shareable report that escapes the project's text", () => {
+    const root = withRun();
+    const out = spawnSync(process.execPath, [path.join(REPO, "skills", "variants", "scripts", "report.mjs"), root, "orders"], { encoding: "utf8" });
+    expect(out.status).toBe(0);
+    expect(out.stdout).toContain("Conservadora &lt;b&gt;");
+    expect(out.stdout).not.toContain("Conservadora <b>");
+    expect(out.stdout).toContain('src="../screenshots/orders/a-desktop-light.png"');
+    expect(out.stdout).not.toMatch(/<script/i);
   });
 });

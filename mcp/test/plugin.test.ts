@@ -106,6 +106,26 @@ describe("states and senior critique", () => {
     expect(text).toContain("Read `copy` from `get_design_system`");
   });
 
+  it("variants offers the compare page, team votes and a shareable report; apply shows the votes", () => {
+    const text = read("variants");
+    expect(text).toContain("`compare/[slug]/page.tsx`");
+    expect(text).toContain('### L4b · A team vote (`"kind": "vote"`)');
+    expect(text).toContain("scripts/report.mjs");
+    expect(fs.existsSync(path.join(REPO, "skills", "variants", "templates", "next-app", "compare", "[slug]", "page.tsx"))).toBe(true);
+    const apply = read("apply");
+    expect(apply).toContain("**Team votes**");
+    expect(apply).toContain("**Votos del equipo:**");
+    expect(apply).toContain("scripts/visual-diff.mjs");
+    expect(apply).toContain("## Step 4b · Visual regression and UX score");
+  });
+
+  it("flow reviews a journey without changing code", () => {
+    const text = read("flow");
+    expect(text).toContain("mcp__plugin_facha-ui_facha-ui__review_flow");
+    for (const item of ["FL1", "FL2", "FL3", "FL4", "FL5", "FL6", "FL7", "FL8"]) expect(text, item).toContain(`**${item} ·`);
+    expect(text).toContain("**No code changes.**");
+  });
+
   it("apply removes the state preview lines and the state scaffold", () => {
     const text = read("apply");
     expect(text).toContain("`// facha-ui lab: state preview`");

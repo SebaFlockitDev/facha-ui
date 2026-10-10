@@ -110,8 +110,11 @@ Show one plan, exact and complete:
 3. **Files and directories to delete:** `<lab.dir>/<slug>/` (list its files), the
    screenshots of the variants that were not chosen, and the lab scaffold if step 6
    applies.
-4. **Entry to append** to `memory.decisionsFile`, in full (format in step 7).
-5. **Run update** (step 8).
+4. **Team votes**, when the run has `votes`: the count per variant and each reason. If the
+   chosen variant is not the most voted, say so plainly: the developer decides, but with that in
+   view.
+5. **Entry to append** to `memory.decisionsFile`, in full (format in step 7).
+6. **Run update** (step 8).
 
 Then ask for **approval and the reason** for the choice, in one question. Without a reason,
 ask again: it is what the next run will learn from.
@@ -161,7 +164,7 @@ Delete only what the approved plan listed, after checking that every path resolv
 - the files of `<lab.dir>/<slug>/`, then its empty directories;
 - the screenshots of the variants that were not chosen (paths from `run.variants[].screenshots`
   and from their `revisions`). Keep the chosen variant's screenshots, from every revision;
-- the scaffold (`<lab.dir>/layout.tsx`, `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`, `<lab.dir>/lab-responsive.tsx`, `<lab.dir>/lab-panel.tsx`,
+- the scaffold (`<lab.dir>/layout.tsx`, `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`, `<lab.dir>/lab-responsive.tsx`, `<lab.dir>/compare/`, `<lab.dir>/lab-panel.tsx`,
   `<lab.dir>/facha-live/`, then `<lab.dir>` if it is empty), **only** if no other run in
   `.facha-ui/runs/` has `status: "generated"` and `<lab.dir>` has no other screen directories;
 - `.facha-ui/live/` when its session is for this screen. If live mode is on, first set
@@ -183,6 +186,7 @@ format, which `get_design_system` parses (`## <id> · <title>` and `**Fecha:**`)
 - **Objetivo:** <run.objective>
 - **Elegida:** <X>, <hypothesis in a few words>
 - **Motivo (dev):** "<the developer's reason, verbatim>"
+- **Votos del equipo:** <only when the run has votes: "B (2): Ana, Luis · C (1): Sofía">
 - **Ajustes pedidos:** r1 "<request>", r2 "<request>" (only if the variant was refined)
 - **Descartadas:** <Y> (<why, from its trade-offs>), <Z> (<…>)
 - **Precedentes que deja:**

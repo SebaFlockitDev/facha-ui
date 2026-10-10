@@ -89,9 +89,10 @@ type TokenValues = Record<string, Record<string, string>>;
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette";
+  kind: "change" | "choose" | "palette" | "vote";
   variant: string;
   text: string;
+  voter?: string;
   targets?: Target[];
   palette?: { name: string };
   status: Status;
@@ -642,7 +643,14 @@ function elementAt(x: number, y: number, host: Element): Element | null {
 // ---- Panel ----------------------------------------------------------------------------------
 
 function RequestItem({ r }: { r: LiveRequest }) {
-  const what = r.kind === "choose" ? "Elegir esta variante" : r.kind === "palette" ? `Paleta propuesta: ${r.palette?.name ?? ""}` : r.text;
+  const what =
+    r.kind === "choose"
+      ? "Elegir esta variante"
+      : r.kind === "palette"
+        ? `Paleta propuesta: ${r.palette?.name ?? ""}`
+        : r.kind === "vote"
+          ? `Voto de ${r.voter ?? "alguien"}: ${r.text}`
+          : r.text;
   return (
     <div className="item">
       <span className={`state ${r.status.state}`}>

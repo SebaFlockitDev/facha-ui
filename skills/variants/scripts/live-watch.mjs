@@ -35,6 +35,8 @@ const emit = (r) => {
   if (Array.isArray(r.targets) && r.targets.length) line.targets = r.targets.slice(0, 3);
   // A palette proposed from the panel: new values of existing tokens, per theme.
   if (r.kind === "palette" && r.palette && typeof r.palette === "object") line.palette = r.palette;
+  // A team vote from the compare page: who voted (the reason is the text).
+  if (r.kind === "vote" && typeof r.voter === "string") line.voter = r.voter.slice(0, 40);
   process.stdout.write(JSON.stringify(line) + "\n");
 };
 

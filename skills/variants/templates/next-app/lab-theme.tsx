@@ -6,7 +6,7 @@ import { useEffect } from "react";
  * Non-default themes, filled by /facha-ui:variants from get_design_system → project.themes.
  * `attribute: "class"` toggles a class on <html>; any other attribute is set to `value`.
  */
-const THEMES: Record<string, { attribute: string; value: string }> = {
+export const THEMES: Record<string, { attribute: string; value: string }> = {
   /*__THEMES__*/
 };
 
