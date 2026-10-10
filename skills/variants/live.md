@@ -144,7 +144,7 @@ changes in the project from here.
      "base": "#0f766e",            // only for a custom color
      "requestId": "<id>",
      "at": "<ISO-8601 with offset>",
-     "tokens": { "--brand": { "light": { "from": "#7800C0", "to": "#0048cc" } } }
+     "tokens": { "--brand": { "light": { "from": "#6b7280", "to": "#0048cc" } } }
    }
    ```
 4. Set `{ "state": "proposed", "message": "Propuesta guardada en <file>. Para adoptarla en toda la app: /facha-ui:init palette <file>" }`.

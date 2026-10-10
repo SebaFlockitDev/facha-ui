@@ -98,18 +98,18 @@ const BANNED_TERMS = (process.env.FACHA_UI_BANNED_TERMS ?? "")
   .filter(Boolean);
 
 describe("MCP-7 · nothing from the test projects is hardcoded", () => {
-  it.skipIf(BANNED_TERMS.length === 0)("mcp/src and skills/ do not mention the test projects", () => {
+  it.skipIf(BANNED_TERMS.length === 0)("the plugin, its tests and its docs do not mention the test projects", () => {
     const banned = new RegExp(BANNED_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "i");
-    const dirs = [path.join(MCP_DIR, "src"), path.join(REPO, "skills")].filter((d) => fs.existsSync(d));
+    const dirs = [path.join(MCP_DIR, "src"), path.join(MCP_DIR, "test"), path.join(REPO, "skills"), path.join(REPO, "agents"), path.join(REPO, "docs")].filter((d) => fs.existsSync(d));
+    const rootDocs = ["README.md", "SPEC.md", "CLAUDE.md"].map((f) => path.join(REPO, f)).filter((f) => fs.existsSync(f));
     const offenders: string[] = [];
-    for (const d of dirs) {
-      for (const f of listFiles(d)) {
-        fs.readFileSync(f, "utf8")
-          .split("\n")
-          .forEach((line, i) => {
-            if (banned.test(line)) offenders.push(`${path.relative(REPO, f)}:${i + 1}: ${line.trim()}`);
-          });
-      }
+    for (const f of [...dirs.flatMap((d) => listFiles(d)), ...rootDocs]) {
+      if (/\.(png|jpe?g|gif|webp|ico)$/i.test(f)) continue;
+      fs.readFileSync(f, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          if (banned.test(line)) offenders.push(`${path.relative(REPO, f)}:${i + 1}: ${line.trim()}`);
+        });
     }
     expect(offenders).toEqual([]);
   });

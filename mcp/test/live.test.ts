@@ -184,8 +184,8 @@ describe("live endpoint · palette", () => {
       { name: "evil", selector: ":root } body { display: none" },
     ],
     tokens: [
-      { name: "--brand", role: "accent.primary", values: { light: "#7800C0", dark: "#9D2BD6" } },
-      { name: "--surface", role: "surface.base", values: { light: "#f8f3fc", dark: "#161b22", evil: "#000" } },
+      { name: "--brand", role: "accent.primary", values: { light: "#4f46e5", dark: "#818cf8" } },
+      { name: "--surface", role: "surface.base", values: { light: "#f8fafc", dark: "#161b22", evil: "#000" } },
       { name: "--bad", role: "accent", values: { light: "red; } body { display: none" } },
     ],
     references: [{ where: "app/globals.css:272 (.chip-PAID)", values: ["#dcf7e6", "url(x)"] }],
@@ -201,7 +201,7 @@ describe("live endpoint · palette", () => {
     const body = (await core.handleGet(get(), { root, production: false }).json()) as any;
     expect(body.palette.themes.map((t: any) => t.name)).toEqual(["light", "dark"]);
     expect(body.palette.tokens.map((t: any) => t.name)).toEqual(["--brand", "--surface"]);
-    expect(body.palette.tokens[1].values).toEqual({ light: "#f8f3fc", dark: "#161b22" });
+    expect(body.palette.tokens[1].values).toEqual({ light: "#f8fafc", dark: "#161b22" });
     expect(body.palette.references).toEqual([{ where: "app/globals.css:272 (.chip-PAID)", values: ["#dcf7e6"] }]);
   });
 
