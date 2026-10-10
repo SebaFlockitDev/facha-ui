@@ -4,6 +4,7 @@ import postcss, { type AtRule, type ChildNode, type Declaration, type Root, type
 import picomatch from "picomatch";
 import { isColorValue, parseColor } from "./color.js";
 import { listProjectFiles, readSource, rel, type Project } from "./project.js";
+import { colorEvidence, hslFromChannels, isHslChannels, isShadcnName, shadcnRole } from "./shadcn.js";
 import type { Theme, Token, TokenType } from "./types.js";
 
 export interface TokenSet {
@@ -215,6 +216,10 @@ export function loadTokens(project: Project): TokenSet {
     return e.values.get(theme) ?? (defaultTheme ? e.values.get(defaultTheme) : undefined) ?? [...e.values.values()][0];
   };
 
+  // Colors written as bare channels count as colors only with the project's own evidence (SPEC §2.0.2).
+  const evidence = colorEvidence(project, raw.keys());
+  const channelColors: string[] = [];
+
   const tokens: Token[] = [...raw.keys()].sort().map((name) => {
     const e = raw.get(name)!;
     const values: Record<string, string> = {};
@@ -223,10 +228,26 @@ export function loadTokens(project: Project): TokenSet {
       if (v !== undefined) values[t] = v;
     }
     const resolvedDefault = resolveVars(values[defaultTheme ?? ""] ?? "", defaultTheme ?? "", valueIn);
-    const type = inferType(name, resolvedDefault);
-    const role = project.config.tokens.roles?.[name] ?? inferRole(name, type);
-    return { name, type, role, values, comment: e.comment, source: e.source };
+    let type = inferType(name, resolvedDefault);
+    let format: Token["format"];
+    if (type === "other" && isHslChannels(resolvedDefault) && (evidence.hslConsumed.has(name) || (evidence.shadcn && isShadcnName(name)))) {
+      type = "color";
+      format = "hsl-channels";
+      channelColors.push(name);
+    }
+    const role =
+      project.config.tokens.roles?.[name] ?? (evidence.shadcn && type === "color" ? shadcnRole(name) : undefined) ?? inferRole(name, type);
+    return { name, type, role, ...(format ? { format } : {}), values, comment: e.comment, source: e.source };
   });
+
+  if (evidence.shadcn) {
+    project.assumptions.push(`shadcn/ui project (${evidence.shadcnReason}): its canonical tokens take the shadcn roles (SPEC §2.0.2); tokens.roles in the config overrides them.`);
+  }
+  if (channelColors.length) {
+    project.assumptions.push(
+      `${channelColors.length} token(s) written as bare HSL channels read as colors (hsl(var(--x)) in the project${evidence.shadcn ? " or the shadcn/ui names" : ""}): ${channelColors.slice(0, 8).join(", ")}${channelColors.length > 8 ? "…" : ""}.`,
+    );
+  }
 
   return {
     sources,
@@ -260,7 +281,10 @@ export function tokenValue(ts: TokenSet, name: string, theme: string): string | 
   return v === undefined ? undefined : resolveVars(v, theme, lookup);
 }
 
+/** A token's color in a theme. Bare HSL channels of a color token are read as hsl(…). */
 export function tokenColor(ts: TokenSet, name: string, theme: string) {
   const v = tokenValue(ts, name, theme);
-  return v === undefined ? undefined : parseColor(v);
+  if (v === undefined) return undefined;
+  if (ts.byName.get(name)?.type === "color" && isHslChannels(v)) return parseColor(hslFromChannels(v));
+  return parseColor(v);
 }

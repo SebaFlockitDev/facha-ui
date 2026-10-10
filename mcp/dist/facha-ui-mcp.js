@@ -2060,27 +2060,27 @@ var require_util = __commonJS({
       };
     }
     var normalize2 = lruMemoize(function normalize3(aPath) {
-      var path9 = aPath;
+      var path10 = aPath;
       var url2 = urlParse(aPath);
       if (url2) {
         if (!url2.path) {
           return aPath;
         }
-        path9 = url2.path;
+        path10 = url2.path;
       }
-      var isAbsolute = exports.isAbsolute(path9);
+      var isAbsolute = exports.isAbsolute(path10);
       var parts = [];
       var start = 0;
       var i = 0;
       while (true) {
         start = i;
-        i = path9.indexOf("/", start);
+        i = path10.indexOf("/", start);
         if (i === -1) {
-          parts.push(path9.slice(start));
+          parts.push(path10.slice(start));
           break;
         } else {
-          parts.push(path9.slice(start, i));
-          while (i < path9.length && path9[i] === "/") {
+          parts.push(path10.slice(start, i));
+          while (i < path10.length && path10[i] === "/") {
             i++;
           }
         }
@@ -2101,15 +2101,15 @@ var require_util = __commonJS({
           }
         }
       }
-      path9 = parts.join("/");
-      if (path9 === "") {
-        path9 = isAbsolute ? "/" : ".";
+      path10 = parts.join("/");
+      if (path10 === "") {
+        path10 = isAbsolute ? "/" : ".";
       }
       if (url2) {
-        url2.path = path9;
+        url2.path = path10;
         return urlGenerate(url2);
       }
-      return path9;
+      return path10;
     });
     exports.normalize = normalize2;
     function join(aRoot, aPath) {
@@ -3834,11 +3834,11 @@ var require_previous_map = __commonJS({
     var { existsSync, readFileSync, realpathSync } = __require("fs");
     var { dirname, isAbsolute, join, relative, sep } = __require("path");
     var { SourceMapConsumer, SourceMapGenerator } = require_source_map();
-    function realPath(path9) {
+    function realPath(path10) {
       try {
-        return realpathSync(path9);
+        return realpathSync(path10);
       } catch {
-        return path9;
+        return path10;
       }
     }
     function fromBase64(str) {
@@ -3901,19 +3901,19 @@ var require_previous_map = __commonJS({
           this.annotation = this.getAnnotationURL(css.substring(start, end));
         }
       }
-      loadFile(path9, cssFile, trusted) {
+      loadFile(path10, cssFile, trusted) {
         if (!trusted && !this.unsafeMap) {
-          if (!/\.map$/i.test(path9)) return void 0;
+          if (!/\.map$/i.test(path10)) return void 0;
           if (!cssFile) return void 0;
-          let rel3 = relative(realPath(dirname(cssFile)), realPath(path9));
+          let rel3 = relative(realPath(dirname(cssFile)), realPath(path10));
           if (rel3 === ".." || rel3.startsWith(".." + sep) || isAbsolute(rel3)) {
             return void 0;
           }
         }
-        this.root = dirname(path9);
-        if (existsSync(path9)) {
-          this.mapFile = path9;
-          return readFileSync(path9, "utf-8").toString().trim();
+        this.root = dirname(path10);
+        if (existsSync(path10)) {
+          this.mapFile = path10;
+          return readFileSync(path10, "utf-8").toString().trim();
         }
       }
       loadMap(file2, prev) {
@@ -4709,9 +4709,9 @@ var require_map_generator = __commonJS({
         if (typeof this.mapOpts.annotation === "string") {
           from = dirname(resolve(from, this.mapOpts.annotation));
         }
-        let path9 = relative(from, file2);
-        this.memoizedPaths.set(file2, path9);
-        return path9;
+        let path10 = relative(from, file2);
+        this.memoizedPaths.set(file2, path10);
+        return path10;
       }
       previous() {
         if (!this.previousMaps) {
@@ -4766,12 +4766,12 @@ var require_map_generator = __commonJS({
           return window.btoa(unescape(encodeURIComponent(str)));
         }
       }
-      toFileUrl(path9) {
-        let cached2 = this.memoizedFileURLs.get(path9);
+      toFileUrl(path10) {
+        let cached2 = this.memoizedFileURLs.get(path10);
         if (cached2) return cached2;
         if (pathToFileURL) {
-          let fileURL = pathToFileURL(path9).toString();
-          this.memoizedFileURLs.set(path9, fileURL);
+          let fileURL = pathToFileURL(path10).toString();
+          this.memoizedFileURLs.set(path10, fileURL);
           return fileURL;
         } else {
           throw new Error(
@@ -4779,14 +4779,14 @@ var require_map_generator = __commonJS({
           );
         }
       }
-      toUrl(path9) {
-        let cached2 = this.memoizedURLs.get(path9);
+      toUrl(path10) {
+        let cached2 = this.memoizedURLs.get(path10);
         if (cached2) return cached2;
         if (sep === "\\") {
-          path9 = path9.replace(/\\/g, "/");
+          path10 = path10.replace(/\\/g, "/");
         }
-        let url2 = encodeURI(path9).replace(/[#?]/g, encodeURIComponent);
-        this.memoizedURLs.set(path9, url2);
+        let url2 = encodeURI(path10).replace(/[#?]/g, encodeURIComponent);
+        this.memoizedURLs.set(path10, url2);
         return url2;
       }
     };
@@ -6509,8 +6509,8 @@ var require_utils = __commonJS({
       }
       return output2;
     };
-    exports.basename = (path9, { windows } = {}) => {
-      const segs = path9.split(windows ? /[\\/]/ : "/");
+    exports.basename = (path10, { windows } = {}) => {
+      const segs = path10.split(windows ? /[\\/]/ : "/");
       const last = segs[segs.length - 1];
       if (last === "") {
         return segs[segs.length - 2];
@@ -11259,8 +11259,8 @@ var require_utils2 = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path9) {
-      let input2 = path9;
+    function removeDotSegments(path10) {
+      let input2 = path10;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -11669,8 +11669,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path9 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path9 && path9 !== "/" ? path9 : void 0;
+        const path10 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path10 && path10 !== "/" ? path10 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -16018,10 +16018,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path9) {
-  if (!path9)
+function getElementAtPath(obj, path10) {
+  if (!path10)
     return obj;
-  return path9.reduce((acc, key) => acc?.[key], obj);
+  return path10.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -16361,11 +16361,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path9, issues) {
+function prefixIssues(path10, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path9);
+    iss.path.unshift(path10);
     return iss;
   });
 }
@@ -16815,16 +16815,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path9 = []) => {
+  const processError = (error63, path10 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path9, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path9, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -16863,17 +16863,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path9 = []) => {
+  const processError = (error63, path10 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path9, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path9, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -16912,8 +16912,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path9 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path9) {
+  const path10 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path10) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -34015,13 +34015,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path9 = ref.slice(1).split("/").filter(Boolean);
-  if (path9.length === 0) {
+  const path10 = ref.slice(1).split("/").filter(Boolean);
+  if (path10.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path9[0] === defsKey) {
-    const key = path9[1] === void 0 ? void 0 : decodeJSONPointerSegment(path9[1]);
+  if (path10[0] === defsKey) {
+    const key = path10[1] === void 0 ? void 0 : decodeJSONPointerSegment(path10[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -36506,7 +36506,7 @@ var StdioServerTransport = class {
 };
 
 // src/context.ts
-import path4 from "node:path";
+import path5 from "node:path";
 
 // node_modules/postcss/lib/postcss.mjs
 var import_postcss = __toESM(require_postcss(), 1);
@@ -40336,7 +40336,7 @@ function round2(n, digits2 = 1) {
 
 // src/tokens.ts
 import fs3 from "node:fs";
-import path3 from "node:path";
+import path4 from "node:path";
 var import_picomatch2 = __toESM(require_picomatch2(), 1);
 
 // src/project.ts
@@ -40688,10 +40688,86 @@ function resolveUserPath(project, input2) {
   }
   throw new FachaError("PATH_NOT_FOUND", `Path not found in the project: ${input2}`, { path: input2 });
 }
+function readRootFile(project, name) {
+  const abs2 = path2.join(project.root, name);
+  try {
+    if (!fs2.existsSync(abs2) || fs2.lstatSync(abs2).isSymbolicLink()) return null;
+    if (!isInside(project.root, fs2.realpathSync(abs2)) || !fs2.statSync(abs2).isFile()) return null;
+    return readSource(abs2);
+  } catch {
+    return null;
+  }
+}
 function readSource(abs2) {
   const st = fs2.statSync(abs2);
   if (st.size > MAX_FILE_BYTES) return null;
   return fs2.readFileSync(abs2, "utf8");
+}
+
+// src/shadcn.ts
+import path3 from "node:path";
+var HSL_CHANNELS = /^-?\d*\.?\d+(?:deg|rad|grad|turn)?\s+\d*\.?\d+%\s+\d*\.?\d+%(?:\s*\/\s*\d*\.?\d+%?)?$/;
+function isHslChannels(value) {
+  return HSL_CHANNELS.test(value.trim());
+}
+function hslFromChannels(value) {
+  return `hsl(${value.trim()})`;
+}
+var TAILWIND_CONFIG_NAMES = ["tailwind.config.ts", "tailwind.config.js", "tailwind.config.mjs", "tailwind.config.cjs", "tailwind.config.mts", "tailwind.config.cts"];
+var CANONICAL_PAIRS = ["background", "card", "popover", "primary", "secondary", "muted", "accent", "destructive"];
+var SHADCN_ROLES = {
+  background: "surface.base",
+  card: "surface.raised",
+  popover: "surface.raised",
+  foreground: "text.primary",
+  "card-foreground": "text.primary",
+  "popover-foreground": "text.primary",
+  muted: "surface.raised",
+  secondary: "surface.raised",
+  accent: "surface.raised",
+  "muted-foreground": "text.secondary",
+  "secondary-foreground": "text.primary",
+  "accent-foreground": "text.primary",
+  primary: "accent.primary",
+  "primary-foreground": "on-accent",
+  "destructive-foreground": "on-accent",
+  destructive: "status.danger",
+  border: "border.default",
+  input: "border.default",
+  ring: "border.default"
+};
+function bareName(name) {
+  return name.replace(/^--/, "").replace(/^color-/, "");
+}
+function shadcnRole(name) {
+  const n = bareName(name);
+  if (n === "sidebar") return "surface.raised";
+  const inner = n.startsWith("sidebar-") ? n.slice("sidebar-".length) : n;
+  return SHADCN_ROLES[inner];
+}
+function isShadcnName(name) {
+  return shadcnRole(name) !== void 0 || /^chart-\d+$/.test(bareName(name));
+}
+var HSL_VAR = /hsla?\(\s*var\(\s*(--[\w-]+)/g;
+function colorEvidence(project, tokenNames) {
+  const hslConsumed = /* @__PURE__ */ new Set();
+  const texts = [];
+  for (const abs2 of listProjectFiles(project)) {
+    if (path3.extname(abs2) !== ".css") continue;
+    const text = readSource(abs2);
+    if (text) texts.push(text);
+  }
+  for (const name of TAILWIND_CONFIG_NAMES) {
+    const text = readRootFile(project, name);
+    if (text) texts.push(text);
+  }
+  for (const text of texts) for (const m of text.matchAll(HSL_VAR)) hslConsumed.add(m[1]);
+  const names = new Set([...tokenNames].map(bareName));
+  const pairs = CANONICAL_PAIRS.filter((p4) => names.has(p4) && names.has(p4 === "background" ? "foreground" : `${p4}-foreground`));
+  let shadcnReason = null;
+  if (readRootFile(project, "components.json") !== null) shadcnReason = "components.json";
+  else if (pairs.length >= 3) shadcnReason = `canonical token pairs (${pairs.map((p4) => `--${p4}`).join(", ")})`;
+  return { hslConsumed, shadcn: shadcnReason !== null, shadcnReason };
 }
 
 // src/tokens.ts
@@ -40778,7 +40854,7 @@ function autodetectSources(project) {
   const priority = ["app/globals.css", "src/index.css", "src/app/globals.css", "styles/globals.css"];
   const cssFiles = listProjectFiles(project).filter((f3) => f3.endsWith(".css")).map((f3) => rel2(project, f3));
   const withTokens = cssFiles.filter((r2) => {
-    const text = readSource(path3.join(project.root, r2)) ?? "";
+    const text = readSource(path4.join(project.root, r2)) ?? "";
     return /(:root|@theme)[^{]*\{[^}]*--[\w-]+\s*:/.test(text);
   });
   return withTokens.sort((a, b) => {
@@ -40792,7 +40868,7 @@ function resolveSources(project) {
   if (!globs) return autodetectSources(project);
   const isMatch = (0, import_picomatch2.default)(globs);
   const all = [];
-  for (const g of globs) if (!/[*?{[]/.test(g) && fs3.existsSync(path3.join(project.root, g))) all.push(g);
+  for (const g of globs) if (!/[*?{[]/.test(g) && fs3.existsSync(path4.join(project.root, g))) all.push(g);
   const walked = listProjectFiles({ ...project, include: ["**/*.css"], exclude: [] }).map((f3) => rel2(project, f3)).filter((r2) => isMatch(r2));
   return [.../* @__PURE__ */ new Set([...all, ...walked])].sort();
 }
@@ -40811,7 +40887,7 @@ function loadTokens(project) {
     }
   }
   for (const source of sources) {
-    const text = readSource(path3.join(project.root, source));
+    const text = readSource(path4.join(project.root, source));
     if (text == null) continue;
     let root2;
     try {
@@ -40863,6 +40939,8 @@ function loadTokens(project) {
     if (!e4) return void 0;
     return e4.values.get(theme) ?? (defaultTheme2 ? e4.values.get(defaultTheme2) : void 0) ?? [...e4.values.values()][0];
   };
+  const evidence = colorEvidence(project, raw.keys());
+  const channelColors = [];
   const tokens = [...raw.keys()].sort().map((name) => {
     const e4 = raw.get(name);
     const values = {};
@@ -40871,10 +40949,24 @@ function loadTokens(project) {
       if (v !== void 0) values[t] = v;
     }
     const resolvedDefault = resolveVars(values[defaultTheme2 ?? ""] ?? "", defaultTheme2 ?? "", valueIn);
-    const type = inferType(name, resolvedDefault);
-    const role = project.config.tokens.roles?.[name] ?? inferRole(name, type);
-    return { name, type, role, values, comment: e4.comment, source: e4.source };
+    let type = inferType(name, resolvedDefault);
+    let format;
+    if (type === "other" && isHslChannels(resolvedDefault) && (evidence.hslConsumed.has(name) || evidence.shadcn && isShadcnName(name))) {
+      type = "color";
+      format = "hsl-channels";
+      channelColors.push(name);
+    }
+    const role = project.config.tokens.roles?.[name] ?? (evidence.shadcn && type === "color" ? shadcnRole(name) : void 0) ?? inferRole(name, type);
+    return { name, type, role, ...format ? { format } : {}, values, comment: e4.comment, source: e4.source };
   });
+  if (evidence.shadcn) {
+    project.assumptions.push(`shadcn/ui project (${evidence.shadcnReason}): its canonical tokens take the shadcn roles (SPEC \xA72.0.2); tokens.roles in the config overrides them.`);
+  }
+  if (channelColors.length) {
+    project.assumptions.push(
+      `${channelColors.length} token(s) written as bare HSL channels read as colors (hsl(var(--x)) in the project${evidence.shadcn ? " or the shadcn/ui names" : ""}): ${channelColors.slice(0, 8).join(", ")}${channelColors.length > 8 ? "\u2026" : ""}.`
+    );
+  }
   return {
     sources,
     themes,
@@ -40899,7 +40991,9 @@ function tokenValue(ts, name, theme) {
 }
 function tokenColor(ts, name, theme) {
   const v = tokenValue(ts, name, theme);
-  return v === void 0 ? void 0 : parseColor(v);
+  if (v === void 0) return void 0;
+  if (ts.byName.get(name)?.type === "color" && isHslChannels(v)) return parseColor(hslFromChannels(v));
+  return parseColor(v);
 }
 
 // src/sources/usage.ts
@@ -55561,7 +55655,7 @@ function createContext(root2, ws) {
 }
 function extractFile(ctx, abs2) {
   const file2 = rel2(ctx.project, abs2);
-  const ext = path4.extname(abs2);
+  const ext = path5.extname(abs2);
   const code2 = readSource(abs2);
   if (code2 == null) return { usages: [], skipped: { file: file2, code: "FILE_TOO_LARGE", detail: "File is larger than 1 MB" } };
   try {
@@ -55586,10 +55680,10 @@ function extractFile(ctx, abs2) {
 
 // src/score.ts
 import fs4 from "node:fs";
-import path7 from "node:path";
+import path8 from "node:path";
 
 // src/check.ts
-import path5 from "node:path";
+import path6 from "node:path";
 
 // src/a11y.ts
 var INTERACTIVE_ROLES = /* @__PURE__ */ new Set(["button", "link", "checkbox", "radio", "switch", "tab", "menuitem", "option", "combobox", "textbox", "slider", "treeitem", "gridcell"]);
@@ -57640,7 +57734,7 @@ function checkUi(ctx, input2, opts = {}) {
   if (isDir) {
     files = walk(abs2);
   } else {
-    if (!SOURCE_EXTENSIONS.has(path5.extname(abs2))) {
+    if (!SOURCE_EXTENSIONS.has(path6.extname(abs2))) {
       throw new FachaError("UNSUPPORTED_FILE", `Unsupported file type: ${relPath} (supported: ${[...SOURCE_EXTENSIONS].join(", ")})`, { path: input2 });
     }
     files = [abs2];
@@ -57701,7 +57795,7 @@ function auditProject(ctx, opts = {}) {
 }
 
 // src/review.ts
-import path6 from "node:path";
+import path7 from "node:path";
 var MAX_ACCENTS = 2;
 var MAX_FONT_SIZES = 4;
 var SCREEN_FILE = /(^|\/)page\.[jt]sx$/;
@@ -57728,7 +57822,7 @@ function lineOf(text, re) {
 function reviewUi(ctx, input2) {
   const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
   const relPath = rel2(ctx.project, abs2) || ".";
-  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path6.extname(f3)) && !f3.endsWith(".css"));
+  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path7.extname(f3)) && !f3.endsWith(".css"));
   if (!isDir && files.length === 0) throw new FachaError("UNSUPPORTED_FILE", `review_ui reads JSX/TSX files: ${relPath}`, { path: input2 });
   const roleOf = (token) => ctx.tokens.byName.get(token)?.role ?? "";
   const classRule = new Map(ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector)).map((c2) => [c2.selector.slice(1), c2]));
@@ -57894,10 +57988,10 @@ function importsOf(ctx, abs2, depth = 2, seen = /* @__PURE__ */ new Set()) {
   const source = readSource(abs2) ?? "";
   for (const m of source.matchAll(/(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g)) {
     const spec = m[1];
-    const bases = spec.startsWith(".") ? [path7.resolve(path7.dirname(abs2), spec)] : spec.startsWith("@/") ? [path7.join(ctx.project.root, spec.slice(2)), path7.join(ctx.project.root, "src", spec.slice(2))] : [];
+    const bases = spec.startsWith(".") ? [path8.resolve(path8.dirname(abs2), spec)] : spec.startsWith("@/") ? [path8.join(ctx.project.root, spec.slice(2)), path8.join(ctx.project.root, "src", spec.slice(2))] : [];
     for (const b of bases) {
-      const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path7.join(b, "index" + e4))].find(
-        (p4) => fs4.existsSync(p4) && fs4.statSync(p4).isFile() && !p4.includes(`${path7.sep}node_modules${path7.sep}`)
+      const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path8.join(b, "index" + e4))].find(
+        (p4) => fs4.existsSync(p4) && fs4.statSync(p4).isFile() && !p4.includes(`${path8.sep}node_modules${path8.sep}`)
       );
       if (hit && !seen.has(hit) && hit.startsWith(ctx.project.root)) importsOf(ctx, hit, depth - 1, seen);
     }
@@ -58337,8 +58431,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path9, errorMaps, issueData } = params;
-  const fullPath = [...path9, ...issueData.path || []];
+  const { data, path: path10, errorMaps, issueData } = params;
+  const fullPath = [...path10, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -58453,11 +58547,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path9, key) {
+  constructor(parent, value, path10, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path9;
+    this._path = path10;
     this._key = key;
   }
   get path() {
@@ -62008,11 +62102,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path9) {
-  if (path9.length === 0) {
+function getDotPath(path10) {
+  if (path10.length === 0) {
     return "object root";
   }
-  return path9.reduce((acc, seg, index2) => {
+  return path10.reduce((acc, seg, index2) => {
     if (index2 === 0) {
       return String(seg);
     }
@@ -66000,7 +66094,7 @@ var EMPTY_COMPLETION_RESULT = {
 
 // src/design-system.ts
 import fs5 from "node:fs";
-import path8 from "node:path";
+import path9 from "node:path";
 var SECTIONS = [
   "project",
   "tokens",
@@ -66199,7 +66293,7 @@ function gaps(ctx) {
 }
 function parseDecisions(ctx) {
   const file2 = ctx.project.config.memory.decisionsFile;
-  const abs2 = path8.join(ctx.project.root, file2);
+  const abs2 = path9.join(ctx.project.root, file2);
   if (!fs5.existsSync(abs2)) return [];
   const lines = fs5.readFileSync(abs2, "utf8").split(/\r?\n/);
   const out = [];
@@ -66237,7 +66331,7 @@ function getDesignSystem(ctx, sections = SECTIONS) {
     const pkgDeps = readDeps(ctx.project.root);
     const twVersion = (pkgDeps.tailwindcss ?? "").match(/\d+/)?.[0] ?? null;
     out.project = {
-      root: path8.basename(ctx.project.root),
+      root: path9.basename(ctx.project.root),
       framework: ctx.project.config.framework === "auto" ? ctx.project.frameworkDetected : ctx.project.config.framework,
       tailwind: {
         detected: ctx.project.hasTailwind,
@@ -66278,7 +66372,7 @@ function getDesignSystem(ctx, sections = SECTIONS) {
 }
 function readDeps(root2) {
   try {
-    const pkg = JSON.parse(fs5.readFileSync(path8.join(root2, "package.json"), "utf8"));
+    const pkg = JSON.parse(fs5.readFileSync(path9.join(root2, "package.json"), "utf8"));
     return { ...pkg.dependencies ?? {}, ...pkg.devDependencies ?? {} };
   } catch {
     return {};
@@ -66845,9 +66939,9 @@ function createServer(opts) {
       },
       annotations: { title: "Check UI", ...READ_ONLY }
     },
-    async ({ path: path9, rules, minSeverity }) => {
+    async ({ path: path10, rules, minSeverity }) => {
       try {
-        const data = checkUi(context(), path9, { rules, minSeverity });
+        const data = checkUi(context(), path10, { rules, minSeverity });
         const s = data.summary;
         return ok(`${data.path}: ${s.error} error(s), ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
@@ -66907,9 +67001,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).describe("File or directory, relative to the project root or the workspace root.") },
       annotations: { title: "Review UI", ...READ_ONLY }
     },
-    async ({ path: path9 }) => {
+    async ({ path: path10 }) => {
       try {
-        const data = reviewUi(context(), path9);
+        const data = reviewUi(context(), path10);
         const s = data.summary;
         return ok(`${data.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
@@ -66925,9 +67019,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).optional().describe("A screen file or a directory; by default every screen outside the lab.") },
       annotations: { title: "UX score", ...READ_ONLY }
     },
-    async ({ path: path9 }) => {
+    async ({ path: path10 }) => {
       try {
-        const data = uxScore(context(), path9);
+        const data = uxScore(context(), path10);
         return ok(`${data.screens.length} screen(s), average ${data.average ?? "-"}/100.`, data);
       } catch (e4) {
         return fail(e4);

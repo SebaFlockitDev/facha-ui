@@ -226,6 +226,21 @@ export function resolveUserPath(project: Project, input: string): { abs: string;
   throw new FachaError("PATH_NOT_FOUND", `Path not found in the project: ${input}`, { path: input });
 }
 
+/**
+ * Reads a file at a fixed name in the project root (components.json, tailwind.config.ts…) as text.
+ * Null when it does not exist, is a symlink, resolves outside the root or is too large. Never loads it.
+ */
+export function readRootFile(project: { root: string }, name: string): string | null {
+  const abs = path.join(project.root, name);
+  try {
+    if (!fs.existsSync(abs) || fs.lstatSync(abs).isSymbolicLink()) return null;
+    if (!isInside(project.root, fs.realpathSync(abs)) || !fs.statSync(abs).isFile()) return null;
+    return readSource(abs);
+  } catch {
+    return null;
+  }
+}
+
 export function readSource(abs: string): string | null {
   const st = fs.statSync(abs);
   if (st.size > MAX_FILE_BYTES) return null;

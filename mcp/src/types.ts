@@ -59,6 +59,8 @@ export interface Token {
   name: string;
   type: TokenType;
   role: string;
+  /** Only for colors written as bare HSL channels ("222 47% 11%"): read as hsl(…) for contrast and suggestions. */
+  format?: "hsl-channels";
   /** Raw value as written, per theme (inherits the default theme when not overridden). */
   values: Record<string, string>;
   comment: string | null;
