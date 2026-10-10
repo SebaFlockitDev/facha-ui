@@ -16,7 +16,7 @@ Vas a ver, en menos de un minuto y sin que se escriba nada:
 - tu proyecto y su design system en palabras simples (tokens, temas, qué falta);
 - el puntaje de UX del proyecto y los 3 problemas más graves, cada uno con archivo, línea y por qué importa;
 - **una** recomendación: lo próximo que más mejora tu UI, listo para pedir;
-- lo que falta para el resto (config, líneas del `.gitignore`, dev server), para copiar.
+- lo que falta para el resto (config, líneas del `.gitignore`, dev server). Al final te pregunta *"¿Querés que agregue esto?"*: solo si decís que sí agrega las líneas que faltan al `.gitignore` y crea la config mínima (nunca sobrescribe una existente).
 
 Desde ahí, pedíselo con tus palabras. Los comandos son atajos:
 

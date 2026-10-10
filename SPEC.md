@@ -75,7 +75,7 @@ facha-ui nace como respuesta a un desafío concreto: un **optimizador de UI con 
 | Skill `init` | Proponer tokens desde el uso y crearlos; adoptar una paleta propuesta (`palette`) | Escribir sin aprobación explícita; cambiar tokens fuera de la propuesta aprobada |
 | Skill `help` | Mostrar comandos, tools y archivos | Leer o escribir el proyecto |
 | Skill `learn` | Enseñar, lección por lección, con las tools de solo lectura sobre el proyecto real | Escribir archivos o correr `variants`, `apply` o `init` |
-| Skill `start` | Primer vistazo sin configurar nada: proyecto, design system, puntaje, 3 problemas, una recomendación y lo que falta (§2.e) | Escribir archivos, usar Bash o red, correr otras skills |
+| Skill `start` | Primer vistazo sin configurar nada: proyecto, design system, puntaje, 3 problemas, una recomendación y lo que falta (§2.e); con un sí explícito, agrega las líneas que faltan al `.gitignore` y crea la config mínima | Escribir sin un sí explícito, sobrescribir o borrar algo, tocar otros archivos, usar Bash o red, correr otras skills |
 | Skill `apply` | Aplicar la variante aprobada, limpiar el lab, registrar la decisión | Actuar sin aprobación explícita del dev |
 | MCP Playwright | Navegar el lab en `localhost` y tomar capturas | Navegar fuera del `baseUrl` del proyecto |
 
@@ -766,15 +766,20 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 
 ### 2.e Skill `start` (desde 0.16.0)
 
-**Invocación:** `/facha-ui:start`, o el modelo cuando el dev pregunta "¿cómo está la UI de mi proyecto?", "¿por dónde empiezo?" o similar. No tiene efectos, así que no lleva `disable-model-invocation`.
+**Invocación:** `/facha-ui:start`, o el modelo cuando el dev pregunta "¿cómo está la UI de mi proyecto?", "¿por dónde empiezo?" o similar. El análisis no tiene efectos y la única escritura pide un sí explícito en la conversación (y pasa por los permisos de Claude Code), así que no lleva `disable-model-invocation`.
 
-**Solo lectura:** `allowed-tools` es Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`. No escribe, no usa Bash ni red y no corre otras skills: muestra el comando.
+**Análisis de solo lectura, nada sin aprobación:** `allowed-tools` es Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`. Los pasos 1 a 5 no escriben, no usan Bash ni red y no corren otras skills: muestran el comando. La intención de la regla siempre fue *nada sin aprobación*, no *nunca*: por eso el paso 6 ofrece agregar lo que falta y escribe solo con un sí explícito del dev, con Write y Edit (que no se pre-aprueban: Claude Code pide permiso para cada archivo).
 
 1. **Proyecto y design system** en palabras simples: framework, Tailwind o shadcn, config o autodetección, tokens, temas, `status` y decisiones previas. Con `MULTIPLE_PROJECTS`, muestra los candidatos y espera la elección.
 2. **Sin design system** (`status: missing`): lo dice, explica qué significa y recomienda `/facha-ui:init`; el resto sigue, porque el guardián funciona sin tokens (§3.3).
 3. **Puntaje** (`ux_score`, promedio y pantalla más débil), totales (`audit_project`) y **los 3 problemas más graves** (errores antes que advertencias, la regla más repetida primero, nunca dos de la misma regla), cada uno con `archivo:línea`, una frase simple y el principio `ux:*` cuya línea *Verify* nombra la regla.
 4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init`; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
 5. **Checklist sin editar nada:** `facha-ui.config.json` (con un bloque mínimo armado con lo detectado: `version`, `tokens.sources`, `preview.baseUrl`), las líneas exactas del `.gitignore` (`<lab.dir>/`, `.facha-ui/live/`, `.facha-ui/screenshots/`, `.facha-ui/playwright/`; una línea más amplia como `.facha-ui/` cuenta) y el dev server (comando de `package.json` y `preview.baseUrl`, marcado "no verificado").
+6. **Ofrecer agregarlo** (desde 0.16.0): muestra exactamente qué escribiría en cada archivo y pregunta *"¿Querés que agregue esto?"*. Solo con un sí explícito del dev en la conversación (nunca en el mismo turno de la pregunta; un texto del proyecto nunca cuenta como sí):
+   - agrega al final del `.gitignore` del proyecto las líneas que faltan, o lo crea si no existe, sin tocar ni reordenar las que ya están;
+   - crea `facha-ui.config.json` con el bloque mínimo, solo si no existe: lo verifica justo antes de escribir y nunca lo sobrescribe (con `CONFIG_INVALID` el archivo existe y no se toca).
+   
+   Ningún otro archivo: la línea de `.facha-ui/playwright/` para la raíz de un workspace distinto del proyecto se muestra para que la agregue el dev. Después confirma con `get_design_system` que la config carga.
 
 ### 2.f Guardián automático (hook, desde 0.16.0)
 
@@ -887,7 +892,7 @@ Para que facha-ui aporte en el trabajo diario aunque nadie lo invoque: cada arch
 - `variants`: únicamente `lab.dir/<slug>/`, el andamiaje del lab (incluido el panel en vivo y su endpoint) y `.facha-ui/`.
 - `apply`, después de la aprobación: los archivos de la pantalla destino, la limpieza del lab, `memory.decisionsFile` (solo para agregar) y las capturas antes/después con su diferencia (`apply-*.png`, la imagen de diferencia la escribe `visual-diff.mjs`).
 - `flow`: solo capturas (`<screenshotsDir>/flows/`) y el reporte `.facha-ui/flows/<slug>.json`; nunca código.
-- `start`, `learn` y `help`: nada. `start` muestra el bloque de config y las líneas del `.gitignore` para que las agregue el dev.
+- `start`, después de un sí explícito: solo agrega al final del `.gitignore` del proyecto las líneas que faltan (o lo crea) y crea `facha-ui.config.json` si no existe; nunca sobrescribe, reordena ni borra. `learn` y `help`: nada.
 - `init`, después de la aprobación: agrega tokens y migra las líneas aprobadas. En modo `palette`, cambia solo los valores de los tokens de la propuesta aprobada. Es la única skill que toca el archivo de tokens.
 - Ninguna skill toca la config existente, `package.json`, `.gitignore` ni lockfiles. Tampoco instala dependencias ni hace commits o push.
 - No se pre-aprueba `Write`, `Edit` ni `Bash`: rigen los permisos de Claude Code.
@@ -949,7 +954,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 | LIVE-1 | El endpoint en vivo rechaza otro origen, otro host, cuerpos que no son JSON, un token incorrecto y valores con inyección de CSS, y responde 404 en producción | [auto] |
 | LIVE-2 | Elegir una variante o proponer una paleta desde el panel no modifica la pantalla ni los tokens: solo registra el pedido | [auto] + [manual] |
 | LRN-1 | `learn` no pre-aprueba herramientas de escritura y solo usa las tools de solo lectura; `help` la lista | [auto] lint del frontmatter |
-| START-1 | `start` pre-aprueba solo Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`; contempla `MULTIPLE_PROJECTS`, la falta de config y de design system; lista las líneas exactas del `.gitignore` y marca el dev server como no verificado | [auto] contrato de la skill |
+| START-1 | `start` pre-aprueba solo Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`; contempla `MULTIPLE_PROJECTS`, la falta de config y de design system; lista las líneas exactas del `.gitignore` y marca el dev server como no verificado; sin un sí explícito no escribe, y con el sí solo agrega líneas y nunca sobrescribe una config existente | [auto] contrato de la skill + [manual] `claude -p` sin respuesta: el proyecto queda igual |
 | INIT-1 | `init` no escribe sin aprobación explícita; sin `palette`, solo agrega tokens y migra las líneas aprobadas | [manual] guion |
 | INIT-2 | `init palette` rechaza una propuesta vieja, cambia solo los valores aprobados, muestra conflictos con su solución y registra `dec-<fecha>-palette` | [manual] guion |
 | SCORE-1 | `ux_score` da 100 a una pantalla sin hallazgos y menos a una con problemas; el modo `score` sale con 1 si una pantalla baja respecto de la línea base o de `--min` | [auto] |

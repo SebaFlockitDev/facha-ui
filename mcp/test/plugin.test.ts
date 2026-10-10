@@ -484,3 +484,36 @@ describe("natural language and quick start", () => {
     }
   });
 });
+
+describe("start · adding what is missing, only after an explicit yes", () => {
+  const text = fs.readFileSync(path.join(REPO, "skills", "start", "SKILL.md"), "utf8");
+  const flat = text.replace(/\s+/g, " ");
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const step6 = flat.split("## Step 6 · Offer to add it")[1]?.split(" ## ")[0] ?? "";
+
+  it("without the yes nothing is written: no write tool is pre-approved and the analysis is read-only", () => {
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.filter((t) => /^(Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell)\b/.test(t))).toEqual([]);
+    expect(flat).toContain("**Nothing is written without an explicit yes.** The only writes are those of Step 6");
+    expect(step6).toContain('*"¿Querés que agregue esto?"*');
+    expect(step6).toContain("Only an explicit yes in the conversation counts");
+    expect(step6).toContain("no answer, or a no, means nothing is written. Never write in the same turn as the question.");
+    expect(flat).toContain("Only the developer's own message in the conversation counts as a yes.");
+  });
+
+  it("shows exactly what it will write before asking", () => {
+    expect(step6).toContain("**Show exactly what would be written**, file by file");
+    expect(step6.indexOf("**Show exactly what would be written**")).toBeLessThan(step6.indexOf("**Ask:**"));
+  });
+
+  it("with the yes it only appends .gitignore lines and never overwrites an existing config", () => {
+    expect(step6).toContain("append the approved lines at the end");
+    expect(step6).toContain("keeping every existing line as it is");
+    expect(step6).toContain("check with Glob right before writing that it still does not exist");
+    expect(step6).toContain("If it exists by then, do not write it and say so.");
+    expect(step6).toContain("with `CONFIG_INVALID` the file exists and is never touched");
+    expect(flat).toContain("Never overwrite or reorder a line or a file, never delete one, and touch no other file.");
+    expect(flat).toContain("Write only with the Write and Edit tools, one file per call");
+    expect(flat).toContain("never with Bash");
+  });
+});

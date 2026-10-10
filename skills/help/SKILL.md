@@ -43,7 +43,7 @@ Además, cada vez que Claude escribe un archivo de UI, el guardián automático 
 
 | Comando | Para qué |
 |---|---|
-| `/facha-ui:start` | Primer vistazo, sin configurar nada: tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves, lo próximo que conviene hacer y qué te falta (config, `.gitignore`, dev server). Solo lee |
+| `/facha-ui:start` | Primer vistazo, sin configurar nada: tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves, lo próximo que conviene hacer y qué te falta (config, `.gitignore`, dev server). El análisis solo lee; al final te ofrece agregar lo que falta y lo hace solo si decís que sí |
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
 | `/facha-ui:variants <pantalla> "<objetivo>" --rapido` | Modo rápido: una sola variante (la hipótesis que mejor resuelve el diagnóstico), con las mismas reglas y el guardián en 0 errores, captura de escritorio y sin revisor independiente |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Ajusta una variante que te gustó (por ejemplo, agregar o mover algo), con historial de revisiones |

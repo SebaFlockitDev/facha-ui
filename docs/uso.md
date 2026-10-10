@@ -486,7 +486,7 @@ Atajos útiles:
 
 | Comando | Quién lo invoca | Escribe |
 |---|---|---|
-| `/facha-ui:start` | Vos, o Claude cuando preguntás "¿cómo está la UI de mi proyecto?" | Nada: solo lee |
+| `/facha-ui:start` | Vos, o Claude cuando preguntás "¿cómo está la UI de mi proyecto?" | Nada, salvo que digas que sí al final: entonces agrega las líneas que faltan al `.gitignore` y crea `facha-ui.config.json` si no existe |
 | `/facha-ui:variants <pantalla> "<objetivo>" [--rapido]` | Vos, o Claude cuando pedís "mejorá la pantalla de…", "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Vos, o Claude cuando pedís un cambio en una variante | Solo esa variante, el run y sus capturas |
 | `/facha-ui:variants <slug> live [stop]` | Vos | Lo mismo que un ajuste, más el panel del lab y `.facha-ui/live/`; las paletas propuestas en `.facha-ui/proposals/` |
