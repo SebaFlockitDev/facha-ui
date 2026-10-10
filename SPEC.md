@@ -987,6 +987,7 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 | Ejecución con LangGraph / Strands | El mismo flujo como agente fuera de Claude Code, reutilizando el MCP |
 | CI de violaciones | `facha-ui audit --baseline`: falla si aparecen violaciones nuevas (ratchet). El puntaje de UX ya tiene su modo CI (§7.20) |
 | Regla `unknown-class` | Clases que no son utilidades de Tailwind ni existen en el CSS del proyecto (típico de IA), resueltas con el motor de Tailwind empaquetado |
+| Sugerencia de contraste que respeta el significado | Hoy `theme-contrast` sugiere el token legible más cercano de la misma familia de rol, y esa familia puede ser amplia: un texto en `#ff0000` puede terminar con `--muted-foreground`, y el aviso pasa de rojo de alerta a gris. Debería preferir un token del mismo rol semántico (`status.danger` para un rojo de error) y, si no hay ninguno legible, decir que la sugerencia "cambia el significado" y tratarlo como una brecha |
 | Contraste de pares en JSX | Desde 0.3.0 se mide el contraste por regla CSS (`theme-contrast`), por clase (`class-contrast`) y de elementos no textuales. Falta el par texto/fondo que solo existe en las clases de Tailwind de un mismo elemento JSX |
 | i18n | Mensajes de violaciones en español (`locale`) |
 | Diff visual entre pantallas | El de `apply` (antes/después de la pantalla) existe desde 0.12.0; falta el de las pantallas que comparten un componente modificado |
