@@ -1,9 +1,9 @@
 ---
 name: apply
-description: Applies a facha-ui variant that the developer has explicitly approved, removes the lab files and records the decision in the design-decisions memory.
+description: Applies a facha-ui variant that the developer has explicitly approved, checks the result with a before/after visual diff and UX score, removes the lab files and records the decision in the design-decisions memory.
 argument-hint: "<screen-slug> <a|b|c>"
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui
+allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__ux_score
 ---
 
 # facha-ui · apply
@@ -42,7 +42,8 @@ variant yourself, not even "the obvious one".
    - deletions inside `<lab.dir>/<slug>/`, the lab scaffold (step 6), `.facha-ui/live/` and
      the screenshots of the variants that were not chosen;
    - `memory.decisionsFile`, **append only**;
-   - `.facha-ui/runs/<slug>.json`.
+   - `.facha-ui/runs/<slug>.json`;
+   - the before/after captures and their diff images: `<project.screenshotsDir>/<slug>/apply-*.png`.
 
    Nothing else. Never touch token files, global CSS, `facha-ui.config.json`,
    `package.json`, lockfiles or `.gitignore`. Never install dependencies, commit, push,
@@ -54,7 +55,9 @@ variant yourself, not even "the obvious one".
      `git log -1 --format=%cI -- <file>`;
    - deleting exactly the paths listed in the approved plan, one by one. No wildcards, no
      recursive deletes of a path you computed without listing it first;
-   - `git restore -- <file>` only in step 5, and only if the developer says so.
+   - `git restore -- <file>` only in step 5, and only if the developer says so;
+   - the visual diff (step 4b): `node "<this skill's directory>/scripts/visual-diff.mjs" <before.png> <after.png> <diff.png>`,
+     with the three paths inside `<project.screenshotsDir>/<slug>/`. It writes only the diff image.
 
 ## Step 1 · Preflight (read-only)
 
@@ -77,6 +80,15 @@ variant yourself, not even "the obvious one".
      requires the developer to say so explicitly.
    - not a git repository → say that this check could not be made.
 5. Read the variant, everything it imports from `_shared/`, and the original screen.
+6. **The before** (read-only for the project):
+   - `ux_score` on `run.screen.file`: keep the score and its categories;
+   - capture the **real screen** (`preview.baseUrl` + `run.screen.route`) with Playwright, with the
+     same restrictions as `/facha-ui:variants` (only navigate, resize, wait, snapshot, screenshot
+     and close; never evaluate, click or type; the developer signs in if needed): desktop in the
+     default theme and mobile (375×812), as
+     `<project.screenshotsDir>/<slug>/apply-before-desktop-<theme>.png` and
+     `apply-before-mobile-<theme>.png`. If the screen has no route or the app is not reachable
+     after 2 attempts, say that the visual check will be skipped and go on.
 
 ## Step 2 · Plan and approval
 
@@ -118,6 +130,21 @@ Run `check_ui` on every modified or created file. Compare with `run.baseline`:
 - the result must have **no new errors** compared with the baseline violations, and
   `error ≤ baseline.error`;
 - warnings and info are reported but do not block.
+
+## Step 4b · Visual regression and UX score
+
+Only when the before captures exist:
+
+1. Capture **the same URLs, viewports and theme** as in step 1.6, as `apply-after-…png`.
+2. Run the visual diff for each pair, into `apply-diff-desktop-<theme>.png` and
+   `apply-diff-mobile-<theme>.png`. It prints the changed share, the changed regions and the
+   height change.
+3. Read the diff images. The changes must be where the plan said the screen would change.
+   A change outside it (the shell, another section, a shared component's area) is a
+   **possible regression**: show the region and the image, explain what you think changed, and
+   ask the developer before cleaning the lab. Do not hide it and do not fix it on your own.
+4. Run `ux_score` on the screen again and compare it with the before, by category. A category
+   that went down is reported with the findings that cost the points and their fix.
 
 ## Step 5 · If validation fails
 
@@ -175,13 +202,15 @@ what the team explicitly wanted.
 In `.facha-ui/runs/<slug>.json`, change only:
 
 - `status`: `"applied"`;
-- `applied`: `{ "variant": "<x>", "reason": "<developer's reason>", "at": "<ISO-8601 with offset>", "decisionId": "<id>", "files": ["<modified/created files>"] }`.
+- `applied`: `{ "variant": "<x>", "reason": "<developer's reason>", "at": "<ISO-8601 with offset>", "decisionId": "<id>", "files": ["<modified/created files>"], "uxScore": { "before": 63, "after": 81 }, "visualDiff": [ { "viewport": "desktop", "theme": "light", "diff": "<path>", "changedPercent": 12.4, "regions": [] } ] }`.
 
 ## Step 9 · Report
 
 Summarise:
 - what changed (files);
 - the guardian result against the baseline;
+- the UX score before and after, by category;
+- the visual diff: the images, the changed share and any possible regression;
 - what was deleted;
 - the decision id.
 
