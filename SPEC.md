@@ -636,7 +636,7 @@ facha-ui/
 │   └── dist/facha-ui-mcp.js      # bundle (esbuild); se commitea junto con cada cambio en src (§7.8)
 ├── scripts/run-pinned.mjs        # lanza un paquete npm con versión fija, portable a Windows
 ├── docs/
-│   ├── prompts/                  # 01-spec.md, 02-mvp-plan.md, 03-variants.md
+│   ├── prompts/                  # 01 a 13: el prompt de cada tarea (originales; lo reconstruido, marcado)
 │   ├── img/                      # diagrama del flujo y capturas de la demo
 │   └── uso.md                    # guía de uso
 ├── SPEC.md · README.md · LICENSE (MIT)

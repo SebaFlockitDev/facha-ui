@@ -241,6 +241,25 @@ describe("ux-reviewer agent", () => {
   });
 });
 
+describe("prompt traceability", () => {
+  const DIR = path.join(REPO, "docs", "prompts");
+  const files = fs.readdirSync(DIR).filter((f) => /^\d{2}-[a-z0-9-]+\.md$/.test(f)).sort();
+
+  it("numbers the prompts without gaps", () => {
+    expect(files.map((f) => Number(f.slice(0, 2)))).toEqual(files.map((_, i) => i + 1));
+  });
+
+  it("every prompt from 04 says where its text comes from, and marks what was reconstructed", () => {
+    for (const f of files.filter((f) => Number(f.slice(0, 2)) >= 4)) {
+      const text = fs.readFileSync(path.join(DIR, f), "utf8");
+      const header = text.match(/^<!--([\s\S]*?)-->/)?.[1] ?? "";
+      for (const field of ["Prompt ", "Fecha:", "Resultado:", "Commits:", "Origen:"]) expect(header, `${f} ${field}`).toContain(field);
+      const body = text.slice(text.indexOf("-->") + 3);
+      if (body.includes("[reconstruido]")) expect(header, f).toContain("[reconstruido]");
+    }
+  });
+});
+
 describe("short skills that read their parts when a step needs them", () => {
   const SKILLS = path.join(REPO, "skills");
   const VARIANTS = path.join(SKILLS, "variants");
