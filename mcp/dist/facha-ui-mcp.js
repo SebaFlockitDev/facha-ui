@@ -40706,7 +40706,7 @@ function selectorContext(node2) {
     if (cur.type === "rule") parts.unshift(cur.selector);
     else if (cur.type === "atrule") {
       const a = cur;
-      parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
+      if (a.name !== "layer") parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
     }
     cur = cur.parent;
   }
@@ -55550,7 +55550,8 @@ function createContext(root2, ws) {
       });
       const single = rule2.selector.trim().match(/^\.([\w-]+)$/);
       const fs7 = decls.find((d) => d.prop === "font-size");
-      if (single && fs7 && decls.every((d) => TYPO_PROPS.has(d.prop)) && !rule2.parent?.name) {
+      const atRule2 = rule2.parent?.name;
+      if (single && fs7 && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule2 || atRule2 === "layer")) {
         const px = toPx(fs7.value);
         if (px != null) typographyClasses.push({ className: single[1], fontSizePx: px, source });
       }

@@ -94,7 +94,9 @@ export function createContext(root: string, ws?: Workspace): Context {
       });
       const single = rule.selector.trim().match(/^\.([\w-]+)$/);
       const fs = decls.find((d) => d.prop === "font-size");
-      if (single && fs && decls.every((d) => TYPO_PROPS.has(d.prop)) && !(rule.parent as AtRule)?.name) {
+      // Typography classes outside any at-rule (a cascade layer does not count: it does not change matching).
+      const atRule = (rule.parent as AtRule)?.name;
+      if (single && fs && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule || atRule === "layer")) {
         const px = toPx(fs.value);
         if (px != null) typographyClasses.push({ className: single[1]!, fontSizePx: px, source });
       }

@@ -23,7 +23,11 @@ function norm(sel: string): string {
   return sel.replace(/\s+/g, " ").replace(/'/g, '"').trim();
 }
 
-/** Context string of a rule: enclosing at-rules + selector, e.g. "@media (prefers-color-scheme: dark) :root". */
+/**
+ * Context string of a rule: enclosing at-rules + selector, e.g. "@media (prefers-color-scheme: dark) :root".
+ * Cascade layers are left out: `@layer base { :root {…} }` matches the same elements as `:root {…}`,
+ * so a layer never decides a theme or a component class (shadcn/ui and Tailwind 3 declare tokens there).
+ */
 export function selectorContext(node: Rule | AtRule): string {
   const parts: string[] = [];
   let cur: ChildNode | Root | undefined = node as any;
@@ -31,7 +35,7 @@ export function selectorContext(node: Rule | AtRule): string {
     if (cur.type === "rule") parts.unshift((cur as Rule).selector);
     else if (cur.type === "atrule") {
       const a = cur as AtRule;
-      parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
+      if (a.name !== "layer") parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
     }
     cur = (cur as any).parent;
   }
