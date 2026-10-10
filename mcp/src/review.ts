@@ -47,6 +47,13 @@ function isAction(e: ElementUsage): boolean {
   );
 }
 
+/** The code without comments, keeping line breaks so line numbers still match. */
+export function withoutComments(code: string): string {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+    .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, (m, lead: string) => lead + " ".repeat(m.length - lead.length));
+}
+
 function lineOf(text: string, re: RegExp): number | null {
   const m = re.exec(text);
   return m ? text.slice(0, m.index).split("\n").length : null;
@@ -68,7 +75,7 @@ export function reviewUi(ctx: Context, input: string) {
   for (const f of files.sort()) {
     const { usages } = extractFile(ctx, f);
     const file = rel(ctx.project, f);
-    const source = readSource(f) ?? "";
+    const source = withoutComments(readSource(f) ?? "");
     const elements = usages.filter((u): u is ElementUsage => u.kind === "element");
 
     // Primary actions: buttons and links painted with the brand's primary accent.

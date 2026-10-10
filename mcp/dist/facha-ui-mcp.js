@@ -7293,26 +7293,26 @@ var require_parse2 = __commonJS({
       };
       if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input2)) {
         let backslashes = false;
-        let output2 = input2.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc2, chars, first, rest, index2) => {
-          if (first === "\\") {
+        let output2 = input2.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc2, chars, first2, rest, index2) => {
+          if (first2 === "\\") {
             backslashes = true;
             return m;
           }
-          if (first === "?") {
+          if (first2 === "?") {
             if (esc2) {
-              return esc2 + first + (rest ? QMARK.repeat(rest.length) : "");
+              return esc2 + first2 + (rest ? QMARK.repeat(rest.length) : "");
             }
             if (index2 === 0) {
               return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
             }
             return QMARK.repeat(chars.length);
           }
-          if (first === ".") {
+          if (first2 === ".") {
             return DOT_LITERAL.repeat(chars.length);
           }
-          if (first === "*") {
+          if (first2 === "*") {
             if (esc2) {
-              return esc2 + first + (rest ? star : "");
+              return esc2 + first2 + (rest ? star : "");
             }
             return star;
           }
@@ -18935,10 +18935,10 @@ var $ZodUnion = /* @__PURE__ */ $constructor("$ZodUnion", (inst, def) => {
     }
     return void 0;
   });
-  const first = def.options.length === 1 ? def.options[0]._zod.run : null;
+  const first2 = def.options.length === 1 ? def.options[0]._zod.run : null;
   inst._zod.parse = (payload, ctx) => {
-    if (first) {
-      return first(payload, ctx);
+    if (first2) {
+      return first2(payload, ctx);
     }
     let async = false;
     const results = [];
@@ -18995,10 +18995,10 @@ function handleExclusiveUnionResults(results, final, inst, ctx) {
 var $ZodXor = /* @__PURE__ */ $constructor("$ZodXor", (inst, def) => {
   $ZodUnion.init(inst, def);
   def.inclusive = false;
-  const first = def.options.length === 1 ? def.options[0]._zod.run : null;
+  const first2 = def.options.length === 1 ? def.options[0]._zod.run : null;
   inst._zod.parse = (payload, ctx) => {
-    if (first) {
-      return first(payload, ctx);
+    if (first2) {
+      return first2(payload, ctx);
     }
     let async = false;
     const results = [];
@@ -31463,9 +31463,9 @@ var numberProcessor = (schema, ctx, _json, params) => {
       else
         handleUnrepresentable(schema, ctx, json2, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
     }
-    const [first, ...rest] = divisors;
-    if (first !== void 0)
-      json2.multipleOf = first;
+    const [first2, ...rest] = divisors;
+    if (first2 !== void 0)
+      json2.multipleOf = first2;
     if (rest.length)
       json2.allOf = [...json2.allOf ?? [], ...rest.map((m) => ({ multipleOf: m }))];
   }
@@ -34169,14 +34169,14 @@ function checkArrayGuards(arraySchema, guards) {
         const key = canonicalKey(items[i], /* @__PURE__ */ new Set());
         if (key === null)
           continue;
-        const first = firstSeen.get(key);
-        if (first === void 0) {
+        const first2 = firstSeen.get(key);
+        if (first2 === void 0) {
           firstSeen.set(key, i);
           continue;
         }
         payload.issues.push({
           code: "custom",
-          message: `Array items must be unique: element at index ${i} duplicates the one at index ${first}`,
+          message: `Array items must be unique: element at index ${i} duplicates the one at index ${first2}`,
           input: items,
           path: [i],
           continue: true
@@ -40682,8 +40682,8 @@ function resolveUserPath(project, input2) {
     }
     return { abs: real, isDir: fs2.statSync(real).isDirectory() };
   }
-  const first = candidates[0];
-  if (!isInside(project.root, path2.resolve(first))) {
+  const first2 = candidates[0];
+  if (!isInside(project.root, path2.resolve(first2))) {
     throw new FachaError("PATH_OUTSIDE_PROJECT", `Path is outside the project root: ${input2}`, { path: input2 });
   }
   throw new FachaError("PATH_NOT_FOUND", `Path not found in the project: ${input2}`, { path: input2 });
@@ -43430,7 +43430,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     this.expect(1);
     return this.finishNode(node2, "TupleTypeAnnotation");
   }
-  flowParseFunctionTypeParam(first) {
+  flowParseFunctionTypeParam(first2) {
     let name = null;
     let optional2 = false;
     let typeAnnotation;
@@ -43438,7 +43438,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     const lh = this.lookahead();
     const isThis = this.state.type === 74;
     if (lh.type === 10 || lh.type === 13) {
-      if (isThis && !first) {
+      if (isThis && !first2) {
         this.raise(FlowErrors.ThisParamMustBeFirst, node2);
       }
       name = this.parseIdentifier(isThis);
@@ -48207,10 +48207,10 @@ var LValParser = class extends NodeUtils {
   parseBindingList(close, closeCharCode, flags) {
     const allowEmpty = flags & 1;
     const elts = [];
-    let first = true;
+    let first2 = true;
     while (!this.eat(close)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8);
       }
@@ -48919,10 +48919,10 @@ var ExpressionParser = class extends LValParser {
   }
   parseCallExpressionArguments(allowPlaceholder, nodeForExtra, refExpressionErrors) {
     const elts = [];
-    let first = true;
+    let first2 = true;
     while (!this.eat(7)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8);
         if (this.match(7)) {
@@ -49307,12 +49307,12 @@ var ExpressionParser = class extends LValParser {
     const innerStartLoc = this.state.startLoc;
     const exprList = [];
     const refExpressionErrors = new ExpressionErrors();
-    let first = true;
+    let first2 = true;
     let spreadStartLoc;
     let optionalCommaStartLoc;
     while (!this.match(7)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8, refExpressionErrors.optionalParametersLoc === null ? null : refExpressionErrors.optionalParametersLoc);
         if (this.match(7)) {
@@ -49464,13 +49464,13 @@ var ExpressionParser = class extends LValParser {
   }
   parseObjectLike(close, isPattern, refExpressionErrors) {
     let sawProto = false;
-    let first = true;
+    let first2 = true;
     const node2 = this.startNode();
     node2.properties = [];
     this.next();
     while (!this.match(close)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8);
         if (this.match(close)) {
@@ -49757,10 +49757,10 @@ var ExpressionParser = class extends LValParser {
   }
   parseExprList(close, allowEmpty, refExpressionErrors, nodeForExtra) {
     const elts = [];
-    let first = true;
+    let first2 = true;
     while (!this.eat(close)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8);
         if (this.match(close)) {
@@ -51518,11 +51518,11 @@ var StatementParser = class extends ExpressionParser {
   }
   parseExportSpecifiers(isInTypeExport) {
     const nodes = [];
-    let first = true;
+    let first2 = true;
     this.expect(2);
     while (!this.eat(4)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         this.expect(8);
         if (this.eat(4)) break;
@@ -51721,11 +51721,11 @@ var StatementParser = class extends ExpressionParser {
     return false;
   }
   parseNamedImportSpecifiers(node2) {
-    let first = true;
+    let first2 = true;
     this.expect(2);
     while (!this.eat(4)) {
-      if (first) {
-        first = false;
+      if (first2) {
+        first2 = false;
       } else {
         if (this.eat(10)) {
           throw this.raise(Errors.DestructureNamedImport, this.state.startLoc);
@@ -57214,14 +57214,14 @@ function statusConfusable(ctx) {
           if (!prev.themes.includes(th)) prev.themes.push(th);
           if (Math.min(...Object.values(prev.deltaE)) <= min) continue;
         }
-        const [first, second] = a.kind < b.kind ? [a, b] : [b, a];
+        const [first2, second] = a.kind < b.kind ? [a, b] : [b, a];
         worstByPair.set(key, {
           themes: prev?.themes ?? [th],
           kind: "status-confusable",
-          token: `${first.label} ~ ${second.label}`,
-          states: [first.kind, second.kind],
+          token: `${first2.label} ~ ${second.label}`,
+          states: [first2.kind, second.kind],
           items: [
-            { label: first.label, source: first.source, colors: partsHex(first, th) },
+            { label: first2.label, source: first2.source, colors: partsHex(first2, th) },
             { label: second.label, source: second.source, colors: partsHex(second, th) }
           ],
           measuredIn: th,
@@ -57717,6 +57717,9 @@ var varRefs = (text) => [...text.matchAll(/var\(\s*(--[\w-]+)|\((--[\w-]+)\)/g)]
 function isAction(e4) {
   return e4.tag === "button" || e4.tag === "a" && "href" in e4.attrs || e4.attrs.role === "button" || e4.tag === "input" && (e4.attrs.type === "submit" || e4.attrs.type === "button");
 }
+function withoutComments(code2) {
+  return code2.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`\\])\/\/[^\n]*/g, (m, lead) => lead + " ".repeat(m.length - lead.length));
+}
 function lineOf(text, re) {
   const m = re.exec(text);
   return m ? text.slice(0, m.index).split("\n").length : null;
@@ -57734,7 +57737,7 @@ function reviewUi(ctx, input2) {
   for (const f3 of files.sort()) {
     const { usages } = extractFile(ctx, f3);
     const file2 = rel2(ctx.project, f3);
-    const source = readSource(f3) ?? "";
+    const source = withoutComments(readSource(f3) ?? "");
     const elements = usages.filter((u) => u.kind === "element");
     const primary = elements.filter((e4) => {
       if (!isAction(e4)) return false;
@@ -58021,9 +58024,9 @@ var util;
 })(util || (util = {}));
 var objectUtil;
 (function(objectUtil2) {
-  objectUtil2.mergeShapes = (first, second) => {
+  objectUtil2.mergeShapes = (first2, second) => {
     return {
-      ...first,
+      ...first2,
       ...second
       // second overwrites first
     };
@@ -60956,10 +60959,10 @@ var ZodRecord2 = class _ZodRecord extends ZodType2 {
   get element() {
     return this._def.valueType;
   }
-  static create(first, second, third) {
+  static create(first2, second, third) {
     if (second instanceof ZodType2) {
       return new _ZodRecord({
-        keyType: first,
+        keyType: first2,
         valueType: second,
         typeName: ZodFirstPartyTypeKind2.ZodRecord,
         ...processCreateParams(third)
@@ -60967,7 +60970,7 @@ var ZodRecord2 = class _ZodRecord extends ZodType2 {
     }
     return new _ZodRecord({
       keyType: ZodString2.create(),
-      valueType: first,
+      valueType: first2,
       typeName: ZodFirstPartyTypeKind2.ZodRecord,
       ...processCreateParams(second)
     });
@@ -66624,6 +66627,136 @@ function scanStyles(ctx) {
   };
 }
 
+// src/flow.ts
+var SYNONYMS = [
+  ["guardar", "grabar", "salvar", "save", "store"],
+  ["eliminar", "borrar", "quitar", "suprimir", "delete", "remove", "erase"],
+  ["crear", "agregar", "a\xF1adir", "nuevo", "nueva", "alta", "add", "create", "new"],
+  ["editar", "modificar", "cambiar", "edit", "modify", "change"],
+  ["enviar", "mandar", "send", "submit"],
+  ["cancelar", "descartar", "cancel", "discard"],
+  ["volver", "atr\xE1s", "regresar", "back", "return"],
+  ["confirmar", "aceptar", "confirm", "accept"]
+];
+var DESTRUCTIVE = /\b(eliminar|borrar|quitar|dar de baja|desactivar|anular|cancelar (el|la|suscripci)|delete|remove|deactivate|revoke)\b/i;
+var CONFIRMS = /\bconfirm\s*\(|¿[^?]*(seguro|segura|eliminar|borrar)|are you sure|<\w*(Modal|Dialog|Confirm)\b|role=["']alertdialog["']|deshacer|undo/i;
+var FEEDBACK = /guardad|cread[oa]|enviad[oa]|actualizad[oa]|eliminad[oa]|listo|éxito|exito|success|saved|created|toast|notif|role=["']status["']|aria-live/i;
+var ERROR_STATE = /\b[eE]rror\b|role=["']alert["']|\bcatch\s*\(/;
+var EXIT = /\b(cancelar|volver|atrás|cerrar|descartar|cancel|back|close|discard)\b/i;
+var first = (s) => s.toLowerCase().match(/[\p{L}]+/u)?.[0] ?? "";
+var isAction2 = (e4) => e4.tag === "button" || e4.tag === "a" && "href" in e4.attrs || e4.attrs.role === "button";
+function reviewFlow(ctx, inputs) {
+  if (inputs.length < 2) throw new FachaError("PATH_NOT_FOUND", "A flow needs at least two steps (screen files, in order).", { paths: inputs });
+  const steps = inputs.map((input2, i) => {
+    const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
+    if (isDir) throw new FachaError("UNSUPPORTED_FILE", `Step ${i + 1} must be a file, not a directory: ${input2}`, { path: input2 });
+    const file2 = rel2(ctx.project, abs2);
+    const source = withoutComments(readSource(abs2) ?? "");
+    const { usages } = extractFile(ctx, abs2);
+    const elements = usages.filter((u) => u.kind === "element");
+    const actions = elements.filter(isAction2).map((e4) => ({ label: (e4.attrs["aria-label"] && e4.attrs["aria-label"] !== "{}" ? e4.attrs["aria-label"] : e4.text).trim(), line: e4.line }));
+    const title = elements.find((e4) => /^h[1-3]$/.test(e4.tag) && e4.text)?.text ?? source.match(/<[A-Z][\w.]*[^>]*\btitle=["']([^"']+)["']/)?.[1] ?? null;
+    const submits = /onSubmit=|type=["']submit["']/.test(source);
+    const hasForm = submits || elements.some((e4) => e4.tag === "form" || e4.tag === "input" || e4.tag === "select" || e4.tag === "textarea");
+    const review = reviewUi(ctx, file2).files[0];
+    return {
+      step: i + 1,
+      file: file2,
+      title,
+      actions: actions.filter((a) => a.label),
+      primaryActions: review?.primaryActions.length ?? 0,
+      hasForm,
+      submits,
+      destructive: actions.filter((a) => DESTRUCTIVE.test(a.label)).map((a) => a.label),
+      confirms: CONFIRMS.test(source),
+      feedback: FEEDBACK.test(source),
+      errorState: ERROR_STATE.test(source),
+      exit: actions.some((a) => EXIT.test(a.label)) || /router\.back\(|history\.back\(/.test(source)
+    };
+  });
+  const findings = [];
+  for (const group of SYNONYMS) {
+    const used = /* @__PURE__ */ new Map();
+    for (const s of steps) for (const a of s.actions) {
+      const verb = first(a.label);
+      if (group.includes(verb)) used.set(verb, [.../* @__PURE__ */ new Set([...used.get(verb) ?? [], s.step])]);
+    }
+    if (used.size > 1) {
+      const list2 = [...used.entries()].map(([w, st]) => `"${w}" (step ${st.join(", ")})`).join(", ");
+      findings.push({
+        heuristic: "wording",
+        severity: "warning",
+        steps: [...new Set([...used.values()].flat())].sort((a, b) => a - b),
+        evidence: `the same action is named ${list2}`,
+        why: "Different words for one action make people wonder whether they do different things.",
+        fix: `Pick one word for this action in the whole flow (and add it to copy.terms so the guardian keeps it).`
+      });
+    }
+  }
+  for (const s of steps) {
+    if (s.destructive.length && !s.confirms) {
+      findings.push({
+        heuristic: "destructive",
+        severity: "warning",
+        steps: [s.step],
+        evidence: `"${s.destructive[0]}" with no confirmation or undo in ${s.file}`,
+        why: "A destructive action without confirmation or undo turns a slip into lost data.",
+        fix: 'Ask for confirmation naming what will be lost ("\xBFEliminar el pedido 1042?"), or offer undo right after.'
+      });
+    }
+    if (s.submits && !s.exit) {
+      findings.push({
+        heuristic: "exit",
+        severity: "info",
+        steps: [s.step],
+        evidence: `a form with no cancel or back action in ${s.file}`,
+        why: "Without a way out, people use the browser's back button and may lose what they typed.",
+        fix: 'Add a secondary "Cancelar" or "Volver" next to the primary action.'
+      });
+    }
+    if (s.submits && !s.feedback) {
+      findings.push({
+        heuristic: "feedback",
+        severity: "info",
+        steps: [s.step],
+        evidence: `the form submits with no visible confirmation in ${s.file}`,
+        why: "Without feedback, people do not know whether it worked and try again (duplicates).",
+        fix: "Confirm the result in place (a status message or toast that says what happened) or move to a screen that shows it."
+      });
+    }
+    if (s.submits && !s.errorState) {
+      findings.push({
+        heuristic: "errors",
+        severity: "info",
+        steps: [s.step],
+        evidence: `the form submits with no error state in ${s.file}`,
+        why: "When it fails, the person is left with nothing to do, or loses what they typed.",
+        fix: "Show what failed next to the field or above the form, keep the data, and say how to retry."
+      });
+    }
+    if (s.actions.length > 0 && s.primaryActions === 0 && s.step < steps.length) {
+      findings.push({
+        heuristic: "next-step",
+        severity: "info",
+        steps: [s.step],
+        evidence: `no primary action in step ${s.step} (${s.file})`,
+        why: "Without a primary action, the next step of the flow does not stand out.",
+        fix: "Make the action that moves the flow forward the primary one (the project's primary button class)."
+      });
+    }
+  }
+  return {
+    configSource: ctx.project.configSource,
+    steps,
+    findings,
+    summary: { steps: steps.length, warning: findings.filter((f3) => f3.severity === "warning").length, info: findings.filter((f3) => f3.severity === "info").length },
+    notes: [
+      "Signals from the code of each step, not rules: confirm them on the captures and by walking the flow.",
+      "Steps reached only after an action (a modal, a success screen) are not captured automatically: describe them or capture them by hand."
+    ]
+  };
+}
+
 // src/server.ts
 var VERSION = "0.11.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -66648,7 +66781,10 @@ var DESCRIPTIONS = {
 **Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
   ux_score: `Scores each screen from 0 to 100 with the deterministic signals facha-ui measures, split into five categories: consistency with the design system, accessibility, responsive, microcopy, and hierarchy and states. A screen counts its own file plus the project components it imports. Each category starts at 100 and loses points per finding (error 15, warning 6, info 2).
 **When to use:** to answer "how good is this screen?" or "which screens need the most work?", to compare a screen before and after a change, and to explain where the points go. It is a trend, not an absolute grade: compare a screen with itself over time.
-**Returns:** JSON with \`average\`, \`screens\` (per screen: \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`
+**Returns:** JSON with \`average\`, \`screens\` (per screen: \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`,
+  review_flow: `Measures signals of a user journey across screens (for example create \u2192 confirm \u2192 done), given the screen files in order: the same action named differently across steps, destructive actions without a confirmation or undo, forms without a way out, submissions without visible feedback or an error state, and steps without a clear next step. Deterministic heuristics over the code; they never block.
+**When to use:** to review a flow rather than one screen ("review the sign-up flow"), before redesigning a step, and as the measurable half of /facha-ui:flow.
+**Returns:** JSON with \`steps\` (per step: title, actions, primary actions, form, destructive actions, confirmation, feedback, error state, exit) and \`findings\` (heuristic, severity, steps, evidence, why it matters, fix). Read-only.`
 };
 var READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 var severity2 = external_exports.enum(["info", "warning", "error"]);
@@ -66792,6 +66928,24 @@ function createServer(opts) {
       try {
         const data = uxScore(context(), path9);
         return ok(`${data.screens.length} screen(s), average ${data.average ?? "-"}/100.`, data);
+      } catch (e4) {
+        return fail(e4);
+      }
+    }
+  );
+  server.registerTool(
+    "review_flow",
+    {
+      title: "Review flow",
+      description: DESCRIPTIONS.review_flow,
+      inputSchema: { paths: external_exports.array(external_exports.string().min(1)).min(2).max(12).describe("The screen files of the flow, in order.") },
+      annotations: { title: "Review flow", ...READ_ONLY }
+    },
+    async ({ paths }) => {
+      try {
+        const data = reviewFlow(context(), paths);
+        const s = data.summary;
+        return ok(`${s.steps} step(s): ${s.warning} warning(s), ${s.info} info.`, data);
       } catch (e4) {
         return fail(e4);
       }

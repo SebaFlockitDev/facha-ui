@@ -119,7 +119,16 @@ describe("ux_score", () => {
   it("scores each screen by category, counting the components it imports", async () => {
     const r = await h.call("ux_score", {});
     const byScreen = Object.fromEntries(r.structuredContent.screens.map((s: any) => [s.screen, s]));
-    expect(Object.keys(byScreen)).toEqual(["app/clean/page.tsx", "app/copy/page.tsx", "app/list/page.tsx", "app/orders/page.tsx", "app/wide/page.tsx"]);
+    expect(Object.keys(byScreen)).toEqual([
+      "app/clean/page.tsx",
+      "app/copy/page.tsx",
+      "app/flow/done/page.tsx",
+      "app/flow/new/page.tsx",
+      "app/flow/review/page.tsx",
+      "app/list/page.tsx",
+      "app/orders/page.tsx",
+      "app/wide/page.tsx",
+    ]);
     expect(byScreen["app/clean/page.tsx"].score).toBe(100);
     expect(byScreen["app/orders/page.tsx"].score).toBeLessThan(byScreen["app/clean/page.tsx"].score);
     expect(byScreen["app/orders/page.tsx"].categories.accessibility).toMatchObject({ error: 3 });
@@ -179,7 +188,7 @@ describe("score CLI · CI gate", () => {
   it("prints the score as JSON and exits 0 when nothing got worse", () => {
     const r = run([]);
     expect(r.status).toBe(0);
-    expect(JSON.parse(r.stdout).screens.length).toBe(5);
+    expect(JSON.parse(r.stdout).screens.length).toBe(8);
   });
 
   it("exits 1 when a screen scores below its baseline or below --min", () => {
@@ -191,5 +200,29 @@ describe("score CLI · CI gate", () => {
     expect(down.stderr).toContain("UX score went down: app/orders/page.tsx 100 →");
     expect(run(["--min", "101"]).status).toBe(1);
     fs.rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+describe("review_flow", () => {
+  const FLOW = ["app/flow/new/page.tsx", "app/flow/review/page.tsx", "app/flow/done/page.tsx"];
+
+  it("finds what breaks a journey across steps, each with why and a fix", async () => {
+    const r = await h.call("review_flow", { paths: FLOW });
+    expect(r.structuredContent.findings.map((f: any) => `${f.heuristic} ${f.severity} ${f.steps.join(",")}`)).toEqual([
+      "wording warning 1,2",
+      "exit info 1",
+      "feedback info 1",
+      "errors info 1",
+      "destructive warning 2",
+    ]);
+    const wording = r.structuredContent.findings[0];
+    expect(wording.evidence).toContain('"guardar" (step 1), "grabar" (step 2)');
+    expect(wording.fix).toContain("copy.terms");
+    expect(r.structuredContent.steps.map((s: any) => s.title)).toEqual(["Nuevo pedido", "Revisar pedido", "Pedido guardado"]);
+  });
+
+  it("needs at least two steps", async () => {
+    const r = await h.call("review_flow", { paths: ["app/flow/new/page.tsx"] });
+    expect(r.isError).toBe(true);
   });
 });

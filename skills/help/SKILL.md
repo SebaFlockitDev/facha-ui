@@ -1,7 +1,7 @@
 ---
 name: help
 description: Lists the facha-ui commands, MCP tools and files, with examples. Only shows text; it never reads or changes the project.
-argument-hint: "[variants|apply|init|learn|tools|files]"
+argument-hint: "[variants|flow|apply|init|learn|tools|files]"
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 Show the reference below to the developer. Rules:
 
 - **Do not call any tool** and do not read or write files: this command only shows text.
-- If `$ARGUMENTS` is `variants`, `apply`, `init`, `learn`, `tools` or `files`, show only that section,
+- If `$ARGUMENTS` is `variants`, `flow`, `apply`, `init`, `learn`, `tools` or `files`, show only that section,
   plus the last line ("Guía completa…").
   With no argument (or an unknown one), show everything.
 - Show it in the developer's language. The text below is in Spanish; translate it if
@@ -28,11 +28,12 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Genera 3 variantes de una pantalla en el laboratorio, validadas con el guardián |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Ajusta una variante que te gustó (por ejemplo, agregar o mover algo), con historial de revisiones |
 | `/facha-ui:variants <slug> live [stop]` | Modo en vivo: pedís los cambios desde un panel en el navegador y los ves al instante |
+| `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Revisa un recorrido entre pantallas (nombres, confirmaciones, errores, salida, próximo paso) con capturas; no cambia código y te propone qué paso rediseñar |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
 | `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
 | `/facha-ui:learn [1-9\|<tema>]` | Curso práctico sobre tu propio proyecto: design system, IA y UI con criterio, en 9 lecciones. Solo lee |
-| `/facha-ui:help [variants\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
+| `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
 
 **Flujo en 4 pasos**
 
@@ -71,6 +72,17 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
   - **Paleta:** probás con un clic paletas predefinidas o tu color sobre toda la app, solo en tu navegador, con el contraste y los conflictos (y su solución) a la vista. *Proponer* la guarda para `/facha-ui:init palette`.
   - **Ver en Móvil 375 / Tablet 768:** abre la variante a ese ancho, con el medidor de responsive encendido.
   - El panel se arrastra, se ajusta de tamaño, se minimiza (–) o se oculta (×; Alt+Shift+F lo trae).
+
+### flow
+
+```text
+/facha-ui:flow "<objetivo del recorrido>" <pantalla> <pantalla> [<pantalla>…]
+```
+
+- Revisa el recorrido completo, en orden: que la misma acción se llame igual en cada paso, que lo destructivo pida confirmación, que haya una salida, que después de cada acción se vea qué pasó, que los errores se puedan resolver y que siempre esté claro el próximo paso.
+- Captura cada paso en escritorio y celular, mide cada pantalla (guardián, `review_ui`, puntaje) y hace una crítica de 8 puntos (FL1–FL8), cada hallazgo con su arreglo.
+- No cambia código: deja un reporte en `.facha-ui/flows/` y te propone el comando de `variants` para el paso que más lo necesita.
+- Si no sabés qué pantallas son, describí el flujo ("revisá el alta de pedidos"): las busca y te las confirma.
 
 ### apply
 

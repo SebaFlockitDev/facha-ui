@@ -6,6 +6,7 @@ import { getDesignSystem, health, rulesInfo, SECTIONS } from "./design-system.js
 import { scanStyles } from "./propose.js";
 import { reviewUi } from "./review.js";
 import { uxScore } from "./score.js";
+import { reviewFlow } from "./flow.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
@@ -37,6 +38,9 @@ export const DESCRIPTIONS = {
   ux_score: `Scores each screen from 0 to 100 with the deterministic signals facha-ui measures, split into five categories: consistency with the design system, accessibility, responsive, microcopy, and hierarchy and states. A screen counts its own file plus the project components it imports. Each category starts at 100 and loses points per finding (error 15, warning 6, info 2).
 **When to use:** to answer "how good is this screen?" or "which screens need the most work?", to compare a screen before and after a change, and to explain where the points go. It is a trend, not an absolute grade: compare a screen with itself over time.
 **Returns:** JSON with \`average\`, \`screens\` (per screen: \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`,
+  review_flow: `Measures signals of a user journey across screens (for example create → confirm → done), given the screen files in order: the same action named differently across steps, destructive actions without a confirmation or undo, forms without a way out, submissions without visible feedback or an error state, and steps without a clear next step. Deterministic heuristics over the code; they never block.
+**When to use:** to review a flow rather than one screen ("review the sign-up flow"), before redesigning a step, and as the measurable half of /facha-ui:flow.
+**Returns:** JSON with \`steps\` (per step: title, actions, primary actions, form, destructive actions, confirmation, feedback, error state, exit) and \`findings\` (heuristic, severity, steps, evidence, why it matters, fix). Read-only.`,
 } as const;
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
@@ -201,6 +205,25 @@ export function createServer(opts: ServerOptions): McpServer {
       try {
         const data = uxScore(context(), path);
         return ok(`${data.screens.length} screen(s), average ${data.average ?? "-"}/100.`, data);
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "review_flow",
+    {
+      title: "Review flow",
+      description: DESCRIPTIONS.review_flow,
+      inputSchema: { paths: z.array(z.string().min(1)).min(2).max(12).describe("The screen files of the flow, in order.") },
+      annotations: { title: "Review flow", ...READ_ONLY },
+    },
+    async ({ paths }) => {
+      try {
+        const data = reviewFlow(context(), paths);
+        const s = data.summary;
+        return ok(`${s.steps} step(s): ${s.warning} warning(s), ${s.info} info.`, data);
       } catch (e) {
         return fail(e);
       }
