@@ -37,9 +37,6 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 - **Nada hardcodeado de proyectos de prueba:** ni nombres, ni rutas, ni términos de dominio, ni
   colores de marca. Los ejemplos usan valores neutros (`orders`, `#4f46e5`). Hay un test que lo
   controla.
-- **Prompts:** cada prompt que inicia una tarea se guarda en `docs/prompts/NN-<tema>.md`, con una
-  cabecera (fecha, resultado, commits). Las referencias al proyecto de prueba se reemplazan por
-  marcadores; si el texto original no existe, se marca "reconstruido a partir del historial".
 - **Skills cortas:** cada `SKILL.md` tiene 250 líneas o menos. Lo que se usa en un solo modo o
   paso va a un archivo aparte, y el paso que lo usa dice "antes de este paso, leé X".
 
@@ -53,7 +50,7 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 | `skills/_shared/ux-principles.md` | principios de UX con ids estables; los citan las skills y el agente |
 | `skills/variants/templates/next-app/` | laboratorio (layout, panel en vivo, medición responsive, comparar) |
 | `agents/ux-reviewer.md` | subagente crítico, solo lectura (`facha-ui:ux-reviewer`) |
-| `docs/uso.md`, `docs/prompts/` | guía de uso y prompts de cada tarea |
+| `docs/uso.md` | guía de uso |
 
 ## Verificación antes de cada commit
 
