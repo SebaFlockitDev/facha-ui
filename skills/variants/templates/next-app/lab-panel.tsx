@@ -98,6 +98,8 @@ interface Status {
   message?: string;
   revision?: number;
   guardian?: { error: number; warning: number; info: number };
+  /** For needs-input: the choices, shown as buttons; the recommended one stands out. */
+  options?: { label: string; recommended?: boolean }[];
 }
 
 /** What is sent about a pointed element. The endpoint keeps only these fields. */
@@ -269,6 +271,12 @@ a.act.link { display: inline-block; text-decoration: none; border-radius: 9px; b
 a.act.link:focus-visible { outline: 2px solid #ff8a4c; outline-offset: 2px; }
 select { font: inherit; font-size: 12px; color: #e8eaf2; background: #0e1119; border: 1px solid #3a4256; border-radius: 8px; padding: 3px 6px; }
 .liveoff { display: grid; gap: 6px; border: 1px solid #ff8a4c; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+.decision { display: grid; gap: 8px; flex-shrink: 0; max-height: 45vh; overflow: auto; border: 1px solid #ff8a4c; border-radius: 12px; background: #1f1a17; padding: 10px 12px; }
+.decision .label { color: #ff8a4c; }
+.decision-text { margin: 0; font-size: 12.5px; }
+.decision-options { display: grid; gap: 6px; }
+.decision-options button { text-align: left; }
+input.answer { flex: 1; min-width: 0; box-sizing: border-box; border-radius: 9px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 7px 10px; font: inherit; }
 .liveoff .row { gap: 6px; }
 button.view { border-radius: 999px; border: 1px solid #3a4256; background: #0e1119; color: #e8eaf2; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
 button.view[aria-pressed="true"] { border-color: #ff8a4c; }
@@ -802,6 +810,7 @@ export function LabPanel() {
   const [choice, setChoice] = useState<PaletteChoice | null>(null);
   const [customHex, setCustomHex] = useState("#2563eb");
   const [viewport, setViewport] = useState<(typeof VIEWPORTS)[number] | null>(null);
+  const [ownAnswer, setOwnAnswer] = useState("");
   const hostRef = useRef<HTMLDivElement | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -1083,6 +1092,15 @@ export function LabPanel() {
   };
 
   /** A one-click improvement, sent as a change; the status shows in the Cambios tab. */
+  /** Answers a question from Claude Code: the answer is a new request that names the question. */
+  const answer = async (question: LiveRequest, choice: string) => {
+    const ok = await post({ kind: "change", text: `Respuesta a ${question.id}: ${choice}` });
+    if (ok) {
+      setOwnAnswer("");
+      setNotice(`Respuesta enviada: ${choice}`);
+    }
+  };
+
   const quick = async (label: string, request: string) => {
     const ok = await post({ kind: "change", text: request });
     if (ok) {
@@ -1200,6 +1218,10 @@ export function LabPanel() {
   const liveHere = live.active && live.slug === here.slug;
   const showTab = tab === "palette" && !paletteBase ? "improve" : tab;
   const deviceIssues = issuesOf(deviceReport ?? []);
+  // The newest question still waiting for an answer, unless a later request already answers it.
+  const decision = [...mine].reverse().find(
+    (r) => r.status.state === "needs-input" && !mine.some((m) => m.text.startsWith(`Respuesta a ${r.id}`)),
+  );
   const params = new URLSearchParams(window.location.search);
   const currentTheme = params.get("theme") ?? "";
   const currentState = params.get("state") ?? "";
@@ -1539,6 +1561,45 @@ export function LabPanel() {
                 </button>
               )}
             </div>
+            {decision && (
+              <div className="decision" role="alert">
+                <span className="label">Necesita tu decisión</span>
+                <p className="decision-text">{decision.status.message}</p>
+                {(decision.status.options ?? []).length > 0 && (
+                  <div className="decision-options">
+                    {(decision.status.options ?? []).map((o) => (
+                      <button
+                        key={o.label}
+                        className={`act${o.recommended ? " primary" : ""}`}
+                        type="button"
+                        disabled={sending || !liveHere}
+                        onClick={() => void answer(decision, o.label)}
+                      >
+                        {o.label}
+                        {o.recommended ? " · recomendada" : ""}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="row">
+                  <input
+                    className="answer"
+                    value={ownAnswer}
+                    maxLength={500}
+                    placeholder="O escribí tu respuesta"
+                    aria-label="Tu respuesta"
+                    onChange={(e) => setOwnAnswer(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && ownAnswer.trim()) void answer(decision, ownAnswer.trim());
+                    }}
+                  />
+                  <button className="act" type="button" disabled={sending || !liveHere || !ownAnswer.trim()} onClick={() => void answer(decision, ownAnswer.trim())}>
+                    Responder
+                  </button>
+                </div>
+                {!liveHere && <LiveOff slug={here.slug} />}
+              </div>
+            )}
             <div className="body">{showTab === "palette" ? paletteTab : showTab === "improve" ? improveTab : changesTab}</div>
           </div>
         )}

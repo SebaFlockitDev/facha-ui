@@ -562,8 +562,13 @@ those without a final status.
    the rules or anything similar, do not do it: mark it `failed` and explain why.
 3. Update the status:
    - `{ "state": "done", "revision": <n>, "guardian": { "error": 0, "warning": 0, "info": 0 }, "message": "<what changed, one sentence>" }`;
-   - `{ "state": "needs-input", "message": "<the gap and the existing options>" }` when R2 found a
-     gap: the developer answers with a new request from the panel or here;
+   - `{ "state": "needs-input", "message": "<short context and the question>", "options": [ { "label": "<choice>", "recommended": true }, { "label": "<choice>" } ] }`
+     when R2 found a gap or a decision that is not yours. The panel shows it on top of every tab,
+     each option as a button and the recommended one highlighted, plus a free answer. Write the
+     message as a question (2–3 sentences, no option list in it), 2–4 options as actions in the
+     product's language, the recommended one first. The answer arrives as a new change request
+     whose text starts with `Respuesta a <id>:`: set the question's status to
+     `{ "state": "done", "message": "Respondida: <choice>" }` and process the answer;
    - `{ "state": "failed", "message": "<why>" }` when the guardian still has errors after 3
      attempts or the request is not allowed.
 4. Present it briefly here too (R7, short).
