@@ -67,6 +67,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
 - **Ajustar una variante:** `/facha-ui:variants orders b "agregá un contador al lado del título"`, o pedíselo en la misma conversación. Cambia esa variante y nada más, avisa brechas antes de tocar, vuelve a pasar el guardián, saca capturas nuevas y guarda cada ajuste como revisión (r1, r2…) con tu pedido. Si preferís conservar la original, pedí el ajuste "como variante nueva" (b2).
+- **Comparar y votar:** `http://localhost:3000/lab/compare/<slug>` muestra las variantes lado a lado (escritorio, tablet o móvil, cualquier tema y estado); con el modo en vivo, cada persona vota con un motivo. Pedile a Claude el reporte HTML para compartir.
 - **Modo en vivo:** `/facha-ui:variants orders live`. En cada variante aparece un panel **facha-ui** abajo a la derecha: escribís el cambio, Claude lo aplica como revisión y la página se recarga sola. "Elegir esta variante" no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code. Dura 2 horas o hasta `/facha-ui:variants orders live stop`. Necesita la sesión de Claude Code abierta y la app corriendo.
   - **⌖ Señalar:** hacés clic en hasta 3 elementos y los nombrás [1], [2], [3] en el pedido; Claude sabe qué componente los dibuja.
   - **Paleta:** probás con un clic paletas predefinidas o tu color sobre toda la app, solo en tu navegador, con el contraste y los conflictos (y su solución) a la vista. *Proponer* la guarda para `/facha-ui:init palette`.
@@ -98,6 +99,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
   - la entrada que se agrega a `decisions.md`.
 - Aplica solo si respondés nombrando la variante y el motivo, por ejemplo "Sí, aplicá la B:
   deja lo urgente arriba". Una respuesta ambigua se repregunta.
+- Si la app corre, captura la pantalla antes y después y marca las diferencias (posibles regresiones), y muestra el puntaje de UX antes y después. Si el equipo votó, te muestra los votos.
 - Valida que no haya errores nuevos, limpia el laboratorio y registra la decisión.
   No commitea.
 
@@ -142,6 +144,8 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `audit_project` | "¿Cuántas violaciones tiene el proyecto?" | Totales por severidad, regla y archivo |
 | `scan_styles` | "¿Qué tokens le faltan a este proyecto?" | Propuesta de tokens desde los valores en uso, con valor por tema, contraste y plan de migración |
 | `review_ui` | "¿Qué mejorarías de esta pantalla?" · "Revisala como un senior" | Acciones primarias que compiten, acentos, tamaños de texto, títulos y estados que faltan, con por qué importa y cómo arreglarlo. No bloquea |
+| `ux_score` | "¿Qué puntaje de UX tiene cada pantalla?" | De 0 a 100 por pantalla en consistencia, accesibilidad, responsive, microcopy y jerarquía, con los hallazgos que más cuestan. También para CI: `facha-ui-mcp.js score --baseline …` |
+| `review_flow` | "Revisá el flujo de alta" | Nombres distintos para la misma acción, borrados sin confirmación, formularios sin salida, feedback o error, pasos sin acción principal |
 
 ### files
 
@@ -153,6 +157,8 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `.facha-ui/screenshots/` | Capturas por variante y tema |
 | `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos y estados. No lo versiones |
 | `.facha-ui/proposals/` | Paletas propuestas desde el panel en vivo |
+| `.facha-ui/reports/` | Reportes para compartir las variantes con el equipo |
+| `.facha-ui/flows/` | Revisiones de flujos |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas; la próxima corrida las cita |
 
 Guía completa: https://github.com/SebaFlockitDev/facha-ui/blob/main/docs/uso.md

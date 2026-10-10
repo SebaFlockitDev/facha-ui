@@ -108,6 +108,8 @@ Every lesson has the same five parts, short:
   same input, same result, no opinion. Explain error vs warning vs info, and why a variant
   must reach 0 errors before it can be applied. Contrast with what a model is good at:
   structure, hierarchy, alternatives.
+- Then `ux_score`: the same signals as a 0–100 score per screen and category, and how a team
+  uses it in CI so a screen never gets worse (a baseline, not a grade).
 - Exercise: "Mirando los totales, ¿por qué regla empezarías una limpieza y por qué?"
 
 ### 4 · Calidad visual que se mide
@@ -193,6 +195,8 @@ Every lesson has the same five parts, short:
   - ask for goals, compare alternatives, look at every theme in the captures;
   - a problem without a solution is half a review: bring the way out;
   - record decisions with their reason, so the next person (or model) builds on them;
-  - nothing gets applied or committed by the AI: you review the diff and commit.
+  - nothing gets applied or committed by the AI: you review the diff and commit;
+  - review journeys, not only screens (`/facha-ui:flow`), compare variants with the team before
+    deciding (`/lab/compare/<screen>`), and check the before/after of every apply.
 - Close with a short review: 3 questions from the course with their answers after the
   developer replies, and the next real step for their project (the command, with the reason).

@@ -346,6 +346,15 @@ En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la a
 
 ---
 
+### 6.7 Comparar y decidir en equipo
+
+Abrí `http://localhost:3000/lab/compare/<pantalla>`: las variantes aparecen lado a lado, con los mismos datos reales. Elegís el ancho (escritorio, tablet o móvil), el tema y el estado (cargando, vacío, error, datos extremos), y podés sincronizar el scroll.
+
+- **Votar:** con el modo en vivo activo, cada persona pone su nombre, elige una variante y escribe por qué. Claude lo registra en el run, y `/facha-ui:apply` te muestra los votos en el plan (y te avisa si elegís una que no es la más votada).
+- **Compartir:** pedile a Claude el reporte. Genera `.facha-ui/reports/<pantalla>.html` con las hipótesis, el guardián, los estados, la crítica, los votos y las capturas. Compartí la carpeta `.facha-ui/reports/` junto con `.facha-ui/screenshots/`.
+
+---
+
 ## 7. Aplicar una variante
 
 ### 7.1 Pedirlo
@@ -373,6 +382,10 @@ Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede 
 
 ![Sesión de /facha-ui:apply: verificaciones, plan exacto con la entrada de decisions.md, aprobación con motivo y resultado](img/terminal-apply.png)
 
+### 7.2b Regresión visual y puntaje
+
+Si la app está corriendo, `apply` captura la pantalla real antes de tocar nada (escritorio y celular) y otra vez después. Genera `apply-diff-…png`, con lo que no cambió en gris, lo que cambió en rojo y las zonas recuadradas, y te dice qué porcentaje cambió. Si algo cambió donde el plan no tocaba nada (la barra lateral, otra sección), te lo muestra como posible regresión antes de limpiar el laboratorio. También te muestra el puntaje de UX de la pantalla antes y después, por categoría.
+
 ### 7.3 Después de aplicar
 
 - Revisá el diff y probá la pantalla. **facha-ui no commitea**: el commit lo hacés vos.
@@ -384,6 +397,32 @@ Ejemplo: `/facha-ui:apply orders b`. Solo lo podés lanzar vos: Claude no puede 
 
 - volver a correr `/facha-ui:variants` sobre la misma pantalla y aceptar descartar el run anterior cuando lo pregunte;
 - borrar a mano `app/lab/<slug>/` y `.facha-ui/runs/<slug>.json`.
+
+---
+
+## 7b. Revisar un flujo completo
+
+```text
+/facha-ui:flow "dar de alta un pedido y confirmarlo" /orders/new /orders/review /orders/done
+```
+
+Revisa el recorrido como un senior: que la misma acción se llame igual en cada paso, que lo destructivo pida confirmación, que haya salida, que después de cada acción se vea qué pasó, que los errores se puedan resolver y que el próximo paso esté claro, también en el celular. Captura cada paso, mide cada pantalla y deja un reporte en `.facha-ui/flows/`. No cambia código: te propone el `/facha-ui:variants` del paso que más lo necesita. Si no sabés qué pantallas son, describí el flujo y te las busca.
+
+## 7c. Puntaje de UX y CI
+
+Preguntá *"¿qué puntaje de UX tiene cada pantalla?"* (`ux_score`): de 0 a 100, en consistencia, accesibilidad, responsive, microcopy y jerarquía y estados, con los hallazgos que más puntos cuestan. Es una tendencia: sirve para comparar una pantalla consigo misma.
+
+Para que el CI falle si una pantalla empeora:
+
+```bash
+# una vez, para crear la línea base (y cada vez que mejoren y quieras subir la vara)
+node <ruta del plugin>/mcp/dist/facha-ui-mcp.js score --root . > .facha-ui/ux-baseline.json
+
+# en cada PR
+node <ruta del plugin>/mcp/dist/facha-ui-mcp.js score --root . --baseline .facha-ui/ux-baseline.json
+```
+
+Sale con 1 si una pantalla bajó (o quedó por debajo de `--min <n>`). Si versionás la línea base, ignorá el resto de `.facha-ui/` como siempre.
 
 ---
 
@@ -429,6 +468,7 @@ Atajos útiles:
 | `/facha-ui:variants <pantalla> "<objetivo>"` | Vos, o Claude cuando pedís "variantes" o "alternativas" | Solo `app/lab/` y `.facha-ui/` |
 | `/facha-ui:variants <slug> <a\|b\|c> "<cambio>"` | Vos, o Claude cuando pedís un cambio en una variante | Solo esa variante, el run y sus capturas |
 | `/facha-ui:variants <slug> live [stop]` | Vos | Lo mismo que un ajuste, más el panel del lab y `.facha-ui/live/`; las paletas propuestas en `.facha-ui/proposals/` |
+| `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Vos, o Claude cuando pedís revisar un flujo | Solo capturas y `.facha-ui/flows/<slug>.json` |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
 | `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
@@ -442,6 +482,8 @@ Atajos útiles:
 | `audit_project` | Audita todo el proyecto (sin el lab) |
 | `scan_styles` | Propone tokens a partir de los valores que el proyecto ya usa (no escribe) |
 | `review_ui` | Mide jerarquía y estados de una pantalla para la crítica (no bloquea, no escribe) |
+| `ux_score` | Puntaje de UX de 0 a 100 por pantalla y categoría (también como `score` para CI) |
+| `review_flow` | Señales de un recorrido entre pantallas: nombres, confirmaciones, salida, feedback, errores |
 
 | Archivo | Qué es |
 |---|---|
@@ -456,5 +498,8 @@ Atajos útiles:
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
 | `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos, estados y la base de la paleta. No lo versiones |
 | `.facha-ui/proposals/` | Paletas propuestas desde el panel |
+| `.facha-ui/reports/<slug>.html` | Reporte para compartir: variantes, crítica, votos y capturas |
+| `.facha-ui/flows/<slug>.json` | Revisión de un flujo |
+| `app/lab/compare/[slug]/page.tsx` | Página para comparar variantes y votar (solo en desarrollo) |
 | `.facha-ui/playwright/` | Archivos automáticos de Playwright, como los logs de consola (en la carpeta donde abriste Claude Code) |
 | `design-system/decisions.md` | Memoria de decisiones aprobadas |
