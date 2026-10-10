@@ -10,6 +10,14 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 ### Added
 - Modo rápido de `/facha-ui:variants` (`--rapido`, `--quick`, o "hacelo rápido"): una sola variante, la hipótesis que mejor resuelve el diagnóstico, con las mismas reglas duras, el guardián en 0 errores (hasta 2 intentos) y las citas de fuente; captura de escritorio y sin revisor independiente (§2.b.6).
 - `/facha-ui:start`: primer vistazo sin configurar nada. Tu proyecto y su design system en palabras simples, el puntaje de UX, los 3 problemas más graves con su archivo, línea y principio, una sola recomendación de mayor impacto y lo que falta (config, líneas del `.gitignore`, dev server). Solo lee; también se activa con "¿cómo está la UI de mi proyecto?" (§2.e).
+- Guardián automático: un hook del plugin chequea cada `.tsx`, `.jsx` o `.css` del proyecto que Claude escribe o edita, sin que lo pidas. Si hay problemas te avisa ("facha-ui ⚠ N problemas en …"), y Claude corrige lo que escribió en ese turno, una sola vez, e informa lo que ya estaba. Calla en el laboratorio, sin design system o con varios proyectos (§2.f).
+- `"guard": "off" | "quiet" | "on"` en `facha-ui.config.json` para el guardián automático (por defecto `quiet`).
+
+### Changed
+- `start`, `learn` y `help` copian el registro de quien los usa (vos, tú o usted) en lugar de usar siempre el voseo.
+
+### Security
+- El guardián automático solo lee: mismo bundle sin escritura, red ni ejecución de código del proyecto; el texto del proyecto que le pasa a Claude va cortado a 200 caracteres y marcado como dato; cualquier error interno es silencio y nunca rompe la edición (§2.f).
 
 ## [0.15.0] - 2026-10-10
 

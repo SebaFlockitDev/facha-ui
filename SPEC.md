@@ -144,6 +144,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `preview.baseUrl` | `string` | `http://localhost:3000` | Debe ser loopback (`localhost`, `127.0.0.1`, `::1`). El panel en vivo solo acepta pedidos de este origen |
 | `preview.auth` | `"none" \| "manual"` | `"none"` | `manual`: el dev inicia sesión en el navegador de Playwright; facha-ui nunca maneja credenciales |
 | `memory.decisionsFile` | `string` | `design-system/decisions.md` | Memoria de decisiones aprobadas |
+| `guard` | `"off" \| "quiet" \| "on"` | `"quiet"` | Guardián automático (§2.f, desde 0.16.0): `quiet` avisa solo si hay problemas, `on` también confirma un archivo limpio, `off` lo apaga |
 
 ¹ Se buscan archivos CSS dentro de `include` que contengan `:root { --… }` o `@theme { --… }` (prioridad: `app/globals.css`, `src/index.css`, `src/styles/**`, `styles/**`).
 ² Bloques cuyas declaraciones son solo custom properties que redefinen tokens del tema base. El nombre se infiere del selector (`dark` si contiene "dark").
@@ -770,6 +771,32 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init`; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
 5. **Checklist sin editar nada:** `facha-ui.config.json` (con un bloque mínimo armado con lo detectado: `version`, `tokens.sources`, `preview.baseUrl`), las líneas exactas del `.gitignore` (`<lab.dir>/`, `.facha-ui/live/`, `.facha-ui/screenshots/`, `.facha-ui/playwright/`; una línea más amplia como `.facha-ui/` cuenta) y el dev server (comando de `package.json` y `preview.baseUrl`, marcado "no verificado").
 
+### 2.f Guardián automático (hook, desde 0.16.0)
+
+Para que facha-ui aporte en el trabajo diario aunque nadie lo invoque: cada archivo de UI que Claude escribe se chequea solo.
+
+**Hook** (`hooks/hooks.json`, verificado en la documentación de Claude Code el 2026-10-10): `PostToolUse` con `matcher: "Write|Edit|MultiEdit"` (solo letras y `|`: lista de nombres exactos, no regex) y un hook `command` en *exec form*: `"command": "node"`, `"args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/facha-ui-mcp.js", "guard"]`, `"timeout": 10` (segundos). Con `args` no hay shell: cada elemento es un argumento tal cual, así que una ruta con espacios (`C:\Users\Nombre Apellido\…`) no se parte; la documentación lo recomienda cuando hay placeholders de ruta. El hook recibe por stdin el JSON del evento (`tool_input.file_path`, absoluta) y `CLAUDE_PROJECT_DIR` en el entorno. Responde con exit 0 y un JSON: `systemMessage` lo ve el dev y `hookSpecificOutput.additionalContext` le llega a Claude como recordatorio del sistema. El stdout que no es JSON va solo al log de depuración; exit 2 es un error.
+
+**Modo `guard` del bundle** (`mcp/src/guard.ts`): resuelve el proyecto desde `CLAUDE_PROJECT_DIR` con el descubrimiento de siempre (§2.0.2) y chequea **solo ese archivo** con las mismas reglas que `check_ui`. Queda en silencio (sin salida) si:
+- el archivo no es UI: `.tsx`, `.jsx` o `.css` dentro de `include` y fuera de `exclude`;
+- está fuera del proyecto o en el laboratorio;
+- el proyecto no tiene design system (`status: missing`);
+- la config dice `"guard": "off"`, o es inválida;
+- hay más de un proyecto candidato (o ninguno).
+
+**Mensajes.** Un problema es una violación `error` o `warning`; los `info` no se avisan. En `quiet` (por defecto) solo habla con problemas: `facha-ui ⚠ N problemas en <archivo> (los detallo y corrijo si querés)`. En `on`, además, `facha-ui ✓ 0 violaciones`. El detalle (línea, regla, severidad, valor encontrado, sugerencia) va en `additionalContext`, hasta 20 violaciones, errores primero.
+
+**Qué hace Claude con el aviso** (lo dice el texto de `additionalContext`):
+- si el archivo lo escribió o editó en este turno como parte del pedido del dev, corrige lo que escribió él, solo y en una sola pasada, con las sugerencias;
+- si los problemas ya existían (código que no escribió en este turno), solo los informa y ofrece corregirlos;
+- máximo 1 corrección automática por archivo y por turno: si el hook vuelve a reportar el archivo después de corregir, informa lo que queda en lugar de editar de nuevo. Así no hay bucle hook → edición → hook.
+
+**Garantías.**
+- S1: el texto del proyecto dentro de `additionalContext` (ruta, valor encontrado, mensajes, que en las reglas `custom` escribe el equipo, y sugerencias) va entre comillas, escapado con JSON y cortado a 200 caracteres, con la aclaración de que es dato y nunca instrucción.
+- Nunca rompe la edición: cualquier error interno (JSON de entrada inválido, config inválida, archivo que no existe) sale con exit 0 y en silencio, y el hook no corre con `onFailure: "block"`.
+- S2: es el mismo bundle que cubre el test de MCP-3. Lee stdin y archivos del proyecto; no escribe, no usa red ni ejecuta código del proyecto. Un test corre el bundle como lo corre el hook y compara una instantánea del directorio antes y después.
+- Tiempo por archivo, medido con el bundle en Windows: ~140 ms cuando calla (arranque de Node y carga del bundle) y ~170–230 ms cuando chequea, en los fixtures y en un proyecto real chico (6 pantallas). El test pone un límite holgado de 3 s por archivo.
+
 ---
 
 ## 3. Adopción en un proyecto, paso a paso
@@ -843,6 +870,7 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 **S2. El MCP `facha-ui` no escribe, no usa red y no ejecuta código.**
 - No importa módulos `fs` de escritura, `child_process`, `net`, `http(s)`, `dgram` ni `fetch`. Se controla con una lista permitida en ESLint (`no-restricted-imports`/`no-restricted-globals`) y con un test que inspecciona el bundle.
 - No carga código del proyecto ni de su `node_modules`, y no evalúa plugins de Tailwind.
+- Vale también para los modos de línea de comandos del bundle: `score` (CI) y `guard` (el hook del guardián automático, §2.f), que solo leen stdin y archivos del proyecto.
 - Toda ruta se resuelve con `realpath` y debe quedar dentro de la raíz del proyecto: se bloquean `..`, rutas absolutas externas y symlinks que escapan.
 - Se ignoran siempre `node_modules`, `.git` y los directorios de build. Hay límites de tamaño y de cantidad de archivos.
 

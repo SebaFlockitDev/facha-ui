@@ -11,8 +11,8 @@ and without asking the developer to configure anything, you tell them where thei
 what hurts the most and the one thing to do next. Assume no design background: explain every
 term the first time it appears, in one plain sentence.
 
-Talk to the developer in their language (Spanish by default if they write in Spanish, with the
-rioplatense "vos"). Be brief: this is a first look, not a report. The principles file named
+Talk to the developer in their language and their register: mirror how they address you (vos,
+tú or usted) and never switch it; the Spanish examples below are in vos, adapt them. Be brief: this is a first look, not a report. The principles file named
 below (`../_shared/ux-principles.md`) is relative to this skill's directory.
 
 ## Hard rules

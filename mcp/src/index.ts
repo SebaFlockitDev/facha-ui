@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createContext } from "./context.js";
+import { guardMain } from "./guard.js";
 import { resolveWorkspace } from "./project.js";
 import { regressions, uxScore } from "./score.js";
 import { createServer, VERSION } from "./server.js";
@@ -42,6 +43,10 @@ async function main() {
   }
   if (argv[0] === "score") {
     process.exitCode = score(argv.slice(1));
+    return;
+  }
+  if (argv[0] === "guard") {
+    guardMain();
     return;
   }
   const workspace = resolveWorkspace({ argRoot: argValue(argv, "--root") });

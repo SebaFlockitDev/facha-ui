@@ -13,8 +13,8 @@ Show the reference below to the developer. Rules:
 - If `$ARGUMENTS` is `variants`, `flow`, `apply`, `init`, `learn`, `tools` or `files`, show only that section,
   plus the last line ("Guía completa…").
   With no argument (or an unknown one), show everything.
-- Show it in the developer's language. The text below is in Spanish; translate it if
-  they write in another language. Keep commands, paths and tool names exactly as written.
+- Show it in the developer's language and register. The text below is in Spanish with vos;
+  translate it if they write in another language, and adapt it to tú or usted if they use it. Keep commands, paths and tool names exactly as written.
 - Do not add anything about the current project: no counts, no file names of theirs.
 
 ---
@@ -150,6 +150,8 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `review_ui` | "¿Qué mejorarías de esta pantalla?" · "Revisala como un senior" | Acciones primarias que compiten, acentos, tamaños de texto, títulos y estados que faltan, con por qué importa y cómo arreglarlo. No bloquea |
 | `ux_score` | "¿Qué puntaje de UX tiene cada pantalla?" | De 0 a 100 por pantalla en consistencia, accesibilidad, responsive, microcopy y jerarquía, con los hallazgos que más cuestan. También para CI: `facha-ui-mcp.js score --baseline …` |
 | `review_flow` | "Revisá el flujo de alta" | Nombres distintos para la misma acción, borrados sin confirmación, formularios sin salida, feedback o error, pasos sin acción principal |
+
+**Guardián automático:** cada vez que Claude escribe o edita un `.tsx`, `.jsx` o `.css` del proyecto, facha-ui lo chequea solo (fuera del laboratorio y si hay design system). Si encuentra errores o advertencias, te avisa ("facha-ui ⚠ N problemas en …") y Claude corrige lo que escribió en ese turno, una sola vez; lo que ya estaba te lo informa y te ofrece corregirlo. Solo lee. En `facha-ui.config.json`: `"guard": "quiet"` (por defecto, habla solo si hay problemas), `"on"` (también confirma "✓ 0 violaciones") u `"off"`.
 
 ### files
 
