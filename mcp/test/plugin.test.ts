@@ -76,6 +76,27 @@ describe("variant refinements", () => {
   });
 });
 
+describe("states and senior critique", () => {
+  const read = (skill: string) => fs.readFileSync(path.join(REPO, "skills", skill, "SKILL.md"), "utf8");
+
+  it("variants designs every state, previews it with ?state= and critiques each variant (C1–C8)", () => {
+    const text = read("variants");
+    expect(text).toContain("mcp__plugin_facha-ui_facha-ui__review_ui");
+    expect(text).toContain("## Step 7b · Senior critique");
+    for (const item of ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"]) expect(text, item).toContain(`**${item} ·`);
+    expect(text).toContain("// facha-ui lab: state preview");
+    expect(text).toContain("?state=loading|empty|error|long");
+    expect(text).toContain('"critique": [');
+    expect(fs.existsSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-state.ts"))).toBe(true);
+  });
+
+  it("apply removes the state preview lines and the state scaffold", () => {
+    const text = read("apply");
+    expect(text).toContain("`// facha-ui lab: state preview`");
+    expect(text).toContain("`<lab.dir>/lab-state.ts`");
+  });
+});
+
 describe("learn skill", () => {
   it("is read-only: it pre-approves only reading tools and the facha-ui MCP", () => {
     const text = fs.readFileSync(path.join(REPO, "skills", "learn", "SKILL.md"), "utf8");

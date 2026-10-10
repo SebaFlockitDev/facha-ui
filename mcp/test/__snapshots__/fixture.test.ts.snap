@@ -342,6 +342,46 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "severity": "warning",
       "summary": "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background.",
     },
+    {
+      "id": "a11y-img-alt",
+      "severity": "error",
+      "summary": "<img> (or next/image) without alt. alt="" is valid for decorative images.",
+    },
+    {
+      "id": "a11y-control-label",
+      "severity": "error",
+      "summary": "input, select or textarea without a label: not inside <label>, no <label htmlFor> in the file, no aria-label(ledby) or title. A placeholder is not a label.",
+    },
+    {
+      "id": "a11y-button-name",
+      "severity": "error",
+      "summary": "Button or link with no accessible name: no text, aria-label(ledby) or title (typically an icon-only button).",
+    },
+    {
+      "id": "a11y-click-target",
+      "severity": "warning",
+      "summary": "onClick on a non-interactive element (div, span, li, td…) without role, tabIndex and a key handler: unreachable with the keyboard.",
+    },
+    {
+      "id": "a11y-tabindex",
+      "severity": "warning",
+      "summary": "Positive tabIndex: the keyboard order no longer follows the visual order.",
+    },
+    {
+      "id": "a11y-focus-visible",
+      "severity": "warning",
+      "summary": "The focus outline is removed (outline-none, focus:outline-none, or outline: none in a :focus rule) with no visible focus replacement.",
+    },
+    {
+      "id": "a11y-target-size",
+      "severity": "warning",
+      "summary": "Button or link smaller than 24×24 px by its size utilities and without padding (WCAG 2.5.8).",
+    },
+    {
+      "id": "a11y-heading-order",
+      "severity": "warning",
+      "summary": "A heading level is skipped inside a file (h2 → h4): the outline screen readers navigate has a hole.",
+    },
   ],
   "scales": {
     "fontSize": {

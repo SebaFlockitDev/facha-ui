@@ -1,5 +1,5 @@
 import { parse } from "@babel/parser";
-import { makeLocAt, type Usage } from "./usage.js";
+import { makeLocAt, type ElementUsage, type Usage } from "./usage.js";
 
 const SVG_COLOR_ATTRS = new Set(["fill", "stroke", "stopColor", "floodColor", "lightingColor", "color"]);
 
@@ -125,11 +125,139 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
     }
   };
 
+  // Next's <Image> and <Link> render img and a: they count as those elements.
+  const aliases = new Map<string, string>();
+  for (const s of ((ast as Node).program?.body ?? []) as Node[]) {
+    if (s.type !== "ImportDeclaration") continue;
+    const tag = s.source?.value === "next/image" ? "img" : s.source?.value === "next/link" ? "a" : null;
+    if (!tag) continue;
+    for (const sp of s.specifiers as Node[]) if (sp.type === "ImportDefaultSpecifier") aliases.set(sp.local.name, tag);
+  }
+
+  const elementName = (opening: Node): { tag: string; intrinsic: boolean } => {
+    if (opening.name?.type !== "JSXIdentifier") return { tag: "", intrinsic: false };
+    const name: string = opening.name.name;
+    if (/^[a-z]/.test(name)) return { tag: name, intrinsic: true };
+    const alias = aliases.get(name);
+    return alias ? { tag: alias, intrinsic: true } : { tag: name, intrinsic: false };
+  };
+
+  const collectStrings = (n: Node | null | undefined, out: string[]): void => {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "StringLiteral") out.push(...String(n.value).split(/\s+/).filter(Boolean));
+    else if (n.type === "TemplateLiteral") for (const q of n.quasis as Node[]) out.push(...String(q.value.cooked ?? "").split(/\s+/).filter(Boolean));
+    else for (const key of Object.keys(n)) {
+      if (key === "loc" || key === "start" || key === "end" || key === "extra" || key === "comments") continue;
+      const child = n[key];
+      if (Array.isArray(child)) child.forEach((c) => collectStrings(c, out));
+      else if (child && typeof child === "object") collectStrings(child, out);
+    }
+  };
+
+  const attrsOf = (opening: Node) => {
+    const attrs: Record<string, string> = {};
+    const dynamic: string[] = [];
+    const classes: string[] = [];
+    let spread = false;
+    for (const a of opening.attributes as Node[]) {
+      if (a.type === "JSXSpreadAttribute") {
+        spread = true;
+        continue;
+      }
+      const key: string = a.name?.type === "JSXIdentifier" ? a.name.name : `${a.name?.namespace?.name}:${a.name?.name?.name}`;
+      const v = a.value as Node | null;
+      if (v == null) attrs[key] = "";
+      else if (v.type === "StringLiteral") attrs[key] = v.value;
+      else if (v.type === "JSXExpressionContainer") {
+        const e = v.expression as Node;
+        if (e.type === "StringLiteral") attrs[key] = e.value;
+        else if (e.type === "NumericLiteral" || e.type === "BooleanLiteral") attrs[key] = String(e.value);
+        else if (e.type === "TemplateLiteral" && e.expressions.length === 0) attrs[key] = e.quasis[0].value.cooked ?? "";
+        else if (e.type === "UnaryExpression" && e.operator === "-" && e.argument?.type === "NumericLiteral") attrs[key] = `-${e.argument.value}`;
+        else {
+          attrs[key] = "{}";
+          dynamic.push(key);
+        }
+      }
+      if (key === "className" || key === "class") collectStrings(v, classes);
+    }
+    return { attrs, dynamic, classes, spread };
+  };
+
+  /** Text that can name the element: static text, an aria-label/title/alt below it, or unknown. */
+  const textOf = (children: Node[]): { name: ElementUsage["name"]; text: string } => {
+    let name: ElementUsage["name"] = "none";
+    const parts: string[] = [];
+    const unknown = () => {
+      if (name !== "text") name = "unknown";
+    };
+    const walkChildren = (kids: Node[]) => {
+      for (const c of kids) {
+        if (c.type === "JSXText") {
+          const s = String(c.value).replace(/\s+/g, " ").trim();
+          if (s) {
+            name = "text";
+            parts.push(s);
+          }
+        } else if (c.type === "JSXExpressionContainer") {
+          const e = c.expression as Node;
+          if (e.type === "JSXEmptyExpression") continue;
+          if (e.type === "StringLiteral" && e.value.trim()) {
+            name = "text";
+            parts.push(e.value.trim());
+          } else unknown();
+        } else if (c.type === "JSXFragment") {
+          walkChildren(c.children);
+        } else if (c.type === "JSXElement") {
+          const nm = elementName(c.openingElement);
+          if (!nm.intrinsic) {
+            unknown();
+            continue;
+          }
+          const a = attrsOf(c.openingElement);
+          if (a.attrs["aria-hidden"] === "true") continue;
+          if (a.attrs["aria-label"] || a.attrs.title || (nm.tag === "img" && a.attrs.alt)) {
+            name = "text";
+            continue;
+          }
+          if (a.dynamic.some((d) => d === "aria-label" || d === "title" || d === "alt")) {
+            unknown();
+            continue;
+          }
+          walkChildren(c.children);
+        }
+      }
+    };
+    walkChildren(children);
+    return { name, text: parts.join(" ").slice(0, 80) };
+  };
+
+  const ancestors: string[] = [];
+
   const visit = (n: Node | null | undefined) => {
     if (!n || typeof n !== "object") return;
     if (Array.isArray(n)) {
       for (const c of n) visit(c);
       return;
+    }
+    let pushed = false;
+    if (n.type === "JSXElement") {
+      const opening = n.openingElement as Node;
+      const nm = elementName(opening);
+      if (nm.intrinsic) {
+        usages.push({
+          kind: "element",
+          tag: nm.tag,
+          ...attrsOf(opening),
+          ...textOf(n.children),
+          inLabel: ancestors.includes("label"),
+          file,
+          line: opening.loc!.start.line,
+          column: opening.loc!.start.column + 1,
+        });
+      }
+      ancestors.push(nm.intrinsic ? nm.tag : "");
+      pushed = true;
     }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
       const name: string = n.name.name;
@@ -161,6 +289,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
       const child = n[key];
       if (child && typeof child === "object") visit(child);
     }
+    if (pushed) ancestors.pop();
   };
 
   visit(ast);

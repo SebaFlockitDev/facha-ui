@@ -32,7 +32,29 @@ export interface DeclUsage extends Loc {
   siblingBackground?: string | null;
 }
 
-export type Usage = ClassUsage | DynamicClassUsage | InlineStyleUsage | DeclUsage;
+/**
+ * A JSX element, for the accessibility rules and the UI review. Intrinsic elements only; Next's
+ * <Image> and <Link> count as img and a. Attribute values: the literal string, "" for a bare
+ * attribute, "{}" for an expression (also listed in `dynamic`).
+ */
+export interface ElementUsage extends Loc {
+  kind: "element";
+  tag: string;
+  attrs: Record<string, string>;
+  dynamic: string[];
+  /** A {...spread} attribute: any attribute may be present. */
+  spread: boolean;
+  /** Static class tokens of className. */
+  classes: string[];
+  /** Whether it has text content for an accessible name: yes, none, or unknown (expressions, components). */
+  name: "text" | "none" | "unknown";
+  /** Static text content, trimmed and cut (for headings). */
+  text: string;
+  /** Inside a <label>. */
+  inLabel: boolean;
+}
+
+export type Usage = ClassUsage | DynamicClassUsage | InlineStyleUsage | DeclUsage | ElementUsage;
 
 /** Maps an offset inside a multi-line string that starts at (line, column) to a location. */
 export function makeLocAt(file: string, startLine: number, startColumn: number, text: string) {

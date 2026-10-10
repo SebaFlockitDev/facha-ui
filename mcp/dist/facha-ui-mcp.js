@@ -295,8 +295,8 @@ var require_utils = __commonJS({
       }
       return output2;
     };
-    exports.basename = (path7, { windows } = {}) => {
-      const segs = path7.split(windows ? /[\\/]/ : "/");
+    exports.basename = (path8, { windows } = {}) => {
+      const segs = path8.split(windows ? /[\\/]/ : "/");
       const last = segs[segs.length - 1];
       if (last === "") {
         return segs[segs.length - 2];
@@ -557,7 +557,7 @@ var require_scan = __commonJS({
         isExtglob = false;
         isGlob = false;
       }
-      let base = str;
+      let base3 = str;
       let prefix2 = "";
       let glob = "";
       if (start > 0) {
@@ -565,31 +565,31 @@ var require_scan = __commonJS({
         str = str.slice(start);
         lastIndex -= start;
       }
-      if (base && isGlob === true && lastIndex > 0) {
-        base = str.slice(0, lastIndex);
+      if (base3 && isGlob === true && lastIndex > 0) {
+        base3 = str.slice(0, lastIndex);
         glob = str.slice(lastIndex);
       } else if (isGlob === true) {
-        base = "";
+        base3 = "";
         glob = str;
       } else {
-        base = str;
+        base3 = str;
       }
-      if (base && base !== "" && base !== "/" && base !== str) {
-        if (isPathSeparator(base.charCodeAt(base.length - 1))) {
-          base = base.slice(0, -1);
+      if (base3 && base3 !== "" && base3 !== "/" && base3 !== str) {
+        if (isPathSeparator(base3.charCodeAt(base3.length - 1))) {
+          base3 = base3.slice(0, -1);
         }
       }
       if (opts.unescape === true) {
         if (glob) glob = utils.removeBackslashes(glob);
-        if (base && backslashes === true) {
-          base = utils.removeBackslashes(base);
+        if (base3 && backslashes === true) {
+          base3 = utils.removeBackslashes(base3);
         }
       }
       const state = {
         prefix: prefix2,
         input: input2,
         start,
-        base,
+        base: base3,
         glob,
         isBrace,
         isBracket,
@@ -5045,8 +5045,8 @@ var require_utils2 = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path7) {
-      let input2 = path7;
+    function removeDotSegments(path8) {
+      let input2 = path8;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -5455,8 +5455,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path7 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path7 && path7 !== "/" ? path7 : void 0;
+        const path8 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path8 && path8 !== "/" ? path8 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -5657,10 +5657,10 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative, options, skipNormalization) {
+    function resolveComponent(base3, relative, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
-        base = parse6(serialize(base, options), options);
+        base3 = parse6(serialize(base3, options), options);
         relative = parse6(serialize(relative, options), options);
       }
       options = options || {};
@@ -5680,32 +5680,32 @@ var require_fast_uri = __commonJS({
           target.query = relative.query;
         } else {
           if (!relative.path) {
-            target.path = base.path;
+            target.path = base3.path;
             if (relative.query !== void 0) {
               target.query = relative.query;
             } else {
-              target.query = base.query;
+              target.query = base3.query;
             }
           } else {
             if (relative.path[0] === "/") {
               target.path = removeDotSegments(relative.path);
             } else {
-              if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
+              if ((base3.userinfo !== void 0 || base3.host !== void 0 || base3.port !== void 0) && !base3.path) {
                 target.path = "/" + relative.path;
-              } else if (!base.path) {
+              } else if (!base3.path) {
                 target.path = relative.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
+                target.path = base3.path.slice(0, base3.path.lastIndexOf("/") + 1) + relative.path;
               }
               target.path = removeDotSegments(target.path);
             }
             target.query = relative.query;
           }
-          target.userinfo = base.userinfo;
-          target.host = base.host;
-          target.port = base.port;
+          target.userinfo = base3.userinfo;
+          target.host = base3.host;
+          target.port = base3.port;
         }
-        target.scheme = base.scheme;
+        target.scheme = base3.scheme;
       }
       target.fragment = relative.fragment;
       return target;
@@ -11002,27 +11002,27 @@ var require_util2 = __commonJS({
       };
     }
     var normalize = lruMemoize(function normalize2(aPath) {
-      var path7 = aPath;
+      var path8 = aPath;
       var url2 = urlParse(aPath);
       if (url2) {
         if (!url2.path) {
           return aPath;
         }
-        path7 = url2.path;
+        path8 = url2.path;
       }
-      var isAbsolute = exports.isAbsolute(path7);
+      var isAbsolute = exports.isAbsolute(path8);
       var parts = [];
       var start = 0;
       var i = 0;
       while (true) {
         start = i;
-        i = path7.indexOf("/", start);
+        i = path8.indexOf("/", start);
         if (i === -1) {
-          parts.push(path7.slice(start));
+          parts.push(path8.slice(start));
           break;
         } else {
-          parts.push(path7.slice(start, i));
-          while (i < path7.length && path7[i] === "/") {
+          parts.push(path8.slice(start, i));
+          while (i < path8.length && path8[i] === "/") {
             i++;
           }
         }
@@ -11043,15 +11043,15 @@ var require_util2 = __commonJS({
           }
         }
       }
-      path7 = parts.join("/");
-      if (path7 === "") {
-        path7 = isAbsolute ? "/" : ".";
+      path8 = parts.join("/");
+      if (path8 === "") {
+        path8 = isAbsolute ? "/" : ".";
       }
       if (url2) {
-        url2.path = path7;
+        url2.path = path8;
         return urlGenerate(url2);
       }
-      return path7;
+      return path8;
     });
     exports.normalize = normalize;
     function join(aRoot, aPath) {
@@ -11312,7 +11312,7 @@ var require_util2 = __commonJS({
 var require_array_set = __commonJS({
   "node_modules/source-map-js/lib/array-set.js"(exports) {
     var util2 = require_util2();
-    var has = Object.prototype.hasOwnProperty;
+    var has2 = Object.prototype.hasOwnProperty;
     var hasNativeMap = typeof Map !== "undefined";
     function ArraySet() {
       this._array = [];
@@ -11330,7 +11330,7 @@ var require_array_set = __commonJS({
     };
     ArraySet.prototype.add = function ArraySet_add(aStr, aAllowDuplicates) {
       var sStr = hasNativeMap ? aStr : util2.toSetString(aStr);
-      var isDuplicate = hasNativeMap ? this.has(aStr) : has.call(this._set, sStr);
+      var isDuplicate = hasNativeMap ? this.has(aStr) : has2.call(this._set, sStr);
       var idx = this._array.length;
       if (!isDuplicate || aAllowDuplicates) {
         this._array.push(aStr);
@@ -11348,7 +11348,7 @@ var require_array_set = __commonJS({
         return this._set.has(aStr);
       } else {
         var sStr = util2.toSetString(aStr);
-        return has.call(this._set, sStr);
+        return has2.call(this._set, sStr);
       }
     };
     ArraySet.prototype.indexOf = function ArraySet_indexOf(aStr) {
@@ -11359,7 +11359,7 @@ var require_array_set = __commonJS({
         }
       } else {
         var sStr = util2.toSetString(aStr);
-        if (has.call(this._set, sStr)) {
+        if (has2.call(this._set, sStr)) {
           return this._set[sStr];
         }
       }
@@ -12776,11 +12776,11 @@ var require_previous_map = __commonJS({
     var { existsSync, readFileSync, realpathSync } = __require("fs");
     var { dirname, isAbsolute, join, relative, sep } = __require("path");
     var { SourceMapConsumer, SourceMapGenerator } = require_source_map();
-    function realPath(path7) {
+    function realPath(path8) {
       try {
-        return realpathSync(path7);
+        return realpathSync(path8);
       } catch {
-        return path7;
+        return path8;
       }
     }
     function fromBase64(str) {
@@ -12843,19 +12843,19 @@ var require_previous_map = __commonJS({
           this.annotation = this.getAnnotationURL(css.substring(start, end));
         }
       }
-      loadFile(path7, cssFile, trusted) {
+      loadFile(path8, cssFile, trusted) {
         if (!trusted && !this.unsafeMap) {
-          if (!/\.map$/i.test(path7)) return void 0;
+          if (!/\.map$/i.test(path8)) return void 0;
           if (!cssFile) return void 0;
-          let rel3 = relative(realPath(dirname(cssFile)), realPath(path7));
+          let rel3 = relative(realPath(dirname(cssFile)), realPath(path8));
           if (rel3 === ".." || rel3.startsWith(".." + sep) || isAbsolute(rel3)) {
             return void 0;
           }
         }
-        this.root = dirname(path7);
-        if (existsSync(path7)) {
-          this.mapFile = path7;
-          return readFileSync(path7, "utf-8").toString().trim();
+        this.root = dirname(path8);
+        if (existsSync(path8)) {
+          this.mapFile = path8;
+          return readFileSync(path8, "utf-8").toString().trim();
         }
       }
       loadMap(file2, prev) {
@@ -13651,9 +13651,9 @@ var require_map_generator = __commonJS({
         if (typeof this.mapOpts.annotation === "string") {
           from = dirname(resolve(from, this.mapOpts.annotation));
         }
-        let path7 = relative(from, file2);
-        this.memoizedPaths.set(file2, path7);
-        return path7;
+        let path8 = relative(from, file2);
+        this.memoizedPaths.set(file2, path8);
+        return path8;
       }
       previous() {
         if (!this.previousMaps) {
@@ -13708,12 +13708,12 @@ var require_map_generator = __commonJS({
           return window.btoa(unescape(encodeURIComponent(str)));
         }
       }
-      toFileUrl(path7) {
-        let cached2 = this.memoizedFileURLs.get(path7);
+      toFileUrl(path8) {
+        let cached2 = this.memoizedFileURLs.get(path8);
         if (cached2) return cached2;
         if (pathToFileURL) {
-          let fileURL = pathToFileURL(path7).toString();
-          this.memoizedFileURLs.set(path7, fileURL);
+          let fileURL = pathToFileURL(path8).toString();
+          this.memoizedFileURLs.set(path8, fileURL);
           return fileURL;
         } else {
           throw new Error(
@@ -13721,14 +13721,14 @@ var require_map_generator = __commonJS({
           );
         }
       }
-      toUrl(path7) {
-        let cached2 = this.memoizedURLs.get(path7);
+      toUrl(path8) {
+        let cached2 = this.memoizedURLs.get(path8);
         if (cached2) return cached2;
         if (sep === "\\") {
-          path7 = path7.replace(/\\/g, "/");
+          path8 = path8.replace(/\\/g, "/");
         }
-        let url2 = encodeURI(path7).replace(/[#?]/g, encodeURIComponent);
-        this.memoizedURLs.set(path7, url2);
+        let url2 = encodeURI(path8).replace(/[#?]/g, encodeURIComponent);
+        this.memoizedURLs.set(path8, url2);
         return url2;
       }
     };
@@ -16015,10 +16015,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path7) {
-  if (!path7)
+function getElementAtPath(obj, path8) {
+  if (!path8)
     return obj;
-  return path7.reduce((acc, key) => acc?.[key], obj);
+  return path8.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -16358,11 +16358,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path7, issues) {
+function prefixIssues(path8, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path7);
+    iss.path.unshift(path8);
     return iss;
   });
 }
@@ -16812,16 +16812,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path8 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -16860,17 +16860,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path8 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -16909,8 +16909,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path7 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path7) {
+  const path8 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path8) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -20390,14 +20390,14 @@ var memo = {
     var _a3;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base = inst._zod.parse;
+      const base3 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (ctx.direction !== "backward" && isBackEdge(ctx, payload.value))
           throw new $ZodCyclicError();
-        return base(payload, ctx);
+        return base3(payload, ctx);
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base)
+      if (inst._zod.run === base3)
         inst._zod.run = wrapped;
     });
   },
@@ -20409,15 +20409,15 @@ var memo = {
     let lastBucket;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base = inst._zod.parse;
+      const base3 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (isRecursiveInst === void 0) {
           const walked = isRecursive(inst, /* @__PURE__ */ new Set(), false);
           if (walked === NONE) {
-            inst._zod.parse = base;
+            inst._zod.parse = base3;
             if (inst._zod.run === wrapped)
-              inst._zod.run = base;
-            return base(payload, ctx);
+              inst._zod.run = base3;
+            return base3(payload, ctx);
           }
           if (walked === PROVEN || rechecked)
             isRecursiveInst = true;
@@ -20426,7 +20426,7 @@ var memo = {
         }
         const input2 = payload.value;
         if (!isRef(input2))
-          return base(payload, ctx);
+          return base3(payload, ctx);
         let state = ctx[STATE];
         if (!state) {
           state = { buckets: /* @__PURE__ */ new WeakMap(), backEdges: void 0 };
@@ -20455,7 +20455,7 @@ var memo = {
         }
         handoff = bucket;
         const depth = open.length;
-        const result = base(payload, ctx);
+        const result = base3(payload, ctx);
         handoff = void 0;
         const entry = open.length > depth ? open.pop() : void 0;
         if (result instanceof Promise) {
@@ -20470,7 +20470,7 @@ var memo = {
         return result;
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base)
+      if (inst._zod.run === base3)
         inst._zod.run = wrapped;
     });
   }
@@ -34012,13 +34012,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path7 = ref.slice(1).split("/").filter(Boolean);
-  if (path7.length === 0) {
+  const path8 = ref.slice(1).split("/").filter(Boolean);
+  if (path8.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path7[0] === defsKey) {
-    const key = path7[1] === void 0 ? void 0 : decodeJSONPointerSegment(path7[1]);
+  if (path8[0] === defsKey) {
+    const key = path8[1] === void 0 ? void 0 : decodeJSONPointerSegment(path8[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -36521,7 +36521,15 @@ var RULE_IDS = [
   "class-contrast",
   "non-text-contrast",
   "tailwind-palette-color",
-  "tailwind-default-scale"
+  "tailwind-default-scale",
+  "a11y-img-alt",
+  "a11y-control-label",
+  "a11y-button-name",
+  "a11y-click-target",
+  "a11y-tabindex",
+  "a11y-focus-visible",
+  "a11y-target-size",
+  "a11y-heading-order"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -36697,7 +36705,7 @@ function projectTier(dir) {
   const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
   return "react" in deps || "next" in deps ? 1 : 0;
 }
-function discoverCandidates(base) {
+function discoverCandidates(base3) {
   const found = [];
   const visit2 = (dir, depth) => {
     if (depth > DISCOVERY_DEPTH) return;
@@ -36715,7 +36723,7 @@ function discoverCandidates(base) {
       else visit2(abs2, depth + 1);
     }
   };
-  visit2(base, 1);
+  visit2(base3, 1);
   const best = Math.max(0, ...found.map((f3) => f3.tier));
   return found.filter((f3) => f3.tier === best).map((f3) => f3.dir).sort();
 }
@@ -36723,16 +36731,16 @@ function resolveWorkspace(opts) {
   const env = opts.env ?? process.env;
   const cwd = opts.cwd ?? process.cwd();
   const isUsable = (v) => !!v && !v.includes("${");
-  const base = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
+  const base3 = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
   const existingDir = (p4) => {
     if (!fs2.existsSync(p4) || !fs2.statSync(p4).isDirectory()) {
       throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${p4}`);
     }
     return fs2.realpathSync(p4);
   };
-  const workspaceRoot = existingDir(base);
+  const workspaceRoot = existingDir(base3);
   if (isUsable(env.FACHA_UI_ROOT)) {
-    return { workspaceRoot, root: existingDir(path2.resolve(base, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
+    return { workspaceRoot, root: existingDir(path2.resolve(base3, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
   }
   if (projectTier(workspaceRoot) > 0) return { workspaceRoot, root: workspaceRoot, mode: "direct", candidates: [] };
   const found = discoverCandidates(workspaceRoot);
@@ -37206,8 +37214,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path7, errorMaps, issueData } = params;
-  const fullPath = [...path7, ...issueData.path || []];
+  const { data, path: path8, errorMaps, issueData } = params;
+  const fullPath = [...path8, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -37322,11 +37330,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path7, key) {
+  constructor(parent, value, path8, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path7;
+    this._path = path8;
     this._key = key;
   }
   get path() {
@@ -40380,23 +40388,23 @@ var ZodEffects = class extends ZodType2 {
     }
     if (effect.type === "transform") {
       if (ctx.common.async === false) {
-        const base = this._def.schema._parseSync({
+        const base3 = this._def.schema._parseSync({
           data: ctx.data,
           path: ctx.path,
           parent: ctx
         });
-        if (!isValid(base))
+        if (!isValid(base3))
           return INVALID2;
-        const result = effect.transform(base.value, checkCtx);
+        const result = effect.transform(base3.value, checkCtx);
         if (result instanceof Promise) {
           throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
         }
         return { status: status.value, value: result };
       } else {
-        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
-          if (!isValid(base))
+        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base3) => {
+          if (!isValid(base3))
             return INVALID2;
-          return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({
+          return Promise.resolve(effect.transform(base3.value, checkCtx)).then((result) => ({
             status: status.value,
             value: result
           }));
@@ -40877,11 +40885,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path7) {
-  if (path7.length === 0) {
+function getDotPath(path8) {
+  if (path8.length === 0) {
     return "object root";
   }
-  return path7.reduce((acc, seg, index2) => {
+  return path8.reduce((acc, seg, index2) => {
     if (index2 === 0) {
       return String(seg);
     }
@@ -41805,19 +41813,19 @@ function parseNullableDef(def, refs) {
     };
   }
   if (refs.target === "openApi3") {
-    const base2 = parseDef(def.innerType._def, {
+    const base4 = parseDef(def.innerType._def, {
       ...refs,
       currentPath: [...refs.currentPath]
     });
-    if (base2 && "$ref" in base2)
-      return { allOf: [base2], nullable: true };
-    return base2 && { ...base2, nullable: true };
+    if (base4 && "$ref" in base4)
+      return { allOf: [base4], nullable: true };
+    return base4 && { ...base4, nullable: true };
   }
-  const base = parseDef(def.innerType._def, {
+  const base3 = parseDef(def.innerType._def, {
     ...refs,
     currentPath: [...refs.currentPath, "anyOf", "0"]
   });
-  return base && { anyOf: [base, { type: "null" }] };
+  return base3 && { anyOf: [base3, { type: "null" }] };
 }
 
 // node_modules/zod-to-json-schema/dist/esm/parsers/number.js
@@ -43244,8 +43252,8 @@ var Protocol = class {
 function isPlainObject2(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
-function mergeCapabilities(base, additional) {
-  const result = { ...base };
+function mergeCapabilities(base3, additional) {
+  const result = { ...base3 };
   for (const key in additional) {
     const k4 = key;
     const addValue = additional[k4];
@@ -48686,8 +48694,8 @@ function compositeOver(fg, bg) {
     b: f3.b * a + b.b * (1 - a)
   };
 }
-function contrast2(fg, bg, base) {
-  const solidBg = alphaOf(bg) < 1 && base ? compositeOver(bg, base) : bg;
+function contrast2(fg, bg, base3) {
+  const solidBg = alphaOf(bg) < 1 && base3 ? compositeOver(bg, base3) : bg;
   const solidFg = alphaOf(fg) < 1 ? compositeOver(fg, solidBg) : fg;
   return Math.round(contrast(solidFg, solidBg) * 100) / 100;
 }
@@ -49284,11 +49292,11 @@ function toParseErrorConstructor({
   syntaxPlugin
 }) {
   const hasMissingPlugin = reasonCode === "MissingPlugin" || reasonCode === "MissingOneOfPlugins";
-  return function constructor(loc, pos, details) {
+  return function constructor(loc2, pos, details) {
     const error62 = new SyntaxError();
     error62.code = code2;
     error62.reasonCode = reasonCode;
-    error62.loc = loc;
+    error62.loc = loc2;
     error62.pos = pos;
     error62.syntaxPlugin = syntaxPlugin;
     if (hasMissingPlugin) {
@@ -49299,7 +49307,7 @@ function toParseErrorConstructor({
         line,
         column,
         index: index2 = pos
-      } = overrides.loc ?? loc;
+      } = overrides.loc ?? loc2;
       return constructor(new Position(line, column), index2, {
         ...details,
         ...overrides.details
@@ -49309,7 +49317,7 @@ function toParseErrorConstructor({
     Object.defineProperty(error62, "message", {
       configurable: true,
       get() {
-        const message = `${toMessage(details)} (${loc.line}:${loc.column})`;
+        const message = `${toMessage(details)} (${loc2.line}:${loc2.column})`;
         this.message = message;
         return message;
       },
@@ -49428,8 +49436,8 @@ function toESTreeLocation(node2) {
   return node2;
 }
 var estree = (superClass) => class ESTreeParserMixin extends superClass {
-  createPosition(loc) {
-    return new Position(loc.line, loc.column);
+  createPosition(loc2) {
+    return new Position(loc2.line, loc2.column);
   }
   parse() {
     const file2 = super.parse();
@@ -49503,7 +49511,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     const {
       start,
       end,
-      loc,
+      loc: loc2,
       range,
       raw,
       value
@@ -49512,7 +49520,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     cloned.type = "Literal";
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc;
+    cloned.loc = loc2;
     cloned.range = range;
     cloned.raw = raw;
     cloned.value = value;
@@ -49720,15 +49728,15 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     }
     return node2;
   }
-  stopParseSubscript(base, state) {
-    const node2 = super.stopParseSubscript(base, state);
+  stopParseSubscript(base3, state) {
+    const node2 = super.stopParseSubscript(base3, state);
     if (state.optionalChainMember) {
-      return this.estreeParseChainExpression(node2, base);
+      return this.estreeParseChainExpression(node2, base3);
     }
     return node2;
   }
-  parseMember(base, startLoc, state, computed, optional2) {
-    const node2 = super.parseMember(base, startLoc, state, computed, optional2);
+  parseMember(base3, startLoc, state, computed, optional2) {
+    const node2 = super.parseMember(base3, startLoc, state, computed, optional2);
     if (node2.type === "OptionalMemberExpression") {
       this.castNodeTo(node2, "MemberExpression");
     } else {
@@ -50454,10 +50462,10 @@ var ScopeHandler = class {
   treatFunctionsAsVarInScope(scope) {
     return !!(scope.flags & (2 | 128) || !this.parser.inModule && scope.flags & 1);
   }
-  declareName(name, bindingType, loc) {
+  declareName(name, bindingType, loc2) {
     let scope = this.currentScope();
     if (bindingType & 8 || bindingType & 16) {
-      this.checkRedeclarationInScope(scope, name, bindingType, loc);
+      this.checkRedeclarationInScope(scope, name, bindingType, loc2);
       let type = scope.names.get(name) || 0;
       if (bindingType & 16) {
         type = type | 4;
@@ -50474,7 +50482,7 @@ var ScopeHandler = class {
     } else if (bindingType & 4) {
       for (let i = this.scopeStack.length - 1; i >= 0; --i) {
         scope = this.scopeStack[i];
-        this.checkRedeclarationInScope(scope, name, bindingType, loc);
+        this.checkRedeclarationInScope(scope, name, bindingType, loc2);
         scope.names.set(name, (scope.names.get(name) || 0) | 1);
         this.maybeExportDefined(scope, name);
         if (scope.flags & 3715) break;
@@ -50489,9 +50497,9 @@ var ScopeHandler = class {
       this.undefinedExports.delete(name);
     }
   }
-  checkRedeclarationInScope(scope, name, bindingType, loc) {
+  checkRedeclarationInScope(scope, name, bindingType, loc2) {
     if (this.isRedeclaredInScope(scope, name, bindingType)) {
-      this.parser.raise(Errors.VarRedeclaration, loc, {
+      this.parser.raise(Errors.VarRedeclaration, loc2, {
         identifierName: name
       });
     }
@@ -50547,15 +50555,15 @@ var FlowScopeHandler = class extends ScopeHandler {
   createScope(flags) {
     return new FlowScope(flags);
   }
-  declareName(name, bindingType, loc) {
+  declareName(name, bindingType, loc2) {
     const scope = this.currentScope();
     if (bindingType & 2048) {
-      this.checkRedeclarationInScope(scope, name, bindingType, loc);
+      this.checkRedeclarationInScope(scope, name, bindingType, loc2);
       this.maybeExportDefined(scope, name);
       scope.declareFunctions.add(name);
       return;
     }
-    super.declareName(name, bindingType, loc);
+    super.declareName(name, bindingType, loc2);
   }
   isRedeclaredInScope(scope, name, bindingType) {
     if (super.isRedeclaredInScope(scope, name, bindingType)) return true;
@@ -52270,8 +52278,8 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     }
     return !isExport && this.isContextual(83);
   }
-  applyImportPhase(node2, isExport, phase, loc) {
-    super.applyImportPhase(node2, isExport, phase, loc);
+  applyImportPhase(node2, isExport, phase, loc2) {
+    super.applyImportPhase(node2, isExport, phase, loc2);
     if (isExport) {
       if (!phase && this.match(61)) {
         return;
@@ -52468,18 +52476,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
   parseParenAndDistinguishExpression(canStartArrow) {
     return super.parseParenAndDistinguishExpression(canStartArrow && !this.state.noArrowAt.includes(this.sourceToOffsetPos(this.state.start)));
   }
-  parseSubscripts(base, startLoc, noCalls) {
-    if (base.type === "Identifier" && base.name === "async" && this.state.noArrowAt.includes(startLoc.index)) {
+  parseSubscripts(base3, startLoc, noCalls) {
+    if (base3.type === "Identifier" && base3.name === "async" && this.state.noArrowAt.includes(startLoc.index)) {
       this.next();
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base;
+      node2.callee = base3;
       node2.arguments = super.parseCallExpressionArguments();
-      base = this.finishNode(node2, "CallExpression");
-    } else if (base.type === "Identifier" && base.name === "async" && this.match(43)) {
+      base3 = this.finishNode(node2, "CallExpression");
+    } else if (base3.type === "Identifier" && base3.name === "async" && this.match(43)) {
       const state = this.state.clone();
       const arrow = this.tryParse((abort) => this.parseAsyncArrowWithTypeParameters(startLoc) || abort(), state);
       if (!arrow.error && !arrow.aborted) return arrow.node;
-      const result = this.tryParse(() => super.parseSubscripts(base, startLoc, noCalls), state);
+      const result = this.tryParse(() => super.parseSubscripts(base3, startLoc, noCalls), state);
       if (result.node && !result.error) return result.node;
       if (arrow.node) {
         this.state = arrow.failState;
@@ -52491,18 +52499,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       }
       throw arrow.error || result.error;
     }
-    return super.parseSubscripts(base, startLoc, noCalls);
+    return super.parseSubscripts(base3, startLoc, noCalls);
   }
-  parseSubscript(base, startLoc, noCalls, subscriptState) {
+  parseSubscript(base3, startLoc, noCalls, subscriptState) {
     if (this.match(14) && this.isLookaheadToken_lt()) {
       subscriptState.optionalChainMember = true;
       if (noCalls) {
         subscriptState.stop = true;
-        return base;
+        return base3;
       }
       this.next();
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base;
+      node2.callee = base3;
       node2.typeArguments = this.flowParseTypeParameterInstantiationInExpression();
       this.expect(6);
       node2.arguments = this.parseCallExpressionArguments();
@@ -52510,7 +52518,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       return this.finishCallExpression(node2, true);
     } else if (!noCalls && this.shouldParseTypes() && (this.match(43) || this.match(47))) {
       const node2 = this.startNodeAt(startLoc);
-      node2.callee = base;
+      node2.callee = base3;
       const result = this.tryParse(() => {
         node2.typeArguments = this.flowParseTypeParameterInstantiationCallOrNew();
         this.expect(6);
@@ -52525,7 +52533,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
         return result.node;
       }
     }
-    return super.parseSubscript(base, startLoc, noCalls, subscriptState);
+    return super.parseSubscript(base3, startLoc, noCalls, subscriptState);
   }
   parseNewCallee(node2) {
     super.parseNewCallee(node2);
@@ -52608,14 +52616,14 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       throw this.raise(Errors.UnterminatedComment, this.state.curPosition());
     }
   }
-  flowEnumErrorBooleanMemberNotInitialized(loc, names) {
-    this.raise(FlowErrors.EnumBooleanMemberNotInitialized, loc, names);
+  flowEnumErrorBooleanMemberNotInitialized(loc2, names) {
+    this.raise(FlowErrors.EnumBooleanMemberNotInitialized, loc2, names);
   }
-  flowEnumErrorInvalidMemberInitializer(loc, enumContext) {
-    return this.raise(!enumContext.explicitType ? FlowErrors.EnumInvalidMemberInitializerUnknownType : enumContext.explicitType === "symbol" ? FlowErrors.EnumInvalidMemberInitializerSymbolType : FlowErrors.EnumInvalidMemberInitializerPrimaryType, loc, enumContext);
+  flowEnumErrorInvalidMemberInitializer(loc2, enumContext) {
+    return this.raise(!enumContext.explicitType ? FlowErrors.EnumInvalidMemberInitializerUnknownType : enumContext.explicitType === "symbol" ? FlowErrors.EnumInvalidMemberInitializerSymbolType : FlowErrors.EnumInvalidMemberInitializerPrimaryType, loc2, enumContext);
   }
-  flowEnumErrorNumberMemberNotInitialized(loc, details) {
-    this.raise(FlowErrors.EnumNumberMemberNotInitialized, loc, details);
+  flowEnumErrorNumberMemberNotInitialized(loc2, details) {
+    this.raise(FlowErrors.EnumNumberMemberNotInitialized, loc2, details);
   }
   flowEnumErrorStringMemberInconsistentlyInitialized(node2, details) {
     this.raise(FlowErrors.EnumStringMemberInconsistentlyInitialized, node2, details);
@@ -52664,18 +52672,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     };
   }
   flowEnumMemberRaw() {
-    const loc = this.state.startLoc;
+    const loc2 = this.state.startLoc;
     const id = this.parseIdentifier(true);
     const init = this.eat(25) ? this.flowEnumMemberInit() : {
       type: "none",
-      loc
+      loc: loc2
     };
     return {
       id,
       init
     };
   }
-  flowEnumCheckExplicitTypeMismatch(loc, context, expectedType) {
+  flowEnumCheckExplicitTypeMismatch(loc2, context, expectedType) {
     const {
       explicitType
     } = context;
@@ -52683,7 +52691,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       return;
     }
     if (explicitType !== expectedType) {
-      this.flowEnumErrorInvalidMemberInitializer(loc, context);
+      this.flowEnumErrorInvalidMemberInitializer(loc2, context);
     }
   }
   flowEnumMembers({
@@ -53720,10 +53728,10 @@ var TypeScriptScopeHandler = class extends ScopeHandler {
     }
     return false;
   }
-  declareName(name, bindingType, loc) {
+  declareName(name, bindingType, loc2) {
     if (bindingType & 4096) {
       if (this.hasImport(name, true)) {
-        this.parser.raise(Errors.VarRedeclaration, loc, {
+        this.parser.raise(Errors.VarRedeclaration, loc2, {
           identifierName: name
         });
       }
@@ -53737,10 +53745,10 @@ var TypeScriptScopeHandler = class extends ScopeHandler {
       scope.tsNames.set(name, type | 16);
       return;
     }
-    super.declareName(name, bindingType, loc);
+    super.declareName(name, bindingType, loc2);
     if (bindingType & 2) {
       if (!(bindingType & 1)) {
-        this.checkRedeclarationInScope(scope, name, bindingType, loc);
+        this.checkRedeclarationInScope(scope, name, bindingType, loc2);
         this.maybeExportDefined(scope, name);
       }
       type = type | 1;
@@ -54479,15 +54487,15 @@ var Tokenizer = class extends CommentsParser {
     }
     this.locData = locDataCache;
   }
-  setLoc(loc) {
-    const dataIndex = this.offsetToSourcePos(loc.index);
-    this.locData[dataIndex * 2] = loc.line;
-    this.locData[dataIndex * 2 + 1] = loc.column;
+  setLoc(loc2) {
+    const dataIndex = this.offsetToSourcePos(loc2.index);
+    this.locData[dataIndex * 2] = loc2.line;
+    this.locData[dataIndex * 2 + 1] = loc2.column;
   }
   getLoc(locIndex) {
     const dataIndex = this.offsetToSourcePos(locIndex);
-    const loc = new Position(this.locData[dataIndex * 2], this.locData[dataIndex * 2 + 1], locIndex);
-    return loc;
+    const loc2 = new Position(this.locData[dataIndex * 2], this.locData[dataIndex * 2 + 1], locIndex);
+    return loc2;
   }
   pushToken(token) {
     this.tokens.length = this.state.tokensLength;
@@ -55354,38 +55362,38 @@ var Tokenizer = class extends CommentsParser {
     }
   }
   raise(toParseError, at, details = {}) {
-    const loc = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
-    const pos = at instanceof Position ? loc.index : typeof at === "number" ? at : at.start;
-    const error62 = toParseError(loc, pos, details);
+    const loc2 = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const pos = at instanceof Position ? loc2.index : typeof at === "number" ? at : at.start;
+    const error62 = toParseError(loc2, pos, details);
     if (!(this.optionFlags & 4096)) throw error62;
     if (!this.isLookahead) this.state.errors.push(error62);
     return error62;
   }
   raiseOverwrite(toParseError, at, details = {}) {
-    const loc = at instanceof Position ? at : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
-    const pos = at instanceof Position ? loc.index : at.start;
+    const loc2 = at instanceof Position ? at : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const pos = at instanceof Position ? loc2.index : at.start;
     const errors = this.state.errors;
     for (let i = errors.length - 1; i >= 0; i--) {
       const error62 = errors[i];
       if (error62.pos === pos) {
-        return errors[i] = toParseError(loc, pos, details);
+        return errors[i] = toParseError(loc2, pos, details);
       }
       if (error62.pos < pos) break;
     }
-    return this.raise(toParseError, loc, details);
+    return this.raise(toParseError, loc2, details);
   }
   updateContext(prevType) {
   }
-  unexpected(loc, type) {
-    throw this.raise(Errors.UnexpectedToken, loc != null ? loc : this.state.startLoc, {
+  unexpected(loc2, type) {
+    throw this.raise(Errors.UnexpectedToken, loc2 != null ? loc2 : this.state.startLoc, {
       expected: type ? tokenLabelName(type) : null
     });
   }
-  expectPlugin(pluginName, loc) {
+  expectPlugin(pluginName, loc2) {
     if (this.hasPlugin(pluginName)) {
       return true;
     }
-    throw this.raise(Errors.MissingPlugin, loc != null ? loc : this.state.startLoc, {
+    throw this.raise(Errors.MissingPlugin, loc2 != null ? loc2 : this.state.startLoc, {
       missingPlugin: [pluginName]
     });
   }
@@ -55452,19 +55460,19 @@ var ClassScopeHandler = class {
   exit() {
     const oldClassScope = this.stack.pop();
     const current = this.current();
-    for (const [name, loc] of Array.from(oldClassScope.undefinedPrivateNames)) {
+    for (const [name, loc2] of Array.from(oldClassScope.undefinedPrivateNames)) {
       if (current) {
         if (!current.undefinedPrivateNames.has(name)) {
-          current.undefinedPrivateNames.set(name, loc);
+          current.undefinedPrivateNames.set(name, loc2);
         }
       } else {
-        this.parser.raise(Errors.InvalidPrivateFieldResolution, loc, {
+        this.parser.raise(Errors.InvalidPrivateFieldResolution, loc2, {
           identifierName: name
         });
       }
     }
   }
-  declarePrivateName(name, elementType, loc) {
+  declarePrivateName(name, elementType, loc2) {
     const {
       privateNames,
       loneAccessors,
@@ -55485,22 +55493,22 @@ var ClassScopeHandler = class {
       }
     }
     if (redefined) {
-      this.parser.raise(Errors.PrivateNameRedeclaration, loc, {
+      this.parser.raise(Errors.PrivateNameRedeclaration, loc2, {
         identifierName: name
       });
     }
     privateNames.add(name);
     undefinedPrivateNames.delete(name);
   }
-  usePrivateName(name, loc) {
+  usePrivateName(name, loc2) {
     let classScope;
     for (classScope of this.stack) {
       if (classScope.privateNames.has(name)) return;
     }
     if (classScope) {
-      classScope.undefinedPrivateNames.set(name, loc);
+      classScope.undefinedPrivateNames.set(name, loc2);
     } else {
-      this.parser.raise(Errors.InvalidPrivateFieldResolution, loc, {
+      this.parser.raise(Errors.InvalidPrivateFieldResolution, loc2, {
         identifierName: name
       });
     }
@@ -55544,7 +55552,7 @@ var ExpressionScopeHandler = class {
   exit() {
     this.stack.pop();
   }
-  recordParameterInitializerError(toParseError, loc) {
+  recordParameterInitializerError(toParseError, loc2) {
     const {
       stack
     } = this;
@@ -55552,13 +55560,13 @@ var ExpressionScopeHandler = class {
     let scope = stack[i];
     while (!scope.isCertainlyParameterDeclaration()) {
       if (scope.canBeArrowParameterDeclaration()) {
-        scope.recordDeclarationError(toParseError, loc);
+        scope.recordDeclarationError(toParseError, loc2);
       } else {
         return;
       }
       scope = stack[--i];
     }
-    this.parser.raise(toParseError, loc);
+    this.parser.raise(toParseError, loc2);
   }
   recordArrowParameterBindingError(error62, node2) {
     const {
@@ -55710,9 +55718,9 @@ var UtilParser = class extends Tokenizer {
     if (allowAsi ? this.isLineTerminator() : this.eat(9)) return;
     this.raise(Errors.MissingSemicolon, this.state.lastTokEndLoc);
   }
-  expect(type, loc) {
+  expect(type, loc2) {
     if (!this.eat(type)) {
-      this.unexpected(loc, type);
+      this.unexpected(loc2, type);
     }
   }
   tryParse(fn5, oldState = this.state.clone()) {
@@ -55879,12 +55887,12 @@ var ExpressionErrors = class {
   voidPatternLoc = null;
 };
 var Node2 = class {
-  constructor(optionFlags, filename, pos, loc) {
+  constructor(optionFlags, filename, pos, loc2) {
     this.start = pos;
     this.end = 0;
-    if (loc !== void 0) this.loc = new SourceLocation(loc);
+    if (loc2 !== void 0) this.loc = new SourceLocation(loc2);
     if (optionFlags & 128) this.range = [pos, 0];
-    if (loc !== void 0 && filename) {
+    if (loc2 !== void 0 && filename) {
       this.loc.filename = filename;
     }
   }
@@ -55892,8 +55900,8 @@ var Node2 = class {
 };
 var NodePrototype = Node2.prototype;
 var NodeUtils = class extends UtilParser {
-  createPosition(loc) {
-    return loc;
+  createPosition(loc2) {
+    return loc2;
   }
   startNode() {
     const {
@@ -55902,15 +55910,15 @@ var NodeUtils = class extends UtilParser {
     this.setLoc(startLoc);
     return this.startNodeAt(startLoc);
   }
-  startNodeAt(loc) {
+  startNodeAt(loc2) {
     const {
       optionFlags,
       filename
     } = this;
     if (!(optionFlags & 256)) {
-      return new Node2(optionFlags, filename, loc.index);
+      return new Node2(optionFlags, filename, loc2.index);
     }
-    return new Node2(optionFlags, filename, loc.index, this.createPosition(loc));
+    return new Node2(optionFlags, filename, loc2.index, this.createPosition(loc2));
   }
   startNodeAtNode(type) {
     const {
@@ -56000,7 +56008,7 @@ var NodeUtils = class extends UtilParser {
       type,
       start,
       end,
-      loc,
+      loc: loc2,
       range,
       name
     } = node2;
@@ -56008,7 +56016,7 @@ var NodeUtils = class extends UtilParser {
     cloned.type = type;
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc;
+    cloned.loc = loc2;
     cloned.range = range;
     cloned.name = name;
     if (node2.extra) cloned.extra = node2.extra;
@@ -56019,7 +56027,7 @@ var NodeUtils = class extends UtilParser {
       type,
       start,
       end,
-      loc,
+      loc: loc2,
       range,
       extra
     } = node2;
@@ -56027,7 +56035,7 @@ var NodeUtils = class extends UtilParser {
     cloned.type = type;
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc;
+    cloned.loc = loc2;
     cloned.range = range;
     cloned.extra = extra;
     cloned.value = node2.value;
@@ -56778,62 +56786,62 @@ var ExpressionParser = class extends LValParser {
     }
     return this.parseSubscripts(expr, startLoc);
   }
-  parseSubscripts(base, startLoc, noCalls) {
+  parseSubscripts(base3, startLoc, noCalls) {
     const state = {
       optionalChainMember: false,
-      maybeAsyncArrow: this.atPossibleAsyncArrow(base),
+      maybeAsyncArrow: this.atPossibleAsyncArrow(base3),
       stop: false
     };
     do {
-      base = this.parseSubscript(base, startLoc, noCalls, state);
+      base3 = this.parseSubscript(base3, startLoc, noCalls, state);
       state.maybeAsyncArrow = false;
     } while (!state.stop);
-    return base;
+    return base3;
   }
-  parseSubscript(base, startLoc, noCalls, state) {
+  parseSubscript(base3, startLoc, noCalls, state) {
     const {
       type
     } = this.state;
     if (!noCalls && type === 11) {
-      return this.parseBind(base, startLoc, state);
+      return this.parseBind(base3, startLoc, state);
     } else if (tokenIsTemplate(type)) {
-      return this.parseTaggedTemplateExpression(base, startLoc, state);
+      return this.parseTaggedTemplateExpression(base3, startLoc, state);
     }
     let optional2 = false;
     if (type === 14) {
       if (noCalls) {
         this.raise(Errors.OptionalChainingNoNew, this.state.startLoc);
         if (this.lookaheadCharCode() === 40) {
-          return this.stopParseSubscript(base, state);
+          return this.stopParseSubscript(base3, state);
         }
       }
       state.optionalChainMember = optional2 = true;
       this.next();
     }
     if (!noCalls && this.match(6)) {
-      return this.parseCoverCallAndAsyncArrowHead(base, startLoc, state, optional2);
+      return this.parseCoverCallAndAsyncArrowHead(base3, startLoc, state, optional2);
     } else {
       const computed = this.eat(0);
       if (computed || optional2 || this.eat(12)) {
-        return this.parseMember(base, startLoc, state, computed, optional2);
+        return this.parseMember(base3, startLoc, state, computed, optional2);
       } else {
-        return this.stopParseSubscript(base, state);
+        return this.stopParseSubscript(base3, state);
       }
     }
   }
-  stopParseSubscript(base, state) {
+  stopParseSubscript(base3, state) {
     state.stop = true;
-    return base;
+    return base3;
   }
-  parseMember(base, startLoc, state, computed, optional2) {
+  parseMember(base3, startLoc, state, computed, optional2) {
     const node2 = this.startNodeAt(startLoc);
-    node2.object = base;
+    node2.object = base3;
     node2.computed = computed;
     if (computed) {
       node2.property = this.parseExpression();
       this.expect(1);
     } else if (this.match(134)) {
-      if (base.type === "Super") {
+      if (base3.type === "Super") {
         this.raise(Errors.SuperPrivateField, startLoc);
       }
       this.classScope.usePrivateName(this.state.value, this.state.startLoc);
@@ -56848,12 +56856,12 @@ var ExpressionParser = class extends LValParser {
       return this.finishNode(node2, "MemberExpression");
     }
   }
-  parseBind(base, startLoc, state) {
+  parseBind(base3, startLoc, state) {
     const node2 = this.startNodeAt(startLoc);
-    node2.object = base;
+    node2.object = base3;
     this.next();
-    const callee = this.parseNoCallExpr((base2) => {
-      throw this.raise(Errors.UnsupportedBindRHS, base2);
+    const callee = this.parseNoCallExpr((base4) => {
+      throw this.raise(Errors.UnsupportedBindRHS, base4);
     });
     if (callee.type === "Super" || callee.type === "Import") {
       throw this.raise(Errors.UnsupportedBindRHS, callee);
@@ -56862,11 +56870,11 @@ var ExpressionParser = class extends LValParser {
     state.stop = true;
     return this.parseSubscripts(this.finishNode(node2, "BindExpression"), startLoc, false);
   }
-  parseCoverCallAndAsyncArrowHead(base, startLoc, state, optional2) {
+  parseCoverCallAndAsyncArrowHead(base3, startLoc, state, optional2) {
     let refExpressionErrors = null;
     this.next();
     const node2 = this.startNodeAt(startLoc);
-    node2.callee = base;
+    node2.callee = base3;
     const {
       maybeAsyncArrow,
       optionalChainMember
@@ -56881,7 +56889,7 @@ var ExpressionParser = class extends LValParser {
     if (optional2) {
       node2.arguments = this.parseCallExpressionArguments();
     } else {
-      node2.arguments = this.parseCallExpressionArguments(base.type !== "Super", node2, refExpressionErrors);
+      node2.arguments = this.parseCallExpressionArguments(base3.type !== "Super", node2, refExpressionErrors);
     }
     let finishedNode = this.finishCallExpression(node2, optionalChainMember);
     if (maybeAsyncArrow && this.shouldParseAsyncArrow() && !optional2) {
@@ -56899,17 +56907,17 @@ var ExpressionParser = class extends LValParser {
     }
     return finishedNode;
   }
-  parseTaggedTemplateExpression(base, startLoc, state) {
+  parseTaggedTemplateExpression(base3, startLoc, state) {
     const node2 = this.startNodeAt(startLoc);
-    node2.tag = base;
+    node2.tag = base3;
     node2.quasi = this.parseTemplate(true);
     if (state.optionalChainMember) {
       this.raise(Errors.OptionalChainingNoTemplate, startLoc);
     }
     return this.finishNode(node2, "TaggedTemplateExpression");
   }
-  atPossibleAsyncArrow(base) {
-    return base.type === "Identifier" && base.name === "async" && this.state.lastTokEndLoc.index === base.end && !this.canInsertSemicolon() && base.end - base.start === 5 && this.state.canStartArrow;
+  atPossibleAsyncArrow(base3) {
+    return base3.type === "Identifier" && base3.name === "async" && this.state.lastTokEndLoc.index === base3.end && !this.canInsertSemicolon() && base3.end - base3.start === 5 && this.state.canStartArrow;
   }
   finishCallExpression(node2, optional2) {
     if (node2.callee.type === "Import") {
@@ -56963,11 +56971,11 @@ var ExpressionParser = class extends LValParser {
   parseNoCallExpr(onUnparenthesizedImportExpression) {
     const startLoc = this.state.startLoc;
     const isImport = this.match(79);
-    const base = this.parseExprAtom();
-    if (isImport && base.type === "ImportExpression") {
-      onUnparenthesizedImportExpression(base);
+    const base3 = this.parseExprAtom();
+    if (isImport && base3.type === "ImportExpression") {
+      onUnparenthesizedImportExpression(base3);
     }
-    return this.parseSubscripts(base, startLoc, true);
+    return this.parseSubscripts(base3, startLoc, true);
   }
   parseExprAtom(refExpressionErrors) {
     let node2;
@@ -57042,8 +57050,8 @@ var ExpressionParser = class extends LValParser {
         node2 = this.startNode();
         this.next();
         node2.object = null;
-        const callee = node2.callee = this.parseNoCallExpr((base) => {
-          throw this.raise(Errors.UnsupportedBind, base);
+        const callee = node2.callee = this.parseNoCallExpr((base3) => {
+          throw this.raise(Errors.UnsupportedBind, base3);
         });
         if (callee.type === "MemberExpression") {
           return this.finishNode(node2, "BindExpression");
@@ -57415,8 +57423,8 @@ var ExpressionParser = class extends LValParser {
     return this.finishNode(node2, "NewExpression");
   }
   parseNewCallee(node2) {
-    const callee = this.parseNoCallExpr((base) => {
-      this.raise(Errors.ImportCallNotNewExpression, base, base);
+    const callee = this.parseNoCallExpr((base3) => {
+      this.raise(Errors.ImportCallNotNewExpression, base3, base3);
     });
     node2.callee = callee;
     if (callee.type === "Import") {
@@ -59585,15 +59593,15 @@ var StatementParser = class extends ExpressionParser {
     if (isExport) return false;
     return this.isContextual(101) || this.isContextual(93);
   }
-  applyImportPhase(node2, isExport, phase, loc) {
+  applyImportPhase(node2, isExport, phase, loc2) {
     if (isExport) {
       return;
     }
     if (phase === "source") {
-      this.expectPlugin("sourcePhaseImports", loc);
+      this.expectPlugin("sourcePhaseImports", loc2);
       node2.phase = "source";
     } else if (phase === "defer") {
-      this.expectPlugin("deferredImportEvaluation", loc);
+      this.expectPlugin("deferredImportEvaluation", loc2);
       node2.phase = "defer";
     } else if (this.hasPlugin("sourcePhaseImports")) {
       node2.phase = null;
@@ -59991,16 +59999,16 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     return void 0;
   }
   tsParseModifiers(modifiers, errorTemplate = TSErrors.InvalidModifierOnTypeMember, modified, stopOnStartOfClassStaticBlock = false) {
-    const enforceOrder = (loc, modifier, before, after) => {
+    const enforceOrder = (loc2, modifier, before, after) => {
       if (modifier === before && modified[after]) {
-        this.raise(TSErrors.InvalidModifiersOrder, loc, {
+        this.raise(TSErrors.InvalidModifiersOrder, loc2, {
           orderedModifiers: [before, after]
         });
       }
     };
-    const incompatible = (loc, modifier, mod1, mod2) => {
+    const incompatible = (loc2, modifier, mod1, mod2) => {
       if (modified[mod1] && modifier === mod2 || modified[mod2] && modifier === mod1) {
-        this.raise(TSErrors.IncompatibleModifiers, loc, {
+        this.raise(TSErrors.IncompatibleModifiers, loc2, {
           modifiers: [mod1, mod2]
         });
       }
@@ -61441,19 +61449,19 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     }
     return node2;
   }
-  parseSubscript(base, startLoc, noCalls, state) {
+  parseSubscript(base3, startLoc, noCalls, state) {
     if (!this.hasPrecedingLineBreak() && this.match(31)) {
       this.state.canStartJSXElement = false;
       this.next();
       const nonNullExpression = this.startNodeAt(startLoc);
-      nonNullExpression.expression = base;
+      nonNullExpression.expression = base3;
       return this.finishNode(nonNullExpression, "TSNonNullExpression");
     }
     let isOptionalCall = false;
     if (this.match(14) && this.lookaheadCharCode() === 60) {
       if (noCalls) {
         state.stop = true;
-        return base;
+        return base3;
       }
       state.optionalChainMember = isOptionalCall = true;
       this.next();
@@ -61461,7 +61469,7 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     if (this.match(43) || this.match(47)) {
       let missingParenErrorLoc;
       const result = this.tsTryParseAndCatch(() => {
-        if (!noCalls && this.atPossibleAsyncArrow(base)) {
+        if (!noCalls && this.atPossibleAsyncArrow(base3)) {
           const asyncArrowFn = this.tsTryParseGenericAsyncArrowFunction(startLoc);
           if (asyncArrowFn) {
             state.stop = true;
@@ -61475,13 +61483,13 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
           return;
         }
         if (tokenIsTemplate(this.state.type)) {
-          const result2 = super.parseTaggedTemplateExpression(base, startLoc, state);
+          const result2 = super.parseTaggedTemplateExpression(base3, startLoc, state);
           result2.typeArguments = typeArguments;
           return result2;
         }
         if (!noCalls && this.eat(6)) {
           const node3 = this.startNodeAt(startLoc);
-          node3.callee = base;
+          node3.callee = base3;
           node3.arguments = this.parseCallExpressionArguments();
           this.tsCheckForInvalidTypeCasts(node3.arguments);
           node3.typeArguments = typeArguments;
@@ -61495,7 +61503,7 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
           return;
         }
         const node2 = this.startNodeAt(startLoc);
-        node2.expression = base;
+        node2.expression = base3;
         node2.typeArguments = typeArguments;
         return this.finishNode(node2, "TSInstantiationExpression");
       });
@@ -61508,13 +61516,13 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
             this.raise(TSErrors.InvalidPropertyAccessAfterInstantiationExpression, this.state.startLoc);
           }
           if (!this.match(12) && !this.match(14)) {
-            result.expression = super.stopParseSubscript(base, state);
+            result.expression = super.stopParseSubscript(base3, state);
           }
         }
         return result;
       }
     }
-    return super.parseSubscript(base, startLoc, noCalls, state);
+    return super.parseSubscript(base3, startLoc, noCalls, state);
   }
   parseNewCallee(node2) {
     super.parseNewCallee(node2);
@@ -61564,8 +61572,8 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     }
     return !isExport && this.isContextual(83);
   }
-  applyImportPhase(node2, isExport, phase, loc) {
-    super.applyImportPhase(node2, isExport, phase, loc);
+  applyImportPhase(node2, isExport, phase, loc2) {
+    super.applyImportPhase(node2, isExport, phase, loc2);
     if (isExport) {
       node2.exportKind = phase === "type" ? "type" : "value";
     } else {
@@ -63298,21 +63306,141 @@ function extractJsx(file2, code2, ext, classHelpers) {
       }
     }
   };
+  const aliases = /* @__PURE__ */ new Map();
+  for (const s of ast.program?.body ?? []) {
+    if (s.type !== "ImportDeclaration") continue;
+    const tag = s.source?.value === "next/image" ? "img" : s.source?.value === "next/link" ? "a" : null;
+    if (!tag) continue;
+    for (const sp of s.specifiers) if (sp.type === "ImportDefaultSpecifier") aliases.set(sp.local.name, tag);
+  }
+  const elementName = (opening) => {
+    if (opening.name?.type !== "JSXIdentifier") return { tag: "", intrinsic: false };
+    const name = opening.name.name;
+    if (/^[a-z]/.test(name)) return { tag: name, intrinsic: true };
+    const alias = aliases.get(name);
+    return alias ? { tag: alias, intrinsic: true } : { tag: name, intrinsic: false };
+  };
+  const collectStrings = (n, out) => {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "StringLiteral") out.push(...String(n.value).split(/\s+/).filter(Boolean));
+    else if (n.type === "TemplateLiteral") for (const q of n.quasis) out.push(...String(q.value.cooked ?? "").split(/\s+/).filter(Boolean));
+    else for (const key of Object.keys(n)) {
+      if (key === "loc" || key === "start" || key === "end" || key === "extra" || key === "comments") continue;
+      const child = n[key];
+      if (Array.isArray(child)) child.forEach((c2) => collectStrings(c2, out));
+      else if (child && typeof child === "object") collectStrings(child, out);
+    }
+  };
+  const attrsOf = (opening) => {
+    const attrs = {};
+    const dynamic = [];
+    const classes = [];
+    let spread = false;
+    for (const a of opening.attributes) {
+      if (a.type === "JSXSpreadAttribute") {
+        spread = true;
+        continue;
+      }
+      const key = a.name?.type === "JSXIdentifier" ? a.name.name : `${a.name?.namespace?.name}:${a.name?.name?.name}`;
+      const v = a.value;
+      if (v == null) attrs[key] = "";
+      else if (v.type === "StringLiteral") attrs[key] = v.value;
+      else if (v.type === "JSXExpressionContainer") {
+        const e4 = v.expression;
+        if (e4.type === "StringLiteral") attrs[key] = e4.value;
+        else if (e4.type === "NumericLiteral" || e4.type === "BooleanLiteral") attrs[key] = String(e4.value);
+        else if (e4.type === "TemplateLiteral" && e4.expressions.length === 0) attrs[key] = e4.quasis[0].value.cooked ?? "";
+        else if (e4.type === "UnaryExpression" && e4.operator === "-" && e4.argument?.type === "NumericLiteral") attrs[key] = `-${e4.argument.value}`;
+        else {
+          attrs[key] = "{}";
+          dynamic.push(key);
+        }
+      }
+      if (key === "className" || key === "class") collectStrings(v, classes);
+    }
+    return { attrs, dynamic, classes, spread };
+  };
+  const textOf = (children) => {
+    let name = "none";
+    const parts = [];
+    const unknown2 = () => {
+      if (name !== "text") name = "unknown";
+    };
+    const walkChildren = (kids) => {
+      for (const c2 of kids) {
+        if (c2.type === "JSXText") {
+          const s = String(c2.value).replace(/\s+/g, " ").trim();
+          if (s) {
+            name = "text";
+            parts.push(s);
+          }
+        } else if (c2.type === "JSXExpressionContainer") {
+          const e4 = c2.expression;
+          if (e4.type === "JSXEmptyExpression") continue;
+          if (e4.type === "StringLiteral" && e4.value.trim()) {
+            name = "text";
+            parts.push(e4.value.trim());
+          } else unknown2();
+        } else if (c2.type === "JSXFragment") {
+          walkChildren(c2.children);
+        } else if (c2.type === "JSXElement") {
+          const nm = elementName(c2.openingElement);
+          if (!nm.intrinsic) {
+            unknown2();
+            continue;
+          }
+          const a = attrsOf(c2.openingElement);
+          if (a.attrs["aria-hidden"] === "true") continue;
+          if (a.attrs["aria-label"] || a.attrs.title || nm.tag === "img" && a.attrs.alt) {
+            name = "text";
+            continue;
+          }
+          if (a.dynamic.some((d) => d === "aria-label" || d === "title" || d === "alt")) {
+            unknown2();
+            continue;
+          }
+          walkChildren(c2.children);
+        }
+      }
+    };
+    walkChildren(children);
+    return { name, text: parts.join(" ").slice(0, 80) };
+  };
+  const ancestors = [];
   const visit2 = (n) => {
     if (!n || typeof n !== "object") return;
     if (Array.isArray(n)) {
       for (const c2 of n) visit2(c2);
       return;
     }
+    let pushed = false;
+    if (n.type === "JSXElement") {
+      const opening = n.openingElement;
+      const nm = elementName(opening);
+      if (nm.intrinsic) {
+        usages.push({
+          kind: "element",
+          tag: nm.tag,
+          ...attrsOf(opening),
+          ...textOf(n.children),
+          inLabel: ancestors.includes("label"),
+          file: file2,
+          line: opening.loc.start.line,
+          column: opening.loc.start.column + 1
+        });
+      }
+      ancestors.push(nm.intrinsic ? nm.tag : "");
+      pushed = true;
+    }
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
       const name = n.name.name;
       const value = n.value;
-      const loc = { file: file2, line: n.loc.start.line, column: n.loc.start.column + 1 };
+      const loc2 = { file: file2, line: n.loc.start.line, column: n.loc.start.column + 1 };
       if (name === "className" || name === "class") {
         if (value?.type === "StringLiteral") fromString(value);
         else if (value?.type === "JSXExpressionContainer") fromClassExpr(value.expression);
       } else if (name === "style" && value?.type === "JSXExpressionContainer") {
-        usages.push({ kind: "inline-style", raw: code2.slice(n.start, n.end).replace(/\s+/g, " "), ...loc });
+        usages.push({ kind: "inline-style", raw: code2.slice(n.start, n.end).replace(/\s+/g, " "), ...loc2 });
         if (value.expression?.type === "ObjectExpression") fromStyleObject(value.expression);
       } else if (SVG_COLOR_ATTRS.has(name) && value?.type === "StringLiteral") {
         const s = inner(value);
@@ -63334,6 +63462,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
       const child = n[key];
       if (child && typeof child === "object") visit2(child);
     }
+    if (pushed) ancestors.pop();
   };
   visit2(ast);
   return usages;
@@ -63438,6 +63567,148 @@ function extractFile(ctx, abs2) {
       skipped: { file: file2, code: "PARSE_ERROR", detail: `${err.message}${err.loc ? ` (line ${err.loc.line})` : ""}`.slice(0, 200) }
     };
   }
+}
+
+// src/a11y.ts
+var INTERACTIVE_ROLES = /* @__PURE__ */ new Set(["button", "link", "checkbox", "radio", "switch", "tab", "menuitem", "option", "combobox", "textbox", "slider", "treeitem", "gridcell"]);
+var NON_INTERACTIVE = /* @__PURE__ */ new Set(["div", "span", "li", "td", "tr", "th", "p", "img", "section", "article", "header", "footer", "main", "aside", "ul", "ol", "table", "tbody", "svg", "i", "label", "h1", "h2", "h3", "h4", "h5", "h6"]);
+var UNLABELED_INPUT_TYPES = /* @__PURE__ */ new Set(["hidden", "submit", "button", "reset", "image"]);
+var FOCUS_REPLACEMENT = /^(focus|focus-visible|focus-within|group-focus|peer-focus):(ring|outline|border|shadow|bg|underline|decoration)/;
+var PADDING = /^(p|px|py|pt|pb|pl|pr|ps|pe)-|^min-(h|w)-|^size-(full|auto)/;
+var has = (e4, attr) => attr in e4.attrs;
+var hasValue = (e4, attr) => has(e4, attr) && (e4.attrs[attr] !== "" || e4.dynamic.includes(attr));
+var base = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
+var loc = (e4) => ({ file: e4.file, line: e4.line, column: e4.column });
+var show = (e4) => `<${e4.tag}${e4.text ? ` \xAB${e4.text.slice(0, 40)}\xBB` : ""}>`;
+function sizePx(cls, axis) {
+  const b = base(cls);
+  const m = b.match(new RegExp(`^(?:${axis}|size)-(\\d+(?:\\.\\d+)?|\\[(\\d+(?:\\.\\d+)?)(px|rem)\\])$`));
+  if (!m) return null;
+  if (m[2]) return m[3] === "rem" ? Number(m[2]) * 16 : Number(m[2]);
+  return Number(m[1]) * 4;
+}
+function isButtonLike(e4) {
+  return e4.tag === "button" || e4.tag === "a" && has(e4, "href") || e4.attrs.role === "button" || e4.attrs.role === "link";
+}
+function checkA11y(usages, report) {
+  const elements = usages.filter((u) => u.kind === "element");
+  const labelled = new Set(elements.filter((e4) => e4.tag === "label" && e4.attrs.htmlFor && e4.attrs.htmlFor !== "{}").map((e4) => e4.attrs.htmlFor));
+  const anyDynamicLabel = elements.some((e4) => e4.tag === "label" && e4.dynamic.includes("htmlFor"));
+  let lastHeading = 0;
+  for (const e4 of elements) {
+    const hidden = e4.attrs["aria-hidden"] === "true" || e4.attrs.role === "presentation" || e4.attrs.role === "none";
+    const named2 = hasValue(e4, "aria-label") || hasValue(e4, "aria-labelledby");
+    if (e4.tag === "img" && !e4.spread && !hidden && !has(e4, "alt")) {
+      report(
+        "a11y-img-alt",
+        "error",
+        loc(e4),
+        show(e4),
+        "Image without alt: screen readers announce the file name or nothing.",
+        'Add alt with what the image tells (alt="" if it is only decorative).'
+      );
+    }
+    const inputType = e4.attrs.type ?? "text";
+    const isControl = e4.tag === "select" || e4.tag === "textarea" || e4.tag === "input" && !UNLABELED_INPUT_TYPES.has(inputType) && !e4.dynamic.includes("type");
+    if (isControl && !e4.spread && !hidden && !named2 && !e4.inLabel && !hasValue(e4, "title")) {
+      const id = e4.attrs.id;
+      const byFor = id && id !== "{}" && labelled.has(id);
+      const unknown2 = e4.dynamic.includes("id") || id && anyDynamicLabel;
+      if (!byFor && !unknown2) {
+        report(
+          "a11y-control-label",
+          "error",
+          loc(e4),
+          show(e4),
+          `Form control without a label${has(e4, "placeholder") ? " (a placeholder is not a label: it disappears when typing)" : ""}.`,
+          'Wrap it in <label>, or give it an id with <label htmlFor="\u2026">, or aria-label when the label is visual only.'
+        );
+      }
+    }
+    if (isButtonLike(e4) && !e4.spread && !hidden && !named2 && !hasValue(e4, "title") && e4.name === "none") {
+      report(
+        "a11y-button-name",
+        "error",
+        loc(e4),
+        show(e4),
+        'Button or link without an accessible name: it is announced as just "button".',
+        "Add visible text, or aria-label when it is an icon (and aria-hidden on the icon)."
+      );
+    }
+    const backdrop = ["dialog", "alertdialog", "presentation", "none"].includes(e4.attrs.role ?? "");
+    if (NON_INTERACTIVE.has(e4.tag) && has(e4, "onClick") && !e4.spread && !backdrop) {
+      const role = e4.attrs.role;
+      const keyboard = has(e4, "onKeyDown") || has(e4, "onKeyUp") || has(e4, "onKeyPress");
+      const focusable = has(e4, "tabIndex");
+      if (!(role && INTERACTIVE_ROLES.has(role) && keyboard && focusable)) {
+        report(
+          "a11y-click-target",
+          "warning",
+          loc(e4),
+          show(e4),
+          `Click handler on a <${e4.tag}>: it cannot be reached with the keyboard${role ? "" : " and has no role"}.`,
+          "Use a <button> (or <a href> to navigate). If it must stay, add role, tabIndex={0} and a key handler."
+        );
+      }
+    }
+    const tabIndex = Number(e4.attrs.tabIndex);
+    if (has(e4, "tabIndex") && !e4.dynamic.includes("tabIndex") && tabIndex > 0) {
+      report(
+        "a11y-tabindex",
+        "warning",
+        loc(e4),
+        `tabIndex=${tabIndex}`,
+        "Positive tabIndex changes the keyboard order away from the visual order.",
+        "Use tabIndex={0} (or none) and order the elements in the markup."
+      );
+    }
+    const removesOutline = e4.classes.some((c2) => /^(outline-none|outline-0)$/.test(base(c2)) && (!c2.includes(":") || /^(focus|focus-visible):/.test(c2)));
+    if (removesOutline && !e4.classes.some((c2) => FOCUS_REPLACEMENT.test(c2))) {
+      report(
+        "a11y-focus-visible",
+        "warning",
+        loc(e4),
+        e4.classes.find((c2) => /outline-(none|0)$/.test(c2)) ?? "outline-none",
+        "The focus outline is removed with no visible replacement: keyboard users lose track of where they are.",
+        "Keep the outline, or add a focus-visible style (focus-visible:ring-\u2026 or an outline with a project token)."
+      );
+    }
+    if (isButtonLike(e4) && !e4.classes.some((c2) => PADDING.test(base(c2)))) {
+      const h = Math.min(...e4.classes.map((c2) => sizePx(c2, "h") ?? Infinity));
+      const w = Math.min(...e4.classes.map((c2) => sizePx(c2, "w") ?? Infinity));
+      const small = Math.min(h, w);
+      if (Number.isFinite(small) && small < 24) {
+        report(
+          "a11y-target-size",
+          "warning",
+          loc(e4),
+          `${show(e4)} ${Math.round(small)}px`,
+          `Target of ${Math.round(small)}px: below the 24\xD724 px minimum (WCAG 2.5.8); hard to hit on touch screens.`,
+          "Give the control at least 24\xD724 px (padding or a min size), even if the icon stays small."
+        );
+      }
+    }
+    const heading = e4.tag.match(/^h([1-6])$/);
+    if (heading) {
+      const level = Number(heading[1]);
+      if (lastHeading > 0 && level > lastHeading + 1) {
+        report(
+          "a11y-heading-order",
+          "warning",
+          loc(e4),
+          `<h${lastHeading}> \u2192 <h${level}>`,
+          `Heading level jumps from h${lastHeading} to h${level}: the outline that screen readers navigate has a hole.`,
+          `Use h${lastHeading + 1} here, and style it with the class you need (the level is structure, not size).`
+        );
+      }
+      lastHeading = level;
+    }
+  }
+}
+function removesFocusOutline(property, value, selector, siblings) {
+  if (!selector || !/:focus(?!-within)/.test(selector) || /:not\(:focus-visible\)/.test(selector)) return false;
+  if (!/^outline(-style|-width)?$/.test(property) || !/^(none|0(px)?)$/.test(value.trim())) return false;
+  return !(siblings ?? []).some((d) => /^(box-shadow|border|border-color|outline-color|background|background-color|text-decoration)$/.test(d.prop) && !/^(none|0)$/.test(d.value.trim()));
 }
 
 // src/suggest.ts
@@ -64283,9 +64554,9 @@ function sprawl(ctx, usages) {
       const c2 = parseColor(lit.text);
       if (!c2) continue;
       const hex5 = toHex(c2).toLowerCase();
-      const loc = u.locAt(lit.index);
+      const loc2 = u.locAt(lit.index);
       const e4 = literals.get(hex5) ?? { color: c2, where: [] };
-      e4.where.push(`${loc.file}:${loc.line}`);
+      e4.where.push(`${loc2.file}:${loc2.line}`);
       literals.set(hex5, e4);
     }
   }
@@ -64403,12 +64674,12 @@ function index(ctx) {
       const selector = selectorContext(rule2);
       if (themeForSelector(selector, ctx.project.config.tokens.themes) !== null) return;
       rules.push({ rule: rule2, selector, file: file2 });
-      const { theme, base } = themeScope(ctx, selector);
-      if (!theme || !base) return;
+      const { theme, base: base3 } = themeScope(ctx, selector);
+      if (!theme || !base3) return;
       for (const n of rule2.nodes ?? []) {
         if (n.type !== "decl") continue;
-        if (n.prop === "color") idx.overrides.add(`${theme}|${base}|color`);
-        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base}|background`);
+        if (n.prop === "color") idx.overrides.add(`${theme}|${base3}|color`);
+        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base3}|background`);
       }
     });
   }
@@ -64434,16 +64705,16 @@ function index(ctx) {
   return idx;
 }
 function textContrast(ctx, value, background, selector, minRatio, opts = { text: true }) {
-  const { theme: scoped, base } = themeScope(ctx, selector);
+  const { theme: scoped, base: base3 } = themeScope(ctx, selector);
   const idx = index(ctx);
   const themes = ctx.tokens.themes.map((t) => t.name).filter((t) => !scoped || t === scoped);
   const surf = surfaces(ctx);
   const ratios = {};
   const against = {};
   for (const th of themes) {
-    if (!scoped && base && th !== ctx.tokens.themes[0]?.name) {
-      if (idx.overrides.has(`${th}|${base}|color`)) continue;
-      if (background && idx.overrides.has(`${th}|${base}|background`)) continue;
+    if (!scoped && base3 && th !== ctx.tokens.themes[0]?.name) {
+      if (idx.overrides.has(`${th}|${base3}|color`)) continue;
+      if (background && idx.overrides.has(`${th}|${base3}|background`)) continue;
     }
     const fg = colorOf(ctx, value, th);
     if (!fg) return null;
@@ -64680,7 +64951,23 @@ var RULES = [
     id: "non-text-contrast",
     severity: "warning",
     summary: "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background."
-  }
+  },
+  { id: "a11y-img-alt", severity: "error", summary: '<img> (or next/image) without alt. alt="" is valid for decorative images.' },
+  {
+    id: "a11y-control-label",
+    severity: "error",
+    summary: "input, select or textarea without a label: not inside <label>, no <label htmlFor> in the file, no aria-label(ledby) or title. A placeholder is not a label."
+  },
+  { id: "a11y-button-name", severity: "error", summary: "Button or link with no accessible name: no text, aria-label(ledby) or title (typically an icon-only button)." },
+  { id: "a11y-click-target", severity: "warning", summary: "onClick on a non-interactive element (div, span, li, td\u2026) without role, tabIndex and a key handler: unreachable with the keyboard." },
+  { id: "a11y-tabindex", severity: "warning", summary: "Positive tabIndex: the keyboard order no longer follows the visual order." },
+  {
+    id: "a11y-focus-visible",
+    severity: "warning",
+    summary: "The focus outline is removed (outline-none, focus:outline-none, or outline: none in a :focus rule) with no visible focus replacement."
+  },
+  { id: "a11y-target-size", severity: "warning", summary: "Button or link smaller than 24\xD724 px by its size utilities and without padding (WCAG 2.5.8)." },
+  { id: "a11y-heading-order", severity: "warning", summary: "A heading level is skipped inside a file (h2 \u2192 h4): the outline screen readers navigate has a hole." }
 ];
 var MESSAGES = {
   "color-literal": "Color literal outside the design tokens; it does not follow theme changes.",
@@ -64691,13 +64978,21 @@ var MESSAGES = {
   "tailwind-default-scale": "Tailwind default scale step instead of a project value.",
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
-  "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background."
+  "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background.",
+  "a11y-img-alt": "Image without alt.",
+  "a11y-control-label": "Form control without a label.",
+  "a11y-button-name": "Button or link without an accessible name.",
+  "a11y-click-target": "Click handler on a non-interactive element.",
+  "a11y-tabindex": "Positive tabIndex.",
+  "a11y-focus-visible": "Focus outline removed without a visible replacement.",
+  "a11y-target-size": "Target smaller than 24\xD724 px.",
+  "a11y-heading-order": "Heading level skipped."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
-function effectiveSeverity(ctx, rule2, base, soft = false) {
+function effectiveSeverity(ctx, rule2, base3, soft = false) {
   const override = ctx.project.config.rules?.[rule2];
   if (override === "off") return "off";
-  if (!override || soft) return base;
+  if (!override || soft) return base3;
   return override;
 }
 function clip(s, n = 200) {
@@ -64709,16 +65004,16 @@ function checkUsages(ctx, usages) {
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
   const custom2 = customRules(ctx);
-  const push = (rule2, base, loc, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
-    const severity3 = rule2.startsWith("custom/") ? base : effectiveSeverity(ctx, rule2, base, soft);
+  const push = (rule2, base3, loc2, found, property, context, suggestion, breaksThemes = [], soft = false, message) => {
+    const severity3 = rule2.startsWith("custom/") ? base3 : effectiveSeverity(ctx, rule2, base3, soft);
     if (severity3 === "off") return;
     violations.push({
-      id: `${loc.file}:${loc.line}:${loc.column}:${rule2}`,
+      id: `${loc2.file}:${loc2.line}:${loc2.column}:${rule2}`,
       rule: rule2,
       severity: severity3,
-      file: loc.file,
-      line: loc.line,
-      column: loc.column,
+      file: loc2.file,
+      line: loc2.line,
+      column: loc2.column,
       found: clip(found),
       property,
       context,
@@ -64803,16 +65098,16 @@ function checkUsages(ctx, usages) {
         }
         continue;
       }
-      const loc = { file: u.file, line: u.line, column: u.column };
+      const loc2 = { file: u.file, line: u.line, column: u.column };
       const varOnly = a.value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
       if (varOnly) {
         const name = varOnly[1];
         if (!ctx.definedCustomProps.has(name) && !ALWAYS_ALLOWED_VARS.test(name)) {
-          push("unknown-token", "error", loc, u.raw, a.property, "className", suggestTokenName(ctx, name));
+          push("unknown-token", "error", loc2, u.raw, a.property, "className", suggestTokenName(ctx, name));
         } else {
           const t = ctx.tokens.byName.get(name);
           const property = a.prefix === "text" && t?.type === "color" ? "color" : a.property;
-          push("tailwind-arbitrary-value", "info", loc, u.raw, property, "className", {
+          push("tailwind-arbitrary-value", "info", loc2, u.raw, property, "className", {
             match: "none",
             kind: "none",
             value: null,
@@ -64825,15 +65120,16 @@ function checkUsages(ctx, usages) {
       if (a.category === "color") {
         const lit = findColorLiterals(a.value, a.property)[0];
         if (lit && !allowed.has(lit.text.toLowerCase())) {
-          push("color-literal", "error", loc, u.raw, a.property, "className", suggestColor(ctx, lit.text, a.property), otherThemes);
+          push("color-literal", "error", loc2, u.raw, a.property, "className", suggestColor(ctx, lit.text, a.property), otherThemes);
           continue;
         }
       }
-      checkVarRefs(a.value, () => loc, a.property, "className");
+      checkVarRefs(a.value, () => loc2, a.property, "className");
       const severity3 = a.category === "sizing" || a.category === "layout" ? "warning" : "error";
-      push("tailwind-arbitrary-value", severity3, loc, u.raw, a.property, "className", suggestArbitrary(ctx, a));
+      push("tailwind-arbitrary-value", severity3, loc2, u.raw, a.property, "className", suggestArbitrary(ctx, a));
       continue;
     }
+    if (u.kind === "element") continue;
     const context = u.context === "css" ? "css" : u.context;
     for (const lit of findColorLiterals(u.value, u.property)) {
       if (allowed.has(lit.text.toLowerCase())) continue;
@@ -64873,6 +65169,20 @@ function checkUsages(ctx, usages) {
         );
       }
     }
+    if (u.context === "css") {
+      const siblings = ctx.componentClasses.find((c2) => c2.selector === u.selector)?.decls ?? null;
+      if (removesFocusOutline(u.property, u.value, u.selector, siblings)) {
+        push(
+          "a11y-focus-visible",
+          "warning",
+          { file: u.file, line: u.line, column: u.column },
+          `${u.selector} { ${u.property}: ${u.value} }`,
+          u.property,
+          "css",
+          { match: "none", kind: "none", value: null, detail: "Add a visible focus style in the same rule (an outline or box-shadow with a project token), or use :focus-visible.", source: null }
+        );
+      }
+    }
     if (isNonTextTarget(u.property, u.selector, u.context)) {
       const bg = u.siblingBackground ?? null;
       const r2 = nonTextContrast(ctx, u.value, bg, u.selector);
@@ -64892,6 +65202,10 @@ function checkUsages(ctx, usages) {
       }
     }
   }
+  checkA11y(
+    usages,
+    (rule2, base3, loc2, found, message, fix) => push(rule2, base3, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+  );
   return { violations, unresolved };
 }
 
@@ -65021,7 +65335,7 @@ var RECOMMENDED = [
 function coverage(ctx) {
   const roles = new Set(ctx.tokens.tokens.map((t) => t.role));
   const count = (role) => ctx.tokens.tokens.filter((t) => t.role === role).length;
-  const has = (k4) => {
+  const has2 = (k4) => {
     switch (k4) {
       case "typography.family":
         return roles.has("font");
@@ -65038,9 +65352,9 @@ function coverage(ctx) {
     }
   };
   const all = [...REQUIRED_ROLES, ...RECOMMENDED];
-  const present = all.filter(has);
-  const missing = all.filter((k4) => !has(k4));
-  const requiredMissing = REQUIRED_ROLES.filter((k4) => !has(k4));
+  const present = all.filter(has2);
+  const missing = all.filter((k4) => !has2(k4));
+  const requiredMissing = REQUIRED_ROLES.filter((k4) => !has2(k4));
   const status = ctx.tokens.tokens.length === 0 ? "missing" : missing.length === 0 ? "ok" : "partial";
   return { status, present, missing, requiredMissing };
 }
@@ -65074,8 +65388,8 @@ function health(ctx, usages) {
       for (const s of surfaces2) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
-        const base = tokenColor(ctx.tokens, surfaces2[0], th);
-        const r2 = contrast2(fg, bg, base);
+        const base3 = tokenColor(ctx.tokens, surfaces2[0], th);
+        const r2 = contrast2(fg, bg, base3);
         if (r2 < worst) {
           worst = r2;
           worstName = s;
@@ -65361,15 +65675,15 @@ function scanStyles(ctx) {
       continue;
     }
     const part = partOf(v.property);
-    const { theme, base } = themeScope2(occ.selector);
+    const { theme, base: base3 } = themeScope2(occ.selector);
     if (theme) {
-      themed.push({ theme, part, base, hex: hex4(c2), occ });
+      themed.push({ theme, part, base: base3, hex: hex4(c2), occ });
       continue;
     }
     const key = `${part}|${hex4(c2)}`;
     const g = groups.get(key) ?? { part, hex: hex4(c2), color: c2, occurrences: [], selectors: /* @__PURE__ */ new Set(), themeValues: /* @__PURE__ */ new Map() };
     g.occurrences.push(occ);
-    if (base) g.selectors.add(base);
+    if (base3) g.selectors.add(base3);
     groups.set(key, g);
   }
   for (const t of themed) {
@@ -65617,8 +65931,181 @@ function scanStyles(ctx) {
   };
 }
 
+// src/review.ts
+import path7 from "node:path";
+var MAX_ACCENTS = 2;
+var MAX_FONT_SIZES = 4;
+var SCREEN_FILE = /(^|\/)page\.[jt]sx$/;
+var TITLE_PROP = /<[A-Z][\w.]*[^>]*\btitle=/;
+var RENDERS_LIST = /\.map\(/;
+var LOADS_DATA = /\buse[A-Z]\w*\(|\bfetch\(|\bawait\s|\buseQuery\(|\buseSWR\(/;
+var STATE_SIGNALS = {
+  loading: /\b(is)?[lL]oading\b|\bisPending\b|[sS]keleton|aria-busy|[sS]pinner|Cargando/,
+  empty: /\.length\s*===?\s*0|!\s*[\w.?]+\.length\b|\b[eE]mpty|vac[ií]o|No hay|[sS]in resultados|no results/i,
+  error: /\b[eE]rror\b|role=["']alert["']|\bcatch\s*\(/
+};
+var base2 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
+var varRefs = (text) => [...text.matchAll(/var\(\s*(--[\w-]+)|\((--[\w-]+)\)/g)].map((m) => m[1] ?? m[2]);
+function isAction(e4) {
+  return e4.tag === "button" || e4.tag === "a" && "href" in e4.attrs || e4.attrs.role === "button" || e4.tag === "input" && (e4.attrs.type === "submit" || e4.attrs.type === "button");
+}
+function lineOf(text, re) {
+  const m = re.exec(text);
+  return m ? text.slice(0, m.index).split("\n").length : null;
+}
+function reviewUi(ctx, input2) {
+  const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
+  const relPath = rel(ctx.project, abs2) || ".";
+  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path7.extname(f3)) && !f3.endsWith(".css"));
+  if (!isDir && files.length === 0) throw new FachaError("UNSUPPORTED_FILE", `review_ui reads JSX/TSX files: ${relPath}`, { path: input2 });
+  const roleOf = (token) => ctx.tokens.byName.get(token)?.role ?? "";
+  const classRule = new Map(ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector)).map((c2) => [c2.selector.slice(1), c2]));
+  const typography = new Map(ctx.typographyClasses.map((t) => [t.className, t.fontSizePx]));
+  const results = [];
+  const findings = [];
+  for (const f3 of files.sort()) {
+    const { usages } = extractFile(ctx, f3);
+    const file2 = rel(ctx.project, f3);
+    const source = readSource(f3) ?? "";
+    const elements = usages.filter((u) => u.kind === "element");
+    const primary = elements.filter((e4) => {
+      if (!isAction(e4)) return false;
+      return e4.classes.some((c2) => {
+        const b = base2(c2);
+        if (/^bg-/.test(b) && varRefs(b).some((t) => roleOf(t) === "accent.primary")) return true;
+        const cc = classRule.get(b);
+        if (!cc) return false;
+        const paints = cc.decls.some((d) => /^background(-color)?$/.test(d.prop) && varRefs(d.value).some((t) => roleOf(t) === "accent.primary"));
+        return paints || /(^|-)(primary|cta)($|-)/.test(b);
+      });
+    });
+    const accents = /* @__PURE__ */ new Set();
+    const addRefs = (text) => {
+      for (const t of varRefs(text)) if (roleOf(t).startsWith("accent")) accents.add(t);
+    };
+    for (const u of usages) {
+      if (u.kind === "class") addRefs(u.raw);
+      else if (u.kind === "decl") addRefs(u.value);
+      else if (u.kind === "element") {
+        for (const c2 of u.classes) for (const t of classRule.get(base2(c2))?.tokens ?? []) if (roleOf(t).startsWith("accent")) accents.add(t);
+      }
+    }
+    const sizes = /* @__PURE__ */ new Set();
+    for (const e4 of elements) {
+      for (const c2 of e4.classes) {
+        const b = base2(c2);
+        const typo = typography.get(b);
+        if (typo != null) sizes.add(typo);
+        const fs5 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
+        const ccPx = fs5 ? toPx(fs5.value) : null;
+        if (ccPx != null) sizes.add(ccPx);
+        const scale = parseScaleClass(b);
+        if (scale?.kind === "fontSize" && scale.value) {
+          const px = toPx(scale.value);
+          if (px != null) sizes.add(px);
+        }
+        const arb = b.match(/^text-\[(\d+(?:\.\d+)?)(px|rem)\]$/);
+        if (arb) sizes.add(arb[2] === "rem" ? Number(arb[1]) * 16 : Number(arb[1]));
+      }
+    }
+    for (const u of usages) if (u.kind === "decl" && u.property === "font-size") {
+      const px = toPx(u.value);
+      if (px != null) sizes.add(px);
+    }
+    const headings = elements.filter((e4) => /^h[1-6]$/.test(e4.tag)).map((e4) => ({ level: Number(e4.tag[1]), text: e4.text, line: e4.line }));
+    const isScreen = SCREEN_FILE.test(file2);
+    const states = Object.fromEntries(
+      Object.keys(STATE_SIGNALS).map((k4) => [k4, lineOf(source, STATE_SIGNALS[k4])])
+    );
+    results.push({
+      file: file2,
+      primaryActions: primary.map((e4) => ({ line: e4.line, element: `<${e4.tag}${e4.text ? ` \xAB${e4.text.slice(0, 40)}\xBB` : ""}>` })),
+      accents: [...accents].sort(),
+      fontSizesPx: [...sizes].sort((a, b) => a - b),
+      headings,
+      states: isScreen ? states : null
+    });
+    const add = (heuristic, severity3, line, evidence, why, fix) => findings.push({ id: `${file2}:${line}:${heuristic}`, heuristic, severity: severity3, file: file2, line, evidence, why, fix });
+    if (primary.length > 1) {
+      add(
+        "primary-action",
+        "warning",
+        primary[1].line,
+        `${primary.length} primary actions: ${primary.map((e4) => `line ${e4.line}`).join(", ")}`,
+        'Several primary actions compete: the eye has no single answer to "what do I do here?".',
+        "Keep one primary action per view (the one that serves the goal); make the others secondary or links. Repeated row actions can be secondary with the main one at the top."
+      );
+    }
+    if (accents.size > MAX_ACCENTS) {
+      add(
+        "accents",
+        "warning",
+        1,
+        `${accents.size} accent tokens: ${[...accents].sort().join(", ")}`,
+        "Too many accents compete for attention, so none of them stands out.",
+        `Use at most ${MAX_ACCENTS} accents (brand plus one punctual emphasis); status colors are for states, not decoration.`
+      );
+    }
+    if (sizes.size > MAX_FONT_SIZES) {
+      add(
+        "type-scale",
+        "info",
+        1,
+        `${sizes.size} font sizes: ${[...sizes].sort((a, b) => a - b).map((s) => `${s}px`).join(", ")}`,
+        "Many sizes blur the hierarchy: the difference between levels stops being readable.",
+        `Stay within ${MAX_FONT_SIZES} steps of the project's type scale: title, section, body and caption.`
+      );
+    }
+    if (headings.filter((h) => h.level === 1).length > 1) {
+      add(
+        "headings",
+        "warning",
+        headings.filter((h) => h.level === 1)[1].line,
+        "more than one <h1>",
+        "Two main titles split the page's purpose for readers and screen readers.",
+        "Keep one h1 (often in the shell) and use h2 for the sections."
+      );
+    }
+    if (isScreen && headings.length === 0 && !TITLE_PROP.test(source)) {
+      add(
+        "headings",
+        "info",
+        1,
+        "no heading in the screen",
+        "Sections without headings are hard to scan and to navigate with a screen reader.",
+        "Give each section a heading (h2) with the project's section-title class."
+      );
+    }
+    if (isScreen && LOADS_DATA.test(source)) {
+      for (const [state, line] of Object.entries(states)) {
+        if (line != null || state === "empty" && !RENDERS_LIST.test(source)) continue;
+        add(
+          "states",
+          "info",
+          1,
+          `no ${state} state found`,
+          state === "loading" ? "Without a loading state the screen looks broken or empty while data arrives." : state === "empty" ? "Without an empty state, no data looks like an error and gives no next step." : "Without an error state, a failure leaves the user with nothing to do.",
+          state === "loading" ? "Show a loading state that keeps the layout (skeleton or a short message)." : state === "empty" ? "Show what is missing and the next step (a message and, if it applies, an action)." : "Show what failed in plain words and how to retry."
+        );
+      }
+    }
+  }
+  const summary = { warning: findings.filter((f3) => f3.severity === "warning").length, info: findings.filter((f3) => f3.severity === "info").length, files: results.length };
+  return {
+    path: relPath,
+    configSource: ctx.project.configSource,
+    summary,
+    files: results,
+    findings: findings.sort((a, b) => a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line || (a.heuristic < b.heuristic ? -1 : 1)),
+    notes: [
+      "Signals for a visual critique, not rules: they never block. Confirm each one on the captures (light and dark) before changing anything.",
+      "State signals are found by reading the code; check them in the captures with ?state=loading|empty|error|long in the lab."
+    ]
+  };
+}
+
 // src/server.ts
-var VERSION = "0.8.0";
+var VERSION = "0.9.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
@@ -65635,7 +66122,10 @@ var DESCRIPTIONS = {
 **Returns:** JSON with \`totals\`, \`byRule\`, \`byFile\` (sorted by errors desc), \`top\`, \`unresolved\`, \`ignored\`, \`health\`, \`filesScanned\`. Read-only.`,
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review \u2014 this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
-**Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`
+**Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
+  review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
+**When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
+**Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`
 };
 var READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 var severity2 = external_exports.enum(["info", "warning", "error"]);
@@ -65695,9 +66185,9 @@ function createServer(opts) {
       },
       annotations: { title: "Check UI", ...READ_ONLY }
     },
-    async ({ path: path7, rules, minSeverity }) => {
+    async ({ path: path8, rules, minSeverity }) => {
       try {
-        const data = checkUi(context(), path7, { rules, minSeverity });
+        const data = checkUi(context(), path8, { rules, minSeverity });
         const s = data.summary;
         return ok(`${data.path}: ${s.error} error(s), ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
@@ -65744,6 +66234,24 @@ function createServer(opts) {
           `${s.colorLiterals} color literal(s): ${s.coveredByExistingTokens} match existing tokens, ${s.tokenProposals} token proposal(s), ${s.scaleProposals} scale proposal(s), ${s.filesToMigrate} file(s) to migrate.`,
           data
         );
+      } catch (e4) {
+        return fail(e4);
+      }
+    }
+  );
+  server.registerTool(
+    "review_ui",
+    {
+      title: "Review UI",
+      description: DESCRIPTIONS.review_ui,
+      inputSchema: { path: external_exports.string().min(1).describe("File or directory, relative to the project root or the workspace root.") },
+      annotations: { title: "Review UI", ...READ_ONLY }
+    },
+    async ({ path: path8 }) => {
+      try {
+        const data = reviewUi(context(), path8);
+        const s = data.summary;
+        return ok(`${data.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e4) {
         return fail(e4);
       }

@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.8.0** (§7.10–§7.16). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.9.0** (§7.10–§7.17). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 > **Prompts de origen:** [`docs/prompts/01-spec.md`](docs/prompts/01-spec.md) · [`docs/prompts/02-mvp-plan.md`](docs/prompts/02-mvp-plan.md)
 
@@ -340,6 +340,15 @@ Las escalas `inferred` salen de los valores que usan las clases de componente de
 
 Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 
+##### `review_ui` (desde 0.9.0, §7.17)
+
+**Descripción (literal):**
+> Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
+> **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
+> **Returns:** JSON with `files` (per file: `primaryActions`, `accents`, `fontSizesPx`, `headings`, `states`), `findings` (heuristic, severity, evidence, why it matters, fix), `summary` and `notes`. Read-only.
+
+**Entrada:** `{ path: string }`. Las señales son heurísticas (warning o info), nunca errores: orientan la crítica, no bloquean. Umbrales: más de 1 acción primaria, más de 2 acentos, más de 4 tamaños de texto; títulos (varios `h1`, pantalla sin título propio ni título pasado al shell); estados `loading`/`empty`/`error` en pantallas que cargan datos (`empty` solo si muestran listas).
+
 #### 2.a.4 Reglas del guardián
 
 | ID | Default | Detecta | Ejemplo |
@@ -353,6 +362,14 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 | `theme-contrast` | error si el fondo es conocido, warning si no (desde 0.3.0, §7.11) | Un color de texto (`color` en CSS o `style={{}}`) que no llega a `contrast.minRatio` en algún tema. Si la misma regla CSS fija el fondo, se usa ese par (con composición alfa); si no, el peor caso contra las superficies. Sugiere un token legible en todos los temas, de la misma familia de rol | `color: var(--color-title)` → 1,2:1 en dark; `color: var(--color-primary)` → 3,1:1 en dark |
 | `class-contrast` | igual que `theme-contrast` (desde 0.3.0) | Una clase cuya regla CSS fija un color de texto que falla en algún tema, reportada donde el componente la usa | `className="numeric"` con `.table .numeric { color: var(--color-title) }` |
 | `non-text-contrast` | warning (desde 0.3.0) | WCAG 1.4.11: bordes y outlines de partes interactivas, anillos de foco e íconos SVG por debajo de `contrast.nonTextMinRatio` (3:1) | `.field input { border: 1px solid var(--color-border) }` → 1,2:1 |
+| `a11y-img-alt` | error (desde 0.9.0, §7.17) | `<img>` (o `next/image`) sin `alt`. `alt=""` es válido para imágenes decorativas | `<img src="/chart.png" />` |
+| `a11y-control-label` | error (0.9.0) | `input`, `select` o `textarea` sin etiqueta: fuera de `<label>`, sin `<label htmlFor>` en el archivo y sin `aria-label(ledby)` ni `title`. Un placeholder no es una etiqueta | `<input placeholder="Buscar" />` |
+| `a11y-button-name` | error (0.9.0) | Botón o enlace sin nombre accesible (sin texto, `aria-label(ledby)` ni `title`): típico de los botones de solo ícono | `<button><svg/></button>` |
+| `a11y-click-target` | warning (0.9.0) | `onClick` en un elemento no interactivo (`div`, `span`, `li`, `td`…) sin rol, `tabIndex` y manejo de teclado. Los fondos de diálogo (`role="dialog"`) quedan afuera | `<div onClick={open}>` |
+| `a11y-tabindex` | warning (0.9.0) | `tabIndex` positivo: el orden del teclado deja de seguir el visual | `tabIndex={2}` |
+| `a11y-focus-visible` | warning (0.9.0) | Se quita el foco (`outline-none`, `focus:outline-none` o `outline: none` en una regla `:focus`) sin otro estilo de foco visible | `.field input:focus { outline: none }` |
+| `a11y-target-size` | warning (0.9.0) | Botón o enlace de menos de 24×24 px por sus utilidades de tamaño y sin padding (WCAG 2.5.8) | `<button className="h-4 w-4">` |
+| `a11y-heading-order` | warning (0.9.0) | Un nivel de título salteado dentro de un archivo (h2 → h4) | `<h1>…<h3>` |
 
 **Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas. Desde 0.5.0 suma la **paleta inflada**: `near-duplicate-tokens` (tokens de color casi iguales en todos los temas), `near-duplicate-literals` (colores escritos a mano casi iguales) y `near-duplicate-steps` (tamaños de letra a ±0,5 px y radios a ±1 px).
 
@@ -782,7 +799,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 
 | ID | Criterio | Verificación |
 |---|---|---|
-| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project` y `scan_styles` (desde 0.2.0), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
+| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project`, `scan_styles` (desde 0.2.0) y `review_ui` (desde 0.9.0), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
 | MCP-2 | **Solo lectura:** las tools (3 en 0.1.0, 4 desde 0.2.0) y los 4 recursos funcionan sobre un fixture con permisos de solo lectura, y el árbol queda idéntico (hash) después de correrlos | [auto] |
 | MCP-3 | **Sin red ni procesos:** el bundle no referencia `child_process`, `net`, `http`, `https`, `dgram`, `fetch` ni APIs de escritura de `fs` | [auto] análisis del bundle + ESLint |
 | MCP-4 | **Determinismo:** dos ejecuciones con la misma entrada producen JSON idéntico byte a byte | [auto] |
@@ -1135,6 +1152,17 @@ Pedido del dev: que el plugin pueda guiar desde cero a quien empieza a construir
 - **Mismo criterio que el resto del plugin:** ejemplos reales (nunca inventados), cada problema con su solución y el contenido del proyecto como dato.
 - **Invocación:** la puede lanzar el dev o Claude cuando el dev pide que le enseñe (no tiene efectos).
 - **Tests:** LRN-1 (frontmatter sin herramientas de escritura) y `help` lista la skill.
+
+### 7.17 Versión 0.9.0: crítica visual, estados completos y accesibilidad
+
+Pedido del dev, actuando "como experto en UX": que el plugin juzgue si una pantalla es buena, no solo si cumple las reglas; que diseñe los estados que nadie diseña; y que cuide la accesibilidad más allá del color.
+
+- **Accesibilidad en el guardián:** 8 reglas `a11y-*` sobre el JSX y el CSS (§2.a.4). El parser de JSX ahora registra cada elemento (etiqueta, atributos, clases, si tiene texto para su nombre accesible, si está dentro de un `<label>`); `next/image` y `next/link` cuentan como `img` y `a`. Son reglas de lectura estática: lo que depende de la página renderizada queda para las capturas y la crítica. Calibradas sobre un proyecto real: cero falsos positivos después de excluir los fondos de diálogo.
+- **`review_ui`** (5.ª tool, solo lectura): mide señales de jerarquía (acciones primarias que compiten, acentos, tamaños de texto, esquema de títulos) y de estados. No bloquea: alimenta la crítica.
+- **Crítica senior en `variants`** (paso 7b): `review_ui` más las capturas de cada tema y estado, contra una lista C1–C8 (el objetivo se lee primero, una acción primaria, jerarquía, acentos, ritmo y alineación, agrupación, estados, accesibilidad). Cada hallazgo lleva evidencia, impacto, arreglo y fuente; una pasada de arreglos dentro de la variante y lo demás queda `open` con recomendación. También al ajustar (R4b).
+- **Estados completos:** cada hipótesis diseña cargando, vacío, error, datos extremos y, si aplica, sin permisos, reusando los patrones del proyecto. El andamiaje `lab-state.ts` (`useLabState`, `stress`, `many`) permite verlos con `?state=loading|empty|error|long` sobre los datos reales, y se capturan. Las líneas marcadas `// facha-ui lab: state preview` las quita `apply` al portar.
+- **Run:** cada variante guarda `states` y `critique`.
+- **Tests:** fixture `next-ux` con una pantalla con cada problema y otra con cada solución (0 hallazgos), regla de foco en CSS, `review_ui` (primarias, acentos, tamaños, títulos, estados) y determinismo.
 ---
 
 ## Anexo A · Config completa de ejemplo

@@ -4,10 +4,11 @@ import { auditProject, checkUi } from "./check.js";
 import { createContext, type Context } from "./context.js";
 import { getDesignSystem, health, rulesInfo, SECTIONS } from "./design-system.js";
 import { scanStyles } from "./propose.js";
+import { reviewUi } from "./review.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.8.0";
+export const VERSION = "0.9.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -29,6 +30,9 @@ export const DESCRIPTIONS = {
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review — this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
 **Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
+  review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
+**When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
+**Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
 } as const;
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
@@ -156,6 +160,25 @@ export function createServer(opts: ServerOptions): McpServer {
           `${s.colorLiterals} color literal(s): ${s.coveredByExistingTokens} match existing tokens, ${s.tokenProposals} token proposal(s), ${s.scaleProposals} scale proposal(s), ${s.filesToMigrate} file(s) to migrate.`,
           data,
         );
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "review_ui",
+    {
+      title: "Review UI",
+      description: DESCRIPTIONS.review_ui,
+      inputSchema: { path: z.string().min(1).describe("File or directory, relative to the project root or the workspace root.") },
+      annotations: { title: "Review UI", ...READ_ONLY },
+    },
+    async ({ path }) => {
+      try {
+        const data = reviewUi(context(), path);
+        const s = data.summary;
+        return ok(`${data.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
       } catch (e) {
         return fail(e);
       }

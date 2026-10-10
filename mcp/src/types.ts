@@ -11,6 +11,14 @@ export const RULE_IDS = [
   "non-text-contrast",
   "tailwind-palette-color",
   "tailwind-default-scale",
+  "a11y-img-alt",
+  "a11y-control-label",
+  "a11y-button-name",
+  "a11y-click-target",
+  "a11y-tabindex",
+  "a11y-focus-visible",
+  "a11y-target-size",
+  "a11y-heading-order",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 
@@ -70,7 +78,7 @@ export interface Violation extends Loc {
   severity: Severity;
   found: string;
   property: string | null;
-  context: "className" | "inline-style" | "css" | "svg-attribute";
+  context: "className" | "inline-style" | "css" | "svg-attribute" | "jsx-element";
   message: string;
   breaksThemes: string[];
   suggestion: Suggestion;

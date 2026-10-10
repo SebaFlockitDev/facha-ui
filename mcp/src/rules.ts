@@ -1,3 +1,4 @@
+import { checkA11y, removesFocusOutline } from "./a11y.js";
 import { findColorLiterals } from "./color.js";
 import type { Context } from "./context.js";
 import type { Usage } from "./sources/usage.js";
@@ -61,6 +62,22 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
     summary:
       "WCAG 1.4.11: borders and outlines of interactive parts, focus rings and SVG icons below contrast.nonTextMinRatio (3:1 by default) against their background.",
   },
+  { id: "a11y-img-alt", severity: "error", summary: "<img> (or next/image) without alt. alt=\"\" is valid for decorative images." },
+  {
+    id: "a11y-control-label",
+    severity: "error",
+    summary: "input, select or textarea without a label: not inside <label>, no <label htmlFor> in the file, no aria-label(ledby) or title. A placeholder is not a label.",
+  },
+  { id: "a11y-button-name", severity: "error", summary: "Button or link with no accessible name: no text, aria-label(ledby) or title (typically an icon-only button)." },
+  { id: "a11y-click-target", severity: "warning", summary: "onClick on a non-interactive element (div, span, li, td…) without role, tabIndex and a key handler: unreachable with the keyboard." },
+  { id: "a11y-tabindex", severity: "warning", summary: "Positive tabIndex: the keyboard order no longer follows the visual order." },
+  {
+    id: "a11y-focus-visible",
+    severity: "warning",
+    summary: "The focus outline is removed (outline-none, focus:outline-none, or outline: none in a :focus rule) with no visible focus replacement.",
+  },
+  { id: "a11y-target-size", severity: "warning", summary: "Button or link smaller than 24×24 px by its size utilities and without padding (WCAG 2.5.8)." },
+  { id: "a11y-heading-order", severity: "warning", summary: "A heading level is skipped inside a file (h2 → h4): the outline screen readers navigate has a hole." },
 ];
 
 const MESSAGES: Record<RuleId, string> = {
@@ -73,6 +90,14 @@ const MESSAGES: Record<RuleId, string> = {
   "theme-contrast": "Text color does not reach the minimum contrast against its background in some theme.",
   "class-contrast": "This class sets a text color that does not reach the minimum contrast in some theme.",
   "non-text-contrast": "Interactive border, focus ring or icon does not reach 3:1 against its background.",
+  "a11y-img-alt": "Image without alt.",
+  "a11y-control-label": "Form control without a label.",
+  "a11y-button-name": "Button or link without an accessible name.",
+  "a11y-click-target": "Click handler on a non-interactive element.",
+  "a11y-tabindex": "Positive tabIndex.",
+  "a11y-focus-visible": "Focus outline removed without a visible replacement.",
+  "a11y-target-size": "Target smaller than 24×24 px.",
+  "a11y-heading-order": "Heading level skipped.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -239,6 +264,7 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       push("tailwind-arbitrary-value", severity, loc, u.raw, a.property, "className", suggestArbitrary(ctx, a));
       continue;
     }
+    if (u.kind === "element") continue; // accessibility rules, below
     // decl: CSS declaration, inline style property or SVG attribute
     const context: Violation["context"] = u.context === "css" ? "css" : u.context;
     for (const lit of findColorLiterals(u.value, u.property)) {
@@ -283,6 +309,14 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
         );
       }
     }
+    // A :focus rule that removes the outline with nothing visible instead.
+    if (u.context === "css") {
+      const siblings = ctx.componentClasses.find((c) => c.selector === u.selector)?.decls ?? null;
+      if (removesFocusOutline(u.property, u.value, u.selector, siblings)) {
+        push("a11y-focus-visible", "warning", { file: u.file, line: u.line, column: u.column }, `${u.selector} { ${u.property}: ${u.value} }`, u.property, "css",
+          { match: "none", kind: "none", value: null, detail: "Add a visible focus style in the same rule (an outline or box-shadow with a project token), or use :focus-visible.", source: null });
+      }
+    }
     // WCAG 1.4.11 for interactive borders, focus rings and icons.
     if (isNonTextTarget(u.property, u.selector, u.context)) {
       const bg = u.siblingBackground ?? null;
@@ -303,6 +337,10 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
       }
     }
   }
+
+  checkA11y(usages, (rule, base, loc, found, message, fix) =>
+    push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
+  );
 
   return { violations, unresolved };
 }

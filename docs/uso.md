@@ -173,6 +173,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | *"Revisá `app/orders/page.tsx`"* | `check_ui` | Violaciones con archivo:línea, severidad y sugerencia de token |
 | *"¿Cuántas violaciones tiene el proyecto?"* | `audit_project` | Totales por severidad, por regla y por archivo |
 | *"¿Qué tokens le faltan a este proyecto?"* | `scan_styles` | Propuesta de tokens a partir de los valores en uso, con valor por tema, contraste y plan de migración |
+| *"¿Qué mejorarías de esta pantalla?"* · *"Revisala como un senior"* | `review_ui` | Acciones primarias que compiten, acentos, tamaños de texto, títulos y estados que faltan, cada uno con por qué importa y cómo arreglarlo |
 
 `status` puede tener tres valores:
 
@@ -263,8 +264,9 @@ Ejemplo:
    - **C, patrón alternativo:** otro patrón armado con piezas existentes.
 5. **Escritura en el laboratorio:** `app/lab/<slug>/<a|b|c>/page.tsx`, con el código compartido en `_shared/`. La primera vez agrega el andamiaje: `app/lab/layout.tsx`, `lab-theme.tsx`, el panel del modo en vivo (`lab-panel.tsx`) y su endpoint (`facha-live/`), que solo existe en desarrollo. Cada escritura pasa por los permisos de Claude Code: la ves y la aprobás.
 6. **Guardián:** cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Si no lo logra, queda como `failed` y no se puede aplicar.
-7. **Capturas:** en light y en cada tema extra, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
-8. **Presentación:** para cada variante, hipótesis, resultado del guardián, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
+7. **Capturas:** en light y en cada tema extra, y cada estado (cargando, vacío, error, datos extremos) con `?state=…`, con Playwright. Si Playwright no llega a la app después de 2 intentos, la skill te pasa las URLs para que las mires a mano.
+8. **Crítica senior:** `review_ui` más las capturas, contra una lista de 8 puntos (el objetivo se lee primero, una sola acción primaria, jerarquía, acentos, ritmo, agrupación, estados y accesibilidad). Arregla lo que está dentro de la variante y te deja lo demás con su recomendación.
+9. **Presentación:** para cada variante, hipótesis, resultado del guardián (accesibilidad incluida), sus estados, la crítica, decisiones con su fuente (token, clase, guideline, decisión previa…) y trade-offs.
 
 Así se ve una corrida en la terminal. En este ejemplo, la brecha aparece antes de generar: no hay tokens de estado. Además, el guardián rechaza el primer intento de A y de C, y los dos pasan en el segundo.
 
@@ -420,6 +422,7 @@ Atajos útiles:
 | `check_ui` | Valida un archivo o una carpeta |
 | `audit_project` | Audita todo el proyecto (sin el lab) |
 | `scan_styles` | Propone tokens a partir de los valores que el proyecto ya usa (no escribe) |
+| `review_ui` | Mide jerarquía y estados de una pantalla para la crítica (no bloquea, no escribe) |
 
 | Archivo | Qué es |
 |---|---|
@@ -427,6 +430,7 @@ Atajos útiles:
 | `app/lab/<slug>/<x>/page.tsx` | Variantes (solo en desarrollo) |
 | `app/lab/<slug>/_shared/` | Código compartido entre las variantes de esa pantalla |
 | `app/lab/layout.tsx`, `lab-theme.tsx` | Andamiaje del lab: 404 en producción y temas con `?theme=` |
+| `app/lab/lab-state.ts` | Permite ver cada estado de una variante con `?state=loading\|empty\|error\|long`; `apply` lo saca al portar |
 | `app/lab/lab-panel.tsx`, `app/lab/facha-live/` | Panel y endpoint del modo en vivo (solo en desarrollo) |
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |

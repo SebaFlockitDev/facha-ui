@@ -58,7 +58,9 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
   - **A, conservadora:** misma estructura, con el objetivo resuelto;
   - **B, jerarquía:** reorganiza la información;
   - **C, patrón alternativo:** otro patrón con piezas existentes.
-- Cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos.
+- Cada variante diseña sus estados (cargando, vacío, error, datos extremos): los ves con `?state=…` en la URL del laboratorio.
+- Cada variante pasa por `check_ui` hasta tener 0 errores, con un máximo de 3 intentos. Incluye accesibilidad: `alt`, etiquetas, nombres de botones, teclado, foco visible, objetivos de 24 px y orden de títulos.
+- Después, una crítica senior con `review_ui` y las capturas: arregla lo que puede y te deja lo demás con su recomendación.
 - Saca capturas en light y dark con Playwright, o te lista las URLs.
 - Escribe solo en el laboratorio (`app/lab/<slug>/`) y en `.facha-ui/`. No aplica nada.
 - **Ajustar una variante:** `/facha-ui:variants orders b "agregá un contador al lado del título"`, o pedíselo en la misma conversación. Cambia esa variante y nada más, avisa brechas antes de tocar, vuelve a pasar el guardián, saca capturas nuevas y guarda cada ajuste como revisión (r1, r2…) con tu pedido. Si preferís conservar la original, pedí el ajuste "como variante nueva" (b2).
@@ -124,6 +126,7 @@ Las tools del MCP `facha-ui` son de solo lectura. No hace falta nombrarlas: alca
 | `check_ui` | "Revisá `app/orders/page.tsx`" · "Corré check_ui sobre lo que cambiaste" | Violaciones con archivo:línea, severidad y token sugerido, incluido el contraste de textos, bordes, foco e íconos en cada tema, los colores y escalas por defecto de Tailwind y las reglas propias del equipo (`custom`) |
 | `audit_project` | "¿Cuántas violaciones tiene el proyecto?" | Totales por severidad, regla y archivo |
 | `scan_styles` | "¿Qué tokens le faltan a este proyecto?" | Propuesta de tokens desde los valores en uso, con valor por tema, contraste y plan de migración |
+| `review_ui` | "¿Qué mejorarías de esta pantalla?" · "Revisala como un senior" | Acciones primarias que compiten, acentos, tamaños de texto, títulos y estados que faltan, con por qué importa y cómo arreglarlo. No bloquea |
 
 ### files
 

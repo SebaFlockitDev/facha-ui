@@ -2,7 +2,7 @@
 name: variants
 description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant.
 argument-hint: "<screen|route|file> \"<goal>\"  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles
+allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
 
 # facha-ui · variants
@@ -154,12 +154,25 @@ the same idea:
 - **C · Alternative pattern:** a different pattern built only from existing pieces
   (e.g. cards instead of a table, a work queue, sections).
 
+**Every hypothesis designs every state**, not only the happy path. Real screens fail in the
+states nobody designs:
+- **loading:** keeps the layout (a skeleton or a short message), never a blank screen;
+- **empty:** says what is missing and the next step (an action when one applies);
+- **error:** says what failed in plain words and how to retry;
+- **stress:** long texts and many rows (wrapping, truncation, scroll), and large numbers;
+- **no permission:** only when the screen has actions that depend on a role.
+
+Reuse the project's own patterns for each state first (search for them: loading and empty
+messages, error classes, skeleton classes), and write the copy in the product's language and
+tone. Each state choice is a design decision with its source.
+
 ## Step 5 · Write the lab (Next App Router)
 
 **Scaffold** (once per project). If `<lab.dir>/layout.tsx` does not exist, copy these files
 from this skill's `templates/next-app/` into `<lab.dir>/`, keeping their relative paths:
-`layout.tsx`, `lab-theme.tsx`, `lab-panel.tsx`, `facha-live/route.ts` and
-`facha-live/live-core.ts`. In `lab-panel.tsx`, set `LAB_BASE` to the lab's URL prefix (the part
+`layout.tsx`, `lab-theme.tsx`, `lab-state.ts`, `lab-panel.tsx`, `facha-live/route.ts` and
+`facha-live/live-core.ts`. (A lab created by an older version: add `lab-state.ts` when it is
+missing.) In `lab-panel.tsx`, set `LAB_BASE` to the lab's URL prefix (the part
 of `project.lab.urlPattern` before `/{screen}`, e.g. `"/lab"`). In `lab-theme.tsx`, replace
 `/*__THEMES__*/` with one entry per non-default theme, taken from `project.themes`:
 
@@ -188,6 +201,21 @@ automated browsers, so captures stay clean.
   - when a variant needs a style no class provides, use a CSS module next to the variant
     (`variant.module.css`), with values from `var(--token)` only.
 - Keep the screen's shell (layout components, title) so variants are comparable.
+- **State preview:** each variant reads `useLabState()` from `<lab.dir>/lab-state.ts` so every
+  state can be shown with `?state=loading|empty|error|long`, on top of the real data. Mark
+  every line that uses it (the import included) with the comment
+  `// facha-ui lab: state preview`, so `/facha-ui:apply` can remove exactly those lines; the
+  real state branches stay. For example:
+  ```tsx
+  const preview = useLabState(); // facha-ui lab: state preview
+  const rows = preview === "empty" ? [] : preview === "long" ? many(real.rows) : real.rows; // facha-ui lab: state preview
+  const loading = preview === "loading" || real.loading; // facha-ui lab: state preview
+  ```
+  The preview only forces the screen's own states with its own data shape: never invent
+  domain data (`stress()` and `many()` repeat the real values).
+- **Accessibility is part of the guardian:** images with `alt`, labelled controls, buttons
+  with a name, keyboard-reachable actions, a visible focus, targets of at least 24×24 px and a
+  heading outline without holes (`a11y-*` rules). Fix them like any other violation.
 - First line of every file:
   `// facha-ui lab · run <runId> · variant <x> · removed by /facha-ui:apply`.
 - `runId` = `<slug>-<YYYYMMDD>-<HHMM>`.
@@ -222,7 +250,10 @@ The lab URL of each variant is `preview.baseUrl` + `project.lab.urlPattern`. Add
   - if a login page appears and `preview.auth` is `manual`, ask the developer to sign in
     themselves in that window; never type credentials;
   - capture desktop screenshots for each theme with `browser_take_screenshot` and an
-    explicit `filename`: `<project.screenshotsDir>/<slug>/<x>-desktop-<theme>.png`.
+    explicit `filename`: `<project.screenshotsDir>/<slug>/<x>-desktop-<theme>.png`;
+  - capture each state in the default theme, with `?state=<state>`:
+    `<project.screenshotsDir>/<slug>/<x>-desktop-<theme>-<state>.png` (loading, empty, error,
+    long). Use `browser_wait_for` so the state is rendered before the capture;
     Playwright resolves explicit names against the workspace, and `screenshotsDir` is
     already relative to it, so the files land in the project's `.facha-ui/screenshots/`.
     Never move screenshots afterwards;
@@ -233,6 +264,37 @@ The lab URL of each variant is `preview.baseUrl` + `project.lab.urlPattern`. Add
 Look at every capture, especially the non-default themes. If something is unreadable or
 broken there, fix it in the lab (it counts as a new guardian attempt) or, if it comes from
 outside the lab, record it in `findings`.
+
+## Step 7b · Senior critique
+
+The guardian proves the variant follows the rules; the critique asks whether it is **good**.
+Review each valid variant like a senior UI designer:
+
+1. Call `review_ui("<lab.dir>/<slug>/<x>")`: competing primary actions, accents, font sizes,
+   heading outline and state signals. They are signals, not rules: confirm each one on the
+   captures.
+2. Look at the captures (every theme and every state) against this checklist:
+   - **C1 · The goal reads first:** what the developer asked to see first is the first thing
+     the eye finds.
+   - **C2 · One primary action** per view; the rest are secondary or links.
+   - **C3 · Hierarchy:** at most 4 type steps, clear differences between levels, weight and
+     size doing the work (not color alone).
+   - **C4 · Accents:** at most 2 (brand plus one emphasis); status colors mean status, and
+     status is never told by color alone (icon or text too).
+   - **C5 · Rhythm and alignment:** consistent gaps, shared edges, nothing floating.
+   - **C6 · Grouping and density:** related things close together, sections that breathe,
+     no wall of equal elements.
+   - **C7 · States:** loading, empty, error and stress are designed and useful (the empty and
+     error states give a next step).
+   - **C8 · Accessibility beyond the rules:** a visible focus, a reading order that matches the
+     visual order, readable text in every theme.
+3. For each finding record: the checklist item, the evidence (a `review_ui` signal, a
+   violation, or the capture and the area in it), why it matters to the person using the
+   screen, the fix and its source. **A finding without a fix is not finished.**
+4. Apply the fixes that stay inside the variant and the design system in **one critique
+   pass** (then the guardian again, within its 3 attempts, and new captures of what changed).
+   Fixes that need something outside the variant (a shared component, a new token) stay
+   `open`, with your recommendation.
 
 ## Step 8 · Run state: `.facha-ui/runs/<slug>.json`
 
@@ -253,8 +315,15 @@ outside the lab, record it in `findings`.
       "urls": { "light": "http://...", "dark": "http://...?theme=dark" },
       "attempts": [ { "n": 1, "error": 0, "warning": 0, "info": 0 } ],
       "finalCheck": { "error": 0, "warning": 0, "info": 0 },
-      "screenshots": [".facha-ui/screenshots/<slug>/<x>-desktop-light.png"],
+      "screenshots": [".facha-ui/screenshots/<slug>/<x>-desktop-light.png", ".facha-ui/screenshots/<slug>/<x>-desktop-light-empty.png"],
       "decisions": [ { "decision": "...", "source": { "type": "token", "ref": "--x", "evidence": "file:line" } } ],
+      "states": {
+        "loading": { "how": "skeleton rows with .skeleton", "source": { "type": "pattern", "ref": "app/x/page.tsx:40" } },
+        "empty": { "how": "...", "source": {} }, "error": { "how": "...", "source": {} }, "long": { "how": "...", "source": {} }
+      },
+      "critique": [
+        { "item": "C2", "evidence": "review_ui: 2 primary actions (lines 30, 52)", "why": "...", "fix": "...", "source": { "type": "class", "ref": ".btn-secondary" }, "status": "fixed | open" }
+      ],
       "tradeoffs": ["..."],
       "revision": 0,
       "revisions": []
@@ -286,7 +355,9 @@ source is not allowed.
 
 For each variant, show:
 - the hypothesis and how it serves the goal;
-- the guardian result: attempts and final counts;
+- the guardian result: attempts and final counts (accessibility included);
+- its states, with the state captures;
+- the critique: what was found, what was fixed, and what stays open with your recommendation;
 - the main decisions with their sources;
 - trade-offs;
 - the light and dark URLs (or the screenshots).
@@ -337,6 +408,12 @@ options. Do not invent the value. The developer chooses an option or drops that 
 
 Same as Step 6: `check_ui` on the variant (and `_shared/` if it changed), at most 3
 attempts. The variant's `status` becomes `valid` or `failed` according to the result.
+
+### R4b · Critique of the change
+
+Run `review_ui` on the variant and check the changed area against the critique checklist
+(Step 7b). If the change broke something (two primary actions, a lost state, a hole in the
+headings), fix it in this revision or say it, with the fix.
 
 ### R5 · Screenshots
 

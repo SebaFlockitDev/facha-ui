@@ -2,7 +2,7 @@
 name: learn
 description: A guided, hands-on course on building front-end UI with AI and facha-ui, taught on the developer's own project. Each lesson explains one idea, shows it live with facha-ui's read-only tools, points out what to notice and ends with a short exercise. Read-only, it never writes files. Use when the developer asks to learn or be taught how to use facha-ui or how to work with AI on UI, or asks "where do I start".
 argument-hint: "[1-9 | <tema>]"
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles
+allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
 
 # facha-ui · learn
@@ -57,7 +57,7 @@ Show it like this, marking the recommended start:
 | 1 | El design system de tu proyecto | Qué son los tokens, los roles y los temas, y cómo los ve la IA |
 | 2 | Por qué la IA inventa valores | Cómo se evita: leer antes de escribir, validar después |
 | 3 | El guardián | Qué verifica el código determinista y por qué no lo decide la IA |
-| 4 | Calidad visual que se mide | Contraste WCAG, temas, estados que se confunden |
+| 4 | Calidad visual que se mide | Contraste WCAG, accesibilidad, jerarquía y estados de la pantalla |
 | 5 | Si falta el design system | Cómo se arma desde lo que el código ya usa |
 | 6 | Pedirle diseño a la IA | Objetivos (no valores), 3 hipótesis, decisiones con fuente |
 | 7 | Ajustar con criterio | Revisiones, modo en vivo, señalar elementos, paletas |
@@ -118,8 +118,16 @@ Every lesson has the same five parts, short:
   rings and icons); why a color that works in light can disappear in dark; why two status
   colors that look different to you can be the same to someone with color blindness (ΔE, and
   "never only color": icon and text too). Use the project's real ratios.
+- Then accessibility beyond color: run `check_ui` with the `a11y-*` rules on a screen (images
+  without alt, controls without a label, icon buttons without a name, clicks only for the
+  mouse, an invisible focus, small targets, holes in the headings) and explain who each one
+  leaves out.
+- Then hierarchy and states: `review_ui` on the same screen (competing primary actions,
+  accents, type sizes, headings, and whether it handles loading, empty and error), and why a
+  senior looks there first.
 - Exercise: "Este token da <ratio> en dark. ¿Qué harías: cambiarlo, usar otro o no usarlo
-  para texto?" Explain the trade-offs of each.
+  para texto?" Explain the trade-offs of each. Then: "De lo que marcó review_ui, ¿qué
+  arreglarías primero y por qué?"
 
 ### 5 · Si falta el design system
 
@@ -139,7 +147,9 @@ Every lesson has the same five parts, short:
 - Teach: ask for **goals, not values** ("que se vea primero lo que espera revisión", not
   "poné un borde naranja"); why 3 hypotheses beat 1 answer (conservative, hierarchy,
   alternative pattern); why every decision cites its source (token, class, rule, decision,
-  objective) and what it means when a variant warns about a gap before designing.
+  objective) and what it means when a variant warns about a gap before designing; why each
+  variant designs its loading, empty, error and stress states (`?state=` in the lab), and how
+  the senior critique (C1–C8) reviews the captures and fixes what it finds.
 - Show the command for that screen, for the developer to run:
   `/facha-ui:variants <ruta> "<objetivo>"`. Do not run it.
 - Exercise: "Escribí un objetivo para esa pantalla." Give feedback: is it a goal or a value?
