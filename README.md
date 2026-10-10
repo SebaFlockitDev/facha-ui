@@ -17,7 +17,8 @@ En su núcleo es un **optimizador de UI con el design system**: generás con IA 
 - Un guardián determinista (`check_ui`, `audit_project`) marca valores fuera del design system, contraste insuficiente de texto, bordes, foco e íconos en cada tema (WCAG), estados que se confunden por color (también con daltonismo simulado) y paletas infladas. Es de solo lectura, no usa red y no ejecuta código del proyecto.
 
 **Una forma de trabajar con IA en el front**
-- Cada pieza tiene un dueño: la IA propone (estructura, hipótesis, soluciones), el código verifica (lo medible) y vos decidís (lo que tiene consecuencias). Como cada decisión explica su fuente y cada problema trae su salida, el plugin enseña ese método mientras lo usás. `/facha-ui:help` y la [guía de uso](docs/uso.md) acompañan a quien empieza.
+- Cada pieza tiene un dueño: la IA propone (estructura, hipótesis, soluciones), el código verifica (lo medible) y vos decidís (lo que tiene consecuencias). Como cada decisión explica su fuente y cada problema trae su salida, el plugin enseña ese método mientras lo usás.
+- **`/facha-ui:learn`:** un curso práctico de 9 lecciones sobre **tu propio proyecto**, para quien empieza desde cero: qué es un design system y cómo lo ve la IA, por qué inventa valores, el guardián, contraste y accesibilidad, cómo pedir diseño y cómo decidir. Solo lee. `/facha-ui:help` y la [guía de uso](docs/uso.md) completan la referencia.
 
 Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificación completa en [`SPEC.md`](SPEC.md).
 
@@ -25,7 +26,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Estado:** 0.7.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la paleta de Tailwind y las reglas propias del equipo (`custom`); la 0.5.0, las escalas por defecto de Tailwind y la detección de paleta inflada; la 0.6.0, el ajuste de una variante con historial de revisiones; la 0.7.0, el modo en vivo: un panel en el laboratorio para pedir cambios, señalar elementos y probar paletas de colores en tiempo real. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
+> **Estado:** 0.8.0. El MVP 0.1.0 salió del AI Day (2026-10-09); la 0.2.0 sumó `/facha-ui:init`, el descubrimiento del frontend en monorepos y mejoras en las capturas; la 0.3.0, reglas de calidad visual medibles (contraste por uso, clases con contraste insuficiente, contraste de elementos no textuales y estados confundibles); la 0.4.0, la paleta de Tailwind y las reglas propias del equipo (`custom`); la 0.5.0, las escalas por defecto de Tailwind y la detección de paleta inflada; la 0.6.0, el ajuste de una variante con historial de revisiones; la 0.7.0, el modo en vivo: un panel en el laboratorio para pedir cambios, señalar elementos y probar paletas de colores en tiempo real; la 0.8.0, `/facha-ui:learn`, un curso guiado sobre el propio proyecto. Soporta Next.js App Router y tokens como CSS custom properties, con o sin Tailwind 4. Lo que falta está en SPEC §6 y §7.2.
 
 ## Requisitos
 

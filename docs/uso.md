@@ -2,6 +2,8 @@
 
 Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalación hasta aplicar una variante. La idea central: generás con IA variantes de un componente o de una pantalla, y facha-ui las ajusta hasta que respetan los tokens y las reglas del design system de tu equipo; si ese design system falta o está incompleto, te ayuda a armarlo. Para qué es y qué garantiza: [README](../README.md). Detalle técnico: [SPEC](../SPEC.md).
 
+**¿Empezás de cero?** Corré `/facha-ui:learn`: un curso de 9 lecciones sobre tu propio proyecto que explica cada idea, la muestra con tus datos reales y termina con un ejercicio. No escribe nada. Después volvé a esta guía.
+
 **Resumen del flujo:**
 
 1. Instalar el plugin.
@@ -409,7 +411,8 @@ Atajos útiles:
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
 | `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
-| `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
+| `/facha-ui:learn [1-9\|<tema>]` | Vos, o Claude cuando pedís que te enseñe | Nada: solo lee y explica |
+| `/facha-ui:help [variants\|apply\|init\|learn\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |
 
 | Tool MCP | Hace |
 |---|---|

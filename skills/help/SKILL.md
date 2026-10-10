@@ -1,7 +1,7 @@
 ---
 name: help
 description: Lists the facha-ui commands, MCP tools and files, with examples. Only shows text; it never reads or changes the project.
-argument-hint: "[variants|apply|init|tools|files]"
+argument-hint: "[variants|apply|init|learn|tools|files]"
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 Show the reference below to the developer. Rules:
 
 - **Do not call any tool** and do not read or write files: this command only shows text.
-- If `$ARGUMENTS` is `variants`, `apply`, `init`, `tools` or `files`, show only that section,
+- If `$ARGUMENTS` is `variants`, `apply`, `init`, `learn`, `tools` or `files`, show only that section,
   plus the last line ("Guía completa…").
   With no argument (or an unknown one), show everything.
 - Show it in the developer's language. The text below is in Spanish; translate it if
@@ -31,7 +31,8 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
 | `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
-| `/facha-ui:help [variants\|apply\|init\|tools\|files]` | Esta ayuda |
+| `/facha-ui:learn [1-9\|<tema>]` | Curso práctico sobre tu propio proyecto: design system, IA y UI con criterio, en 9 lecciones. Solo lee |
+| `/facha-ui:help [variants\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
 
 **Flujo en 4 pasos**
 
@@ -101,6 +102,17 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: `/fac
 - Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
   Nunca cambia ni borra tokens existentes (salvo los valores que aprobás en modo `palette`). No commitea.
 - **Paleta:** `/facha-ui:init palette <archivo>` adopta una paleta propuesta desde el panel en vivo. Muestra cada token antes y después, el contraste y los conflictos con su solución; cambia solo esos valores después de tu aprobación y registra la decisión.
+
+### learn
+
+```text
+/facha-ui:learn [1-9|<tema>]
+```
+
+- Un curso guiado, una lección por vez, con ejemplos reales de tu proyecto: qué es el design system y cómo lo ve la IA, por qué inventa valores y cómo se evita, el guardián, contraste y accesibilidad, cómo armar el design system si falta, cómo pedir diseño (objetivos, no valores), ajustar en vivo, aplicar con motivo y un método de trabajo.
+- Cada lección: la idea, la demostración en tu proyecto, qué mirar, cómo se resuelve y un ejercicio con devolución.
+- Solo lee: nunca escribe archivos ni corre `variants`, `apply` o `init` por vos; te muestra el comando.
+- Sin argumento muestra el mapa del curso y te recomienda por dónde empezar.
 
 ### tools
 

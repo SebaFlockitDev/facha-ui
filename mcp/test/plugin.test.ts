@@ -76,6 +76,18 @@ describe("variant refinements", () => {
   });
 });
 
+describe("learn skill", () => {
+  it("is read-only: it pre-approves only reading tools and the facha-ui MCP", () => {
+    const text = fs.readFileSync(path.join(REPO, "skills", "learn", "SKILL.md"), "utf8");
+    const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+    const allowed = (frontmatter.match(/^allowed-tools:\s*(.*)$/m)?.[1] ?? "").split(",").map((t) => t.trim());
+    expect(allowed.length).toBeGreaterThan(0);
+    for (const tool of allowed) expect(tool, tool).toMatch(/^(Read|Glob|Grep|mcp__plugin_facha-ui_facha-ui__\w+)$/);
+    expect(text).toContain("## Hard rules");
+    expect(text).toMatch(/Read-only/);
+  });
+});
+
 describe("init skill", () => {
   it("is developer-only and pre-approves no write tools", () => {
     const text = fs.readFileSync(path.join(REPO, "skills", "init", "SKILL.md"), "utf8");
