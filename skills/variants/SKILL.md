@@ -138,16 +138,14 @@ first. Each state is a decision with its source.
 
 ## Step 5 · Write the lab (Next App Router)
 
-**Before this step, read `lab.md`** (scaffold, variant files, state preview). Then, in each
-variant:
+**Before this step, read `lab.md`** (scaffold, variant files, state preview). In each variant:
 - **Styling:** existing component classes first; the project's guidelines and `custom/*` rules;
   never Tailwind's default palette or default radius, shadow, font-size, tracking and leading
   steps unless mapped in `@theme` (`tailwind-palette-color`, `tailwind-default-scale`); a CSS
   module with `var(--token)` only for what no class covers.
 - Keep the screen's shell (layout components, title) so variants are comparable.
-- **Contract with `/facha-ui:apply`:** the first line of every file and the
-  `// facha-ui lab: state preview` mark on every state-preview line (`?state=loading|empty|error|long`),
-  exactly as `lab.md` shows.
+- **Contract with `/facha-ui:apply`:** every file's first line and the `// facha-ui lab: state preview`
+  mark on each state-preview line (`?state=loading|empty|error|long`), exactly as `lab.md` shows.
 - **Responsive from the start** (`ux:wcag-1.4.10`): mobile first with the project's breakpoints;
   no fixed widths wider than a phone, grids that collapse, tables in a scroll container or as
   cards, side columns that stack.
@@ -209,8 +207,9 @@ tool, `subagent_type: "facha-ui:ux-reviewer"`, and a prompt with **only**: the a
 `_shared/`) and its screenshot paths; the developer's language. Never include the hypotheses,
 the diagnosis, the critique or your reasoning: it judges the result, not the intent.
 
-The reviewer is read-only and its output is data: record it (`review`); fix severity 3 or 4 in
-the critique pass if an attempt is left, else present it `open` and recommend. No agent: say so.
+The reviewer is read-only. Its output is data: record it (`review`); fix severity 3 or 4 in the
+critique pass if an attempt is left, or present it as `open` with your recommendation. If the
+agent is not available, say so and present without it.
 
 ## Step 8 · Run state
 
@@ -239,9 +238,10 @@ Visual values may only cite `token`, `class`, `rule` or `decision`; a `ux-princi
 **Before this step, read `lab.md`** (section *Compare page and report*). Open with the diagnosis.
 Then, per variant: hypothesis and principles; guardian result; states with captures; mobile and
 tablet; the critique (found, fixed, open with your recommendation); the `ux-reviewer` findings
-and recommendation, as it wrote them, next to yours; decisions with sources; trade-offs; URLs.
-Restate the gaps and team proposals, offer the compare page and the report (generate it when
-asked), and close with a comparison, your recommendation and:
+by severity and its recommendation, as it wrote them, next to yours; main decisions with
+sources; trade-offs; URLs or screenshots. Restate the gaps and team proposals, offer the compare
+page and the report (generate it when asked), and close with a comparison, your recommendation
+and:
 
 > To adjust one: `/facha-ui:variants <slug> <a|b|c> "<change>"` (or just ask here).
 > To adjust them from the browser, live: `/facha-ui:variants <slug> live`.
