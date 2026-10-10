@@ -5,6 +5,7 @@ import { createContext, type Context } from "./context.js";
 import { getDesignSystem, health, rulesInfo, SECTIONS } from "./design-system.js";
 import { scanStyles } from "./propose.js";
 import { reviewUi } from "./review.js";
+import { uxScore } from "./score.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
@@ -33,6 +34,9 @@ export const DESCRIPTIONS = {
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
 **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
 **Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
+  ux_score: `Scores each screen from 0 to 100 with the deterministic signals facha-ui measures, split into five categories: consistency with the design system, accessibility, responsive, microcopy, and hierarchy and states. A screen counts its own file plus the project components it imports. Each category starts at 100 and loses points per finding (error 15, warning 6, info 2).
+**When to use:** to answer "how good is this screen?" or "which screens need the most work?", to compare a screen before and after a change, and to explain where the points go. It is a trend, not an absolute grade: compare a screen with itself over time.
+**Returns:** JSON with \`average\`, \`screens\` (per screen: \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`,
 } as const;
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
@@ -179,6 +183,24 @@ export function createServer(opts: ServerOptions): McpServer {
         const data = reviewUi(context(), path);
         const s = data.summary;
         return ok(`${data.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data);
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ux_score",
+    {
+      title: "UX score",
+      description: DESCRIPTIONS.ux_score,
+      inputSchema: { path: z.string().min(1).optional().describe("A screen file or a directory; by default every screen outside the lab.") },
+      annotations: { title: "UX score", ...READ_ONLY },
+    },
+    async ({ path }) => {
+      try {
+        const data = uxScore(context(), path);
+        return ok(`${data.screens.length} screen(s), average ${data.average ?? "-"}/100.`, data);
       } catch (e) {
         return fail(e);
       }

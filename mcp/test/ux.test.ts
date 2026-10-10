@@ -1,3 +1,6 @@
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -112,6 +115,21 @@ describe("microcopy rules", () => {
   });
 });
 
+describe("ux_score", () => {
+  it("scores each screen by category, counting the components it imports", async () => {
+    const r = await h.call("ux_score", {});
+    const byScreen = Object.fromEntries(r.structuredContent.screens.map((s: any) => [s.screen, s]));
+    expect(Object.keys(byScreen)).toEqual(["app/clean/page.tsx", "app/copy/page.tsx", "app/list/page.tsx", "app/orders/page.tsx", "app/wide/page.tsx"]);
+    expect(byScreen["app/clean/page.tsx"].score).toBe(100);
+    expect(byScreen["app/orders/page.tsx"].score).toBeLessThan(byScreen["app/clean/page.tsx"].score);
+    expect(byScreen["app/orders/page.tsx"].categories.accessibility).toMatchObject({ error: 3 });
+    expect(byScreen["app/copy/page.tsx"].categories.copy.score).toBeLessThan(100);
+    expect(byScreen["app/wide/page.tsx"].categories.responsive.score).toBeLessThan(100);
+    expect(byScreen["app/list/page.tsx"].files).toEqual(["app/list/page.tsx"]);
+    for (const s of r.structuredContent.screens) expect(s.score).toBeGreaterThanOrEqual(0);
+  });
+});
+
 describe("review_ui", () => {
   it("measures competing primary actions, accents and font sizes", async () => {
     const r = await h.call("review_ui", { path: "app/orders/page.tsx" });
@@ -152,5 +170,26 @@ describe("review_ui", () => {
     const b = await h.call("review_ui", { path: "app" });
     expect(JSON.stringify(a.structuredContent)).toBe(JSON.stringify(b.structuredContent));
     expect(a.structuredContent.findings.every((f: any) => f.severity !== "error")).toBe(true);
+  });
+});
+
+describe("score CLI · CI gate", () => {
+  const run = (args: string[]) => spawnSync(process.execPath, [path.join(UX, "..", "..", "..", "dist", "facha-ui-mcp.js"), "score", "--root", UX, ...args], { encoding: "utf8" });
+
+  it("prints the score as JSON and exits 0 when nothing got worse", () => {
+    const r = run([]);
+    expect(r.status).toBe(0);
+    expect(JSON.parse(r.stdout).screens.length).toBe(5);
+  });
+
+  it("exits 1 when a screen scores below its baseline or below --min", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "facha-score-"));
+    const baseline = path.join(dir, "baseline.json");
+    fs.writeFileSync(baseline, JSON.stringify({ screens: [{ screen: "app/orders/page.tsx", score: 100 }] }));
+    const down = run(["--baseline", baseline]);
+    expect(down.status).toBe(1);
+    expect(down.stderr).toContain("UX score went down: app/orders/page.tsx 100 →");
+    expect(run(["--min", "101"]).status).toBe(1);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });
