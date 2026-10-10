@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { contrast } from "../src/color.js";
-import { createContext } from "../src/context.js";
+import { createContext, toPx } from "../src/context.js";
 import { tokenColor } from "../src/tokens.js";
 import { connect } from "./helpers.js";
 
@@ -71,6 +71,15 @@ describe("shadcn-tw3 · HSL channels in @layer, mapping in tailwind.config", () 
   });
 });
 
+describe("calc() of lengths", () => {
+  it("evaluates calc() made only of px, rem and numbers, and nothing else", () => {
+    expect(toPx("calc(0.625rem - 2px)")).toBe(8);
+    expect(toPx("calc(0.625rem + 4px)")).toBe(14);
+    expect(toPx("calc(1rem * 2 - 4px)")).toBe(28);
+    for (const bad of ["calc(100% - 2px)", "calc(var(--radius) - 2px)", "calc(10px / 0)", "calc(2px-1px)"]) expect(toPx(bad), bad).toBeNull();
+  });
+});
+
 describe("shadcn-tw4 · oklch with @theme inline", () => {
   let r: Awaited<ReturnType<typeof load>>;
   beforeAll(async () => {
@@ -109,6 +118,20 @@ describe("shadcn-tw4 · oklch with @theme inline", () => {
     expect(ratio(r.ctx, "--muted-foreground", "--background", "light")).toBeGreaterThan(4.5);
     // --primary-foreground is text on the brand, not on a surface: no false alarm.
     expect(r.ds.health.some((h: any) => h.kind === "token-contrast" && h.token === "--primary-foreground")).toBe(false);
+  });
+
+  it("treats @theme inline aliases as aliases: no missing-theme or repeated near-duplicate findings", () => {
+    const aliases = (h: any) => [h.token, ...(h.tokens ?? [])].some((n: string) => n?.includes("--color-"));
+    expect(r.ds.health.filter((h: any) => h.kind === "theme-missing")).toEqual([]);
+    expect(r.ds.health.filter((h: any) => h.kind === "near-duplicate-tokens" && aliases(h))).toEqual([]);
+    // The real near-duplicates of shadcn's neutral theme are reported once, between the tokens themselves.
+    expect(r.ds.health.filter((h: any) => h.kind === "near-duplicate-tokens").map((h: any) => h.token)).toEqual(["--accent ~ --muted", "--card ~ --primary-foreground", "--card-foreground ~ --foreground"]);
+  });
+
+  it("reads calc(var(--radius) ± n) as a radius with its px value", () => {
+    for (const n of ["--radius-sm", "--radius-md", "--radius-lg", "--radius-xl"]) expect(r.byName.get(n), n).toMatchObject({ type: "length", role: "radius" });
+    // One entry per px value: --radius and --radius-lg are both 10px.
+    expect(r.ds.scales.radius.values).toEqual(["6px (--radius-sm)", "8px (--radius-md)", expect.stringMatching(/^10px \(--radius(-lg)?\)$/), "14px (--radius-xl)"]);
   });
 
   it("check_ui marks only the hand-written color: rounded-md is mapped in @theme inline", () => {

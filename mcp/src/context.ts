@@ -65,11 +65,47 @@ function tailwindMapping(project: Project, cssRoots: Map<string, Root>): Tailwin
 }
 
 export function toPx(value: string): number | null {
-  const m = value.trim().match(/^(-?[\d.]+)(px|rem|em)?$/);
+  const v = value.trim();
+  const calc = v.match(/^calc\((.+)\)$/);
+  if (calc) return calcPx(calc[1]!);
+  const m = v.match(/^(-?[\d.]+)(px|rem|em)?$/);
   if (!m) return null;
   const n = Number(m[1]);
   if (m[2] === "rem" || m[2] === "em") return n * 16;
   return n;
+}
+
+/**
+ * px of a calc() made only of lengths and numbers, left to right with * and / first:
+ * "0.625rem - 2px" → 8. Null for anything else (var(), %, viewport units…).
+ */
+function calcPx(expr: string): number | null {
+  const parts = expr.trim().split(/\s+([-+*/])\s+/);
+  const terms: { n: number; length: boolean }[] = [];
+  const ops: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      ops.push(parts[i]!);
+      continue;
+    }
+    const m = parts[i]!.match(/^(-?[\d.]+)(px|rem|em)?$/);
+    if (!m) return null;
+    const n = Number(m[1]);
+    terms.push({ n: m[2] === "rem" || m[2] === "em" ? n * 16 : n, length: m[2] !== undefined });
+  }
+  // * and / first.
+  for (let i = 0; i < ops.length; ) {
+    if (ops[i] === "*" || ops[i] === "/") {
+      const a = terms[i]!;
+      const b = terms[i + 1]!;
+      if (ops[i] === "/" && b.n === 0) return null;
+      terms.splice(i, 2, { n: ops[i] === "*" ? a.n * b.n : a.n / b.n, length: a.length || b.length });
+      ops.splice(i, 1);
+    } else i++;
+  }
+  let total = terms[0]!.n;
+  for (let i = 0; i < ops.length; i++) total = ops[i] === "+" ? total + terms[i + 1]!.n : total - terms[i + 1]!.n;
+  return Math.round(total * 1000) / 1000;
 }
 
 export function createContext(root: string, ws?: Workspace): Context {

@@ -7,7 +7,7 @@ import { suggestFontSize } from "./suggest.js";
 import { baseUtility } from "./tailwind.js";
 import { TAILWIND_PALETTE } from "./tailwind-palette.js";
 import { TAILWIND_SCALES } from "./tailwind-scales.js";
-import { tokenColor, tokenValue } from "./tokens.js";
+import { aliasOf, tokenColor, tokenValue } from "./tokens.js";
 import type { Severity, Suggestion } from "./types.js";
 
 /**
@@ -293,8 +293,9 @@ export function sprawl(ctx: Context, usages: Usage[]) {
   const out: any[] = [];
   const themes = ctx.tokens.themes.map((t) => t.name);
 
-  // 1. Near-duplicate color tokens (in every theme, and not aliases of each other).
-  const colors = ctx.tokens.tokens.filter((t) => t.type === "color");
+  // 1. Near-duplicate color tokens (in every theme, and not aliases of each other). Pure aliases
+  // (--color-x: var(--x)) are left out: the pair of their targets is reported once.
+  const colors = ctx.tokens.tokens.filter((t) => t.type === "color" && !aliasOf(ctx.tokens, t.name));
   for (let i = 0; i < colors.length; i++) {
     for (let j = i + 1; j < colors.length; j++) {
       const a = colors[i]!;

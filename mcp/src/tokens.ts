@@ -72,6 +72,8 @@ function inferType(name: string, value: string): TokenType {
   if (/font|family/.test(name) || /["']|,\s*(sans-serif|serif|monospace)\b/.test(v)) return "font";
   if (/(^|\s)-?[\d.]+px\s+-?[\d.]+px/.test(v) && /(rgba?|hsla?|#)/.test(v)) return "shadow";
   if (/^-?[\d.]+(px|rem|em|%|vh|vw|ch)?$/.test(v)) return "length";
+  // calc() of plain lengths, e.g. shadcn's --radius-md: calc(var(--radius) - 2px) once resolved.
+  if (/^calc\(\s*-?[\d.]+(px|rem|em)?(\s*[-+*/]\s*-?[\d.]+(px|rem|em)?)+\s*\)$/.test(v)) return "length";
   return "other";
 }
 
@@ -272,6 +274,19 @@ export function resolveVars(
     return v !== undefined ? v : (fallback ?? "").trim();
   });
   return resolveVars(out, theme, lookup, depth + 1);
+}
+
+/**
+ * The token another token is a pure alias of: `--color-primary: var(--primary)` in every theme, as
+ * Tailwind 4's `@theme inline` writes them. An alias follows its target in every theme, so it is
+ * not checked on its own for missing themes or near-duplicates. Undefined when it is not an alias.
+ */
+export function aliasOf(ts: TokenSet, name: string): string | undefined {
+  const t = ts.byName.get(name);
+  if (!t) return undefined;
+  const targets = new Set(Object.values(t.values).map((v) => v.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1] ?? ""));
+  const [target] = [...targets];
+  return targets.size === 1 && target && target !== name && ts.byName.has(target) ? target : undefined;
 }
 
 /** Resolved value of a token in a theme (var() references substituted). */

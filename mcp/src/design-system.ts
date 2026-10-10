@@ -8,7 +8,7 @@ import { RULES, effectiveSeverity } from "./rules.js";
 import { scanFiles } from "./check.js";
 import type { Usage } from "./sources/usage.js";
 import { suggestColor } from "./suggest.js";
-import { tokenColor, tokenValue } from "./tokens.js";
+import { aliasOf, tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
 
@@ -111,6 +111,8 @@ export function health(ctx: Context, usages: Usage[]) {
   const invariant = new Set(ctx.project.config.tokens.invariant ?? []);
   for (const t of ctx.tokens.tokens) {
     if (t.type !== "color" || invariant.has(t.name) || themes.length < 2) continue;
+    // A pure alias (--color-x: var(--x)) follows its target in every theme; the target is checked.
+    if (aliasOf(ctx.tokens, t.name)) continue;
     const defaultRaw = t.values[themes[0]!];
     const notRedefined = themes.slice(1).filter((th) => !declaredIn(ctx, t.name, th) && t.values[th] === defaultRaw);
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });

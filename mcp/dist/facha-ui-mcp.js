@@ -40817,6 +40817,7 @@ function inferType(name, value) {
   if (/font|family/.test(name) || /["']|,\s*(sans-serif|serif|monospace)\b/.test(v)) return "font";
   if (/(^|\s)-?[\d.]+px\s+-?[\d.]+px/.test(v) && /(rgba?|hsla?|#)/.test(v)) return "shadow";
   if (/^-?[\d.]+(px|rem|em|%|vh|vw|ch)?$/.test(v)) return "length";
+  if (/^calc\(\s*-?[\d.]+(px|rem|em)?(\s*[-+*/]\s*-?[\d.]+(px|rem|em)?)+\s*\)$/.test(v)) return "length";
   return "other";
 }
 function inferRole(name, type) {
@@ -40988,6 +40989,13 @@ function resolveVars(value, theme, lookup, depth = 0) {
     return v !== void 0 ? v : (fallback ?? "").trim();
   });
   return resolveVars(out, theme, lookup, depth + 1);
+}
+function aliasOf(ts, name) {
+  const t = ts.byName.get(name);
+  if (!t) return void 0;
+  const targets = new Set(Object.values(t.values).map((v) => v.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1] ?? ""));
+  const [target] = [...targets];
+  return targets.size === 1 && target && target !== name && ts.byName.has(target) ? target : void 0;
 }
 function tokenValue(ts, name, theme) {
   const lookup = (n, t) => ts.byName.get(n)?.values[t];
@@ -55748,11 +55756,41 @@ function tailwindMapping(project, cssRoots) {
   return mapping;
 }
 function toPx(value) {
-  const m = value.trim().match(/^(-?[\d.]+)(px|rem|em)?$/);
+  const v = value.trim();
+  const calc = v.match(/^calc\((.+)\)$/);
+  if (calc) return calcPx(calc[1]);
+  const m = v.match(/^(-?[\d.]+)(px|rem|em)?$/);
   if (!m) return null;
   const n = Number(m[1]);
   if (m[2] === "rem" || m[2] === "em") return n * 16;
   return n;
+}
+function calcPx(expr) {
+  const parts = expr.trim().split(/\s+([-+*/])\s+/);
+  const terms = [];
+  const ops = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      ops.push(parts[i]);
+      continue;
+    }
+    const m = parts[i].match(/^(-?[\d.]+)(px|rem|em)?$/);
+    if (!m) return null;
+    const n = Number(m[1]);
+    terms.push({ n: m[2] === "rem" || m[2] === "em" ? n * 16 : n, length: m[2] !== void 0 });
+  }
+  for (let i = 0; i < ops.length; ) {
+    if (ops[i] === "*" || ops[i] === "/") {
+      const a = terms[i];
+      const b = terms[i + 1];
+      if (ops[i] === "/" && b.n === 0) return null;
+      terms.splice(i, 2, { n: ops[i] === "*" ? a.n * b.n : a.n / b.n, length: a.length || b.length });
+      ops.splice(i, 1);
+    } else i++;
+  }
+  let total = terms[0].n;
+  for (let i = 0; i < ops.length; i++) total = ops[i] === "+" ? total + terms[i + 1].n : total - terms[i + 1].n;
+  return Math.round(total * 1e3) / 1e3;
 }
 function createContext(root2, ws) {
   const project = openProject(root2, ws);
@@ -57105,7 +57143,7 @@ function describeScale(s) {
 function sprawl(ctx, usages) {
   const out = [];
   const themes = ctx.tokens.themes.map((t) => t.name);
-  const colors = ctx.tokens.tokens.filter((t) => t.type === "color");
+  const colors = ctx.tokens.tokens.filter((t) => t.type === "color" && !aliasOf(ctx.tokens, t.name));
   for (let i = 0; i < colors.length; i++) {
     for (let j = i + 1; j < colors.length; j++) {
       const a = colors[i];
@@ -66363,6 +66401,7 @@ function health(ctx, usages) {
   const invariant = new Set(ctx.project.config.tokens.invariant ?? []);
   for (const t of ctx.tokens.tokens) {
     if (t.type !== "color" || invariant.has(t.name) || themes.length < 2) continue;
+    if (aliasOf(ctx.tokens, t.name)) continue;
     const defaultRaw = t.values[themes[0]];
     const notRedefined = themes.slice(1).filter((th) => !declaredIn(ctx, t.name, th) && t.values[th] === defaultRaw);
     if (notRedefined.length > 0) out.push({ kind: "theme-missing", token: t.name, themes: notRedefined });
