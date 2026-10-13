@@ -10,7 +10,7 @@ const TEMPLATES = path.join(REPO, "skills", "variants", "templates", "next-app")
 const WATCHER = path.join(REPO, "skills", "variants", "scripts", "live-watch.mjs");
 
 type Core = {
-  handleGet: (req: Request, opts: { root: string; production: boolean; now?: () => Date }) => Response;
+  handleGet: (req: Request, opts: { root: string; production: boolean; baseUrl?: string; now?: () => Date }) => Response;
   handlePost: (req: Request, opts: { root: string; production: boolean; now?: () => Date }) => Promise<Response>;
 };
 let core: Core;
@@ -353,5 +353,20 @@ describe("compare and team votes", () => {
     expect(out.stdout).not.toContain("Conservadora <b>");
     expect(out.stdout).toContain('src="../screenshots/orders/a-desktop-light.png"');
     expect(out.stdout).not.toMatch(/<script/i);
+  });
+});
+
+describe("the Vite plugin's dev server URL", () => {
+  it("is used only when the config does not set preview.baseUrl", () => {
+    const root = project();
+    const vite = "http://localhost:5180/facha-lab/facha-live";
+    // The config says 3000: a request to Vite's 5180 is refused even if the plugin passes 5180.
+    expect(core.handleGet(get({}, vite), { root, production: false, baseUrl: "http://localhost:5180" }).status).toBe(403);
+    // Without preview.baseUrl, the URL the dev server really listens on is the allowed one.
+    fs.writeFileSync(path.join(root, "facha-ui.config.json"), JSON.stringify({ version: 1 }));
+    expect(core.handleGet(get({}, vite), { root, production: false, baseUrl: "http://localhost:5180" }).status).toBe(200);
+    expect(core.handleGet(get({ origin: "http://evil.example" }, vite), { root, production: false, baseUrl: "http://localhost:5180" }).status).toBe(403);
+    // And without either, the old default (3000) still rules: 5180 is refused.
+    expect(core.handleGet(get({}, vite), { root, production: false }).status).toBe(403);
   });
 });

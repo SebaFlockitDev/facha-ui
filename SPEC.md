@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.17.0** (§7.10–§7.25). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.18.0** (§7.10–§7.26). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -113,7 +113,7 @@ interface Rule             { id: string; defaultSeverity: Severity; check(u: Sty
 | Tokens | `css-custom-properties`: `:root`, bloques de tema por selector (`html.dark`, `.dark`, `[data-theme=…]`), `@media (prefers-color-scheme: dark)` y `@theme` de Tailwind 4, también dentro de `@layer` (desde 0.15.0); colores como canales HSL sueltos con evidencia del proyecto (shadcn/ui) | DTCG/JSON, Style Dictionary, SCSS, JS theme objects; canales RGB |
 | Fuentes | `jsx` (`.tsx/.jsx/.ts/.js`: `className`, helpers `clsx/cn/cva/twMerge/classnames`, `style={{}}`, atributos SVG `fill/stroke`), `css` (`.css`, `.module.css`) | Vue SFC, Svelte, styled-components, CSS-in-JS |
 | Sistema de estilos | `tailwind-v4` (parser de candidatos: variantes `hover:`/`dark:`/`md:`, `!`, `[...]`, `[prop:val]`, modificadores `/50`); Tailwind 3 con el mapeo de `tailwind.config` leído de forma estática, sin plugins ni presets (desde 0.15.0) | Plugins y presets de Tailwind 3, UnoCSS |
-| Framework (lab) | `next-app` (App Router) y `vite-react` (desde 0.17.0; el modo en vivo, solo en Next) | Modo en vivo en Vite, Remix/React Router, Astro, Expo |
+| Framework (lab) | `next-app` (App Router) y `vite-react` (desde 0.17.0; el modo en vivo en Vite, desde 0.18.0) | Remix/React Router, Astro, Expo |
 
 #### 2.0.2 Configuración: `facha-ui.config.json`
 
@@ -679,7 +679,7 @@ facha-ui/
 │   │   ├── refine.md · live.md   # ajustes (revisiones) y modo en vivo: se leen antes de R1 / L1
 │   │   ├── lab.md · run-state.md # scaffold, capturas y esquema del run: se leen antes del paso que los usa
 │   │   ├── templates/next-app/   # layout.tsx, lab-theme.tsx, lab-panel.tsx, facha-live/{route,live-core}.ts
-│   │   ├── templates/vite-react/ # index.html, main.tsx, providers.tsx, compare.tsx (lab de Vite, 0.17.0)
+│   │   ├── templates/vite-react/ # index.html, main.tsx, providers.tsx, compare.tsx (lab de Vite, 0.17.0), facha-live-plugin.ts (modo en vivo, 0.18.0)
 │   │   └── scripts/              # live-watch.mjs (Monitor), palette-base.mjs (base de paletas)
 │   ├── apply/SKILL.md
 │   ├── init/SKILL.md             # tokens desde el uso (0.2.0) y adopción de paletas (0.7.0)
@@ -703,7 +703,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1021,7 +1021,6 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 
 | Ítem | Sección de la visión |
 |---|---|
-| Modo en vivo en Vite (un plugin de Vite que reuse `live-core`) | §2.b.4 |
 | Directivas `facha-ui-ignore-next-line` | §2.a.4 |
 | Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
 | `outputSchema` en las tools (el MVP devuelve `structuredContent` sin esquema declarado) | §2.a.1 |
@@ -1398,6 +1397,17 @@ Pedido del dev: probó el plugin en un proyecto React (sin Next.js) y `variants`
 - **Skills:** `variants` acepta los dos frameworks y `lab.md` tiene una sección por cada uno; el modo en vivo dice que todavía no está en Vite y ofrece los ajustes y la comparación; `apply` limpia el andamiaje de Vite; `start` conoce `facha-lab/` y no recomienda variantes cuando no hay laboratorio.
 - **Prueba real** sobre una app Vite 5 + React 18 + React Router 6: la variante renderiza con los datos del provider, navega con `useNavigate` sin romper la URL del lab, aplica el tema oscuro y los estados, el medidor responsive mide, la comparación y el índice responden, el guardián chequea la variante (0 errores) y `vite build` no incluye nada del lab.
 - **Tests:** 198. Fixture `vite-react`; detección, valores por defecto, config explícita, avisos de build, motivos sin laboratorio, `vite.config` estático y con efectos secundarios que no se ejecutan (S2), contrato del template y de las skills. Ningún snapshot cambió.
+
+### 7.26 Versión 0.18.0: modo en vivo en React + Vite
+
+Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Aprobado: el panel completo (Mejorar, Cambios, Paleta, señalar, celular y tablet, preguntas con botones) y la única excepción a "no tocar archivos de la app": la línea que registra el plugin en `vite.config`.
+
+- **Endpoint como plugin de Vite** (`templates/vite-react/facha-live-plugin.ts`): un middleware del servidor de desarrollo en `<lab>/facha-live` que usa **el mismo `live-core.ts`** que Next (mismo origen, JSON, token de sesión, nada se aplica). `apply: "serve"`: Vite lo carga solo en `vite dev`, nunca en el build.
+- **`live-core` con la URL real del servidor:** si `facha-ui.config.json` no declara `preview.baseUrl`, usa la URL en la que el servidor de Vite está escuchando (antes caía en 3000 y en Vite daba 403). La config, si existe, sigue mandando.
+- **Registro en `vite.config`, resistente:** `...(await import("./facha-lab/facha-live-plugin.ts").then((m) => [m.fachaLive()]).catch(() => []))`. Si la carpeta del lab no existe (el clon de un compañero, o después de `apply`), el config carga igual. Lo escribe `live.md` (L1) **solo con un sí explícito** en el chat; si no, deja la línea para pegar. `apply` la quita junto con el andamiaje, listada en su plan. `get_design_system` informa `project.lab.liveRegistered` (solo en Vite).
+- **Panel:** reconoce la URL de Vite (`/facha-lab/?screen=…&v=…`) y enlaza la comparación con `?compare=`; `main.tsx` lo monta fuera de los providers de la app. La comparación de Vite suma los votos del equipo.
+- **Prueba real** sobre una app Vite 5 + React 18: un pedido escrito en el panel llegó a `requests.jsonl`, el watcher lo imprimió y el estado "listo" volvió al panel; la comparación mostró la hipótesis y habilitó el voto; otro origen y un pedido sin token reciben 403, un cuerpo que no es JSON 415; `vite build` sigue sin nada del lab, y con la carpeta del lab ausente el `vite.config` carga y construye.
+- **Tests:** 201. Plugin solo en `serve` y sobre `live-core`, URL efectiva solo sin `preview.baseUrl`, panel con URLs de Vite, votos, detección del registro, la regla dura con su única excepción y `apply` quitando la línea. Ningún snapshot cambió.
 ---
 
 ## Anexo A · Config completa de ejemplo

@@ -19,6 +19,11 @@ export interface LiveOptions {
   /** Project root (the Next dev server's cwd). */
   root: string;
   production: boolean;
+  /**
+   * The dev server's own URL, used when facha-ui.config.json does not set preview.baseUrl. The Vite
+   * plugin passes the URL it is really listening on; Next keeps the config (or port 3000).
+   */
+  baseUrl?: string;
   now?: () => Date;
 }
 
@@ -125,10 +130,10 @@ function readJson<T>(file: string): T | null {
   }
 }
 
-function baseUrlOf(root: string): URL {
+function baseUrlOf(root: string, fallback?: string): URL {
   const config = readJson<{ preview?: { baseUrl?: string } }>(path.join(root, "facha-ui.config.json"));
   try {
-    return new URL(config?.preview?.baseUrl ?? "http://localhost:3000");
+    return new URL(config?.preview?.baseUrl ?? fallback ?? "http://localhost:3000");
   } catch {
     return new URL("http://localhost:3000");
   }
@@ -292,7 +297,7 @@ function votesOf(root: string, slug: string) {
 
 export function handleGet(req: Request, opts: LiveOptions): Response {
   if (opts.production) return new Response("Not found", { status: 404 });
-  if (!sameOrigin(req, baseUrlOf(opts.root))) return json(403, { error: "forbidden" });
+  if (!sameOrigin(req, baseUrlOf(opts.root, opts.baseUrl))) return json(403, { error: "forbidden" });
   const now = opts.now?.() ?? new Date();
   const session = activeSession(opts.root, now);
   const palette = readPalette(opts.root);
@@ -314,7 +319,7 @@ export function handleGet(req: Request, opts: LiveOptions): Response {
 
 export async function handlePost(req: Request, opts: LiveOptions): Promise<Response> {
   if (opts.production) return new Response("Not found", { status: 404 });
-  if (!sameOrigin(req, baseUrlOf(opts.root))) return json(403, { error: "forbidden" });
+  if (!sameOrigin(req, baseUrlOf(opts.root, opts.baseUrl))) return json(403, { error: "forbidden" });
   if (!(req.headers.get("content-type") ?? "").toLowerCase().startsWith("application/json")) {
     return json(415, { error: "JSON only" });
   }

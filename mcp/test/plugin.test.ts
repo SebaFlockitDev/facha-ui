@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { builtinModules } from "node:module";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -554,15 +555,31 @@ describe("Vite lab template", () => {
     for (const p of ["/*__PROVIDER_IMPORTS__*/", "/*__ROUTES__*/", "/*__PROVIDERS__*/", "MemoryRouter"]) expect(read("providers.tsx"), p).toContain(p);
   });
 
-  it("does not depend on Next.js nor call the network; it reuses the framework-free lab pieces", () => {
-    for (const f of fs.readdirSync(dir)) {
+  it("does not depend on Next.js, and only talks to the lab's own endpoint; it reuses the framework-free lab pieces", () => {
+    for (const f of fs.readdirSync(dir).filter((f) => fs.statSync(path.join(dir, f)).isFile())) {
       const code = read(f);
       expect(code, f).not.toMatch(/from "next\//);
-      expect(code, f).not.toMatch(/\bfetch\(/);
+      for (const m of code.matchAll(/\bfetch\(\s*([^,)]+)/g)) expect(m[1], f).toMatch(/^`\$\{LAB_BASE\}\/facha-live/);
     }
-    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx"]) {
+    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx", "lab-panel.tsx", "facha-live/live-core.ts"]) {
       expect(fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", shared), "utf8"), shared).not.toMatch(/from "next\//);
     }
+  });
+
+  it("serves live mode from a dev-only Vite plugin that reuses live-core, and mounts the panel", () => {
+    const plugin = read("facha-live-plugin.ts");
+    expect(plugin).toContain('apply: "serve"');
+    expect(plugin).toContain('import { handleGet, handlePost } from "./facha-live/live-core";');
+    expect(plugin).toContain("server.resolvedUrls?.local?.[0]");
+    expect(plugin).toContain("production: false");
+    expect(plugin).toContain(".catch(() => [])");
+    expect(read("main.tsx")).toContain("<LabPanel />");
+    expect(read("compare.tsx")).toContain('kind: "vote"');
+    const panel = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-panel.tsx"), "utf8");
+    expect(panel).toContain("function isQueryLab()");
+    expect(panel).toContain("href={compareUrl(here.slug)}");
+    const core = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "facha-live", "live-core.ts"), "utf8");
+    expect(core).toContain("baseUrlOf(opts.root, opts.baseUrl)");
   });
 });
 
@@ -580,10 +597,35 @@ describe("skills with a Vite lab", () => {
     expect(lab).toContain("/facha-lab/?screen=orders&v=a&theme=dark");
   });
 
-  it("live mode says it is not available in Vite yet, apply cleans the Vite scaffold and start knows facha-lab/", () => {
-    expect(skill("variants/live.md")).toContain("Live mode\n   needs Next.js");
+  it("live mode works in Vite: the plugin is registered only after an explicit yes, and apply removes it", () => {
+    const live = skill("variants/live.md").replace(/\r\n/g, "\n");
+    expect(live).toContain("`project.lab.liveRegistered`");
+    expect(live).toContain("**only after an explicit yes in this conversation**");
+    expect(live).toContain('...(await import("./<lab.dir>/facha-live-plugin.ts").then((m) => [m.fachaLive()]).catch(() => []))');
+    expect(live).not.toMatch(/not available in Vite yet/);
+    expect(skill("variants/SKILL.md")).toContain("only the plugin line in `vite.config`, after an explicit yes here");
     const apply = skill("apply/SKILL.md");
-    for (const f of ["`index.html`", "`main.tsx`", "`providers.tsx`", "`compare.tsx`"]) expect(apply, f).toContain(f);
+    for (const f of ["`index.html`", "`main.tsx`", "`providers.tsx`", "`compare.tsx`", "`facha-live-plugin.ts`"]) expect(apply, f).toContain(f);
+    expect(apply).toContain("only the removal of the live plugin's line from `vite.config`");
     expect(skill("start/SKILL.md")).toContain("`facha-lab/` in Vite");
+  });
+});
+
+describe("vite.config registration of the live plugin", () => {
+  it("is reported by get_design_system for Vite projects only", async () => {
+    const { openProject } = await import("../src/project.js");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "facha-live-reg-"));
+    try {
+      fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ dependencies: { react: "18.3.1" }, devDependencies: { vite: "5.4.10" } }));
+      fs.writeFileSync(path.join(dir, "vite.config.js"), `export default { plugins: [] };\n`);
+      expect(openProject(dir).liveRegistered).toBe(false);
+      fs.writeFileSync(path.join(dir, "vite.config.js"), `export default { plugins: [...(await import("./facha-lab/facha-live-plugin.ts").then((m) => [m.fachaLive()]).catch(() => []))] };\n`);
+      expect(openProject(dir).liveRegistered).toBe(true);
+      fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ dependencies: { next: "15.3.0", react: "19.0.0" } }));
+      fs.mkdirSync(path.join(dir, "app"));
+      expect(openProject(dir).liveRegistered).toBeUndefined();
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

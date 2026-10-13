@@ -316,12 +316,30 @@ button.view[aria-pressed="true"] { border-color: #ff8a4c; }
 .mark .tag { color: #7ea8ff; }
 `;
 
+/** Vite's lab is one entry with the variant in the query (/facha-lab/?screen=…&v=…); Next's, a route. */
+function isQueryLab(): boolean {
+  return window.location.pathname.replace(/\/+$/, "") === LAB_BASE && new URLSearchParams(window.location.search).has("screen");
+}
+
 function variantFromPath(): { slug: string; variant: string } | null {
   const path = window.location.pathname.replace(/\/+$/, "");
-  if (!path.startsWith(LAB_BASE + "/")) return null;
-  const [slug, variant] = path.slice(LAB_BASE.length + 1).split("/");
-  if (!slug || !variant || !/^[a-z][0-9]?$/.test(variant)) return null;
+  let slug: string | undefined;
+  let variant: string | undefined;
+  if (isQueryLab()) {
+    const q = new URLSearchParams(window.location.search);
+    slug = q.get("screen") ?? undefined;
+    variant = q.get("v") ?? undefined;
+  } else {
+    if (!path.startsWith(LAB_BASE + "/")) return null;
+    [slug, variant] = path.slice(LAB_BASE.length + 1).split("/");
+  }
+  if (!slug || !variant || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !/^[a-z][0-9]?$/.test(variant)) return null;
   return { slug, variant };
+}
+
+/** The compare page of a screen, in either lab. */
+function compareUrl(slug: string): string {
+  return isQueryLab() ? `${LAB_BASE}/?compare=${slug}` : `${LAB_BASE}/compare/${slug}`;
 }
 
 function load<T>(key: string, fallback: T): T {
@@ -1400,7 +1418,7 @@ export function LabPanel() {
       <div className="section">
         <span className="label">Decidir</span>
         <div className="quick">
-          <a className="act link" href={`${LAB_BASE}/compare/${here.slug}`} target="_blank" rel="noreferrer">
+          <a className="act link" href={compareUrl(here.slug)} target="_blank" rel="noreferrer">
             Comparar las variantes
           </a>
           {liveHere && (

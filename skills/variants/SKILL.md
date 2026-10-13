@@ -42,8 +42,8 @@ pantalla de pedidos") takes the main costs of the diagnosis (Step 3b) as its goa
      `project.screenshotsDir`.
    - Refine: only that variant's files (`<lab.dir>/<slug>/<x>/**`), the run JSON and its
      screenshots. `_shared/` only if the developer accepts that the other variants change too.
-   - Live: also the live scaffold (`<lab.dir>/lab-panel.tsx`, `<lab.dir>/facha-live/**`,
-     `<lab.dir>/layout.tsx`), `.facha-ui/live/**` and `.facha-ui/proposals/**`.
+   - Live: also its scaffold (`live.md`), `.facha-ui/live/**`, `.facha-ui/proposals/**` and, in Vite,
+     only the plugin line in `vite.config`, after an explicit yes here (`live.md`, L1).
 
    Nothing else. Never touch token files, global CSS, shared components, `facha-ui.config.json`,
    `package.json`, lockfiles, `.gitignore` or any other app file; a palette is adopted only with

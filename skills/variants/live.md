@@ -5,20 +5,37 @@ hard rule of `SKILL.md` still applies. **Before L1, also read `refine.md`**: eve
 from the panel is processed as a refinement (R1 to R7).
 
 The developer adjusts variants from the browser: the lab's floating panel sends each change to
-this session, you apply it as a refinement, and Next reloads the page. Approval never happens
-in the browser.
+this session, you apply it as a refinement, and the dev server (Next or Vite) reloads the page.
+Approval never happens in the browser.
 
 ## L1 · Start (`<slug> live`)
 
-1. Preflight as in R1 of `refine.md`: the run exists and its `status` is `generated`. Live mode
-   needs Next.js: when `project.framework` is `vite-react`, say it is not available in Vite yet
-   and offer what is: refinements asked here (`refine.md`) and the compare page
-   (`/<lab.dir>/?compare=<slug>`). Stop.
-2. Make sure the live scaffold exists. If `<lab.dir>/lab-panel.tsx` or
-   `<lab.dir>/facha-live/route.ts` is missing (a lab created by an older version), copy them
-   from `templates/next-app/` (with `facha-live/live-core.ts`), set `LAB_BASE`, and update
-   `<lab.dir>/layout.tsx` to the template's version, which renders `<LabPanel />`. Do not touch
+1. Preflight as in R1 of `refine.md`: the run exists and its `status` is `generated`.
+2. Make sure the live scaffold exists (with the Write tool, never shell copies). Do not touch
    `lab-theme.tsx`.
+   - **Next.js:** if `<lab.dir>/lab-panel.tsx` or `<lab.dir>/facha-live/route.ts` is missing (a
+     lab created by an older version), copy them from `templates/next-app/` (with
+     `facha-live/live-core.ts`), set `LAB_BASE`, and update `<lab.dir>/layout.tsx` to the
+     template's version, which renders `<LabPanel />`.
+   - **Vite:** if `<lab.dir>/lab-panel.tsx`, `<lab.dir>/facha-live/live-core.ts` or
+     `<lab.dir>/facha-live-plugin.ts` is missing, copy `lab-panel.tsx` and
+     `facha-live/live-core.ts` from `templates/next-app/` and `facha-live-plugin.ts` from
+     `templates/vite-react/`, and update `main.tsx` and `compare.tsx` to the template's versions
+     (keep the `/*__GLOBAL_CSS__*/` imports you wrote). Set `LAB_BASE` in `lab-panel.tsx`,
+     `compare.tsx` and `facha-live-plugin.ts` to `/<lab.dir>` (`"/facha-lab"`).
+   - **Vite, the registration.** Vite only loads a plugin listed in its config, so live mode needs
+     one change in the app: `get_design_system` → `project.lab.liveRegistered`. When it is
+     `false`, show the developer the exact change to `vite.config` (its file name from the
+     assumptions) and say why: add this element at the end of `plugins`, in the resilient form
+     that never breaks the dev server when the lab folder is missing (a teammate's clone, after
+     `/facha-ui:apply`), and that Vite never builds (`apply: "serve"`):
+     ```js
+     ...(await import("./<lab.dir>/facha-live-plugin.ts").then((m) => [m.fachaLive()]).catch(() => []))
+     ```
+     Write it with Edit **only after an explicit yes in this conversation**, changing nothing else
+     in the file. Without the yes, leave the line for the developer to paste. If `plugins` is not
+     a literal array or the config is computed by a function, do not edit: show the line and
+     where it goes. Then ask the developer to restart the dev server once, so Vite loads it.
 3. Check that the local state is not committed by accident: run
    `git check-ignore -q .facha-ui/live/session.json` from the project root. If it is not
    ignored, warn the developer: `.facha-ui/live/` holds the session token and the requests, and

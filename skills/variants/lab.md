@@ -40,7 +40,8 @@ exist, copy `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` from
 - `vite build` only builds the root `index.html`, so `<lab.dir>/` never ships, and `main.tsx`
   renders nothing in production. If `get_design_system` says `vite.config` lists the lab in
   `build.rollupOptions.input`, stop and ask the developer to remove it.
-- Live mode is not available in Vite yet (`live.md`).
+- Live mode adds the panel, the endpoint as a dev-only Vite plugin and its one line in
+  `vite.config`, only when the developer starts it (`live.md`, L1).
 
 ### Both
 
@@ -55,7 +56,7 @@ exist, copy `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` from
 
 - A Next lab created by an older version: add `lab-state.ts` and `lab-responsive.tsx` when they
   are missing, and update `layout.tsx` to the template's version.
-- The live panel (`lab-panel.tsx`, Next only) and the compare page are facha-ui's own UI: their
+- The live panel (`lab-panel.tsx`) and the compare page are facha-ui's own UI: their
   styles are their own, they are never copied into a variant, and the panel hides itself in
   automated browsers and inside its own previews, so captures stay clean.
 
