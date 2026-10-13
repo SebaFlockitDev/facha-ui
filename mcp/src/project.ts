@@ -19,6 +19,8 @@ export interface Project extends LoadedConfig {
   frameworkDetected: Framework;
   /** The framework in use: the config's when it names one, otherwise the detected one. */
   framework: Framework;
+  /** Vite only: whether vite.config registers facha-ui's live plugin (live mode needs it). */
+  liveRegistered?: boolean;
   /** Project root relative to the workspace (POSIX, "." when they are the same). */
   workspacePath: string;
 }
@@ -141,10 +143,12 @@ export function openProject(root: string, ws?: Workspace): Project {
   const frameworkDetected = detectFramework(root, deps);
   const framework: Framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
   const assumptions = [...loaded.assumptions];
+  let liveRegistered: boolean | undefined;
   // The lab's defaults follow the framework (SPEC §2.b.4): Vite serves facha-lab/ as its own
   // dev-only entry, on the dev server's port read statically from vite.config.
   if (framework === "vite-react") {
     const vite = readViteConfig({ root });
+    liveRegistered = vite?.liveRegistered ?? false;
     if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
     if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
     if (vite?.inputs?.length) {
@@ -176,6 +180,7 @@ export function openProject(root: string, ws?: Workspace): Project {
     hasTailwind,
     frameworkDetected,
     framework,
+    ...(liveRegistered !== undefined ? { liveRegistered } : {}),
     workspacePath,
   };
 }

@@ -14,6 +14,8 @@ export interface ViteConfig {
   port: number | null;
   /** build.rollupOptions.input as written (literal paths), or null when not set. */
   inputs: string[] | null;
+  /** Whether the config registers facha-ui's live plugin (it imports facha-live-plugin). */
+  liveRegistered: boolean;
   unread: Unread[];
 }
 
@@ -32,10 +34,12 @@ function literalStrings(n: Node | undefined, unread: Unread[], where: string): s
 export function readViteConfig(project: { root: string }): ViteConfig | null {
   const file = VITE_CONFIG_NAMES.find((n) => readRootFile(project, n) !== null);
   if (!file) return null;
-  const out: ViteConfig = { file, port: null, inputs: null, unread: [] };
+  const code = readRootFile(project, file) ?? "";
+  // The registration is an import of the lab's plugin file; a text match is enough and never runs it.
+  const out: ViteConfig = { file, port: null, inputs: null, liveRegistered: /facha-live-plugin/.test(code), unread: [] };
   let ast: Node;
   try {
-    ast = parseConfig(readRootFile(project, file) ?? "");
+    ast = parseConfig(code);
   } catch (e) {
     out.unread.push({ what: `the file does not parse (${(e as Error).message.slice(0, 120)})`, line: 0 });
     return out;

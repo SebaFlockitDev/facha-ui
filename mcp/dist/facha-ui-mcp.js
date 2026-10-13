@@ -54846,10 +54846,11 @@ function literalStrings(n, unread, where) {
 function readViteConfig(project) {
   const file2 = VITE_CONFIG_NAMES.find((n) => readRootFile(project, n) !== null);
   if (!file2) return null;
-  const out = { file: file2, port: null, inputs: null, unread: [] };
+  const code2 = readRootFile(project, file2) ?? "";
+  const out = { file: file2, port: null, inputs: null, liveRegistered: /facha-live-plugin/.test(code2), unread: [] };
   let ast;
   try {
-    ast = parseConfig(readRootFile(project, file2) ?? "");
+    ast = parseConfig(code2);
   } catch (e4) {
     out.unread.push({ what: `the file does not parse (${e4.message.slice(0, 120)})`, line: 0 });
     return out;
@@ -54949,8 +54950,10 @@ function openProject(root2, ws) {
   const frameworkDetected = detectFramework(root2, deps);
   const framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
   const assumptions = [...loaded.assumptions];
+  let liveRegistered;
   if (framework === "vite-react") {
     const vite = readViteConfig({ root: root2 });
+    liveRegistered = vite?.liveRegistered ?? false;
     if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
     if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
     if (vite?.inputs?.length) {
@@ -54980,6 +54983,7 @@ function openProject(root2, ws) {
     hasTailwind,
     frameworkDetected,
     framework,
+    ...liveRegistered !== void 0 ? { liveRegistered } : {},
     workspacePath
   };
 }
@@ -58328,7 +58332,11 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
       tokenSources: ctx.tokens.sources,
       themes: ctx.tokens.themes,
       workspacePath: ctx.project.workspacePath,
-      lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework) },
+      lab: {
+        dir: ctx.project.labDir,
+        urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework),
+        ...ctx.project.liveRegistered !== void 0 ? { liveRegistered: ctx.project.liveRegistered } : {}
+      },
       screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
       decisionsFile: ctx.project.config.memory.decisionsFile

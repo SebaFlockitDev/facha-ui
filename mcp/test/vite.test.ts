@@ -36,7 +36,7 @@ describe("vite-react fixture", () => {
     const ds = (await c.call("get_design_system", { sections: ["project"] })).structuredContent;
     await c.close();
     expect(ds.project.framework).toBe("vite-react");
-    expect(ds.project.lab).toEqual({ dir: "facha-lab", urlPattern: "/facha-lab/?screen={screen}&v={variant}" });
+    expect(ds.project.lab).toEqual({ dir: "facha-lab", urlPattern: "/facha-lab/?screen={screen}&v={variant}", liveRegistered: false });
     expect(ds.project.preview.baseUrl).toBe("http://localhost:5180");
     expect(ds.assumptions.join(" ")).toMatch(/Framework autodetected: vite-react/);
   });
