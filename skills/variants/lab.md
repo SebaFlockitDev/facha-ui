@@ -56,7 +56,7 @@ exist, copy `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` from
 
 - A Next lab created by an older version: add `lab-state.ts` and `lab-responsive.tsx` when they
   are missing, and update `layout.tsx` to the template's version.
-- The live panel (`lab-panel.tsx`, Next only) and the compare page are facha-ui's own UI: their
+- The live panel (`lab-panel.tsx`) and the compare page are facha-ui's own UI: their
   styles are their own, they are never copied into a variant, and the panel hides itself in
   automated browsers and inside its own previews, so captures stay clean.
 

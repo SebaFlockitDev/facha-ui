@@ -7,6 +7,20 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-13
+
+### Added
+- Modo en vivo en proyectos React con Vite: el panel sobre cada variante para pedir cambios, señalar elementos, probar paletas y ver la variante en celular y tablet (§7.26).
+- Votos del equipo en la comparación de variantes de Vite (§7.26).
+- `get_design_system` dice si el `vite.config` ya registra el plugin del modo en vivo (`project.lab.liveRegistered`) (§7.26).
+
+### Changed
+- Al activar el modo en vivo en Vite, facha-ui muestra la línea exacta para el `vite.config` y la escribe solo si le decís que sí; `/facha-ui:apply` la quita al limpiar el laboratorio (§7.26).
+
+### Security
+- El endpoint del modo en vivo en Vite es un plugin que Vite carga solo en desarrollo y nunca en el build, con las mismas reglas que en Next: mismo origen, solo JSON y el token de la sesión (§7.26).
+- La línea del `vite.config` es resistente: si falta la carpeta del laboratorio (el clon de un compañero), el servidor de desarrollo arranca igual (§7.26).
+
 ## [0.17.0] - 2026-10-13
 
 ### Added
@@ -203,7 +217,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...v0.15.0
