@@ -538,3 +538,30 @@ describe("CHANGELOG footer links", () => {
     expect([...links.keys()].sort()).toEqual(["Unreleased", ...versions].sort());
   });
 });
+
+describe("Vite lab template", () => {
+  const dir = path.join(REPO, "skills", "variants", "templates", "vite-react");
+  const read = (f: string) => fs.readFileSync(path.join(dir, f), "utf8");
+
+  it("is a dev-only entry that renders the variants it finds, with the app's CSS and providers", () => {
+    const main = read("main.tsx");
+    expect(main).toContain('import.meta.glob<{ default: ComponentType }>("./*/*/Page.{tsx,jsx}")');
+    expect(main).toContain("!import.meta.env.PROD");
+    expect(main).toContain("/*__GLOBAL_CSS__*/");
+    expect(main).toContain("<LabProviders screen={screen}>");
+    expect(main).toContain("<LabResponsive />");
+    expect(read("index.html")).toContain('<script type="module" src="./main.tsx"></script>');
+    for (const p of ["/*__PROVIDER_IMPORTS__*/", "/*__ROUTES__*/", "/*__PROVIDERS__*/", "MemoryRouter"]) expect(read("providers.tsx"), p).toContain(p);
+  });
+
+  it("does not depend on Next.js nor call the network; it reuses the framework-free lab pieces", () => {
+    for (const f of fs.readdirSync(dir)) {
+      const code = read(f);
+      expect(code, f).not.toMatch(/from "next\//);
+      expect(code, f).not.toMatch(/\bfetch\(/);
+    }
+    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx"]) {
+      expect(fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", shared), "utf8"), shared).not.toMatch(/from "next\//);
+    }
+  });
+});
