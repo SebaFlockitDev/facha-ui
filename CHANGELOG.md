@@ -7,6 +7,9 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+- `BACKLOG.md`: lo que viene en facha-ui, priorizado y con criterios de aceptación; el README enlaza ahí en lugar del roadmap del SPEC.
+
 ## [0.18.0] - 2026-10-13
 
 ### Added

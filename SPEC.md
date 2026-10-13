@@ -994,42 +994,9 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 
 ## 6. Fuera de alcance hoy (roadmap)
 
-| Ítem | Notas |
-|---|---|
-| UI web de configuración | Editor visual de `facha-ui.config.json`, roles y reglas `custom` |
-| Otros stacks y formatos | Vue/Svelte/Angular (adapters de fuente), CSS-in-JS, plugins y presets de Tailwind 3, colores como canales RGB, tokens DTCG/Style Dictionary/SCSS (adapters de tokens), Remix/Astro/Expo (adapters de framework) |
-| GitHub MCP para PRs | `apply` abre un PR con capturas antes/después y la entrada de `decisions.md` |
-| Ejecución con LangGraph / Strands | El mismo flujo como agente fuera de Claude Code, reutilizando el MCP |
-| CI de violaciones | `facha-ui audit --baseline`: falla si aparecen violaciones nuevas (ratchet). El puntaje de UX ya tiene su modo CI (§7.20) |
-| Regla `unknown-class` | Clases que no son utilidades de Tailwind ni existen en el CSS del proyecto (típico de IA), resueltas con el motor de Tailwind empaquetado |
-| Sugerencia de contraste que respeta el significado | Hoy `theme-contrast` sugiere el token legible más cercano de la misma familia de rol, y esa familia puede ser amplia: un texto en `#ff0000` puede terminar con `--muted-foreground`, y el aviso pasa de rojo de alerta a gris. Debería preferir un token del mismo rol semántico (`status.danger` para un rojo de error) y, si no hay ninguno legible, decir que la sugerencia "cambia el significado" y tratarlo como una brecha |
-| Contraste de pares en JSX | Desde 0.3.0 se mide el contraste por regla CSS (`theme-contrast`), por clase (`class-contrast`) y de elementos no textuales. Falta el par texto/fondo que solo existe en las clases de Tailwind de un mismo elemento JSX |
-| i18n | Mensajes de violaciones en español (`locale`) |
-| Diff visual entre pantallas | El de `apply` (antes/después de la pantalla) existe desde 0.12.0; falta el de las pantallas que comparten un componente modificado |
-| Export para Cursor | Flujos de `variants`/`apply` como reglas de Cursor |
+Lo que falta desarrollar está en [`BACKLOG.md`](BACKLOG.md), priorizado y con criterios de aceptación por ítem: las reglas UX que todavía no verifica el guardián (B-004 a B-007), las mejoras del guardián (B-008 a B-010), lo que viene después (CI de violaciones, PRs, diff entre pantallas, Tailwind 3 completo, canales RGB, los postergados técnicos del MVP de §7.2) y las ideas sin evaluar (más frameworks, lenguajes y formatos de tokens, export para Cursor, ejecución fuera de Claude Code, UI web de configuración).
 
-**Reglas UX verificables para el guardián.** Ya son reglas desde 0.9.0: objetivo táctil menor a 24 px (`a11y-target-size`), input sin label (`a11y-control-label`), salto de nivel de encabezado (`a11y-heading-order`) y `outline: none` sin foco alternativo (`a11y-focus-visible`). Hoy se verifican solo en revisión o como señal, y pasarían a regla:
-
-| Regla propuesta | Principio | Qué detectaría |
-|---|---|---|
-| `a11y-color-only` | `ux:wcag-1.4.1` | Un estado (chip, punto, fila) que se distingue solo por una clase de color, sin texto ni ícono en el mismo elemento |
-| `ux-too-many-choices` | `ux:hick` | Más de 7 acciones hermanas al mismo nivel (botones en una barra, ítems de un menú sin agrupar) |
-| `ux-missing-states` | `ux:state-empty`, `ux:state-error` | Una pantalla que renderiza una lista (`.map`) sin rama de vacío ni de error (hoy, señal de `review_ui`) |
-| `copy-error-action` | `ux:copy-actionable-errors` | Un mensaje de error sin acción ni siguiente paso cerca (botón de reintentar, enlace) |
-
-**Postergado del MVP AI Day (§7.2).** Es parte de la visión v0.1 y se implementa después del MVP:
-
-| Ítem | Sección de la visión |
-|---|---|
-| Directivas `facha-ui-ignore-next-line` | §2.a.4 |
-| Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
-| `outputSchema` en las tools (el MVP devuelve `structuredContent` sin esquema declarado) | §2.a.1 |
-| JSON Schemas publicados (`facha-ui.config.schema.json`, `run.schema.json`); el MVP valida la config con zod | §2.0.2, §2.b.5 |
-| Fixtures sintéticos (b), (c) y (d) | MCP-8 |
-| Criterio de rendimiento MCP-11 | §5.1 |
-| SEC-1 automatizado (en el MVP queda como guion manual) | §5.2 |
-| `roots/list` del cliente MCP (`MULTIPLE_PROJECTS` y la búsqueda en subdirectorios ya están, §7.10) | §2.0.2 |
-| `sourceHash`/`designSystemHash` en el run y `apply --discard` | §2.b.5, §2.c.1 |
+Este SPEC describe lo que existe y cómo funciona; el backlog, qué sigue y en qué orden. Un ítem del backlog pasa a este SPEC (en su sección y en §7) cuando se implementa.
 
 ---
 

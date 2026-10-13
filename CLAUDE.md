@@ -7,8 +7,9 @@ evidencia. El plugin tiene que comportarse como ese diseñador en el proyecto de
 diagnostica antes de diseñar, propone con hipótesis, verifica con reglas y capturas, y no aplica
 nada sin aprobación.
 
-**Al empezar cada tarea, releé este archivo y `SPEC.md`.** Son la fuente de verdad; la memoria de
-la conversación no lo es.
+**Al empezar cada tarea, releé este archivo, `SPEC.md` y `BACKLOG.md`.** Son la fuente de verdad; la
+memoria de la conversación no lo es. Al empezar una sesión sin un pedido concreto, proponé el primer
+ítem de **Ahora** del backlog.
 
 ## Toda decisión de UI tiene una fuente
 
@@ -29,6 +30,13 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 
 - **SDD.** Primero el plan (archivos a crear o modificar, con un resumen de cada uno), después la
   aprobación, después la implementación. Lo aprobado y lo hecho queda en `SPEC.md` (§7).
+- **Backlog.** Lo pendiente vive en `BACKLOG.md`, con id, estado, prioridad y criterios de
+  aceptación por ítem; un test controla su formato.
+  - Se trabaja sobre ítems del backlog. Lo que no está ahí se agrega primero, y se hace solo con OK.
+  - Lo que aparece mientras se trabaja (una mejora, un bug ajeno al pedido) va a **Ideas**; no se
+    hace en el momento.
+  - Al empezar un ítem, su estado pasa a `en spec` y luego a `en curso`; en el release pasa a
+    **Hecho** con la versión. **Ahora** tiene como máximo 3 ítems.
 - **Commits chicos y convencionales** (`feat(skills): …`, `fix(mcp): …`, `docs: …`), uno por
   punto del plan. Sin trailers de atribución (`Co-Authored-By`, `Claude-Session`).
 - **Push solo cuando lo pida quien mantiene el repo**, y solo con todo en verde.
@@ -58,6 +66,7 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 | `skills/variants/templates/next-app/` | laboratorio (layout, panel en vivo, medición responsive, comparar) |
 | `agents/ux-reviewer.md` | subagente crítico, solo lectura (`facha-ui:ux-reviewer`) |
 | `docs/uso.md` | guía de uso |
+| `BACKLOG.md` | qué sigue: lo pendiente, priorizado, con criterios de aceptación |
 
 ## Verificación antes de cada commit
 

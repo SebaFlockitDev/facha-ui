@@ -629,3 +629,33 @@ describe("vite.config registration of the live plugin", () => {
     }
   });
 });
+
+describe("BACKLOG.md", () => {
+  const text = fs.readFileSync(path.join(REPO, "BACKLOG.md"), "utf8").replace(/\r\n/g, "\n");
+  const section = (name: string) => text.split(`\n## ${name}\n`)[1]?.split("\n## ")[0] ?? "";
+  const items = [...text.matchAll(/^### (B-\d{3}) · (.+)$/gm)];
+
+  it("has its sections in order and at most 3 items in Ahora", () => {
+    const order = ["Ahora", "Siguiente", "Después", "Ideas", "Hecho", "Descartado"].map((s) => text.indexOf(`\n## ${s}\n`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect([...section("Ahora").matchAll(/^### B-/gm)].length).toBeLessThanOrEqual(3);
+    expect([...section("Ahora").matchAll(/^### B-/gm)].length).toBeGreaterThan(0);
+  });
+
+  it("gives every item a unique id, a valid state and priority, and acceptance criteria", () => {
+    const ids = [...items.map((m) => m[1]), ...[...text.matchAll(/^- \*\*(B-\d{3}) · /gm)].map((m) => m[1])];
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const m of items) {
+      const block = text.slice(m.index!).split(/\n### |\n## /)[0]!;
+      expect(block, m[1]).toMatch(/- \*\*Estado:\*\* (listo para spec|en spec|aprobado|en curso|hecho \(\d+\.\d+\.\d+\)|descartado)$/m);
+      expect(block, m[1]).toMatch(/- \*\*Prioridad:\*\* P[0-3]/);
+      expect(block, m[1]).toMatch(/\*\*Criterios de aceptación:\*\*/);
+    }
+  });
+
+  it("is what CLAUDE.md and the SPEC point to for what comes next", () => {
+    expect(fs.readFileSync(path.join(REPO, "CLAUDE.md"), "utf8")).toContain("`BACKLOG.md`");
+    expect(fs.readFileSync(path.join(REPO, "SPEC.md"), "utf8")).toContain("[`BACKLOG.md`](BACKLOG.md)");
+  });
+});
