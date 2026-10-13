@@ -40405,7 +40405,7 @@ var regex = external_exports.string().min(1).refine(
 var ConfigSchema = external_exports.object({
   $schema: external_exports.string().optional(),
   version: external_exports.literal(1),
-  framework: external_exports.enum(["auto", "next-app"]).default("auto"),
+  framework: external_exports.enum(["auto", "next-app", "vite-react"]).default("auto"),
   tokens: external_exports.object({
     sources: external_exports.array(external_exports.string().min(1)).min(1).optional(),
     themes: external_exports.record(external_exports.string().min(1), external_exports.string().min(1)).optional(),
@@ -40522,7 +40522,8 @@ function loadConfig(root2) {
     return {
       config: ConfigSchema.parse({ version: 1 }),
       configSource: "autodetected",
-      assumptions: [`No ${CONFIG_FILE} found: tokens, themes and include globs are autodetected.`]
+      assumptions: [`No ${CONFIG_FILE} found: tokens, themes and include globs are autodetected.`],
+      explicit: { labDir: false, baseUrl: false }
     };
   }
   let json2;
@@ -40546,522 +40547,9 @@ function loadConfig(root2) {
   for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme" && k4 !== "allowDefaultScale" && k4 !== "mapped") notEvaluated.push(`tailwind.${k4}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`] : [];
-  return { config: parsed.data, configSource: CONFIG_FILE, assumptions };
-}
-
-// src/project.ts
-var MAX_FILE_BYTES = 1024 * 1024;
-var MAX_FILES = 5e3;
-var SOURCE_EXTENSIONS = /* @__PURE__ */ new Set([".tsx", ".jsx", ".ts", ".js", ".mjs", ".cjs", ".css"]);
-function toPosix(p4) {
-  return p4.split(path2.sep).join("/");
-}
-function rel2(project, abs2) {
-  return toPosix(path2.relative(project.root, abs2));
-}
-function isInside(root2, candidate) {
-  const r2 = path2.relative(root2, candidate);
-  return r2 === "" || !r2.startsWith("..") && !path2.isAbsolute(r2);
-}
-var DISCOVERY_DEPTH = 2;
-function projectTier(dir) {
-  if (fs2.existsSync(path2.join(dir, CONFIG_FILE))) return 2;
-  const pkg = readPackageJson(dir);
-  const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
-  return "react" in deps || "next" in deps ? 1 : 0;
-}
-function discoverCandidates(base4) {
-  const found = [];
-  const visit2 = (dir, depth) => {
-    if (depth > DISCOVERY_DEPTH) return;
-    let entries;
-    try {
-      entries = fs2.readdirSync(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const e4 of entries) {
-      if (!e4.isDirectory() || e4.isSymbolicLink() || e4.name.startsWith(".") || ALWAYS_IGNORED_DIRS.has(e4.name)) continue;
-      const abs2 = path2.join(dir, e4.name);
-      const tier = projectTier(abs2);
-      if (tier > 0) found.push({ dir: abs2, tier });
-      else visit2(abs2, depth + 1);
-    }
-  };
-  visit2(base4, 1);
-  const best = Math.max(0, ...found.map((f3) => f3.tier));
-  return found.filter((f3) => f3.tier === best).map((f3) => f3.dir).sort();
-}
-function resolveWorkspace(opts) {
-  const env = opts.env ?? process.env;
-  const cwd = opts.cwd ?? process.cwd();
-  const isUsable = (v) => !!v && !v.includes("${");
-  const base4 = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
-  const existingDir = (p4) => {
-    if (!fs2.existsSync(p4) || !fs2.statSync(p4).isDirectory()) {
-      throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${p4}`);
-    }
-    return fs2.realpathSync(p4);
-  };
-  const workspaceRoot = existingDir(base4);
-  if (isUsable(env.FACHA_UI_ROOT)) {
-    return { workspaceRoot, root: existingDir(path2.resolve(base4, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
-  }
-  if (projectTier(workspaceRoot) > 0) return { workspaceRoot, root: workspaceRoot, mode: "direct", candidates: [] };
-  const found = discoverCandidates(workspaceRoot);
-  const candidates = found.map((d) => toPosix(path2.relative(workspaceRoot, d)));
-  if (found.length === 1) return { workspaceRoot, root: fs2.realpathSync(found[0]), mode: "discovered", candidates };
-  return { workspaceRoot, root: workspaceRoot, mode: found.length > 1 ? "ambiguous" : "none", candidates };
-}
-function readPackageJson(root2) {
-  try {
-    return JSON.parse(fs2.readFileSync(path2.join(root2, "package.json"), "utf8"));
-  } catch {
-    return null;
-  }
-}
-function openProject(root2, ws) {
-  const loaded = loadConfig(root2);
-  const pkg = readPackageJson(root2);
-  const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
-  const hasTailwind = "tailwindcss" in deps || "@tailwindcss/postcss" in deps;
-  const frameworkDetected = "next" in deps && fs2.existsSync(path2.join(root2, "app")) ? "next-app" : "unknown";
-  const labDir = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
-  const assumptions = [...loaded.assumptions];
-  const workspacePath = ws ? toPosix(path2.relative(ws.workspaceRoot, root2)) || "." : ".";
-  if (ws?.mode === "discovered") {
-    assumptions.push(
-      `Project discovered at ${workspacePath}/ (the only frontend found below the workspace). Set FACHA_UI_ROOT to choose another folder.`
-    );
-  }
-  if (loaded.config.framework === "auto") {
-    assumptions.push(
-      frameworkDetected === "next-app" ? "Framework autodetected: next-app (package.json depends on next and an app/ directory exists)." : "Framework not detected as next-app; the lab route may not work."
-    );
-  }
-  return {
-    ...loaded,
-    assumptions,
-    root: root2,
-    include: loaded.config.include ?? DEFAULT_INCLUDE,
-    exclude: loaded.config.exclude ?? [],
-    labDir,
-    hasTailwind,
-    frameworkDetected,
-    workspacePath
-  };
-}
-function walk(dir, out = []) {
-  let entries;
-  try {
-    entries = fs2.readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return out;
-  }
-  entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-  for (const e4 of entries) {
-    if (out.length >= MAX_FILES) break;
-    const abs2 = path2.join(dir, e4.name);
-    if (e4.isSymbolicLink()) continue;
-    if (e4.isDirectory()) {
-      if (!ALWAYS_IGNORED_DIRS.has(e4.name)) walk(abs2, out);
-    } else if (e4.isFile() && SOURCE_EXTENSIONS.has(path2.extname(e4.name))) {
-      out.push(abs2);
-    }
-  }
-  return out;
-}
-function auditMatcher(project) {
-  const inc = (0, import_picomatch.default)(project.include, { dot: false });
-  const exc = (0, import_picomatch.default)([...project.exclude, `${project.labDir}/**`], { dot: true });
-  return (r2) => inc(r2) && !exc(r2);
-}
-function listProjectFiles(project) {
-  const audited = auditMatcher(project);
-  return walk(project.root).filter((abs2) => audited(rel2(project, abs2)));
-}
-function isInLab(project, relPath) {
-  return relPath === project.labDir || relPath.startsWith(project.labDir + "/");
-}
-function resolveUserPath(project, input2) {
-  const cleaned = input2.trim().replace(/^["']|["']$/g, "");
-  const candidates = path2.isAbsolute(cleaned) ? [cleaned] : [path2.resolve(project.root, cleaned), path2.resolve(path2.dirname(project.root), cleaned)];
-  for (const c2 of candidates) {
-    if (!fs2.existsSync(c2)) continue;
-    const real = fs2.realpathSync(c2);
-    if (!isInside(project.root, real)) {
-      throw new FachaError("PATH_OUTSIDE_PROJECT", `Path is outside the project root: ${input2}`, { path: input2 });
-    }
-    return { abs: real, isDir: fs2.statSync(real).isDirectory() };
-  }
-  const first2 = candidates[0];
-  if (!isInside(project.root, path2.resolve(first2))) {
-    throw new FachaError("PATH_OUTSIDE_PROJECT", `Path is outside the project root: ${input2}`, { path: input2 });
-  }
-  throw new FachaError("PATH_NOT_FOUND", `Path not found in the project: ${input2}`, { path: input2 });
-}
-function readRootFile(project, name) {
-  const abs2 = path2.join(project.root, name);
-  try {
-    if (!fs2.existsSync(abs2) || fs2.lstatSync(abs2).isSymbolicLink()) return null;
-    if (!isInside(project.root, fs2.realpathSync(abs2)) || !fs2.statSync(abs2).isFile()) return null;
-    return readSource(abs2);
-  } catch {
-    return null;
-  }
-}
-function readSource(abs2) {
-  const st = fs2.statSync(abs2);
-  if (st.size > MAX_FILE_BYTES) return null;
-  return fs2.readFileSync(abs2, "utf8");
-}
-
-// src/shadcn.ts
-import path3 from "node:path";
-var HSL_CHANNELS = /^-?\d*\.?\d+(?:deg|rad|grad|turn)?\s+\d*\.?\d+%\s+\d*\.?\d+%(?:\s*\/\s*\d*\.?\d+%?)?$/;
-function isHslChannels(value) {
-  return HSL_CHANNELS.test(value.trim());
-}
-function hslFromChannels(value) {
-  return `hsl(${value.trim()})`;
-}
-var TAILWIND_CONFIG_NAMES = ["tailwind.config.ts", "tailwind.config.js", "tailwind.config.mjs", "tailwind.config.cjs", "tailwind.config.mts", "tailwind.config.cts"];
-var CANONICAL_PAIRS = ["background", "card", "popover", "primary", "secondary", "muted", "accent", "destructive"];
-var SHADCN_ROLES = {
-  background: "surface.base",
-  card: "surface.raised",
-  popover: "surface.raised",
-  foreground: "text.primary",
-  "card-foreground": "text.primary",
-  "popover-foreground": "text.primary",
-  muted: "surface.raised",
-  secondary: "surface.raised",
-  accent: "surface.raised",
-  "muted-foreground": "text.secondary",
-  "secondary-foreground": "text.primary",
-  "accent-foreground": "text.primary",
-  primary: "accent.primary",
-  "primary-foreground": "on-accent",
-  "destructive-foreground": "on-accent",
-  destructive: "status.danger",
-  border: "border.default",
-  input: "border.default",
-  ring: "border.default"
-};
-function bareName(name) {
-  return name.replace(/^--/, "").replace(/^color-/, "");
-}
-function shadcnRole(name) {
-  const n = bareName(name);
-  if (n === "sidebar") return "surface.raised";
-  const inner = n.startsWith("sidebar-") ? n.slice("sidebar-".length) : n;
-  return SHADCN_ROLES[inner];
-}
-function isShadcnName(name) {
-  return shadcnRole(name) !== void 0 || /^chart-\d+$/.test(bareName(name));
-}
-var HSL_VAR = /hsla?\(\s*var\(\s*(--[\w-]+)/g;
-function colorEvidence(project, tokenNames) {
-  const hslConsumed = /* @__PURE__ */ new Set();
-  const texts = [];
-  for (const abs2 of listProjectFiles(project)) {
-    if (path3.extname(abs2) !== ".css") continue;
-    const text = readSource(abs2);
-    if (text) texts.push(text);
-  }
-  for (const name of TAILWIND_CONFIG_NAMES) {
-    const text = readRootFile(project, name);
-    if (text) texts.push(text);
-  }
-  for (const text of texts) for (const m of text.matchAll(HSL_VAR)) hslConsumed.add(m[1]);
-  const names = new Set([...tokenNames].map(bareName));
-  const pairs = CANONICAL_PAIRS.filter((p4) => names.has(p4) && names.has(p4 === "background" ? "foreground" : `${p4}-foreground`));
-  let shadcnReason = null;
-  if (readRootFile(project, "components.json") !== null) shadcnReason = "components.json";
-  else if (pairs.length >= 3) shadcnReason = `canonical token pairs (${pairs.map((p4) => `--${p4}`).join(", ")})`;
-  return { hslConsumed, shadcn: shadcnReason !== null, shadcnReason };
-}
-
-// src/tokens.ts
-var DEFAULT_SELECTORS = /* @__PURE__ */ new Set([":root", "html", "@theme"]);
-function norm(sel) {
-  return sel.replace(/\s+/g, " ").replace(/'/g, '"').trim();
-}
-function selectorContext(node2) {
-  const parts = [];
-  let cur = node2;
-  while (cur && cur.type !== "root") {
-    if (cur.type === "rule") parts.unshift(cur.selector);
-    else if (cur.type === "atrule") {
-      const a = cur;
-      if (a.name !== "layer") parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
-    }
-    cur = cur.parent;
-  }
-  return norm(parts.join(" "));
-}
-function themeForSelector(ctx, configured) {
-  if (configured && Object.keys(configured).length > 0) {
-    for (const [name, sel2] of Object.entries(configured)) if (norm(sel2) === ctx) return name;
-    return null;
-  }
-  const prefersDark = /@media[^]*prefers-color-scheme:\s*dark/.test(ctx);
-  const sel = ctx.replace(/@media\s*\([^)]*\)\s*/g, "").trim();
-  const parts = sel.split(",").map((s) => s.trim());
-  for (const p4 of parts) {
-    if (DEFAULT_SELECTORS.has(p4)) return prefersDark ? "dark" : "default";
-    const dataTheme = p4.match(/^(?::root|html)?\[data-theme=["']?([\w-]+)["']?\]$/);
-    if (dataTheme) return dataTheme[1];
-    if (/^(?::root|html)?\.dark$/.test(p4)) return "dark";
-    if (/^(?::root|html)?\.light$/.test(p4)) return "default";
-  }
-  return null;
-}
-function inferType(name, value) {
-  const v = value.trim();
-  if (/gradient\(/.test(v)) return "gradient";
-  if (isColorValue(v)) return "color";
-  if (/font|family/.test(name) || /["']|,\s*(sans-serif|serif|monospace)\b/.test(v)) return "font";
-  if (/(^|\s)-?[\d.]+px\s+-?[\d.]+px/.test(v) && /(rgba?|hsla?|#)/.test(v)) return "shadow";
-  if (/^-?[\d.]+(px|rem|em|%|vh|vw|ch)?$/.test(v)) return "length";
-  if (/^calc\(\s*-?[\d.]+(px|rem|em)?(\s*[-+*/]\s*-?[\d.]+(px|rem|em)?)+\s*\)$/.test(v)) return "length";
-  return "other";
-}
-function inferRole(name, type) {
-  if (type === "shadow") return "shadow";
-  if (type === "font") return "font";
-  if (type === "gradient") return "gradient";
-  const n = name.replace(/^--/, "").replace(/^color-/, "").toLowerCase();
-  if (type === "length") {
-    if (/radius|rounded/.test(n)) return "radius";
-    if (/^(text|font-size|fs)(-|$)/.test(n)) return "font-size";
-    if (/space|spacing|gap/.test(n)) return "spacing";
-    return "generic";
-  }
-  if (type !== "color") return "generic";
-  if (/(^|-)on-/.test(n)) return "on-accent";
-  if (/success|positive/.test(n)) return "status.success";
-  if (/warning|caution/.test(n)) return "status.warning";
-  if (/danger|error|negative/.test(n)) return "status.danger";
-  if (/(^|-)info(-|$)/.test(n)) return "status.info";
-  if (/status|state/.test(n)) return "status.other";
-  if (/border|outline|divider|stroke/.test(n)) return "border.default";
-  if (/(^|-)(text|fg|foreground)(-|$)/.test(n)) {
-    return /soft|muted|secondary|subtle|faint/.test(n) ? "text.secondary" : "text.primary";
-  }
-  if (/(^|-)(bg|background|canvas)(-|$)/.test(n)) return "surface.base";
-  if (/panel|card|raised|elevated/.test(n)) return "surface.raised";
-  if (/surface/.test(n)) return "surface.base";
-  if (/^(brand|primary|accent)$/.test(n)) return "accent.primary";
-  if (/brand|primary|accent/.test(n)) return "accent";
-  return "generic";
-}
-function trailingComment(decl2) {
-  const next = decl2.next();
-  if (next && next.type === "comment" && next.source?.start?.line === decl2.source?.start?.line) {
-    return next.text.trim() || null;
-  }
-  return null;
-}
-function autodetectSources(project) {
-  const priority = ["app/globals.css", "src/index.css", "src/app/globals.css", "styles/globals.css"];
-  const cssFiles = listProjectFiles(project).filter((f3) => f3.endsWith(".css")).map((f3) => rel2(project, f3));
-  const withTokens = cssFiles.filter((r2) => {
-    const text = readSource(path4.join(project.root, r2)) ?? "";
-    return /(:root|@theme)[^{]*\{[^}]*--[\w-]+\s*:/.test(text);
-  });
-  return withTokens.sort((a, b) => {
-    const pa = priority.indexOf(a);
-    const pb = priority.indexOf(b);
-    return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb) || (a < b ? -1 : 1);
-  });
-}
-function resolveSources(project) {
-  const globs = project.config.tokens.sources;
-  if (!globs) return autodetectSources(project);
-  const isMatch = (0, import_picomatch2.default)(globs);
-  const all = [];
-  for (const g of globs) if (!/[*?{[]/.test(g) && fs3.existsSync(path4.join(project.root, g))) all.push(g);
-  const walked = listProjectFiles({ ...project, include: ["**/*.css"], exclude: [] }).map((f3) => rel2(project, f3)).filter((r2) => isMatch(r2));
-  return [.../* @__PURE__ */ new Set([...all, ...walked])].sort();
-}
-function loadTokens(project) {
-  const sources = resolveSources(project);
-  const configuredThemes = project.config.tokens.themes;
-  const themeOrder = [];
-  const themeSelectors = /* @__PURE__ */ new Map();
-  const raw = /* @__PURE__ */ new Map();
-  const localCustomProps = /* @__PURE__ */ new Set();
-  const parsed = /* @__PURE__ */ new Map();
-  if (configuredThemes) {
-    for (const [name, sel] of Object.entries(configuredThemes)) {
-      themeOrder.push(name);
-      themeSelectors.set(name, sel);
-    }
-  }
-  for (const source of sources) {
-    const text = readSource(path4.join(project.root, source));
-    if (text == null) continue;
-    let root2;
-    try {
-      root2 = postcss_default.parse(text, { from: source });
-    } catch {
-      continue;
-    }
-    parsed.set(source, root2);
-    root2.walkDecls((decl2) => {
-      if (!decl2.prop.startsWith("--")) return;
-      const parent = decl2.parent;
-      if (!parent || parent.type !== "rule" && parent.type !== "atrule") return;
-      const ctx = selectorContext(parent);
-      let theme = themeForSelector(ctx, configuredThemes);
-      if (theme === null) {
-        localCustomProps.add(decl2.prop);
-        return;
-      }
-      if (!configuredThemes) {
-        if (theme === "default") theme = "light";
-        if (!themeOrder.includes(theme)) {
-          if (theme === "light") themeOrder.unshift(theme);
-          else themeOrder.push(theme);
-          themeSelectors.set(theme, ctx);
-        }
-      }
-      const entry = raw.get(decl2.prop) ?? {
-        values: /* @__PURE__ */ new Map(),
-        comment: null,
-        source: `${source}:${decl2.source?.start?.line ?? 0}`
-      };
-      if (!entry.values.has(theme)) entry.values.set(theme, decl2.value.trim());
-      if (theme === themeOrder[0]) {
-        entry.comment = entry.comment ?? trailingComment(decl2);
-        entry.source = `${source}:${decl2.source?.start?.line ?? 0}`;
-      }
-      raw.set(decl2.prop, entry);
-    });
-  }
-  if (themeOrder.length === 0 && raw.size > 0) themeOrder.push("light");
-  const themes = themeOrder.map((name, i) => ({
-    name,
-    selector: themeSelectors.get(name) ?? ":root",
-    default: i === 0
-  }));
-  const defaultTheme2 = themeOrder[0];
-  const valueIn = (name, theme) => {
-    const e4 = raw.get(name);
-    if (!e4) return void 0;
-    return e4.values.get(theme) ?? (defaultTheme2 ? e4.values.get(defaultTheme2) : void 0) ?? [...e4.values.values()][0];
-  };
-  const evidence = colorEvidence(project, raw.keys());
-  const channelColors = [];
-  const tokens = [...raw.keys()].sort().map((name) => {
-    const e4 = raw.get(name);
-    const values = {};
-    for (const t of themeOrder) {
-      const v = valueIn(name, t);
-      if (v !== void 0) values[t] = v;
-    }
-    const resolvedDefault = resolveVars(values[defaultTheme2 ?? ""] ?? "", defaultTheme2 ?? "", valueIn);
-    let type = inferType(name, resolvedDefault);
-    let format;
-    if (type === "other" && isHslChannels(resolvedDefault) && (evidence.hslConsumed.has(name) || evidence.shadcn && isShadcnName(name))) {
-      type = "color";
-      format = "hsl-channels";
-      channelColors.push(name);
-    }
-    const role = project.config.tokens.roles?.[name] ?? (evidence.shadcn && type === "color" ? shadcnRole(name) : void 0) ?? inferRole(name, type);
-    return { name, type, role, ...format ? { format } : {}, values, comment: e4.comment, source: e4.source };
-  });
-  if (evidence.shadcn) {
-    project.assumptions.push(`shadcn/ui project (${evidence.shadcnReason}): its canonical tokens take the shadcn roles (SPEC \xA72.0.2); tokens.roles in the config overrides them.`);
-  }
-  if (channelColors.length) {
-    project.assumptions.push(
-      `${channelColors.length} token(s) written as bare HSL channels read as colors (hsl(var(--x)) in the project${evidence.shadcn ? " or the shadcn/ui names" : ""}): ${channelColors.slice(0, 8).join(", ")}${channelColors.length > 8 ? "\u2026" : ""}.`
-    );
-  }
-  return {
-    sources,
-    themes,
-    tokens,
-    byName: new Map(tokens.map((t) => [t.name, t])),
-    localCustomProps,
-    parsed
-  };
-}
-function resolveVars(value, theme, lookup, depth = 0) {
-  if (depth > 10 || !value.includes("var(")) return value;
-  const out = value.replace(/var\(\s*(--[\w-]+)\s*(?:,\s*([^()]*))?\)/g, (_m, name, fallback) => {
-    const v = lookup(name, theme);
-    return v !== void 0 ? v : (fallback ?? "").trim();
-  });
-  return resolveVars(out, theme, lookup, depth + 1);
-}
-function aliasOf(ts, name) {
-  const t = ts.byName.get(name);
-  if (!t) return void 0;
-  const targets = new Set(Object.values(t.values).map((v) => v.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1] ?? ""));
-  const [target] = [...targets];
-  return targets.size === 1 && target && target !== name && ts.byName.has(target) ? target : void 0;
-}
-function tokenValue(ts, name, theme) {
-  const lookup = (n, t) => ts.byName.get(n)?.values[t];
-  const v = lookup(name, theme);
-  return v === void 0 ? void 0 : resolveVars(v, theme, lookup);
-}
-function tokenColor(ts, name, theme) {
-  const v = tokenValue(ts, name, theme);
-  if (v === void 0) return void 0;
-  if (ts.byName.get(name)?.type === "color" && isHslChannels(v)) return parseColor(hslFromChannels(v));
-  return parseColor(v);
-}
-
-// src/sources/usage.ts
-function makeLocAt(file2, startLine, startColumn, text) {
-  return (index2) => {
-    let line = startLine;
-    let column = startColumn;
-    for (let i = 0; i < index2 && i < text.length; i++) {
-      if (text[i] === "\n") {
-        line++;
-        column = 1;
-      } else column++;
-    }
-    return { file: file2, line, column };
-  };
-}
-
-// src/sources/css.ts
-function extractCss(file2, code2, opts) {
-  const root2 = opts.parsed ?? postcss_default.parse(code2, { from: file2 });
-  const usages = [];
-  root2.walkDecls((decl2) => {
-    const parent = decl2.parent;
-    const ctx = parent && (parent.type === "rule" || parent.type === "atrule") ? selectorContext(parent) : "";
-    if (opts.isTokenSource && decl2.prop.startsWith("--") && themeForSelector(ctx, opts.themes) !== null) return;
-    const start = decl2.source?.start;
-    if (!start) return;
-    const between = decl2.raws.between ?? ":";
-    const valueRaw = decl2.raws.value?.raw ?? decl2.value;
-    const offset = decl2.prop.length + between.length;
-    const valueStart = makeLocAt(file2, start.line, start.column, decl2.prop + between)(offset);
-    const siblingBackground = parent && "nodes" in parent ? (parent.nodes ?? []).find(
-      (n) => n.type === "decl" && (n.prop === "background" || n.prop === "background-color")
-    )?.value ?? null : null;
-    usages.push({
-      kind: "decl",
-      context: "css",
-      property: decl2.prop,
-      value: valueRaw,
-      selector: ctx || null,
-      file: file2,
-      line: start.line,
-      column: start.column,
-      locAt: makeLocAt(file2, valueStart.line, valueStart.column, valueRaw),
-      siblingBackground
-    });
-  });
-  return usages;
+  const raw = json2;
+  const explicit = { labDir: raw?.lab?.dir !== void 0, baseUrl: raw?.preview?.baseUrl !== void 0 };
+  return { config: parsed.data, configSource: CONFIG_FILE, assumptions, explicit };
 }
 
 // node_modules/@babel/parser/lib/index.js
@@ -55294,6 +54782,631 @@ function getParserClass(pluginsMap) {
   return cls;
 }
 
+// src/static-config.ts
+var lineOf = (n) => n?.loc?.start.line ?? 0;
+function parseConfig(code2) {
+  return parse5(code2, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true });
+}
+function unwrap(n) {
+  let cur = n ?? void 0;
+  while (cur && ["TSSatisfiesExpression", "TSAsExpression", "TSTypeAssertion", "ParenthesizedExpression", "TSNonNullExpression"].includes(cur.type)) cur = cur.expression;
+  return cur;
+}
+function keyName(p4) {
+  if (p4.computed) return null;
+  const k4 = p4.key;
+  if (k4.type === "Identifier") return k4.name;
+  if (k4.type === "StringLiteral" || k4.type === "NumericLiteral") return String(k4.value);
+  return null;
+}
+function property(obj, name) {
+  return obj.properties.find((p4) => (p4.type === "ObjectProperty" || p4.type === "Property") && keyName(p4) === name);
+}
+function exportedObject(ast) {
+  const body = ast.program.body;
+  const declared = /* @__PURE__ */ new Map();
+  for (const st of body) {
+    const decl2 = st.type === "ExportNamedDeclaration" ? st.declaration : st;
+    if (decl2?.type !== "VariableDeclaration") continue;
+    for (const d of decl2.declarations) if (d.id?.type === "Identifier" && d.init) declared.set(d.id.name, d.init);
+  }
+  let exported;
+  for (const st of body) {
+    if (st.type === "ExportDefaultDeclaration") exported = st.declaration;
+    const e4 = st.type === "ExpressionStatement" ? st.expression : void 0;
+    if (e4?.type === "AssignmentExpression" && e4.left?.type === "MemberExpression" && e4.left.object?.name === "module" && (e4.left.property?.name === "exports" || e4.left.property?.value === "exports")) {
+      exported = e4.right;
+    }
+  }
+  let cur = unwrap(exported);
+  if (cur?.type === "Identifier") cur = unwrap(declared.get(cur.name));
+  if (cur?.type === "CallExpression" && cur.arguments?.length === 1) {
+    const arg = unwrap(cur.arguments[0]);
+    if (arg?.type === "ObjectExpression") cur = arg;
+  }
+  if (cur?.type === "ObjectExpression") return { obj: cur };
+  if (!exported) return { unread: { what: "no exported config object found", line: 0 } };
+  const kind = cur?.type === "ArrowFunctionExpression" || cur?.type === "FunctionExpression" || cur?.type === "CallExpression" ? "computed by a function" : "not an object literal";
+  return { unread: { what: `the exported config is ${kind}`, line: lineOf(exported) } };
+}
+
+// src/vite-config.ts
+var VITE_CONFIG_NAMES = ["vite.config.ts", "vite.config.js", "vite.config.mjs", "vite.config.mts", "vite.config.cjs", "vite.config.cts"];
+function literalStrings(n, unread, where) {
+  const v = unwrap(n);
+  if (!v) return [];
+  if (v.type === "StringLiteral") return [v.value];
+  if (v.type === "ArrayExpression") return v.elements.flatMap((e4) => literalStrings(e4, unread, where));
+  if (v.type === "ObjectExpression") {
+    return v.properties.flatMap((p4) => p4.type === "SpreadElement" ? (unread.push({ what: `a spread in ${where}`, line: lineOf(p4) }), []) : literalStrings(p4.value, unread, where));
+  }
+  unread.push({ what: `${where} (not a literal path)`, line: lineOf(v) });
+  return [];
+}
+function readViteConfig(project) {
+  const file2 = VITE_CONFIG_NAMES.find((n) => readRootFile(project, n) !== null);
+  if (!file2) return null;
+  const out = { file: file2, port: null, inputs: null, unread: [] };
+  let ast;
+  try {
+    ast = parseConfig(readRootFile(project, file2) ?? "");
+  } catch (e4) {
+    out.unread.push({ what: `the file does not parse (${e4.message.slice(0, 120)})`, line: 0 });
+    return out;
+  }
+  const { obj, unread } = exportedObject(ast);
+  if (!obj) {
+    if (unread) out.unread.push(unread);
+    return out;
+  }
+  const server = unwrap(property(obj, "server")?.value);
+  const port = server?.type === "ObjectExpression" ? unwrap(property(server, "port")?.value) : void 0;
+  if (port?.type === "NumericLiteral") out.port = port.value;
+  else if (port) out.unread.push({ what: "server.port (not a number literal)", line: lineOf(port) });
+  const build = unwrap(property(obj, "build")?.value);
+  const rollup = build?.type === "ObjectExpression" ? unwrap(property(build, "rollupOptions")?.value) : void 0;
+  const input2 = rollup?.type === "ObjectExpression" ? property(rollup, "input") : void 0;
+  if (input2) out.inputs = literalStrings(input2.value, out.unread, "build.rollupOptions.input");
+  return out;
+}
+
+// src/project.ts
+var MAX_FILE_BYTES = 1024 * 1024;
+var MAX_FILES = 5e3;
+var SOURCE_EXTENSIONS = /* @__PURE__ */ new Set([".tsx", ".jsx", ".ts", ".js", ".mjs", ".cjs", ".css"]);
+function toPosix(p4) {
+  return p4.split(path2.sep).join("/");
+}
+function rel2(project, abs2) {
+  return toPosix(path2.relative(project.root, abs2));
+}
+function isInside(root2, candidate) {
+  const r2 = path2.relative(root2, candidate);
+  return r2 === "" || !r2.startsWith("..") && !path2.isAbsolute(r2);
+}
+var DISCOVERY_DEPTH = 2;
+function projectTier(dir) {
+  if (fs2.existsSync(path2.join(dir, CONFIG_FILE))) return 2;
+  const pkg = readPackageJson(dir);
+  const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
+  return "react" in deps || "next" in deps ? 1 : 0;
+}
+function discoverCandidates(base4) {
+  const found = [];
+  const visit2 = (dir, depth) => {
+    if (depth > DISCOVERY_DEPTH) return;
+    let entries;
+    try {
+      entries = fs2.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e4 of entries) {
+      if (!e4.isDirectory() || e4.isSymbolicLink() || e4.name.startsWith(".") || ALWAYS_IGNORED_DIRS.has(e4.name)) continue;
+      const abs2 = path2.join(dir, e4.name);
+      const tier = projectTier(abs2);
+      if (tier > 0) found.push({ dir: abs2, tier });
+      else visit2(abs2, depth + 1);
+    }
+  };
+  visit2(base4, 1);
+  const best = Math.max(0, ...found.map((f3) => f3.tier));
+  return found.filter((f3) => f3.tier === best).map((f3) => f3.dir).sort();
+}
+function resolveWorkspace(opts) {
+  const env = opts.env ?? process.env;
+  const cwd = opts.cwd ?? process.cwd();
+  const isUsable = (v) => !!v && !v.includes("${");
+  const base4 = isUsable(opts.argRoot) ? path2.resolve(cwd, opts.argRoot) : isUsable(env.CLAUDE_PROJECT_DIR) ? path2.resolve(env.CLAUDE_PROJECT_DIR) : cwd;
+  const existingDir = (p4) => {
+    if (!fs2.existsSync(p4) || !fs2.statSync(p4).isDirectory()) {
+      throw new FachaError("PROJECT_NOT_FOUND", `Project root does not exist or is not a directory: ${p4}`);
+    }
+    return fs2.realpathSync(p4);
+  };
+  const workspaceRoot = existingDir(base4);
+  if (isUsable(env.FACHA_UI_ROOT)) {
+    return { workspaceRoot, root: existingDir(path2.resolve(base4, env.FACHA_UI_ROOT)), mode: "explicit", candidates: [] };
+  }
+  if (projectTier(workspaceRoot) > 0) return { workspaceRoot, root: workspaceRoot, mode: "direct", candidates: [] };
+  const found = discoverCandidates(workspaceRoot);
+  const candidates = found.map((d) => toPosix(path2.relative(workspaceRoot, d)));
+  if (found.length === 1) return { workspaceRoot, root: fs2.realpathSync(found[0]), mode: "discovered", candidates };
+  return { workspaceRoot, root: workspaceRoot, mode: found.length > 1 ? "ambiguous" : "none", candidates };
+}
+function readPackageJson(root2) {
+  try {
+    return JSON.parse(fs2.readFileSync(path2.join(root2, "package.json"), "utf8"));
+  } catch {
+    return null;
+  }
+}
+function openProject(root2, ws) {
+  const loaded = loadConfig(root2);
+  const pkg = readPackageJson(root2);
+  const deps = { ...pkg?.dependencies ?? {}, ...pkg?.devDependencies ?? {} };
+  const hasTailwind = "tailwindcss" in deps || "@tailwindcss/postcss" in deps;
+  const frameworkDetected = detectFramework(root2, deps);
+  const framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
+  const assumptions = [...loaded.assumptions];
+  if (framework === "vite-react") {
+    const vite = readViteConfig({ root: root2 });
+    if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
+    if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
+    if (vite?.inputs?.length) {
+      const lab2 = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
+      const inLab = vite.inputs.some((i) => toPosix(i).replace(/^\.?\//, "").startsWith(`${lab2}/`));
+      assumptions.push(
+        inLab ? `${vite.file} lists the lab (${lab2}/) in build.rollupOptions.input: the lab would be built. Remove it from the inputs.` : `${vite.file} declares build entries (${vite.inputs.join(", ")}); the lab (${lab2}/) is not one of them, so it stays out of the build.`
+      );
+    }
+    if (vite?.unread.length) assumptions.push(`Not read in ${vite.file} without running it: ${vite.unread.map((u) => `${u.what}${u.line ? ` (line ${u.line})` : ""}`).join("; ")}.`);
+  }
+  const labDir = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
+  const workspacePath = ws ? toPosix(path2.relative(ws.workspaceRoot, root2)) || "." : ".";
+  if (ws?.mode === "discovered") {
+    assumptions.push(
+      `Project discovered at ${workspacePath}/ (the only frontend found below the workspace). Set FACHA_UI_ROOT to choose another folder.`
+    );
+  }
+  if (loaded.config.framework === "auto") assumptions.push(frameworkAssumption(frameworkDetected, deps));
+  return {
+    ...loaded,
+    assumptions,
+    root: root2,
+    include: loaded.config.include ?? DEFAULT_INCLUDE,
+    exclude: loaded.config.exclude ?? [],
+    labDir,
+    hasTailwind,
+    frameworkDetected,
+    framework,
+    workspacePath
+  };
+}
+function detectFramework(root2, deps) {
+  if ("next" in deps && fs2.existsSync(path2.join(root2, "app"))) return "next-app";
+  if ("vite" in deps && "react" in deps) return "vite-react";
+  return "unknown";
+}
+function frameworkAssumption(f3, deps) {
+  if (f3 === "next-app") return "Framework autodetected: next-app (package.json depends on next and an app/ directory exists).";
+  if (f3 === "vite-react") return "Framework autodetected: vite-react (package.json depends on vite and react). The lab is a dev-only entry in facha-lab/.";
+  const why = "react-scripts" in deps ? "Create React App (react-scripts) has no lab: it is deprecated, and variants need Next.js (App Router) or Vite with React" : "next" in deps ? "Next.js without an app/ directory (Pages Router) has no lab yet: variants need the App Router" : "no lab framework detected: variants need Next.js (App Router) or Vite with React";
+  return `${why}. Checks, audit, score, start, init and learn work all the same.`;
+}
+function walk(dir, out = []) {
+  let entries;
+  try {
+    entries = fs2.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+  for (const e4 of entries) {
+    if (out.length >= MAX_FILES) break;
+    const abs2 = path2.join(dir, e4.name);
+    if (e4.isSymbolicLink()) continue;
+    if (e4.isDirectory()) {
+      if (!ALWAYS_IGNORED_DIRS.has(e4.name)) walk(abs2, out);
+    } else if (e4.isFile() && SOURCE_EXTENSIONS.has(path2.extname(e4.name))) {
+      out.push(abs2);
+    }
+  }
+  return out;
+}
+function auditMatcher(project) {
+  const inc = (0, import_picomatch.default)(project.include, { dot: false });
+  const exc = (0, import_picomatch.default)([...project.exclude, `${project.labDir}/**`], { dot: true });
+  return (r2) => inc(r2) && !exc(r2);
+}
+function listProjectFiles(project) {
+  const audited = auditMatcher(project);
+  return walk(project.root).filter((abs2) => audited(rel2(project, abs2)));
+}
+function isInLab(project, relPath) {
+  return relPath === project.labDir || relPath.startsWith(project.labDir + "/");
+}
+function resolveUserPath(project, input2) {
+  const cleaned = input2.trim().replace(/^["']|["']$/g, "");
+  const candidates = path2.isAbsolute(cleaned) ? [cleaned] : [path2.resolve(project.root, cleaned), path2.resolve(path2.dirname(project.root), cleaned)];
+  for (const c2 of candidates) {
+    if (!fs2.existsSync(c2)) continue;
+    const real = fs2.realpathSync(c2);
+    if (!isInside(project.root, real)) {
+      throw new FachaError("PATH_OUTSIDE_PROJECT", `Path is outside the project root: ${input2}`, { path: input2 });
+    }
+    return { abs: real, isDir: fs2.statSync(real).isDirectory() };
+  }
+  const first2 = candidates[0];
+  if (!isInside(project.root, path2.resolve(first2))) {
+    throw new FachaError("PATH_OUTSIDE_PROJECT", `Path is outside the project root: ${input2}`, { path: input2 });
+  }
+  throw new FachaError("PATH_NOT_FOUND", `Path not found in the project: ${input2}`, { path: input2 });
+}
+function readRootFile(project, name) {
+  const abs2 = path2.join(project.root, name);
+  try {
+    if (!fs2.existsSync(abs2) || fs2.lstatSync(abs2).isSymbolicLink()) return null;
+    if (!isInside(project.root, fs2.realpathSync(abs2)) || !fs2.statSync(abs2).isFile()) return null;
+    return readSource(abs2);
+  } catch {
+    return null;
+  }
+}
+function readSource(abs2) {
+  const st = fs2.statSync(abs2);
+  if (st.size > MAX_FILE_BYTES) return null;
+  return fs2.readFileSync(abs2, "utf8");
+}
+
+// src/shadcn.ts
+import path3 from "node:path";
+var HSL_CHANNELS = /^-?\d*\.?\d+(?:deg|rad|grad|turn)?\s+\d*\.?\d+%\s+\d*\.?\d+%(?:\s*\/\s*\d*\.?\d+%?)?$/;
+function isHslChannels(value) {
+  return HSL_CHANNELS.test(value.trim());
+}
+function hslFromChannels(value) {
+  return `hsl(${value.trim()})`;
+}
+var TAILWIND_CONFIG_NAMES = ["tailwind.config.ts", "tailwind.config.js", "tailwind.config.mjs", "tailwind.config.cjs", "tailwind.config.mts", "tailwind.config.cts"];
+var CANONICAL_PAIRS = ["background", "card", "popover", "primary", "secondary", "muted", "accent", "destructive"];
+var SHADCN_ROLES = {
+  background: "surface.base",
+  card: "surface.raised",
+  popover: "surface.raised",
+  foreground: "text.primary",
+  "card-foreground": "text.primary",
+  "popover-foreground": "text.primary",
+  muted: "surface.raised",
+  secondary: "surface.raised",
+  accent: "surface.raised",
+  "muted-foreground": "text.secondary",
+  "secondary-foreground": "text.primary",
+  "accent-foreground": "text.primary",
+  primary: "accent.primary",
+  "primary-foreground": "on-accent",
+  "destructive-foreground": "on-accent",
+  destructive: "status.danger",
+  border: "border.default",
+  input: "border.default",
+  ring: "border.default"
+};
+function bareName(name) {
+  return name.replace(/^--/, "").replace(/^color-/, "");
+}
+function shadcnRole(name) {
+  const n = bareName(name);
+  if (n === "sidebar") return "surface.raised";
+  const inner = n.startsWith("sidebar-") ? n.slice("sidebar-".length) : n;
+  return SHADCN_ROLES[inner];
+}
+function isShadcnName(name) {
+  return shadcnRole(name) !== void 0 || /^chart-\d+$/.test(bareName(name));
+}
+var HSL_VAR = /hsla?\(\s*var\(\s*(--[\w-]+)/g;
+function colorEvidence(project, tokenNames) {
+  const hslConsumed = /* @__PURE__ */ new Set();
+  const texts = [];
+  for (const abs2 of listProjectFiles(project)) {
+    if (path3.extname(abs2) !== ".css") continue;
+    const text = readSource(abs2);
+    if (text) texts.push(text);
+  }
+  for (const name of TAILWIND_CONFIG_NAMES) {
+    const text = readRootFile(project, name);
+    if (text) texts.push(text);
+  }
+  for (const text of texts) for (const m of text.matchAll(HSL_VAR)) hslConsumed.add(m[1]);
+  const names = new Set([...tokenNames].map(bareName));
+  const pairs = CANONICAL_PAIRS.filter((p4) => names.has(p4) && names.has(p4 === "background" ? "foreground" : `${p4}-foreground`));
+  let shadcnReason = null;
+  if (readRootFile(project, "components.json") !== null) shadcnReason = "components.json";
+  else if (pairs.length >= 3) shadcnReason = `canonical token pairs (${pairs.map((p4) => `--${p4}`).join(", ")})`;
+  return { hslConsumed, shadcn: shadcnReason !== null, shadcnReason };
+}
+
+// src/tokens.ts
+var DEFAULT_SELECTORS = /* @__PURE__ */ new Set([":root", "html", "@theme"]);
+function norm(sel) {
+  return sel.replace(/\s+/g, " ").replace(/'/g, '"').trim();
+}
+function selectorContext(node2) {
+  const parts = [];
+  let cur = node2;
+  while (cur && cur.type !== "root") {
+    if (cur.type === "rule") parts.unshift(cur.selector);
+    else if (cur.type === "atrule") {
+      const a = cur;
+      if (a.name !== "layer") parts.unshift(a.name === "theme" ? "@theme" : `@${a.name} ${a.params}`.trim());
+    }
+    cur = cur.parent;
+  }
+  return norm(parts.join(" "));
+}
+function themeForSelector(ctx, configured) {
+  if (configured && Object.keys(configured).length > 0) {
+    for (const [name, sel2] of Object.entries(configured)) if (norm(sel2) === ctx) return name;
+    return null;
+  }
+  const prefersDark = /@media[^]*prefers-color-scheme:\s*dark/.test(ctx);
+  const sel = ctx.replace(/@media\s*\([^)]*\)\s*/g, "").trim();
+  const parts = sel.split(",").map((s) => s.trim());
+  for (const p4 of parts) {
+    if (DEFAULT_SELECTORS.has(p4)) return prefersDark ? "dark" : "default";
+    const dataTheme = p4.match(/^(?::root|html)?\[data-theme=["']?([\w-]+)["']?\]$/);
+    if (dataTheme) return dataTheme[1];
+    if (/^(?::root|html)?\.dark$/.test(p4)) return "dark";
+    if (/^(?::root|html)?\.light$/.test(p4)) return "default";
+  }
+  return null;
+}
+function inferType(name, value) {
+  const v = value.trim();
+  if (/gradient\(/.test(v)) return "gradient";
+  if (isColorValue(v)) return "color";
+  if (/font|family/.test(name) || /["']|,\s*(sans-serif|serif|monospace)\b/.test(v)) return "font";
+  if (/(^|\s)-?[\d.]+px\s+-?[\d.]+px/.test(v) && /(rgba?|hsla?|#)/.test(v)) return "shadow";
+  if (/^-?[\d.]+(px|rem|em|%|vh|vw|ch)?$/.test(v)) return "length";
+  if (/^calc\(\s*-?[\d.]+(px|rem|em)?(\s*[-+*/]\s*-?[\d.]+(px|rem|em)?)+\s*\)$/.test(v)) return "length";
+  return "other";
+}
+function inferRole(name, type) {
+  if (type === "shadow") return "shadow";
+  if (type === "font") return "font";
+  if (type === "gradient") return "gradient";
+  const n = name.replace(/^--/, "").replace(/^color-/, "").toLowerCase();
+  if (type === "length") {
+    if (/radius|rounded/.test(n)) return "radius";
+    if (/^(text|font-size|fs)(-|$)/.test(n)) return "font-size";
+    if (/space|spacing|gap/.test(n)) return "spacing";
+    return "generic";
+  }
+  if (type !== "color") return "generic";
+  if (/(^|-)on-/.test(n)) return "on-accent";
+  if (/success|positive/.test(n)) return "status.success";
+  if (/warning|caution/.test(n)) return "status.warning";
+  if (/danger|error|negative/.test(n)) return "status.danger";
+  if (/(^|-)info(-|$)/.test(n)) return "status.info";
+  if (/status|state/.test(n)) return "status.other";
+  if (/border|outline|divider|stroke/.test(n)) return "border.default";
+  if (/(^|-)(text|fg|foreground)(-|$)/.test(n)) {
+    return /soft|muted|secondary|subtle|faint/.test(n) ? "text.secondary" : "text.primary";
+  }
+  if (/(^|-)(bg|background|canvas)(-|$)/.test(n)) return "surface.base";
+  if (/panel|card|raised|elevated/.test(n)) return "surface.raised";
+  if (/surface/.test(n)) return "surface.base";
+  if (/^(brand|primary|accent)$/.test(n)) return "accent.primary";
+  if (/brand|primary|accent/.test(n)) return "accent";
+  return "generic";
+}
+function trailingComment(decl2) {
+  const next = decl2.next();
+  if (next && next.type === "comment" && next.source?.start?.line === decl2.source?.start?.line) {
+    return next.text.trim() || null;
+  }
+  return null;
+}
+function autodetectSources(project) {
+  const priority = ["app/globals.css", "src/index.css", "src/app/globals.css", "styles/globals.css"];
+  const cssFiles = listProjectFiles(project).filter((f3) => f3.endsWith(".css")).map((f3) => rel2(project, f3));
+  const withTokens = cssFiles.filter((r2) => {
+    const text = readSource(path4.join(project.root, r2)) ?? "";
+    return /(:root|@theme)[^{]*\{[^}]*--[\w-]+\s*:/.test(text);
+  });
+  return withTokens.sort((a, b) => {
+    const pa = priority.indexOf(a);
+    const pb = priority.indexOf(b);
+    return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb) || (a < b ? -1 : 1);
+  });
+}
+function resolveSources(project) {
+  const globs = project.config.tokens.sources;
+  if (!globs) return autodetectSources(project);
+  const isMatch = (0, import_picomatch2.default)(globs);
+  const all = [];
+  for (const g of globs) if (!/[*?{[]/.test(g) && fs3.existsSync(path4.join(project.root, g))) all.push(g);
+  const walked = listProjectFiles({ ...project, include: ["**/*.css"], exclude: [] }).map((f3) => rel2(project, f3)).filter((r2) => isMatch(r2));
+  return [.../* @__PURE__ */ new Set([...all, ...walked])].sort();
+}
+function loadTokens(project) {
+  const sources = resolveSources(project);
+  const configuredThemes = project.config.tokens.themes;
+  const themeOrder = [];
+  const themeSelectors = /* @__PURE__ */ new Map();
+  const raw = /* @__PURE__ */ new Map();
+  const localCustomProps = /* @__PURE__ */ new Set();
+  const parsed = /* @__PURE__ */ new Map();
+  if (configuredThemes) {
+    for (const [name, sel] of Object.entries(configuredThemes)) {
+      themeOrder.push(name);
+      themeSelectors.set(name, sel);
+    }
+  }
+  for (const source of sources) {
+    const text = readSource(path4.join(project.root, source));
+    if (text == null) continue;
+    let root2;
+    try {
+      root2 = postcss_default.parse(text, { from: source });
+    } catch {
+      continue;
+    }
+    parsed.set(source, root2);
+    root2.walkDecls((decl2) => {
+      if (!decl2.prop.startsWith("--")) return;
+      const parent = decl2.parent;
+      if (!parent || parent.type !== "rule" && parent.type !== "atrule") return;
+      const ctx = selectorContext(parent);
+      let theme = themeForSelector(ctx, configuredThemes);
+      if (theme === null) {
+        localCustomProps.add(decl2.prop);
+        return;
+      }
+      if (!configuredThemes) {
+        if (theme === "default") theme = "light";
+        if (!themeOrder.includes(theme)) {
+          if (theme === "light") themeOrder.unshift(theme);
+          else themeOrder.push(theme);
+          themeSelectors.set(theme, ctx);
+        }
+      }
+      const entry = raw.get(decl2.prop) ?? {
+        values: /* @__PURE__ */ new Map(),
+        comment: null,
+        source: `${source}:${decl2.source?.start?.line ?? 0}`
+      };
+      if (!entry.values.has(theme)) entry.values.set(theme, decl2.value.trim());
+      if (theme === themeOrder[0]) {
+        entry.comment = entry.comment ?? trailingComment(decl2);
+        entry.source = `${source}:${decl2.source?.start?.line ?? 0}`;
+      }
+      raw.set(decl2.prop, entry);
+    });
+  }
+  if (themeOrder.length === 0 && raw.size > 0) themeOrder.push("light");
+  const themes = themeOrder.map((name, i) => ({
+    name,
+    selector: themeSelectors.get(name) ?? ":root",
+    default: i === 0
+  }));
+  const defaultTheme2 = themeOrder[0];
+  const valueIn = (name, theme) => {
+    const e4 = raw.get(name);
+    if (!e4) return void 0;
+    return e4.values.get(theme) ?? (defaultTheme2 ? e4.values.get(defaultTheme2) : void 0) ?? [...e4.values.values()][0];
+  };
+  const evidence = colorEvidence(project, raw.keys());
+  const channelColors = [];
+  const tokens = [...raw.keys()].sort().map((name) => {
+    const e4 = raw.get(name);
+    const values = {};
+    for (const t of themeOrder) {
+      const v = valueIn(name, t);
+      if (v !== void 0) values[t] = v;
+    }
+    const resolvedDefault = resolveVars(values[defaultTheme2 ?? ""] ?? "", defaultTheme2 ?? "", valueIn);
+    let type = inferType(name, resolvedDefault);
+    let format;
+    if (type === "other" && isHslChannels(resolvedDefault) && (evidence.hslConsumed.has(name) || evidence.shadcn && isShadcnName(name))) {
+      type = "color";
+      format = "hsl-channels";
+      channelColors.push(name);
+    }
+    const role = project.config.tokens.roles?.[name] ?? (evidence.shadcn && type === "color" ? shadcnRole(name) : void 0) ?? inferRole(name, type);
+    return { name, type, role, ...format ? { format } : {}, values, comment: e4.comment, source: e4.source };
+  });
+  if (evidence.shadcn) {
+    project.assumptions.push(`shadcn/ui project (${evidence.shadcnReason}): its canonical tokens take the shadcn roles (SPEC \xA72.0.2); tokens.roles in the config overrides them.`);
+  }
+  if (channelColors.length) {
+    project.assumptions.push(
+      `${channelColors.length} token(s) written as bare HSL channels read as colors (hsl(var(--x)) in the project${evidence.shadcn ? " or the shadcn/ui names" : ""}): ${channelColors.slice(0, 8).join(", ")}${channelColors.length > 8 ? "\u2026" : ""}.`
+    );
+  }
+  return {
+    sources,
+    themes,
+    tokens,
+    byName: new Map(tokens.map((t) => [t.name, t])),
+    localCustomProps,
+    parsed
+  };
+}
+function resolveVars(value, theme, lookup, depth = 0) {
+  if (depth > 10 || !value.includes("var(")) return value;
+  const out = value.replace(/var\(\s*(--[\w-]+)\s*(?:,\s*([^()]*))?\)/g, (_m, name, fallback) => {
+    const v = lookup(name, theme);
+    return v !== void 0 ? v : (fallback ?? "").trim();
+  });
+  return resolveVars(out, theme, lookup, depth + 1);
+}
+function aliasOf(ts, name) {
+  const t = ts.byName.get(name);
+  if (!t) return void 0;
+  const targets = new Set(Object.values(t.values).map((v) => v.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1] ?? ""));
+  const [target] = [...targets];
+  return targets.size === 1 && target && target !== name && ts.byName.has(target) ? target : void 0;
+}
+function tokenValue(ts, name, theme) {
+  const lookup = (n, t) => ts.byName.get(n)?.values[t];
+  const v = lookup(name, theme);
+  return v === void 0 ? void 0 : resolveVars(v, theme, lookup);
+}
+function tokenColor(ts, name, theme) {
+  const v = tokenValue(ts, name, theme);
+  if (v === void 0) return void 0;
+  if (ts.byName.get(name)?.type === "color" && isHslChannels(v)) return parseColor(hslFromChannels(v));
+  return parseColor(v);
+}
+
+// src/sources/usage.ts
+function makeLocAt(file2, startLine, startColumn, text) {
+  return (index2) => {
+    let line = startLine;
+    let column = startColumn;
+    for (let i = 0; i < index2 && i < text.length; i++) {
+      if (text[i] === "\n") {
+        line++;
+        column = 1;
+      } else column++;
+    }
+    return { file: file2, line, column };
+  };
+}
+
+// src/sources/css.ts
+function extractCss(file2, code2, opts) {
+  const root2 = opts.parsed ?? postcss_default.parse(code2, { from: file2 });
+  const usages = [];
+  root2.walkDecls((decl2) => {
+    const parent = decl2.parent;
+    const ctx = parent && (parent.type === "rule" || parent.type === "atrule") ? selectorContext(parent) : "";
+    if (opts.isTokenSource && decl2.prop.startsWith("--") && themeForSelector(ctx, opts.themes) !== null) return;
+    const start = decl2.source?.start;
+    if (!start) return;
+    const between = decl2.raws.between ?? ":";
+    const valueRaw = decl2.raws.value?.raw ?? decl2.value;
+    const offset = decl2.prop.length + between.length;
+    const valueStart = makeLocAt(file2, start.line, start.column, decl2.prop + between)(offset);
+    const siblingBackground = parent && "nodes" in parent ? (parent.nodes ?? []).find(
+      (n) => n.type === "decl" && (n.prop === "background" || n.prop === "background-color")
+    )?.value ?? null : null;
+    usages.push({
+      kind: "decl",
+      context: "css",
+      property: decl2.prop,
+      value: valueRaw,
+      selector: ctx || null,
+      file: file2,
+      line: start.line,
+      column: start.column,
+      locAt: makeLocAt(file2, valueStart.line, valueStart.column, valueRaw),
+      siblingBackground
+    });
+  });
+  return usages;
+}
+
 // src/sources/jsx.ts
 var SVG_COLOR_ATTRS = /* @__PURE__ */ new Set(["fill", "stroke", "stopColor", "floodColor", "lightingColor", "color"]);
 function kebab(prop) {
@@ -55606,44 +55719,6 @@ var SECTIONS = {
   letterSpacing: "--tracking-",
   lineHeight: "--leading-"
 };
-var lineOf = (n) => n?.loc?.start.line ?? 0;
-function unwrap(n) {
-  let cur = n ?? void 0;
-  while (cur && ["TSSatisfiesExpression", "TSAsExpression", "TSTypeAssertion", "ParenthesizedExpression", "TSNonNullExpression"].includes(cur.type)) cur = cur.expression;
-  return cur;
-}
-function keyName(p4) {
-  if (p4.computed) return null;
-  const k4 = p4.key;
-  if (k4.type === "Identifier") return k4.name;
-  if (k4.type === "StringLiteral" || k4.type === "NumericLiteral") return String(k4.value);
-  return null;
-}
-function property(obj, name) {
-  return obj.properties.find((p4) => (p4.type === "ObjectProperty" || p4.type === "Property") && keyName(p4) === name);
-}
-function exportedObject(ast) {
-  const body = ast.program.body;
-  const declared = /* @__PURE__ */ new Map();
-  for (const st of body) {
-    const decl2 = st.type === "ExportNamedDeclaration" ? st.declaration : st;
-    if (decl2?.type !== "VariableDeclaration") continue;
-    for (const d of decl2.declarations) if (d.id?.type === "Identifier" && d.init) declared.set(d.id.name, d.init);
-  }
-  let exported;
-  for (const st of body) {
-    if (st.type === "ExportDefaultDeclaration") exported = st.declaration;
-    const e4 = st.type === "ExpressionStatement" ? st.expression : void 0;
-    if (e4?.type === "AssignmentExpression" && e4.left?.type === "MemberExpression" && e4.left.object?.name === "module" && (e4.left.property?.name === "exports" || e4.left.property?.value === "exports")) {
-      exported = e4.right;
-    }
-  }
-  let cur = unwrap(exported);
-  if (cur?.type === "Identifier") cur = unwrap(declared.get(cur.name));
-  if (cur?.type === "ObjectExpression") return { obj: cur };
-  if (!exported) return { unread: { what: "no exported config object found", line: 0 } };
-  return { unread: { what: `the exported config is ${cur?.type ?? "not an object"}, not an object literal`, line: lineOf(exported) } };
-}
 function readSection(name, value, out, where) {
   const v = unwrap(value);
   if (!v) return;
@@ -55690,7 +55765,7 @@ function readTailwindConfig(project, cssConfigs = []) {
   const code2 = readRootFile(project, file2) ?? "";
   let ast;
   try {
-    ast = parse5(code2, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true });
+    ast = parseConfig(code2);
   } catch (e4) {
     out.unread.push({ what: `the file does not parse (${e4.message.slice(0, 120)})`, line: 0 });
     return out;
@@ -58223,7 +58298,8 @@ function rulesInfo(ctx) {
     ...customRulesInfo(ctx)
   ];
 }
-function labUrlPattern(labDir) {
+function labUrlPattern(labDir, framework = "next-app") {
+  if (framework === "vite-react") return `/${labDir.replace(/^\/+|\/+$/g, "")}/?screen={screen}&v={variant}`;
   const route = labDir.replace(/^(src\/)?app\/?/, "").split("/").filter((s) => s && !/^\(.*\)$/.test(s)).join("/");
   return `/${route}/{screen}/{variant}`.replace(/\/+/g, "/");
 }
@@ -58237,7 +58313,7 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
     const twVersion = (pkgDeps.tailwindcss ?? "").match(/\d+/)?.[0] ?? null;
     out.project = {
       root: path8.basename(ctx.project.root),
-      framework: ctx.project.config.framework === "auto" ? ctx.project.frameworkDetected : ctx.project.config.framework,
+      framework: ctx.project.framework,
       tailwind: {
         detected: ctx.project.hasTailwind,
         version: twVersion,
@@ -58252,7 +58328,7 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
       tokenSources: ctx.tokens.sources,
       themes: ctx.tokens.themes,
       workspacePath: ctx.project.workspacePath,
-      lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir) },
+      lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework) },
       screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
       decisionsFile: ctx.project.config.memory.decisionsFile

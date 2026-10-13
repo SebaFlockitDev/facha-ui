@@ -1,7 +1,7 @@
 import path from "node:path";
-import { parse } from "@babel/parser";
 import { isInside, readRootFile, toPosix, type Project } from "./project.js";
 import { TAILWIND_CONFIG_NAMES } from "./shadcn.js";
+import { exportedObject, keyName, lineOf, type Node, parseConfig, property, unwrap } from "./static-config.js";
 
 /**
  * Tailwind 3 theme mapping, read statically from tailwind.config (SPEC §2.0.2, regla S2).
@@ -29,54 +29,6 @@ const SECTIONS: Record<string, string> = {
   letterSpacing: "--tracking-",
   lineHeight: "--leading-",
 };
-
-type Node = { type: string; loc?: { start: { line: number } }; [k: string]: any };
-
-const lineOf = (n: Node | undefined): number => n?.loc?.start.line ?? 0;
-
-/** Unwraps `x satisfies Config`, `x as Config`, `<Config>x` and parentheses. */
-function unwrap(n: Node | undefined | null): Node | undefined {
-  let cur = n ?? undefined;
-  while (cur && ["TSSatisfiesExpression", "TSAsExpression", "TSTypeAssertion", "ParenthesizedExpression", "TSNonNullExpression"].includes(cur.type)) cur = cur.expression;
-  return cur;
-}
-
-/** The literal name of an object key, or null when it is computed. */
-function keyName(p: Node): string | null {
-  if (p.computed) return null;
-  const k = p.key as Node;
-  if (k.type === "Identifier") return k.name;
-  if (k.type === "StringLiteral" || k.type === "NumericLiteral") return String(k.value);
-  return null;
-}
-
-function property(obj: Node, name: string): Node | undefined {
-  return (obj.properties as Node[]).find((p) => (p.type === "ObjectProperty" || p.type === "Property") && keyName(p) === name);
-}
-
-/** The object the config exports: module.exports = {…}, export default {…}, or a const that holds it. */
-function exportedObject(ast: Node): { obj?: Node; unread?: { what: string; line: number } } {
-  const body = ast.program.body as Node[];
-  const declared = new Map<string, Node>();
-  for (const st of body) {
-    const decl = st.type === "ExportNamedDeclaration" ? st.declaration : st;
-    if (decl?.type !== "VariableDeclaration") continue;
-    for (const d of decl.declarations as Node[]) if (d.id?.type === "Identifier" && d.init) declared.set(d.id.name, d.init);
-  }
-  let exported: Node | undefined;
-  for (const st of body) {
-    if (st.type === "ExportDefaultDeclaration") exported = st.declaration;
-    const e = st.type === "ExpressionStatement" ? st.expression : undefined;
-    if (e?.type === "AssignmentExpression" && e.left?.type === "MemberExpression" && e.left.object?.name === "module" && (e.left.property?.name === "exports" || e.left.property?.value === "exports")) {
-      exported = e.right;
-    }
-  }
-  let cur = unwrap(exported);
-  if (cur?.type === "Identifier") cur = unwrap(declared.get(cur.name));
-  if (cur?.type === "ObjectExpression") return { obj: cur };
-  if (!exported) return { unread: { what: "no exported config object found", line: 0 } };
-  return { unread: { what: `the exported config is ${cur?.type ?? "not an object"}, not an object literal`, line: lineOf(exported) } };
-}
 
 /** Reads one theme section (colors, borderRadius…) into @theme variable names. */
 function readSection(name: string, value: Node | undefined, out: TailwindConfigMapping, where: string) {
@@ -133,7 +85,7 @@ export function readTailwindConfig(project: Project, cssConfigs: string[] = []):
   const code = readRootFile(project, file) ?? "";
   let ast: Node;
   try {
-    ast = parse(code, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true }) as unknown as Node;
+    ast = parseConfig(code);
   } catch (e) {
     out.unread.push({ what: `the file does not parse (${(e as Error).message.slice(0, 120)})`, line: 0 });
     return out;

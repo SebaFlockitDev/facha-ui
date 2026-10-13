@@ -136,9 +136,15 @@ describe("S2 · tailwind.config is parsed, never run", () => {
   });
 
   it("the reader only parses: no require, dynamic import, eval, Function, vm or child processes", () => {
-    const code = fs.readFileSync(path.join(SRC, "tailwind-config.ts"), "utf8");
-    const imports = [...code.matchAll(/^import .* from "([^"]+)";$/gm)].map((m) => m[1]);
-    expect(imports.sort()).toEqual(["./project.js", "./shadcn.js", "@babel/parser", "node:path"]);
-    expect(code).not.toMatch(/\brequire\s*\(|\bimport\s*\(|createRequire|\beval\s*\(|new Function|node:vm|child_process|readFileSync/);
+    // The AST helpers live in static-config.ts (shared with vite.config since 0.17.0): both only parse.
+    for (const [file, expected] of [
+      ["tailwind-config.ts", ["./project.js", "./shadcn.js", "./static-config.js", "node:path"]],
+      ["static-config.ts", ["@babel/parser"]],
+    ] as const) {
+      const code = fs.readFileSync(path.join(SRC, file), "utf8");
+      const imports = [...code.matchAll(/^import .* from "([^"]+)";$/gm)].map((m) => m[1]);
+      expect(imports.sort(), file).toEqual([...expected]);
+      expect(code, file).not.toMatch(/\brequire\s*\(|\bimport\s*\(|createRequire|\beval\s*\(|new Function|node:vm|child_process|readFileSync/);
+    }
   });
 });
