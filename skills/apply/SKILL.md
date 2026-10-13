@@ -41,6 +41,7 @@ variant yourself, not even "the obvious one".
      (for example a CSS module the variant used);
    - deletions inside `<lab.dir>/<slug>/`, the lab scaffold (step 6), `.facha-ui/live/` and
      the screenshots of the variants that were not chosen;
+   - in Vite, with the scaffold, only the removal of the live plugin's line from `vite.config`;
    - `memory.decisionsFile`, **append only**;
    - `.facha-ui/runs/<slug>.json`;
    - the before/after captures and their diff images: `<project.screenshotsDir>/<slug>/apply-*.png`.
@@ -111,7 +112,7 @@ Show one plan, exact and complete:
      elsewhere, propose that and list the files.
 3. **Files and directories to delete:** `<lab.dir>/<slug>/` (list its files), the
    screenshots of the variants that were not chosen, and the lab scaffold if step 6
-   applies.
+   applies (in Vite, with the exact `vite.config` line that goes away, if it is there).
 4. **Team votes**, when the run has `votes`: the count per variant and each reason. If the
    chosen variant is not the most voted, say so plainly: the developer decides, but with that in
    view.
@@ -171,8 +172,11 @@ Delete only what the approved plan listed, after checking that every path resolv
 - the scaffold, **only** if no other run in `.facha-ui/runs/` has `status: "generated"` and
   `<lab.dir>` has no other screen directories: `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`
   and `<lab.dir>/lab-responsive.tsx`; plus `layout.tsx`, `compare/`, `lab-panel.tsx` and
-  `facha-live/` (Next) or `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` (Vite), in
-  `<lab.dir>`; then `<lab.dir>` if it is empty;
+  `facha-live/` (Next) or `index.html`, `main.tsx`, `providers.tsx`, `compare.tsx`,
+  `lab-panel.tsx`, `facha-live-plugin.ts` and `facha-live/` (Vite), in `<lab.dir>`; then
+  `<lab.dir>` if it is empty. In Vite, also remove the live plugin's line from `vite.config`
+  (the element of `plugins` that imports `facha-live-plugin`), changing nothing else, and list
+  it in the plan so it is approved with the rest;
 - `.facha-ui/live/` when its session is for this screen. If live mode is on, first set
   `"active": false` in `.facha-ui/live/session.json` and stop its Monitor.
 

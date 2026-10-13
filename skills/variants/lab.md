@@ -40,7 +40,8 @@ exist, copy `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` from
 - `vite build` only builds the root `index.html`, so `<lab.dir>/` never ships, and `main.tsx`
   renders nothing in production. If `get_design_system` says `vite.config` lists the lab in
   `build.rollupOptions.input`, stop and ask the developer to remove it.
-- Live mode is not available in Vite yet (`live.md`).
+- Live mode adds the panel, the endpoint as a dev-only Vite plugin and its one line in
+  `vite.config`, only when the developer starts it (`live.md`, L1).
 
 ### Both
 
