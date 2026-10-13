@@ -565,3 +565,25 @@ describe("Vite lab template", () => {
     }
   });
 });
+
+describe("skills with a Vite lab", () => {
+  const skill = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8");
+
+  it("variants accepts both lab frameworks and lab.md explains the Vite scaffold", () => {
+    expect(skill("variants/SKILL.md")).toContain("`project.framework` is not `next-app` or `vite-react`");
+    const lab = skill("variants/lab.md");
+    expect(lab).toContain("### React + Vite (`vite-react`)");
+    expect(lab).toContain("`templates/vite-react/`");
+    expect(lab).toContain("/*__GLOBAL_CSS__*/");
+    expect(lab).toContain("MemoryRouter");
+    expect(lab).toContain("**gap**");
+    expect(lab).toContain("/facha-lab/?screen=orders&v=a&theme=dark");
+  });
+
+  it("live mode says it is not available in Vite yet, apply cleans the Vite scaffold and start knows facha-lab/", () => {
+    expect(skill("variants/live.md")).toContain("Live mode\n   needs Next.js");
+    const apply = skill("apply/SKILL.md");
+    for (const f of ["`index.html`", "`main.tsx`", "`providers.tsx`", "`compare.tsx`"]) expect(apply, f).toContain(f);
+    expect(skill("start/SKILL.md")).toContain("`facha-lab/` in Vite");
+  });
+});

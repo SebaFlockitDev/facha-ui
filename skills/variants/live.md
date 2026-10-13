@@ -10,7 +10,10 @@ in the browser.
 
 ## L1 · Start (`<slug> live`)
 
-1. Preflight as in R1 of `refine.md`: the run exists and its `status` is `generated`.
+1. Preflight as in R1 of `refine.md`: the run exists and its `status` is `generated`. Live mode
+   needs Next.js: when `project.framework` is `vite-react`, say it is not available in Vite yet
+   and offer what is: refinements asked here (`refine.md`) and the compare page
+   (`/<lab.dir>/?compare=<slug>`). Stop.
 2. Make sure the live scaffold exists. If `<lab.dir>/lab-panel.tsx` or
    `<lab.dir>/facha-live/route.ts` is missing (a lab created by an older version), copy them
    from `templates/next-app/` (with `facha-live/live-core.ts`), set `LAB_BASE`, and update

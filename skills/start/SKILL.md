@@ -45,7 +45,8 @@ Call `get_design_system` with `project`, `tokens`, `coverage`, `health`, `rules`
   Code in that folder, or set `FACHA_UI_ROOT` before launching it (`$env:FACHA_UI_ROOT = "web"; claude`
   on PowerShell, `FACHA_UI_ROOT=web claude` elsewhere). Stop there and wait for the answer.
 - **`PROJECT_NOT_FOUND`:** say that no React project was found in the open folder or two levels
-  below it, and that facha-ui works on Next.js App Router projects. Stop.
+  below it, and that facha-ui works on React projects (the variants lab: Next.js App Router or
+  Vite). Stop.
 
 Otherwise, say in 3 to 5 plain lines:
 - the project (`project.workspacePath`), its framework and whether it uses Tailwind (and which
@@ -109,7 +110,10 @@ with one sentence on why. Choose it with this rule, in order:
    (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`,
    `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`.
 3. Otherwise → *"mejorá la pantalla `<route>`"* for the screen with the lowest score (its route
-   from the file: `app/orders/page.tsx` → `/orders`), which runs `/facha-ui:variants`.
+   from the file: `app/orders/page.tsx` → `/orders`, or the route that renders it in a Vite
+   app), which runs `/facha-ui:variants`. When `project.framework` is `unknown` there is no lab:
+   say why (from the assumptions) and recommend fixing its worst problem by hand with
+   `check_ui`'s suggestions instead.
 
 Then 2 alternatives, one line each, from what you found (for example "si querés ir rápido:
 *mejorá `<route>`, hacelo rápido*", "si querés aprender primero: `/facha-ui:learn`", "para un
@@ -133,7 +137,8 @@ add it).
    facha-ui works without it.
 2. **`.gitignore`**: Read the project's `.gitignore` (at `project.workspacePath`) and check these
    exact lines. A broader line that covers one (`.facha-ui/` covers the three under it) counts:
-   - `<project.lab.dir>/` (`app/lab/` by default): the variants lab, never shipped;
+   - `<project.lab.dir>/` (`app/lab/` in Next, `facha-lab/` in Vite): the variants lab, never
+     shipped;
    - `.facha-ui/live/`: the live session token;
    - `.facha-ui/screenshots/`;
    - `.facha-ui/playwright/`: the browser's automatic files. If `project.workspacePath` is not
