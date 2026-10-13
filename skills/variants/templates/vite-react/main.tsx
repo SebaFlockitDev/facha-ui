@@ -3,6 +3,7 @@ import { StrictMode, Suspense, lazy, useMemo, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 /*__GLOBAL_CSS__*/
 import { CompareVariants } from "./compare";
+import { LabPanel } from "./lab-panel";
 import { LabResponsive } from "./lab-responsive";
 import { LabTheme } from "./lab-theme";
 import { LabProviders } from "./providers";
@@ -33,13 +34,17 @@ function Variant({ screen, variant }: { screen: string; variant: string }) {
   const Page = useMemo(() => (key ? lazy(PAGES[key]!) : null), [key]);
   if (!Page) return <p style={{ font: "14px system-ui", padding: 16 }}>No existe la variante {variant} de {screen} en el laboratorio.</p>;
   return (
-    <LabProviders screen={screen}>
-      <LabTheme />
-      <Suspense fallback={null}>
-        <Page />
-      </Suspense>
-      <LabResponsive />
-    </LabProviders>
+    <>
+      <LabProviders screen={screen}>
+        <LabTheme />
+        <Suspense fallback={null}>
+          <Page />
+        </Suspense>
+        <LabResponsive />
+      </LabProviders>
+      {/* facha-ui's own live panel, outside the app's providers: it only talks to the lab endpoint. */}
+      <LabPanel />
+    </>
   );
 }
 

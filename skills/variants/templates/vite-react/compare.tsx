@@ -1,14 +1,18 @@
 // facha-ui lab scaffold (Vite) · compare variants · removed by /facha-ui:apply when no runs remain
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { THEMES } from "./lab-theme";
 
 /**
  * /facha-lab/?compare=<screen>: the variants of a run side by side, with the same real data, at
  * the same width, theme and state, with optional synced scroll. The run (objective, hypotheses,
- * status) is read from .facha-ui/runs/<screen>.json when the lab sits at the project root. Team
- * votes need live mode, which in Vite comes in a later version. This page is facha-ui's own UI:
- * its styles are its own, not the project's design system.
+ * status) comes from the live endpoint, or from .facha-ui/runs/<screen>.json when live mode is off.
+ * With live mode on, each person can vote for a variant with a reason; /facha-ui:apply shows the
+ * votes in its plan. This page is facha-ui's own UI: its styles are its own, not the project's.
  */
+
+/** URL prefix of the lab, filled by /facha-ui:variants (the part of the lab URL before "/?"). */
+const LAB_BASE = "/facha-lab"; /*__LAB_BASE__*/
+const NAME_KEY = "facha-ui-lab-voter";
 
 interface Variant {
   id: string;
@@ -19,6 +23,20 @@ interface Variant {
 interface Run {
   objective?: string;
   variants?: Variant[];
+}
+interface Vote {
+  id: string;
+  at: string;
+  voter: string;
+  variant: string;
+  reason: string;
+}
+interface LiveState {
+  active: boolean;
+  token?: string;
+  slug?: string;
+  run?: Run | null;
+  votes?: Vote[];
 }
 
 const RUNS = import.meta.glob<{ default: Run }>("../.facha-ui/runs/*.json", { eager: true });
@@ -43,10 +61,11 @@ const STYLES = `
 .fu .muted { color: #9ba2b8; font-size: 13px; margin: 0; }
 .fu .bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 12px 0 16px; }
 .fu .group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.fu button, .fu select, .fu input { font: inherit; color: #e8eaf2; background: #161a25; border: 1px solid #3a4256; border-radius: 9px; padding: 6px 10px; }
+.fu button, .fu select, .fu input, .fu textarea { font: inherit; color: #e8eaf2; background: #161a25; border: 1px solid #3a4256; border-radius: 9px; padding: 6px 10px; }
 .fu button { cursor: pointer; }
 .fu button[aria-pressed="true"] { border-color: #ff8a4c; }
-.fu button:focus-visible, .fu select:focus-visible, .fu input:focus-visible { outline: 2px solid #ff8a4c; outline-offset: 2px; }
+.fu button.primary { background: #e8eaf2; color: #0e1119; border-color: #e8eaf2; font-weight: 600; }
+.fu button:focus-visible, .fu select:focus-visible, .fu input:focus-visible, .fu textarea:focus-visible { outline: 2px solid #ff8a4c; outline-offset: 2px; }
 .fu .cols { display: grid; gap: 14px; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
 @media (max-width: 900px) { .fu .cols { grid-template-columns: 1fr; } }
 .fu .col { display: grid; gap: 8px; min-width: 0; align-content: start; }
@@ -56,21 +75,59 @@ const STYLES = `
 .fu .badge.failed { border-color: #ff7b72; color: #ff7b72; }
 .fu .frame { position: relative; overflow: hidden; border: 1px solid #3a4256; border-radius: 12px; background: #ffffff; }
 .fu .frame iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; }
+.fu .count { color: #4fd17f; font-weight: 600; font-size: 13px; }
+.fu .votes { display: grid; gap: 10px; margin-top: 20px; max-width: 760px; }
+.fu .vote-form { display: grid; gap: 8px; }
+.fu .vote-form textarea { min-height: 60px; resize: vertical; }
+.fu .vote { border: 1px solid #272d3d; border-radius: 10px; padding: 8px 10px; }
+.fu .error { color: #ff7b72; }
 .fu a { color: #7ea8ff; }
 `;
 
+function loadName(): string {
+  try {
+    return window.localStorage.getItem(NAME_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
 export function CompareVariants({ slug, variants: ids }: { slug: string; variants: string[] }) {
-  const run = Object.entries(RUNS).find(([k]) => k.endsWith(`/${slug}.json`))?.[1].default;
-  const variants: Variant[] = ids.map((id) => run?.variants?.find((v) => v.id === id) ?? { id });
+  const fileRun = Object.entries(RUNS).find(([k]) => k.endsWith(`/${slug}.json`))?.[1].default;
+  const [data, setData] = useState<LiveState>({ active: false });
   const [width, setWidth] = useState<(typeof WIDTHS)[number]>(WIDTHS[0]);
   const [theme, setTheme] = useState("");
   const [state, setState] = useState("");
   const [sync, setSync] = useState(true);
   const [colWidth, setColWidth] = useState(400);
   const [frameHeight] = useState(() => Math.round(Math.max(420, window.innerHeight * 0.68)));
+  const [voter, setVoter] = useState(loadName);
+  const [choice, setChoice] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const colRef = useRef<HTMLDivElement>(null);
   const frames = useRef<Map<string, HTMLIFrameElement>>(new Map());
   const syncing = useRef(false);
+
+  // The lab endpoint (live mode): the run, the votes and the session token. Off without live mode.
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch(`${LAB_BASE}/facha-live?run=${slug}`, { cache: "no-store" });
+      if (res.ok) setData((await res.json()) as LiveState);
+    } catch {
+      /* no live endpoint: the page works without votes */
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    void refresh();
+    const id = window.setInterval(() => void refresh(), 5000);
+    return () => window.clearInterval(id);
+  }, [refresh]);
+
+  const run = data.run ?? fileRun;
+  const variants: Variant[] = ids.map((id) => run?.variants?.find((v) => v.id === id) ?? { id });
 
   // Scale each frame to its column, so every variant is seen at the same real width.
   useEffect(() => {
@@ -106,6 +163,37 @@ export function CompareVariants({ slug, variants: ids }: { slug: string; variant
       window.requestAnimationFrame(() => (syncing.current = false));
     });
   };
+
+  const vote = async () => {
+    if (!data.token) return;
+    setSending(true);
+    setError(null);
+    try {
+      try {
+        window.localStorage.setItem(NAME_KEY, voter);
+      } catch {
+        /* storage blocked: the name is asked again next time */
+      }
+      const res = await fetch(`${LAB_BASE}/facha-live`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: data.token, kind: "vote", slug, variant: choice, voter, text: reason }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(body.error ?? `Error ${res.status}`);
+        return;
+      }
+      setReason("");
+      await refresh();
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const votes = data.votes ?? [];
+  const count = (id: string) => votes.filter((v) => v.variant === id).length;
+  const canVote = data.active && data.slug === slug;
 
   return (
     <main className="fu">
@@ -158,6 +246,7 @@ export function CompareVariants({ slug, variants: ids }: { slug: string; variant
               </b>
               {v.hypothesis && <span className="muted">{v.hypothesis}</span>}
               {v.status && <span className={`badge ${v.status}`}>{v.status === "failed" ? "No pasó el guardián" : "Válida"}</span>}
+              {count(v.id) > 0 && <span className="count">{count(v.id)} voto{count(v.id) === 1 ? "" : "s"}</span>}
             </div>
             <div className="frame" style={{ height: frameHeight }}>
               <iframe
@@ -177,7 +266,49 @@ export function CompareVariants({ slug, variants: ids }: { slug: string; variant
           </div>
         ))}
       </div>
-      <p className="muted" style={{ marginTop: 16 }}>Los votos del equipo usan el modo en vivo, que en Vite llega en una próxima versión.</p>
+
+      <section className="votes" aria-labelledby="votes-title">
+        <h2 id="votes-title" style={{ fontSize: 16, margin: 0 }}>
+          Votos del equipo
+        </h2>
+        {canVote ? (
+          <div className="vote-form">
+            <label className="group">
+              Tu nombre <input value={voter} maxLength={40} onChange={(e) => setVoter(e.target.value)} />
+            </label>
+            <div className="group" role="radiogroup" aria-label="Variante">
+              {variants
+                .filter((v) => v.status !== "failed")
+                .map((v) => (
+                  <button key={v.id} type="button" aria-pressed={choice === v.id} onClick={() => setChoice(v.id)}>
+                    {v.id.toUpperCase()}
+                  </button>
+                ))}
+            </div>
+            <label className="vote-form">
+              ¿Por qué esa? (lo leen el equipo y Claude Code al aplicar)
+              <textarea value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
+            </label>
+            <div>
+              <button className="primary" type="button" disabled={sending || !voter.trim() || !choice || !reason.trim()} onClick={() => void vote()}>
+                Votar
+              </button>
+            </div>
+            {error && <p className="error">{error}</p>}
+          </div>
+        ) : (
+          <p className="muted">Para votar, activá el modo en vivo en Claude Code: «activá el modo en vivo de {slug}».</p>
+        )}
+        {votes.length > 0 ? (
+          [...votes].reverse().map((v) => (
+            <div className="vote" key={v.id}>
+              <b>{v.voter}</b> votó por la <b>{v.variant.toUpperCase()}</b>: {v.reason}
+            </div>
+          ))
+        ) : (
+          <p className="muted">Todavía no hay votos.</p>
+        )}
+      </section>
     </main>
   );
 }
