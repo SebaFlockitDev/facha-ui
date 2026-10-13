@@ -168,9 +168,11 @@ Delete only what the approved plan listed, after checking that every path resolv
 - the files of `<lab.dir>/<slug>/`, then its empty directories;
 - the screenshots of the variants that were not chosen (paths from `run.variants[].screenshots`
   and from their `revisions`). Keep the chosen variant's screenshots, from every revision;
-- the scaffold (`<lab.dir>/layout.tsx`, `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`, `<lab.dir>/lab-responsive.tsx`, `<lab.dir>/compare/`, `<lab.dir>/lab-panel.tsx`,
-  `<lab.dir>/facha-live/`, then `<lab.dir>` if it is empty), **only** if no other run in
-  `.facha-ui/runs/` has `status: "generated"` and `<lab.dir>` has no other screen directories;
+- the scaffold, **only** if no other run in `.facha-ui/runs/` has `status: "generated"` and
+  `<lab.dir>` has no other screen directories: `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`
+  and `<lab.dir>/lab-responsive.tsx`; plus `layout.tsx`, `compare/`, `lab-panel.tsx` and
+  `facha-live/` (Next) or `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` (Vite), in
+  `<lab.dir>`; then `<lab.dir>` if it is empty;
 - `.facha-ui/live/` when its session is for this screen. If live mode is on, first set
   `"active": false` in `.facha-ui/live/session.json` and stop its Monitor.
 

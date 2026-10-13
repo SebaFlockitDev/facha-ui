@@ -232,7 +232,9 @@ export function rulesInfo(ctx: Context) {
   ];
 }
 
-export function labUrlPattern(labDir: string): string {
+export function labUrlPattern(labDir: string, framework: string = "next-app"): string {
+  // Vite serves the lab as its own entry (facha-lab/index.html); the variant goes in the query.
+  if (framework === "vite-react") return `/${labDir.replace(/^\/+|\/+$/g, "")}/?screen={screen}&v={variant}`;
   const route = labDir.replace(/^(src\/)?app\/?/, "").split("/").filter((s) => s && !/^\(.*\)$/.test(s)).join("/");
   return `/${route}/{screen}/{variant}`.replace(/\/+/g, "/");
 }
@@ -247,7 +249,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
     const twVersion = (pkgDeps.tailwindcss ?? "").match(/\d+/)?.[0] ?? null;
     out.project = {
       root: path.basename(ctx.project.root),
-      framework: ctx.project.config.framework === "auto" ? ctx.project.frameworkDetected : ctx.project.config.framework,
+      framework: ctx.project.framework,
       tailwind: {
         detected: ctx.project.hasTailwind,
         version: twVersion,
@@ -260,7 +262,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
       tokenSources: ctx.tokens.sources,
       themes: ctx.tokens.themes,
       workspacePath: ctx.project.workspacePath,
-      lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir) },
+      lab: { dir: ctx.project.labDir, urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework) },
       screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
       decisionsFile: ctx.project.config.memory.decisionsFile,

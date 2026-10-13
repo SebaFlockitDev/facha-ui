@@ -30,7 +30,7 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 | Node ≥ 20 | Corre el MCP de facha-ui y Playwright MCP |
 | Git | `apply` lo usa para saber si la pantalla cambió desde el run |
 | Google Chrome (o `npx playwright install chromium`) | Capturas de las variantes |
-| Proyecto Next.js con App Router | Único framework soportado por ahora |
+| Proyecto React con Next.js (App Router) o con Vite | Se detecta solo por el `package.json`. El laboratorio de variantes es una ruta de Next (`app/lab/`) o una entrada propia de Vite (`facha-lab/`, solo en desarrollo). El modo en vivo, por ahora, solo en Next. Create React App y el Pages Router de Next no tienen laboratorio: el resto de facha-ui funciona igual |
 | Tokens como CSS custom properties (`--panel`, `--text`, …) | Con o sin Tailwind |
 | shadcn/ui (Tailwind 3 o 4) | Se reconoce solo (`components.json`): roles de sus tokens y colores en canales HSL. En Tailwind 3, el mapeo de `tailwind.config` se lee sin ejecutarlo; lo que agreguen plugins o presets se declara en `tailwind.mapped` de `facha-ui.config.json` (por ejemplo `["--radius-md"]`) |
 

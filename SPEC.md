@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.16.0** (§7.10–§7.24). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.17.0** (§7.10–§7.25). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -113,7 +113,7 @@ interface Rule             { id: string; defaultSeverity: Severity; check(u: Sty
 | Tokens | `css-custom-properties`: `:root`, bloques de tema por selector (`html.dark`, `.dark`, `[data-theme=…]`), `@media (prefers-color-scheme: dark)` y `@theme` de Tailwind 4, también dentro de `@layer` (desde 0.15.0); colores como canales HSL sueltos con evidencia del proyecto (shadcn/ui) | DTCG/JSON, Style Dictionary, SCSS, JS theme objects; canales RGB |
 | Fuentes | `jsx` (`.tsx/.jsx/.ts/.js`: `className`, helpers `clsx/cn/cva/twMerge/classnames`, `style={{}}`, atributos SVG `fill/stroke`), `css` (`.css`, `.module.css`) | Vue SFC, Svelte, styled-components, CSS-in-JS |
 | Sistema de estilos | `tailwind-v4` (parser de candidatos: variantes `hover:`/`dark:`/`md:`, `!`, `[...]`, `[prop:val]`, modificadores `/50`); Tailwind 3 con el mapeo de `tailwind.config` leído de forma estática, sin plugins ni presets (desde 0.15.0) | Plugins y presets de Tailwind 3, UnoCSS |
-| Framework (lab) | `next-app` (App Router) | `vite-react` *(roadmap)*, Remix/React Router, Astro, Expo |
+| Framework (lab) | `next-app` (App Router) y `vite-react` (desde 0.17.0; el modo en vivo, solo en Next) | Modo en vivo en Vite, Remix/React Router, Astro, Expo |
 
 #### 2.0.2 Configuración: `facha-ui.config.json`
 
@@ -122,7 +122,7 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | Campo | Tipo | Default | Descripción |
 |---|---|---|---|
 | `version` | `1` | — (obligatorio) | Versión del esquema de config |
-| `framework` | `"auto" \| "next-app"` (`"vite-react"` *roadmap*) | `"auto"` | Adapter de framework (por dependencias de `package.json`) |
+| `framework` | `"auto" \| "next-app" \| "vite-react"` | `"auto"` | Adapter de framework. `auto`: `next` con carpeta `app/` → `next-app`; `vite` y `react` → `vite-react`; si no, sin laboratorio, con el motivo en `assumptions` (Create React App, Pages Router de Next) |
 | `tokens.sources` | `string[]` (globs) | autodetección¹ | Archivos CSS donde se **definen** tokens |
 | `tokens.themes` | `Record<string, string>` | autodetección² | Nombre de tema → selector. El primero es el tema por defecto |
 | `tokens.roles` | `Record<string, Role>` | inferido por nombre³ | Fuerza el rol de un token (`surface`, `text`, `border`, `accent`, `on-accent`, `status.*`…) |
@@ -139,9 +139,9 @@ Vive en la raíz del proyecto frontend (junto a su `package.json`). Define la **
 | `suggest.maxDeltaE` | `number` | `2.0` (ΔE OKLab×100) | Distancia máxima para sugerir un token "cercano" |
 | `guidelines` | `string[]` | `[]` | Reglas en lenguaje natural para la IA (no verificables; se citan como fuente) |
 | `copy` | `{ voice?: "vos" \| "tú" \| "usted", terms: { use, avoid[] }[] }` | — | Voz del producto (desde 0.11.0, §7.19): cómo trata a las personas y qué palabras usa. Activa `copy-voice` y `copy-term`, y `get_design_system` la devuelve en `copy` (sección `guidelines`) |
-| `lab.dir` | `string` | `app/lab` (next; `facha-lab` en vite, *roadmap*) | Directorio del laboratorio de variantes |
+| `lab.dir` | `string` | `app/lab` en Next, `facha-lab` en Vite | Directorio del laboratorio de variantes |
 | `lab.viewports` | `{name,width,height}[]` | `[{ "name": "desktop", "width": 1440, "height": 900 }]` | Capturas |
-| `preview.baseUrl` | `string` | `http://localhost:3000` | Debe ser loopback (`localhost`, `127.0.0.1`, `::1`). El panel en vivo solo acepta pedidos de este origen |
+| `preview.baseUrl` | `string` | `http://localhost:3000` en Next; en Vite, el `server.port` del `vite.config` leído de forma estática, o 5173 | Debe ser loopback (`localhost`, `127.0.0.1`, `::1`). El panel en vivo solo acepta pedidos de este origen |
 | `preview.auth` | `"none" \| "manual"` | `"none"` | `manual`: el dev inicia sesión en el navegador de Playwright; facha-ui nunca maneja credenciales |
 | `memory.decisionsFile` | `string` | `design-system/decisions.md` | Memoria de decisiones aprobadas |
 | `guard` | `"off" \| "quiet" \| "on"` | `"quiet"` | Guardián automático (§2.f, desde 0.16.0): `quiet` avisa solo si hay problemas, `on` también confirma un archivo limpio, `off` lo apaga |
@@ -529,12 +529,12 @@ Los valores visuales solo aceptan `token`, `class`, `rule` o `decision`. `object
 
 #### 2.b.4 Laboratorio por framework
 
-| | Next (App Router) | Vite + React *(roadmap)* |
+| | Next (App Router) | Vite + React (desde 0.17.0) |
 |---|---|---|
-| Archivos | `app/lab/<slug>/<x>/page.tsx` | `facha-lab/<slug>/<x>.tsx` |
+| Archivos | `app/lab/<slug>/<x>/page.tsx` | `facha-lab/<slug>/<x>/Page.tsx` (una carpeta por variante, como en Next, para el CSS module y las revisiones) |
 | URL | `/lab/<slug>/<x>` | `/facha-lab/?screen=<slug>&v=<x>` |
-| Andamiaje (una vez) | `app/lab/layout.tsx` (hace `notFound()` si `NODE_ENV === "production"`), `lab-theme.tsx` (aplica `?theme=`), `lab-panel.tsx` (panel en vivo) y `facha-live/route.ts` + `live-core.ts` (endpoint en vivo, 404 en producción) | `facha-lab/index.html` + `facha-lab/main.tsx` (importa el CSS global, monta la variante y aplica `?theme=`). Vite lo sirve en dev sin tocar el router de la app |
-| Fuera de producción | `notFound()` en el layout + `lab.dir` en `.gitignore` (paso de adopción) | No forma parte del entry de build + `.gitignore` |
+| Andamiaje (una vez) | `app/lab/layout.tsx` (hace `notFound()` si `NODE_ENV === "production"`), `lab-theme.tsx` (aplica `?theme=`), `lab-panel.tsx` (panel en vivo) y `facha-live/route.ts` + `live-core.ts` (endpoint en vivo, 404 en producción) | `facha-lab/index.html` + `main.tsx` (importa el CSS global de la app, busca las variantes con `import.meta.glob` y monta la que pide la URL), `providers.tsx` (importa los providers de la app; un `BrowserRouter` pasa a `MemoryRouter` en la ruta de la pantalla), `compare.tsx` (`?compare=<slug>`, sin votos), y `lab-theme`, `lab-state` y `lab-responsive` compartidos con Next. Vite lo sirve en dev sin tocar ningún archivo de la app |
+| Fuera de producción | `notFound()` en el layout + `lab.dir` en `.gitignore` (paso de adopción) | `vite build` solo construye el `index.html` de la raíz; `main.tsx` no monta nada si `import.meta.env.PROD`; si el `vite.config` lista el lab en `build.rollupOptions.input`, se avisa. Más `lab.dir` en `.gitignore` |
 
 #### 2.b.5 Estado: `.facha-ui/runs/<slug>.json`
 
@@ -679,6 +679,7 @@ facha-ui/
 │   │   ├── refine.md · live.md   # ajustes (revisiones) y modo en vivo: se leen antes de R1 / L1
 │   │   ├── lab.md · run-state.md # scaffold, capturas y esquema del run: se leen antes del paso que los usa
 │   │   ├── templates/next-app/   # layout.tsx, lab-theme.tsx, lab-panel.tsx, facha-live/{route,live-core}.ts
+│   │   ├── templates/vite-react/ # index.html, main.tsx, providers.tsx, compare.tsx (lab de Vite, 0.17.0)
 │   │   └── scripts/              # live-watch.mjs (Monitor), palette-base.mjs (base de paletas)
 │   ├── apply/SKILL.md
 │   ├── init/SKILL.md             # tokens desde el uso (0.2.0) y adopción de paletas (0.7.0)
@@ -702,7 +703,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -818,7 +819,7 @@ Para que facha-ui aporte en el trabajo diario aunque nadie lo invoque: cada arch
 ### 3.1 Requisitos
 
 - Claude Code con soporte de plugins, Node ≥ 20 y Git.
-- Proyecto React con Next.js (App Router), con tokens como CSS custom properties (con o sin Tailwind; shadcn/ui con Tailwind 3 o 4) o sin design system (`init` lo arma). Vite es *roadmap*.
+- Proyecto React con Next.js (App Router) o con Vite, con tokens como CSS custom properties (con o sin Tailwind; shadcn/ui con Tailwind 3 o 4) o sin design system (`init` lo arma). El modo en vivo, por ahora, solo en Next.
 - Google Chrome instalado (Playwright MCP usa el canal `chrome`), o `npx playwright install chromium`.
 
 ### 3.2 Pasos
@@ -1020,7 +1021,7 @@ Se corren **a mano**, con el plugin instalado, contra un proyecto real con token
 
 | Ítem | Sección de la visión |
 |---|---|
-| Adapter de framework `vite-react` (lab en `facha-lab/`) | §2.b.4 |
+| Modo en vivo en Vite (un plugin de Vite que reuse `live-core`) | §2.b.4 |
 | Directivas `facha-ui-ignore-next-line` | §2.a.4 |
 | Resources `facha-ui://design-system/decisions` y `facha-ui://config` | §2.a.5 |
 | `outputSchema` en las tools (el MVP devuelve `structuredContent` sin esquema declarado) | §2.a.1 |
@@ -1074,7 +1075,7 @@ El SPEC v0.1 (§1–§6) está aprobado como **visión**. Esta sección define e
 
 ### 7.2 Excluido hoy (pasa al roadmap)
 
-- `vite-react`;
+- `vite-react` (llegó en 0.17.0, §7.25);
 - directivas `facha-ui-ignore`;
 - resources `decisions` y `config`;
 - `outputSchema`;
@@ -1385,6 +1386,18 @@ Objetivo: que quien instala facha-ui tenga valor en menos de un minuto, sin conf
   - En `-p` las herramientas piden permiso: con la herramienta Skill sin permiso, la skill no carga y Claude improvisa (llegó a intentar escribir la pantalla real, y el permiso lo frenó). Con el plugin instalado, la herramienta Skill y las del MCP se aprueban como cualquier otra.
 - **Tiempos del hook** (bundle, Windows): ~140 ms cuando calla, ~170–230 ms cuando chequea.
 - **Tests:** 179. Modo rápido, `start` (solo lectura del análisis y escritura con sí), hook (`hooks.json`, silencios, modos, sin design system, instantánea sin escrituras, texto truncado y marcado, tiempo), progreso en `apply` e `init`, descriptions y lenguaje natural, `instructions` con el punto 4. Ningún test existente cambió.
+
+### 7.25 Versión 0.17.0: laboratorio de variantes en React + Vite
+
+Pedido del dev: probó el plugin en un proyecto React (sin Next.js) y `variants` se frenó: el laboratorio solo existía como ruta de Next. Plan aprobado: la opción (b), variantes, ajustes, modo rápido, comparar y `apply` en Vite ahora; el modo en vivo en Vite después.
+
+- **Detección** (`project.ts`): `vite` y `react` en `package.json` → `vite-react`; la config acepta `framework: "vite-react"`. Create React App, el Pages Router de Next y React sin framework de laboratorio reciben un motivo claro en `assumptions` (y `start`, `check_ui`, `audit`, `init` y `learn` siguen funcionando).
+- **Valores por defecto según el framework:** en Vite, `lab.dir` es `facha-lab` y `preview.baseUrl` usa el `server.port` del `vite.config` (5173 si no lo declara), salvo que la config los escriba. El patrón de URL es `/facha-lab/?screen={screen}&v={variant}`.
+- **`vite.config` leído de forma estática** (`vite-config.ts`): puerto y `build.rollupOptions.input`, con `defineConfig({…})` incluido; un config calculado por una función se informa en lugar de adivinarse. Si el lab figura como entrada del build, se avisa. Los helpers del AST pasaron a `static-config.ts`, compartidos con `tailwind.config`; los dos lectores solo parsean (S2).
+- **Laboratorio de Vite** (`templates/vite-react/`, §2.b.4): una entrada propia, solo de desarrollo, que no toca ningún archivo de la app. `main.tsx` importa el CSS global y busca las variantes; `providers.tsx` importa los providers de la app (un `BrowserRouter` pasa a `MemoryRouter`); si una instancia no se exporta, es una brecha. `lab-theme`, `lab-state` y `lab-responsive` se comparten con Next. La comparación lee los runs de `.facha-ui/runs/`; los votos esperan al modo en vivo.
+- **Skills:** `variants` acepta los dos frameworks y `lab.md` tiene una sección por cada uno; el modo en vivo dice que todavía no está en Vite y ofrece los ajustes y la comparación; `apply` limpia el andamiaje de Vite; `start` conoce `facha-lab/` y no recomienda variantes cuando no hay laboratorio.
+- **Prueba real** sobre una app Vite 5 + React 18 + React Router 6: la variante renderiza con los datos del provider, navega con `useNavigate` sin romper la URL del lab, aplica el tema oscuro y los estados, el medidor responsive mide, la comparación y el índice responden, el guardián chequea la variante (0 errores) y `vite build` no incluye nada del lab.
+- **Tests:** 198. Fixture `vite-react`; detección, valores por defecto, config explícita, avisos de build, motivos sin laboratorio, `vite.config` estático y con efectos secundarios que no se ejecutan (S2), contrato del template y de las skills. Ningún snapshot cambió.
 ---
 
 ## Anexo A · Config completa de ejemplo

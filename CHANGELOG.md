@@ -7,6 +7,23 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-13
+
+### Added
+- Variantes en proyectos React con Vite: el laboratorio es una entrada propia, solo de desarrollo (`/facha-lab/?screen=<pantalla>&v=<variante>`), que no toca ningún archivo de la app (§7.25).
+- Las variantes de Vite usan el CSS global y los providers de la app (router, datos, estado), así que se ven con los datos reales (§7.25).
+- Comparar las variantes de Vite lado a lado, en escritorio, tablet o celular, en cualquier tema y estado (§7.25).
+- Detección automática de Vite + React; `framework: "vite-react"` en la config si hace falta forzarlo (§2.0.2).
+- El puerto del servidor de desarrollo se lee del `vite.config` sin ejecutarlo; si no lo declara, 5173 (§7.25).
+
+### Changed
+- Create React App, el Pages Router de Next y React sin framework de laboratorio explican por qué no hay variantes, en lugar de "framework no detectado"; el resto de facha-ui funciona igual (§7.25).
+- `/facha-ui:start` no recomienda variantes cuando el proyecto no tiene laboratorio (§7.25).
+
+### Security
+- El laboratorio de Vite no llega a producción: `vite build` no lo construye, no se monta en producción, y se avisa si el `vite.config` lo agrega como entrada del build (§2.b.4).
+- `vite.config` solo se parsea; nunca se importa ni se ejecuta (§7.25).
+
 ## [0.16.0] - 2026-10-10
 
 ### Added
@@ -186,7 +203,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.13.0...v0.14.0

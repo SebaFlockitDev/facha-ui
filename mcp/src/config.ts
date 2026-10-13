@@ -26,7 +26,7 @@ export const ConfigSchema = z
   .object({
     $schema: z.string().optional(),
     version: z.literal(1),
-    framework: z.enum(["auto", "next-app"]).default("auto"),
+    framework: z.enum(["auto", "next-app", "vite-react"]).default("auto"),
     tokens: z
       .object({
         sources: z.array(z.string().min(1)).min(1).optional(),
@@ -181,6 +181,8 @@ export interface LoadedConfig {
   config: RawConfig;
   configSource: typeof CONFIG_FILE | "autodetected";
   assumptions: string[];
+  /** Keys the team wrote, as opposed to schema defaults (the lab defaults depend on the framework). */
+  explicit: { labDir: boolean; baseUrl: boolean };
 }
 
 function pointer(pathParts: PropertyKey[]): string {
@@ -194,6 +196,7 @@ export function loadConfig(root: string): LoadedConfig {
       config: ConfigSchema.parse({ version: 1 }),
       configSource: "autodetected",
       assumptions: [`No ${CONFIG_FILE} found: tokens, themes and include globs are autodetected.`],
+      explicit: { labDir: false, baseUrl: false },
     };
   }
   let json: unknown;
@@ -219,5 +222,7 @@ export function loadConfig(root: string): LoadedConfig {
   const assumptions = notEvaluated.length
     ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`]
     : [];
-  return { config: parsed.data, configSource: CONFIG_FILE, assumptions };
+  const raw = json as { lab?: { dir?: unknown }; preview?: { baseUrl?: unknown } };
+  const explicit = { labDir: raw?.lab?.dir !== undefined, baseUrl: raw?.preview?.baseUrl !== undefined };
+  return { config: parsed.data, configSource: CONFIG_FILE, assumptions, explicit };
 }

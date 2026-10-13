@@ -3,6 +3,7 @@ import path from "node:path";
 import picomatch from "picomatch";
 import { ALWAYS_IGNORED_DIRS, CONFIG_FILE, DEFAULT_INCLUDE, loadConfig, type LoadedConfig } from "./config.js";
 import { FachaError } from "./types.js";
+import { readViteConfig } from "./vite-config.js";
 
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_FILES = 5000;
@@ -15,7 +16,9 @@ export interface Project extends LoadedConfig {
   exclude: string[];
   labDir: string;
   hasTailwind: boolean;
-  frameworkDetected: "next-app" | "unknown";
+  frameworkDetected: Framework;
+  /** The framework in use: the config's when it names one, otherwise the detected one. */
+  framework: Framework;
   /** Project root relative to the workspace (POSIX, "." when they are the same). */
   workspacePath: string;
 }
@@ -135,22 +138,34 @@ export function openProject(root: string, ws?: Workspace): Project {
   const pkg = readPackageJson(root);
   const deps = { ...(pkg?.dependencies ?? {}), ...(pkg?.devDependencies ?? {}) };
   const hasTailwind = "tailwindcss" in deps || "@tailwindcss/postcss" in deps;
-  const frameworkDetected = "next" in deps && fs.existsSync(path.join(root, "app")) ? "next-app" : "unknown";
-  const labDir = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
+  const frameworkDetected = detectFramework(root, deps);
+  const framework: Framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
   const assumptions = [...loaded.assumptions];
+  // The lab's defaults follow the framework (SPEC §2.b.4): Vite serves facha-lab/ as its own
+  // dev-only entry, on the dev server's port read statically from vite.config.
+  if (framework === "vite-react") {
+    const vite = readViteConfig({ root });
+    if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
+    if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
+    if (vite?.inputs?.length) {
+      const lab = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
+      const inLab = vite.inputs.some((i) => toPosix(i).replace(/^\.?\//, "").startsWith(`${lab}/`));
+      assumptions.push(
+        inLab
+          ? `${vite.file} lists the lab (${lab}/) in build.rollupOptions.input: the lab would be built. Remove it from the inputs.`
+          : `${vite.file} declares build entries (${vite.inputs.join(", ")}); the lab (${lab}/) is not one of them, so it stays out of the build.`,
+      );
+    }
+    if (vite?.unread.length) assumptions.push(`Not read in ${vite.file} without running it: ${vite.unread.map((u) => `${u.what}${u.line ? ` (line ${u.line})` : ""}`).join("; ")}.`);
+  }
+  const labDir = toPosix(loaded.config.lab.dir).replace(/\/+$/, "");
   const workspacePath = ws ? toPosix(path.relative(ws.workspaceRoot, root)) || "." : ".";
   if (ws?.mode === "discovered") {
     assumptions.push(
       `Project discovered at ${workspacePath}/ (the only frontend found below the workspace). Set FACHA_UI_ROOT to choose another folder.`,
     );
   }
-  if (loaded.config.framework === "auto") {
-    assumptions.push(
-      frameworkDetected === "next-app"
-        ? "Framework autodetected: next-app (package.json depends on next and an app/ directory exists)."
-        : "Framework not detected as next-app; the lab route may not work.",
-    );
-  }
+  if (loaded.config.framework === "auto") assumptions.push(frameworkAssumption(frameworkDetected, deps));
   return {
     ...loaded,
     assumptions,
@@ -160,8 +175,33 @@ export function openProject(root: string, ws?: Workspace): Project {
     labDir,
     hasTailwind,
     frameworkDetected,
+    framework,
     workspacePath,
   };
+}
+
+export type Framework = "next-app" | "vite-react" | "unknown";
+
+/**
+ * The framework of the lab, from package.json (SPEC §2.0.2): Next.js with an app/ directory, or
+ * Vite with React. Anything else (Create React App, Next.js with pages/ only…) has no lab.
+ */
+function detectFramework(root: string, deps: Record<string, unknown>): Framework {
+  if ("next" in deps && fs.existsSync(path.join(root, "app"))) return "next-app";
+  if ("vite" in deps && "react" in deps) return "vite-react";
+  return "unknown";
+}
+
+function frameworkAssumption(f: Framework, deps: Record<string, unknown>): string {
+  if (f === "next-app") return "Framework autodetected: next-app (package.json depends on next and an app/ directory exists).";
+  if (f === "vite-react") return "Framework autodetected: vite-react (package.json depends on vite and react). The lab is a dev-only entry in facha-lab/.";
+  const why =
+    "react-scripts" in deps
+      ? "Create React App (react-scripts) has no lab: it is deprecated, and variants need Next.js (App Router) or Vite with React"
+      : "next" in deps
+        ? "Next.js without an app/ directory (Pages Router) has no lab yet: variants need the App Router"
+        : "no lab framework detected: variants need Next.js (App Router) or Vite with React";
+  return `${why}. Checks, audit, score, start, init and learn work all the same.`;
 }
 
 /** Walks a directory (deterministic order), skipping always-ignored directories and symlinks. */

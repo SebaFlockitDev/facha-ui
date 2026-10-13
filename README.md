@@ -9,7 +9,7 @@ Plugin de Claude Code que trabaja como un diseñador UI senior dentro de tu proy
    /plugin marketplace add SebaFlockitDev/facha-ui
    /plugin install facha-ui@facha-ui
    ```
-2. **Abrí Claude Code en tu proyecto** (Next.js con App Router). No hace falta configurar nada.
+2. **Abrí Claude Code en tu proyecto** (React con Next.js App Router o con Vite). No hace falta configurar nada.
 3. **Preguntá** *"¿cómo está la UI de mi proyecto?"*, o corré `/facha-ui:start`.
 
 Vas a ver, en menos de un minuto y sin que se escriba nada:
@@ -66,7 +66,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Versión 0.16.0** · Next.js App Router, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
+> **Versión 0.17.0** · React con Next.js App Router o Vite, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Roadmap](SPEC.md#6-fuera-de-alcance-hoy-roadmap)
 
 ## Requisitos
 

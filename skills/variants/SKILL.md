@@ -84,7 +84,7 @@ Stop, and explain why, when:
 - `status` is `missing` or `coverage.requiredMissing` is not empty: without tokens you could only
   invent. Explain the minimum contract (surface, text, border and accent roles, plus themes) and
   suggest `/facha-ui:init`, which proposes tokens from the values the project already uses;
-- `project.framework` is not `next-app` (the only framework supported);
+- `project.framework` is not `next-app` or `vite-react`: give the reason from the assumptions;
 - `.facha-ui/runs/<slug>.json` exists with `status: "generated"`, or `<lab.dir>/<slug>/` has
   files: ask whether to discard the previous run. Never overwrite it silently.
 
@@ -136,7 +136,7 @@ says what failed and how to retry; **stress** (long texts, many rows, large numb
 permission** when actions depend on a role. Reuse the project's own patterns for each state
 first. Each state is a decision with its source.
 
-## Step 5 · Write the lab (Next App Router)
+## Step 5 · Write the lab (Next App Router or Vite)
 
 **Before this step, read `lab.md`** (scaffold, variant files, state preview). In each variant:
 - **Styling:** existing component classes first; the project's guidelines and `custom/*` rules;
