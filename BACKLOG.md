@@ -24,7 +24,7 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 ## Ahora
 
 ### B-001 · El panel en vivo no se ve en un proyecto React + Vite real
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P0 · **Tamaño:** S
 - **Por qué:** el dev actualizó a 0.18.0 y no ve el panel en su proyecto Vite; bloquea el uso del modo en vivo.
 - **Qué:** diagnosticar en el proyecto real (URL abierta, versión del plugin en la sesión, si el laboratorio existe, si `main.tsx` monta `<LabPanel />`, si `vite.config` tiene la línea, si el panel quedó oculto) y corregir lo que sea del plugin.
@@ -49,6 +49,14 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 - **Referencias:** `agents/ux-reviewer.md`, SPEC §7.22
 
 ## Siguiente
+
+### B-023 · El MCP de facha-ui no conecta en algunas sesiones
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** S
+- **Por qué:** en una sesión de Claude Code abierta en el repo de facha-ui, el servidor figuró como "Connection closed", aunque el bundle 0.18.0 instalado, corrido a mano con `--root` sobre la misma carpeta, arranca y responde. Sin MCP no hay guardián ni design system.
+- **Qué:** reproducir (sesión nueva, después de actualizar, en un repo con y sin frontend), leer el log del servidor (stderr) y corregir la causa; si es del entorno, que `start` y la guía digan cómo resolverlo.
+- **Criterios de aceptación:** se identifica la causa con evidencia; si es del plugin, un test la cubre y el servidor conecta en una sesión nueva; si es del entorno, `docs/uso.md` lo explica en Problemas frecuentes.
+- **Referencias:** `.mcp.json`, `mcp/src/index.ts`, SPEC §7.10
 
 ### B-004 · Regla `a11y-color-only`
 - **Estado:** listo para spec
