@@ -1,6 +1,6 @@
 # B-024 · Brief de diseño para un proyecto sin diseño
 
-> **Estado:** en curso · **Rama:** `feat/design-brief` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.20.0) · **Rama:** `feat/design-brief` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-15
 
@@ -70,7 +70,7 @@ oscuro (sí, no o más adelante).
   `plugin.test.ts` · `54ee5e4` (antes, `5d9110b`: el lector toma "nada" y "nothing" como vacío)
 - [x] 8. Docs: SPEC §2.g y §7.30 (y §2.e, árbol de archivos), `docs/uso.md` §5.0, `CHANGELOG.md`
 - [x] 9a. Prueba en una app de Vite sin design system (ver Registro)
-- [ ] 9b. Release
+- [x] 9b. Release 0.20.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -107,11 +107,10 @@ oscuro (sí, no o más adelante).
     marca en dos propuestas.
   - Límite de la prueba: las skills no se corrieron de punta a punta (`init` la lanza solo el
     dev, y el MCP de esta sesión tiene como raíz el repo de facha-ui); se emularon sus pasos.
+- **2026-10-15 · release 0.20.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.30 con la versión; B-024 a Hecho.
 
 ## Cómo retomar
 
-**Estado al 2026-10-15:** tareas 1 a 9a hechas en `feat/design-brief`, sin push. Falta el release.
-
-Falta el release (9b), con el OK de quien mantiene el repo: versión menor (agrega una función),
-con el flujo de `CLAUDE.md` (versión en los 4 lugares, CHANGELOG con fecha y enlaces, SPEC §7.30
-con la versión, B-024 a Hecho), merge de `feat/design-brief` a `main`, tag y push.
+Terminado en 0.20.0. Lo que sigue del bloque "diseño desde cero" es B-025 (generador de design
+system), que lee este brief: tipo de producto, densidad y color de marca.

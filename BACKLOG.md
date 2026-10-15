@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-024 · Brief de diseño para un proyecto sin diseño
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** en un proyecto sin tokens ni dirección visual, `init` solo puede ordenar los valores que ya están en el código: no propone un diseño. Un diseñador primero entiende el producto, y las herramientas que mejor resuelven el inicio (Google Stitch, Readdy, la skill frontend-design de Anthropic) arrancan con una entrevista corta.
-- **Qué:** un modo de `init` que entrevista al dev en pocas preguntas, con opciones sugeridas a partir de lo que el código ya muestra: tipo de producto, quién lo usa y para qué, tres rasgos de personalidad, densidad, referencias, qué evitar y color de marca si lo hay. El brief queda como decisión en `decisions.md` y `get_design_system` lo devuelve, para que `variants`, el revisor y el generador (B-025) lo usen como fuente. `start` lo recomienda cuando el proyecto no tiene tokens.
-- **Criterios de aceptación:** en un proyecto sin tokens, `start` recomienda el brief; cada pregunta trae opciones sugeridas con su evidencia del código; el brief se guarda solo con el sí del dev, en `decisions.md` con id; `get_design_system` lo devuelve (test); `variants` lo cita en sus hipótesis.
-- **Spec:** [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md)
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), `skills/init/SKILL.md`, `skills/start/SKILL.md`; https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/ , https://raw.githubusercontent.com/anthropics/skills/main/skills/frontend-design/SKILL.md
-
 ### B-025 · Generador de design system, desde una marca o desde cero
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** L
@@ -239,6 +230,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.20.0:** B-024, brief de diseño para un proyecto sin diseño (`/facha-ui:init brief`, sección `brief` de `get_design_system`); spec en [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).
 - **0.19.1:** B-023, el "Connection closed" del MCP en sesiones abiertas en el repo de facha-ui (los servidores pasan a `plugin.json`).
 - **0.19.0:** B-003, el revisor independiente ve las capturas (verificado; sin cambios de código).
 - **0.19.0:** B-002, providers reales en el laboratorio de Vite (entry leído de forma estática) y variantes que fallan sin dejar la página en blanco.

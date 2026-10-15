@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.19.1** (§7.10–§7.29). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.20.0** (§7.10–§7.30). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -704,7 +704,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.19.1",
+  "version": "0.20.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1424,7 +1424,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Arreglo:** los dos servidores pasan a `mcpServers` en `.claude-plugin/plugin.json` (mismos comandos y versiones) y se borra el `.mcp.json` de la raíz. `claude plugin validate .` lo acepta.
 - **Tests:** 216. Los de versiones fijas y del bundle leen el manifiesto; uno nuevo falla si vuelve un `.mcp.json` en la raíz con `${CLAUDE_PLUGIN_ROOT}` (comprobado con el archivo anterior).
 
-### 7.30 Brief de diseño
+### 7.30 Versión 0.20.0: brief de diseño
 
 Ítem B-024 del backlog, el primero del bloque "diseño desde cero" que salió del [estudio de herramientas](docs/research/2026-10-15-herramientas-de-diseno.md). Spec, tareas y registro: [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).
 
