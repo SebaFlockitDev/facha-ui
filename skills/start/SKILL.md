@@ -73,8 +73,9 @@ consistent. That is not a failure of the developer: it is the usual starting poi
 Without a `brief`, recommend starting with `/facha-ui:init brief`: a short brief of what the
 product is and the look it needs, which facha-ui proposes from the code and the developer
 corrects, so the design has a direction before any color. With a brief, recommend
-`/facha-ui:init`: it reads the colors, sizes and radii the code already uses and proposes tokens
-with a value per theme and verified contrast. Neither writes anything until the developer approves. The guardian still works without tokens (hand-written colors, arbitrary
+`/facha-ui:init system`: a complete design system (color scales, type, spacing, radii, shadows)
+built from published standards and the brief, with every contrast pair verified. Neither writes
+anything until the developer approves. The guardian still works without tokens (hand-written colors, arbitrary
 values, accessibility, responsive, microcopy), so continue with Step 3.
 
 ## Step 3 · Score and the 3 most serious problems
@@ -108,7 +109,7 @@ Explain each term once ("contraste: la diferencia de luz entre el texto y su fon
 Give **one** next step, the one with the most impact, as a command or a request in plain words,
 with one sentence on why. Choose it with this rule, in order:
 
-1. `status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`.
+1. `status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init system`.
 2. More than half of `audit_project.totals.error` comes from tokens or contrast
    (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`,
    `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`.

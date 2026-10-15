@@ -178,7 +178,7 @@ describe("init skill", () => {
 
   it("has a brief mode in its own file, read before it, that writes only one decisions entry", () => {
     const skill = read("init", "SKILL.md");
-    expect(skill).toContain("`brief`: record what the product is and the look it needs, before any token. **Before this mode, read `brief.md`**");
+    expect(skill).toContain("**Before each, read its file** in this skill's directory: `brief` (`brief.md`) records what the product is and the look it needs, before any token");
     const brief = read("init", "brief.md");
     expect(brief).toContain("the **only** write is appending one entry to `memory.decisionsFile`");
     expect(brief).toContain("**at most 3 questions**");
@@ -197,9 +197,30 @@ describe("init skill", () => {
 
   it("start recommends the brief first, and variants takes who uses the screen from it", () => {
     const start = read("start", "SKILL.md");
-    expect(start).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`");
+    expect(start).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init system`");
     expect(read("variants", "SKILL.md")).toContain("from `brief` (cite its id)");
     expect(read("help", "SKILL.md")).toContain("/facha-ui:init brief");
+  });
+
+  // B-025: a complete design system from published standards.
+  it("has a system mode in its own file that takes every value from propose_design_system", () => {
+    const skill = read("init", "SKILL.md");
+    expect(skill).toContain("`system` (`system.md`) builds a complete design system from published standards");
+    expect(skill).toContain("mcp__plugin_facha-ui_facha-ui__propose_design_system");
+    expect(skill).toContain("Values come only from `scan_styles`, `propose_design_system` (system mode) or the developer's own message.");
+    const system = read("init", "system.md");
+    expect(system).toContain('you never pick or "improve" a color, size or radius yourself');
+    expect(system).toContain("`status` must be `missing`");
+    expect(system).toContain("Only an explicit yes counts (hard rule 3)");
+    expect(system).toContain("Nothing else: not the screens");
+    expect(system).toContain("do not present one as better without a source");
+    expect(system).toMatch(/## dec-YYYY-MM-DD-system · /);
+  });
+
+  it("start and the brief lead to the system mode once there is a brief", () => {
+    expect(read("start", "SKILL.md")).toContain("else `/facha-ui:init system`");
+    expect(read("init", "brief.md")).toContain("`/facha-ui:init system`, which builds a complete design system");
+    expect(read("help", "SKILL.md")).toContain("/facha-ui:init system");
   });
 });
 
@@ -435,7 +456,7 @@ describe("start skill", () => {
     expect(flat).toContain('`configSource: "autodetected"`');
     expect(flat).toContain('"version": 1');
     expect(flat).toContain("## Step 2 · Without a design system");
-    expect(flat).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`");
+    expect(flat).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init system`");
     expect(flat).toContain("→ `/facha-ui:init colors`");
   });
 

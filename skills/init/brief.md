@@ -114,8 +114,8 @@ Say, in 3 to 5 lines:
 - that it is now a source: `/facha-ui:variants` uses it in its diagnosis (who uses the screen and
   how) and cites its id;
 - the next step, as a command for the developer:
-  - no tokens (`status: missing`): `/facha-ui:init`, which proposes tokens from the values in use;
-    with the brief, the brand color and the density say which proposals come first;
+  - no tokens (`status: missing`): `/facha-ui:init system`, which builds a complete design system
+    from published standards with this brief (brand color, density, contrast level);
   - with tokens: *"mejorá la pantalla `<route>`"* for the screen the brief's main task lives on.
 
 Remind them that nothing was committed.
