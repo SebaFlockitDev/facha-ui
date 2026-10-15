@@ -75,6 +75,12 @@ export const RADIX: { light: Measured; dark: Measured; source: SourceId } = {
  */
 export const BRIGHT_SOLID = { brightMinL: 0.854, otherMaxL: 0.691, threshold: 0.773, source: "radix" as SourceId };
 
+/**
+ * How far Radix moves the hover step (10) from the solid (9): median ΔE OKLab×100 over the 25
+ * accents. A hover closer than that is hard to notice.
+ */
+export const HOVER_DELTA_E = { light: 2.961, dark: 4.074, source: "radix" as SourceId };
+
 /** Step 9 of the Radix scales the states are built from (the same value in light and dark). */
 export const STATUS_SEEDS = {
   success: { radix: "green", hex: "#30a46c" },

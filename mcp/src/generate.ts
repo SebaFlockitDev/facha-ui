@@ -1,7 +1,7 @@
 import { converter, differenceEuclidean, filterDeficiencyDeuter, filterDeficiencyProt, formatHex, parse, toGamut, wcagContrast } from "culori";
 import type { Color } from "culori";
 import {
-  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
+  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, HOVER_DELTA_E, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
   SPACING, STATUS_MIN_DELTA_E, STATUS_SEEDS, SYSTEM_FONT, TYPE_NAMES, WCAG, type SourceId,
 } from "./standards.js";
 
@@ -50,6 +50,8 @@ export interface Token {
   light: string;
   dark: string;
   sources: (SourceId | "brief")[];
+  /** Written as var(alias): the same value by design, so facha-ui does not report a near-duplicate. */
+  alias?: string;
 }
 
 export interface ProofRow {
@@ -123,12 +125,18 @@ function accentScale(mode: Mode, solid: string, bg: string, onText: string, text
   // in Radix it always contrasts at least as much as step 9.
   const target = (t: number, i: number) => (i === 10 ? Math.max(t, solidRatio) : t);
   const steps = m.accentContrast.map((t, i) => (i === 8 ? solid : i === 9 ? "" : solve(mode, s.h, s.c * m.accentChroma[i]!, target(t, i), bg)));
-  // Hover: Radix moves it away from the background (darker in light, lighter in dark); if the
-  // on-text loses contrast that way, it goes the other way, and as a last resort stays the solid.
-  const factor = m.accentContrast[9]! / m.accentContrast[8]!;
-  const towards = solve(mode, s.h, s.c * m.accentChroma[9]!, solidRatio * factor, bg);
-  const other = solve(mode, s.h, s.c * m.accentChroma[9]!, solidRatio / factor, bg);
-  steps[9] = [towards, other].find((c) => raw(onText, c) >= textMin) ?? solid;
+  // Hover: as far from the solid as Radix moves it (HOVER_DELTA_E), away from the background
+  // (darker in light, lighter in dark); if the on-text loses contrast that way, the other way;
+  // as a last resort it stays the solid (and a note says so).
+  const away = mode === "light" ? -1 : 1;
+  const hover = (dir: number) => {
+    for (let step = 1; step <= 300; step++) {
+      const c = hex({ mode: "oklch", l: s.l + (dir * step) / 1000, c: s.c * m.accentChroma[9]!, h: s.h });
+      if (oklabDistance(parse(c)!, parse(solid)!) * 100 >= HOVER_DELTA_E[mode]) return c;
+    }
+    return solid;
+  };
+  steps[9] = [hover(away), hover(-away)].find((c) => c !== solid && raw(onText, c) >= textMin) ?? solid;
   return steps;
 }
 
@@ -293,6 +301,12 @@ function buildDirection(id: string, seed: string, from: string, input: SystemInp
   ensure("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
   for (const k of KINDS) ensure(`--color-${k}-text`, ["--color-background", "--color-panel", `--color-${k}-bg`], min.text, textRule);
 
+  if (infoFollowsBrand)
+    for (const [info, brand] of [["--color-info", "--color-primary"], ["--color-info-text", "--color-primary-strong"], ["--color-info-bg", "--color-primary-subtle"], ["--color-on-info", "--color-on-primary"]] as const) {
+      const t = tokens.find((x) => x.name === info)!;
+      Object.assign(t, { light: value(brand, "light"), dark: value(brand, "dark"), alias: brand });
+    }
+
   prove("--color-foreground", surfaces, min.text, textRule);
   prove("--color-muted-foreground", surfaces, min.text, textRule);
   prove("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
@@ -307,7 +321,7 @@ function buildDirection(id: string, seed: string, from: string, input: SystemInp
   for (const mode of MODES) {
     const r = raw(value("--color-primary", mode), value("--color-background", mode));
     if (r < min.nonText)
-      notes.push(`${mode}: the brand color is ${r2(r)}:1 on the background, under 3:1. Buttons with a text label are fine (the label identifies them); an icon-only control needs --color-border-strong around it (WCAG 1.4.11).`);
+      notes.push(`${mode}: the brand color is ${Math.floor(r * 100) / 100}:1 on the background, under 3:1. Buttons with a text label are fine (the label identifies them); an icon-only control needs --color-border-strong around it (WCAG 1.4.11).`);
   }
   for (const mode of MODES)
     if (value("--color-primary-hover", mode) === value("--color-primary", mode))
@@ -391,8 +405,8 @@ function cssBlocks(id: string, tokens: Token[], format: Format) {
   const lines = (pick: (t: Token) => string | null) =>
     tokens.map((t) => [t.name, pick(t)] as const).filter(([, v]) => v !== null).map(([n, v]) => `  ${n}: ${v};`).join("\n");
   return {
-    light: { selector: light, text: `/* facha-ui system · ${id} */\n${light} {\n${lines((t) => t.light)}\n}` },
-    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines((t) => (t.dark !== t.light ? t.dark : null))}\n}` },
+    light: { selector: light, text: `/* facha-ui system · ${id} */\n${light} {\n${lines((t) => (t.alias ? `var(${t.alias})` : t.light))}\n}` },
+    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines((t) => (t.alias ? null : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null))}\n}` },
   };
 }
 

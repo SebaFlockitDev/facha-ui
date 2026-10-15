@@ -6,7 +6,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/context.js";
 import { coverage, getDesignSystem } from "../src/design-system.js";
 import { proposeSystem, seedColors, type SystemInput } from "../src/generate.js";
-import { SOURCES } from "../src/standards.js";
+import { HOVER_DELTA_E, SOURCES } from "../src/standards.js";
+import { differenceEuclidean } from "culori";
 
 // The design-system generator (B-025, SPEC §2.h).
 
@@ -51,6 +52,16 @@ describe("propose_design_system · color", () => {
     expect(moved.from).toBe("#4f46e5");
     expect(moved.to).not.toBe("#4f46e5");
     expect(moved.why).toContain("7:1");
+  });
+
+  it.each(BRANDS)("the hover step moves at least as far from the solid as Radix's does (%s)", (brand) => {
+    const d = proposeSystem({ ...base, brandColor: brand }).directions[0]!;
+    for (const mode of ["light", "dark"] as const) {
+      const solid = d.tokens.find((t) => t.name === "--color-primary")![mode];
+      const hover = d.tokens.find((t) => t.name === "--color-primary-hover")![mode];
+      if (hover === solid) expect(d.notes.join(" ")).toContain(`${mode}: the hover step equals the brand color`);
+      else expect(differenceEuclidean("oklab")(solid, hover) * 100, `${mode} ${solid} ${hover}`).toBeGreaterThanOrEqual(HOVER_DELTA_E[mode]);
+    }
   });
 
   it("solves light and dark separately: the dark background is dark, not the light one inverted", () => {
@@ -140,7 +151,12 @@ describe("propose_design_system · facha-ui reads what it generates", () => {
     expect(ctx.tokens.themes.map((t) => t.name).sort()).toEqual(["dark", "light"]);
     for (const t of d.tokens) expect(ctx.tokens.tokens.find((x) => x.name === t.name)?.role, t.name).toBe(t.role);
     const ds = getDesignSystem(ctx, ["health"]) as { health: { kind: string }[] };
-    expect(ds.health.filter((h) => /contrast|confusable/.test(h.kind))).toEqual([]);
+    // Nothing but near-duplicates of different roles, which the rule itself says to ignore
+    // ("different roles that happen to match"); two texts-on-a-solid may share white or dark.
+    const findings = (ds.health as unknown as { kind: string; roles?: string[] }[]).filter(
+      (h) => !(h.kind === "near-duplicate-tokens" && (h.roles![0] !== h.roles![1] || h.roles![0] === "on-accent")),
+    );
+    expect(findings).toEqual([]);
   });
 
   it("in Tailwind 4 the default theme goes in @theme, which facha-ui reads too", () => {

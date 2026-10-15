@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { converter, wcagContrast } from "culori";
+import { converter, differenceEuclidean, wcagContrast } from "culori";
 import { describe, expect, it } from "vitest";
-import { ACCENT_SEEDS, RADIX, SOURCES, STATUS_SEEDS, fluentShadow } from "../src/standards.js";
+import { ACCENT_SEEDS, BRIGHT_SOLID, HOVER_DELTA_E, RADIX, SOURCES, STATUS_SEEDS, fluentShadow } from "../src/standards.js";
 
 // The constants of the design-system generator come from published sources (B-025, SPEC §2.h):
 // the ones measured from Radix Colors are measured again here from the published scales.
@@ -41,6 +41,15 @@ describe("standards · measured from Radix Colors 3.0.0", () => {
       expect(steps.map((i) => r3(median(Object.values(radix.grays).map((s) => wcagContrast(s[mode][i]!, s[mode][0]!)))))).toEqual(RADIX[mode].grayContrast);
     });
   }
+
+  it("the hover distance and the bright solids are measured from the scales", () => {
+    const dE = differenceEuclidean("oklab");
+    for (const mode of ["light", "dark"] as const)
+      expect(r3(median(Object.values(radix.accents).map((s) => dE(s[mode][8]!, s[mode][9]!) * 100)))).toBe(HOVER_DELTA_E[mode]);
+    const l9 = (n: string) => r3(oklch(radix.accents[n]!.light[8]!)!.l);
+    expect(Math.min(...BRIGHT.map(l9))).toBe(BRIGHT_SOLID.brightMinL);
+    expect(Math.max(...Object.keys(radix.accents).filter((n) => !BRIGHT.includes(n)).map(l9))).toBe(BRIGHT_SOLID.otherMaxL);
+  });
 
   it("the state and seed colors are step 9 of their Radix scale, the same in light and dark", () => {
     for (const s of [...Object.values(STATUS_SEEDS), ...ACCENT_SEEDS]) {

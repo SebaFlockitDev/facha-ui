@@ -67513,6 +67513,7 @@ var RADIX = {
   source: "radix"
 };
 var BRIGHT_SOLID = { brightMinL: 0.854, otherMaxL: 0.691, threshold: 0.773, source: "radix" };
+var HOVER_DELTA_E = { light: 2.961, dark: 4.074, source: "radix" };
 var STATUS_SEEDS = {
   success: { radix: "green", hex: "#30a46c" },
   warning: { radix: "amber", hex: "#ffc53d" },
@@ -67600,10 +67601,15 @@ function accentScale(mode, solid, bg, onText, textMin) {
   const solidRatio = raw(solid, bg);
   const target = (t, i) => i === 10 ? Math.max(t, solidRatio) : t;
   const steps = m.accentContrast.map((t, i) => i === 8 ? solid : i === 9 ? "" : solve(mode, s.h, s.c * m.accentChroma[i], target(t, i), bg));
-  const factor2 = m.accentContrast[9] / m.accentContrast[8];
-  const towards = solve(mode, s.h, s.c * m.accentChroma[9], solidRatio * factor2, bg);
-  const other = solve(mode, s.h, s.c * m.accentChroma[9], solidRatio / factor2, bg);
-  steps[9] = [towards, other].find((c2) => raw(onText, c2) >= textMin) ?? solid;
+  const away = mode === "light" ? -1 : 1;
+  const hover = (dir) => {
+    for (let step = 1; step <= 300; step++) {
+      const c2 = hex5({ mode: "oklch", l: s.l + dir * step / 1e3, c: s.c * m.accentChroma[9], h: s.h });
+      if (oklabDistance3(parse_default(c2), parse_default(solid)) * 100 >= HOVER_DELTA_E[mode]) return c2;
+    }
+    return solid;
+  };
+  steps[9] = [hover(away), hover(-away)].find((c2) => c2 !== solid && raw(onText, c2) >= textMin) ?? solid;
   return steps;
 }
 function textOn(solid, darkText) {
@@ -67740,6 +67746,11 @@ function buildDirection(id, seed, from, input2) {
   ensure("--color-muted-foreground", surfaces2, min.text, textRule);
   ensure("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
   for (const k4 of KINDS) ensure(`--color-${k4}-text`, ["--color-background", "--color-panel", `--color-${k4}-bg`], min.text, textRule);
+  if (infoFollowsBrand)
+    for (const [info, brand] of [["--color-info", "--color-primary"], ["--color-info-text", "--color-primary-strong"], ["--color-info-bg", "--color-primary-subtle"], ["--color-on-info", "--color-on-primary"]]) {
+      const t = tokens.find((x) => x.name === info);
+      Object.assign(t, { light: value(brand, "light"), dark: value(brand, "dark"), alias: brand });
+    }
   prove("--color-foreground", surfaces2, min.text, textRule);
   prove("--color-muted-foreground", surfaces2, min.text, textRule);
   prove("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
@@ -67753,7 +67764,7 @@ function buildDirection(id, seed, from, input2) {
   for (const mode of MODES) {
     const r4 = raw(value("--color-primary", mode), value("--color-background", mode));
     if (r4 < min.nonText)
-      notes.push(`${mode}: the brand color is ${r2(r4)}:1 on the background, under 3:1. Buttons with a text label are fine (the label identifies them); an icon-only control needs --color-border-strong around it (WCAG 1.4.11).`);
+      notes.push(`${mode}: the brand color is ${Math.floor(r4 * 100) / 100}:1 on the background, under 3:1. Buttons with a text label are fine (the label identifies them); an icon-only control needs --color-border-strong around it (WCAG 1.4.11).`);
   }
   for (const mode of MODES)
     if (value("--color-primary-hover", mode) === value("--color-primary", mode))
@@ -67826,11 +67837,11 @@ function cssBlocks(id, tokens, format) {
   return {
     light: { selector: light, text: `/* facha-ui system \xB7 ${id} */
 ${light} {
-${lines((t) => t.light)}
+${lines((t) => t.alias ? `var(${t.alias})` : t.light)}
 }` },
     dark: { selector: ".dark", text: `/* facha-ui system \xB7 ${id} \xB7 dark */
 .dark {
-${lines((t) => t.dark !== t.light ? t.dark : null)}
+${lines((t) => t.alias ? null : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null)}
 }` }
   };
 }
