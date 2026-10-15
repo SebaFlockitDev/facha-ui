@@ -7,8 +7,13 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.18.1] - 2026-10-14
+
 ### Added
 - `BACKLOG.md`: lo que viene en facha-ui, priorizado y con criterios de aceptación; el README enlaza ahí en lugar del roadmap del SPEC.
+
+### Fixed
+- En proyectos React con Vite, el laboratorio daba error apenas se generaban las variantes («Failed to resolve import ./lab-panel»): no se veía ni la variante ni el panel. Ahora el panel se copia con el resto del laboratorio y avisa si el modo en vivo está apagado (§7.27).
 
 ## [0.18.0] - 2026-10-13
 
@@ -220,7 +225,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...HEAD
+[0.18.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.15.0...v0.16.0

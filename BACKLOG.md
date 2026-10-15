@@ -23,14 +23,6 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 
 ## Ahora
 
-### B-001 · El panel en vivo no se ve en un proyecto React + Vite real
-- **Estado:** en spec
-- **Prioridad:** P0 · **Tamaño:** S
-- **Por qué:** el dev actualizó a 0.18.0 y no ve el panel en su proyecto Vite; bloquea el uso del modo en vivo.
-- **Qué:** diagnosticar en el proyecto real (URL abierta, versión del plugin en la sesión, si el laboratorio existe, si `main.tsx` monta `<LabPanel />`, si `vite.config` tiene la línea, si el panel quedó oculto) y corregir lo que sea del plugin.
-- **Criterios de aceptación:** el panel aparece sobre una variante del proyecto real; si la causa era del plugin, un test la cubre; si era de uso, `start` o `live.md` lo explican mejor.
-- **Referencias:** SPEC §7.25, §7.26
-
 ### B-002 · Modo en vivo de Vite con los providers reales de una app
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -182,6 +174,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.18.1:** B-001, el laboratorio de Vite se rompía antes del modo en vivo (faltaba `lab-panel.tsx` en el andamiaje).
 - **0.18.0:** modo en vivo en React + Vite.
 - **0.17.0:** laboratorio de variantes en React + Vite.
 - **0.16.0:** primer uso (`/facha-ui:start`), modo rápido y guardián automático.
