@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.18.0** (§7.10–§7.26). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.18.1** (§7.10–§7.27). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -703,7 +703,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1375,6 +1375,16 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Panel:** reconoce la URL de Vite (`/facha-lab/?screen=…&v=…`) y enlaza la comparación con `?compare=`; `main.tsx` lo monta fuera de los providers de la app. La comparación de Vite suma los votos del equipo.
 - **Prueba real** sobre una app Vite 5 + React 18: un pedido escrito en el panel llegó a `requests.jsonl`, el watcher lo imprimió y el estado "listo" volvió al panel; la comparación mostró la hipótesis y habilitó el voto; otro origen y un pedido sin token reciben 403, un cuerpo que no es JSON 415; `vite build` sigue sin nada del lab, y con la carpeta del lab ausente el `vite.config` carga y construye.
 - **Tests:** 201. Plugin solo en `serve` y sobre `live-core`, URL efectiva solo sin `preview.baseUrl`, panel con URLs de Vite, votos, detección del registro, la regla dura con su única excepción y `apply` quitando la línea. Ningún snapshot cambió.
+
+### 7.27 Versión 0.18.1: el laboratorio de Vite ya no se rompe antes del modo en vivo
+
+Ítem B-001 del backlog: el dev actualizó a 0.18.0 y no veía el panel en su proyecto Vite.
+
+- **Causa, reproducida en un proyecto Vite 5 + React Query + React Router:** la 0.18.0 agregó `import { LabPanel } from "./lab-panel"` al `main.tsx` del laboratorio de Vite, pero `lab.md` no sumó `lab-panel.tsx` a la lista del andamiaje inicial (se copiaba recién al activar el modo en vivo). Apenas se generaban variantes, Vite respondía 500 («Failed to resolve import ./lab-panel»): no se veía ni la variante ni el panel. Los tests revisaban cada template por separado, no que los archivos que se importan entre sí se copiaran juntos.
+- **Arreglo:** el andamiaje de Vite copia `lab-panel.tsx` con su `LAB_BASE`, como el de Next desde el principio. Sin modo en vivo, el panel avisa que está apagado y muestra el comando para activarlo. Un laboratorio existente al que le falta un archivo que `main.tsx` importa lo recibe del mismo template.
+- **Test que lo hubiera detectado:** para cada framework, todo archivo que copia el andamiaje inicial encuentra en esa misma lista cada archivo que importa (y el `index.html`, su `main.tsx`). Sin el arreglo, falla con el mensaje del bug.
+- **Verificado** en el mismo proyecto: con el andamiaje corregido, la variante renderiza y el panel aparece con «modo en vivo apagado»; el endpoint sin plugin registrado responde HTML y el panel lo trata como apagado.
+- **Tests:** 206.
 ---
 
 ## Anexo A · Config completa de ejemplo
