@@ -7,6 +7,14 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-15
+
+### Added
+
+- `/facha-ui:init brief`: para un proyecto sin diseño definido, Claude lee el código y te muestra un brief ya completado (tipo de producto, quién lo usa y para qué, personalidad, densidad, color de marca, referencias, qué evitar), con la evidencia de cada respuesta, y te pregunta como mucho 3 cosas. Lo guarda en `decisions.md` solo si aprobás.
+- `get_design_system` devuelve el brief en la sección `brief`, con cada campo y su línea; lo que no se puede leer se informa, no se adivina.
+- `start` recomienda empezar por el brief cuando no hay tokens, y `variants` toma del brief quién usa cada pantalla y lo cita.
+
 ## [0.19.1] - 2026-10-15
 
 ### Fixed
@@ -246,7 +254,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...v0.18.1

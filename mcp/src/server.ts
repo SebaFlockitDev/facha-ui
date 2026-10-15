@@ -10,7 +10,7 @@ import { reviewFlow } from "./flow.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.19.1";
+export const VERSION = "0.20.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -21,9 +21,9 @@ export const INSTRUCTIONS = `facha-ui exposes this project's design system and a
 
 /** Tool descriptions, literal from SPEC §2.a.3. */
 export const DESCRIPTIONS = {
-  get_design_system: `Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines and previously approved design decisions.
+  get_design_system: `Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one.
 **When to use:** before writing or modifying any UI, and to answer questions such as "which color/size/component should I use for X?". If no token covers the need, the correct answer is that there is no token: report the gap — never invent a value.
-**Returns:** JSON with \`status\` (ok | partial | missing), \`project\`, \`tokens\`, \`scales\`, \`componentClasses\`, \`coverage\`, \`gaps\`, \`health\`, \`rules\`, \`guidelines\`, \`decisions\`. Read-only: it never modifies files or accesses the network.`,
+**Returns:** JSON with \`status\` (ok | partial | missing), \`project\`, \`tokens\`, \`scales\`, \`componentClasses\`, \`coverage\`, \`gaps\`, \`health\`, \`rules\`, \`guidelines\`, \`decisions\`, \`brief\`. Read-only: it never modifies files or accesses the network.`,
   check_ui: `Validates UI source files against the project's design system using deterministic rules (no AI). Input: a file or directory path, relative to the project root or to the workspace root.
 **When to use:** after generating or editing UI code and before presenting it as done; also when asked to "review" a file. The work is compliant only when \`summary.error = 0\`.
 **Returns:** every violation with file, line, column, rule id, severity, the exact value found, the CSS property involved, whether it breaks a theme, and a suggested token or class when one exists (\`match\`: exact | nearest | none). Values that cannot be resolved statically (dynamic class names) are listed under \`unresolved\`. Read-only.`,

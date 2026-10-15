@@ -1,7 +1,7 @@
 ---
 name: init
-description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. Also adopts a palette proposed from the lab's live panel. Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
-argument-hint: "[colors|scales|all]  ·  palette <proposal file>"
+description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. Also records a design brief (product, users, personality, density, brand color) for a project with no design yet, and adopts a palette proposed from the lab's live panel. Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
+argument-hint: "[colors|scales|all]  ·  brief  ·  palette <proposal file>"
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__ux_score
 ---
@@ -22,6 +22,9 @@ Talk to the developer in their language.
 
 `$ARGUMENTS` (optional): `colors`, `scales` or `all` (default `all`). It limits what the
 proposal covers.
+
+`brief`: record what the product is and the look it needs, before any token. **Before this mode,
+read `brief.md`** in this skill's directory; steps 1 to 7 do not apply.
 
 `palette <file>`: adopt a palette proposed from the lab's live panel
 (`.facha-ui/proposals/palette-*.json`, written by `/facha-ui:variants`). Go to **Palette mode**
@@ -55,7 +58,9 @@ below; steps 2 to 7 do not apply.
 
 ## Step 1 · Preflight (read-only)
 
-Call `get_design_system` (sections `project`, `tokens`, `coverage`, `health`, `decisions`).
+Call `get_design_system` (sections `project`, `tokens`, `coverage`, `health`, `decisions`, `brief`).
+- `status` is `missing` and `brief` is null: offer to start with the brief (read `brief.md`); go on
+  from usage only if the developer says so. With a brief, its brand color and density come first.
 - `MULTIPLE_PROJECTS`: show the candidates and ask which one to use (open Claude Code there or
   set `FACHA_UI_ROOT`).
 - Keep `project.tokenSources`, `project.themes` (name and selector of each theme),

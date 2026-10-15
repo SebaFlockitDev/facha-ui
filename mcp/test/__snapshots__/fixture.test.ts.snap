@@ -126,6 +126,7 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
   "assumptions": [
     "Framework autodetected: next-app (package.json depends on next and an app/ directory exists).",
   ],
+  "brief": null,
   "componentClasses": [
     {
       "literals": [],
