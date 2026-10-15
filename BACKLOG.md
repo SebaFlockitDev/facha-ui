@@ -28,12 +28,13 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-026 · Tres direcciones de diseño sobre la pantalla real
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** L
 - **Por qué:** elegir una paleta en abstracto es elegir a ciegas. Stitch muestra varias direcciones, pero sobre maquetas; facha-ui puede mostrarlas sobre la pantalla real, con datos reales.
 - **Qué:** `init` genera 3 direcciones con B-025 y el laboratorio muestra la misma pantalla con cada una, más una página de muestra con todos los tokens y estados (hover, foco, deshabilitado, error, vacío). El dev elige una, o pide mezclar, y recién entonces `init` escribe los tokens.
 - **Criterios de aceptación:** las 3 direcciones difieren en al menos dos de: tono, tinte de los neutros, radio y densidad; la página de muestra pasa `check_ui` con 0 errores; hay capturas de las 3; fuera del laboratorio no se escribe nada sin aprobación.
 - **Depende de:** B-025
+- **Spec:** [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md)
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §2.b (laboratorio), `skills/init/SKILL.md` (modo paleta)
 
 ## Siguiente
