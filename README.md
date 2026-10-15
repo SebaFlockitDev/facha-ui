@@ -105,7 +105,7 @@ Para todo un equipo, commitear en el repo del proyecto `.claude/settings.json`:
 }
 ```
 
-El plugin trae dos servidores MCP con versiones fijas (`.mcp.json`):
+El plugin trae dos servidores MCP con versiones fijas (`mcpServers` en `.claude-plugin/plugin.json`):
 - `facha-ui`: el bundle `mcp/dist/facha-ui-mcp.js`, que ya viene en el repo, así que no hace falta `npm install`;
 - `playwright`: `@playwright/mcp@0.0.83`, lanzado con [`scripts/run-pinned.mjs`](scripts/run-pinned.mjs). Ese script funciona igual en Windows, macOS y Linux, y rechaza versiones que no sean exactas.
 

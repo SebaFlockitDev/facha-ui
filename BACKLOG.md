@@ -24,13 +24,13 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 ## Ahora
 
 ### B-023 · El MCP de facha-ui no conecta en algunas sesiones
-- **Estado:** listo para spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** S
 - **Por qué:** en una sesión de Claude Code abierta en el repo de facha-ui, el servidor figuró como "Connection closed", aunque el bundle 0.18.0 instalado, corrido a mano con `--root` sobre la misma carpeta, arranca y responde. Sin MCP no hay guardián ni design system.
 - **Qué:** reproducir (sesión nueva, después de actualizar, en un repo con y sin frontend), leer el log del servidor (stderr) y corregir la causa; si es del entorno, que `start` y la guía digan cómo resolverlo.
 - **Criterios de aceptación:** se identifica la causa con evidencia; si es del plugin, un test la cubre y el servidor conecta en una sesión nueva; si es del entorno, `docs/uso.md` lo explica en Problemas frecuentes.
 - **Pista (0.19.0):** en una sesión donde el MCP figuraba "Connection closed", un subagente de la misma sesión (el revisor) sí tuvo las herramientas del MCP: el servidor arranca y responde; lo que falla es la conexión de la sesión principal.
-- **Referencias:** `.mcp.json`, `mcp/src/index.ts`, SPEC §7.10
+- **Referencias:** `.claude-plugin/plugin.json`, `mcp/src/index.ts`, SPEC §7.10, §7.29
 
 ## Siguiente
 

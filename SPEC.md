@@ -662,9 +662,8 @@ allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_syste
 ```
 facha-ui/
 ├── .claude-plugin/
-│   ├── plugin.json
+│   ├── plugin.json               # manifiesto + servidores MCP (facha-ui y Playwright, versiones fijas)
 │   └── marketplace.json          # el repo es su propio marketplace
-├── .mcp.json                     # facha-ui MCP + Playwright MCP, versiones fijas
 ├── CLAUDE.md                     # rol y reglas de trabajo para quien desarrolla el plugin
 ├── agents/
 │   └── ux-reviewer.md            # subagente crítico, solo lectura (facha-ui:ux-reviewer)
@@ -713,7 +712,7 @@ facha-ui/
 }
 ```
 
-`version` se fija en cada release: los usuarios se quedan en esa versión hasta que la cambiemos. Skills y `.mcp.json` están en las ubicaciones por defecto (raíz del plugin), así que no hace falta declararlos.
+`version` se fija en cada release: los usuarios se quedan en esa versión hasta que la cambiemos. Las skills están en la ubicación por defecto. Los servidores MCP se declaran en `mcpServers` del manifiesto (§2.d.4), no en un `.mcp.json` en la raíz: una sesión de Claude Code abierta en este repo también lee ese archivo como config del proyecto, donde `${CLAUDE_PLUGIN_ROOT}` no tiene valor (§7.29).
 
 #### 2.d.3 `.claude-plugin/marketplace.json`
 
@@ -727,7 +726,7 @@ facha-ui/
 }
 ```
 
-#### 2.d.4 `.mcp.json`
+#### 2.d.4 Servidores MCP (`mcpServers` en `plugin.json`)
 
 ```json
 {
@@ -751,8 +750,9 @@ facha-ui/
 
 Decisiones:
 
+- **En el manifiesto, no en la raíz (B-023, §7.29):** un `.mcp.json` en la raíz del repo es a la vez la config MCP del plugin y la del proyecto cuando se abre una sesión en el repo; en esa segunda copia `${CLAUDE_PLUGIN_ROOT}` no se expande y los dos servidores fallan con "Connection closed". Un test controla que no vuelva.
 - **Versiones fijas:** facha-ui MCP = el bundle del mismo tag del plugin. Playwright MCP = `@playwright/mcp@0.0.83` (última estable en npm al 2026-10-09). Prohibido `@latest`; se actualiza con un PR que cambia la versión.
-- **`run-pinned.mjs`:** en Windows nativo, `npx` como `command` necesita `cmd /c`. Para que el mismo `.mcp.json` sirva en todos los sistemas, ambos servidores se lanzan con `node`. El script invoca `npx -y <paquete@versión>` con `shell: true` solo en `win32`, rechaza especificadores sin versión exacta y reenvía stdio sin tocarlo.
+- **`run-pinned.mjs`:** en Windows nativo, `npx` como `command` necesita `cmd /c`. Para que la misma config sirva en todos los sistemas, ambos servidores se lanzan con `node`. El script invoca `npx -y <paquete@versión>` con `shell: true` solo en `win32`, rechaza especificadores sin versión exacta y reenvía stdio sin tocarlo.
 - **Playwright** corre con ventana visible (headed) para que el dev pueda iniciar sesión cuando `preview.auth = manual`, y con `--isolated` (perfil en memoria: no persisten cookies entre sesiones). `--allowed-origins` no es un límite de seguridad según la documentación de Playwright y el puerto depende de cada proyecto, así que no se fija en el plugin: la restricción a `preview.baseUrl` la aplica la skill (§4).
 - **Nombres de tools en Claude Code:** `mcp__plugin_facha-ui_facha-ui__<tool>` y `mcp__plugin_facha-ui_playwright__<tool>`.
 - **Subagentes del plugin** (verificado en la documentación de Claude Code 2.1, 2026-10-10): viven en `agents/` (Markdown con frontmatter) y se nombran `<plugin>:<name>`, así que el revisor es `facha-ui:ux-reviewer`. Se invoca con la herramienta Agent y `subagent_type: "facha-ui:ux-reviewer"`. En plugins se ignoran `permissionMode`, `hooks` y `mcpServers`. Si `tools` se omite, el agente hereda todas las herramientas (Write, Edit y Bash incluidas). Por eso `ux-reviewer` declara `tools` (Read, Glob, Grep, `get_design_system`, `check_ui`) y además `disallowedTools` (Write, Edit, NotebookEdit, Bash), que prevalece. `claude plugin validate` revisa los archivos de agentes.
@@ -915,7 +915,7 @@ Para que facha-ui aporte en el trabajo diario aunque nadie lo invoque: cada arch
 - El panel no aplica nada: elegir una variante prepara `/facha-ui:apply` y una paleta queda como propuesta para `/facha-ui:init palette`, ambas con aprobación en la conversación. Lo que llega del panel es un pedido del dev, pero sigue sujeto a todas las reglas: un pedido de aplicar, borrar o salir del alcance se rechaza.
 - `.facha-ui/live/` guarda el token de la sesión: `variants` avisa si no está en `.gitignore`.
 
-**S7. Cadena de suministro.** Versiones exactas en `.mcp.json` y `package.json`, lockfile commiteado y bundle construido en CI desde un tag. `run-pinned.mjs` rechaza especificadores sin versión exacta.
+**S7. Cadena de suministro.** Versiones exactas en los `mcpServers` de `plugin.json` y en `package.json`, lockfile commiteado y bundle construido en CI desde un tag. `run-pinned.mjs` rechaza especificadores sin versión exacta.
 
 ---
 
@@ -944,7 +944,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 | ID | Criterio | Verificación |
 |---|---|---|
 | PLG-1 | `claude plugin validate .` pasa; el plugin se instala desde GitHub con los comandos de §3.2 y expone `/facha-ui:start` (desde 0.16.0), `/facha-ui:variants`, `/facha-ui:apply`, `/facha-ui:init`, `/facha-ui:flow`, `/facha-ui:learn` y `/facha-ui:help`, y el hook del guardián automático (`hooks/hooks.json`) | [manual] |
-| PLG-2 | `.mcp.json` no contiene especificadores sin versión exacta; `run-pinned.mjs` rechaza `@latest` y funciona en Windows y en macOS/Linux | [auto] + [manual] Windows |
+| PLG-2 | Los `mcpServers` de `plugin.json` no contienen especificadores sin versión exacta; `run-pinned.mjs` rechaza `@latest` y funciona en Windows y en macOS/Linux | [auto] + [manual] Windows |
 | VAR-1 | `variants` crea exactamente `lab.dir/<slug>/{a,b,c}` (más `_shared/` opcional, `<x>2` si se pide un ajuste como variante nueva, y el andamiaje); en modo en vivo, además `.facha-ui/live/` y `.facha-ui/proposals/`. `git status --porcelain` antes y después muestra cambios **solo** en el lab y en `.facha-ui/` | [manual] guion |
 | VAR-2 | Cada variante termina `valid` con `check_ui` = 0 errores, o `failed` después de exactamente 3 intentos registrados en `attempts` | [auto] validación del run JSON + [manual] |
 | VAR-3 | `.facha-ui/runs/<slug>.json` cumple el esquema de la skill (`schema/run.schema.json`, *roadmap*); cada decisión tiene `source`, y las decisiones sobre valores visuales usan solo `token`/`class`/`rule`/`decision` | [auto] |
@@ -1396,6 +1396,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Una variante que falla se explica:** `main.tsx` la envuelve en un manejador de errores que muestra el error y, si falta un provider, dónde agregarlo; el panel queda afuera y sigue visible.
 - **Verificado** en la app de prueba: el entry se lee exacto; con el provider faltante, el lab muestra el aviso y el panel; con `providers.tsx` según las reglas, la variante trae los pedidos con React Query y navega con `useNavigate` dentro del lab.
 - **Tests:** 215. Lector del entry (React Query local, store importado, provider local, instancia exportada, `RouterProvider`, `ReactDOM.render`, entry con otra ruta, lo que no sigue), solo en Vite, S2 (entry con efectos secundarios que no se ejecuta, imports del lector) y el contrato del manejador de errores y de `lab.md`.
+### 7.29 Los servidores MCP en el manifiesto
+
+Ítem B-023 del backlog: en sesiones abiertas en el repo de facha-ui, `facha-ui` y `playwright` figuraban "Connection closed".
+
+- **Causa, con los logs de Claude Code** (`mcp-logs-facha-ui` y `mcp-logs-playwright` de la sesión): el `.mcp.json` de la raíz se cargaba dos veces, como config del plugin y como config del proyecto abierto. En la copia del proyecto `${CLAUDE_PLUGIN_ROOT}` no tiene valor y Node buscaba `…\facha-ui\${CLAUDE_PLUGIN_ROOT}\mcp\dist\facha-ui-mcp.js` (`MODULE_NOT_FOUND`). En la misma sesión, el servidor del plugin (`mcp-logs-plugin-facha-ui-facha-ui`) arrancó y conectó; en los logs de la máquina tiene 24 conexiones correctas y ninguna falla. Por eso el subagente revisor tenía las herramientas (§7.22): eran las del plugin.
+- **Alcance:** solo quien desarrolla el plugin dentro de este repo. En el proyecto de quien usa el plugin no hay un `.mcp.json` del plugin en la raíz.
+- **Arreglo:** los dos servidores pasan a `mcpServers` en `.claude-plugin/plugin.json` (mismos comandos y versiones) y se borra el `.mcp.json` de la raíz. `claude plugin validate .` lo acepta.
+- **Tests:** 216. Los de versiones fijas y del bundle leen el manifiesto; uno nuevo falla si vuelve un `.mcp.json` en la raíz con `${CLAUDE_PLUGIN_ROOT}` (comprobado con el archivo anterior).
+
 ---
 
 ## Anexo A · Config completa de ejemplo

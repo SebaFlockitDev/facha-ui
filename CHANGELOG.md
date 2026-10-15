@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Fixed
+
+- Los servidores MCP se declaran en `plugin.json`: una sesión abierta en el repo de facha-ui ya no levanta una copia de `facha-ui` y `playwright` que fallaba con "Connection closed". Para quien usa el plugin, los servidores y sus versiones no cambian.
+
 ## [0.19.0] - 2026-10-15
 
 ### Added
