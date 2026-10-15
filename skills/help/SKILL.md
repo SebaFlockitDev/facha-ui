@@ -35,6 +35,7 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 | "Revisá el recorrido de alta" | Revisa el flujo entre pantallas, con capturas, sin tocar código | `/facha-ui:flow "<objetivo>" <pantallas>` |
 | "Enseñame a usar facha-ui" | Curso de 9 lecciones sobre tu proyecto | `/facha-ui:learn` |
 | "Aplicá la B" | Claude te responde con el comando exacto: aplicar lo lanzás vos | `/facha-ui:apply orders b` |
+| "No tengo nada de diseño definido" | Un brief de tu producto, propuesto desde el código: qué es, para quién y qué impresión tiene que dar | `/facha-ui:init brief` |
 | "Armá los tokens que faltan" | Claude te da el comando: crear tokens lo lanzás vos | `/facha-ui:init` |
 
 Además, cada vez que Claude escribe un archivo de UI, el guardián automático lo chequea solo (ver **tools**).
@@ -51,6 +52,7 @@ Además, cada vez que Claude escribe un archivo de UI, el guardián automático 
 | `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Revisa un recorrido entre pantallas (nombres, confirmaciones, errores, salida, próximo paso) con capturas; no cambia código y te propone qué paso rediseñar |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
 | `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
+| `/facha-ui:init brief` | Arma el brief de diseño de un proyecto sin diseño: Claude lee el código, te propone cada respuesta (producto, usuarios, personalidad, densidad, color de marca) con su evidencia y te pregunta solo lo que el código no dice. Lo guarda en `decisions.md` solo si aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
 | `/facha-ui:learn [1-9\|<tema>]` | Curso práctico sobre tu propio proyecto: design system, IA y UI con criterio, en 9 lecciones. Solo lee |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
@@ -129,6 +131,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"aju
 
 ```text
 /facha-ui:init [colors|scales|all]
+/facha-ui:init brief
 /facha-ui:init palette <archivo>
 ```
 
@@ -142,6 +145,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"aju
 - Creás todo o una parte, y elegís si migrar los literales. Aprobás con un motivo.
 - Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
   Nunca cambia ni borra tokens existentes (salvo los valores que aprobás en modo `palette`). No commitea.
+- **Brief:** `/facha-ui:init brief`, para un proyecto sin diseño definido. Antes de cualquier color, entiende el producto: te muestra un brief ya completado desde el código (tipo de producto, quién lo usa y para qué, personalidad, densidad, color de marca, referencias, qué evitar), con la evidencia de cada respuesta, y te pregunta como mucho 3 cosas. Lo guarda como decisión solo si aprobás; desde ahí, `variants` lo usa y lo cita.
 - **Paleta:** `/facha-ui:init palette <archivo>` adopta una paleta propuesta desde el panel en vivo. Muestra cada token antes y después, el contraste y los conflictos con su solución; cambia solo esos valores después de tu aprobación y registra la decisión.
 
 ### learn

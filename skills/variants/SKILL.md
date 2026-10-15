@@ -77,7 +77,7 @@ pantalla de pedidos") takes the main costs of the diagnosis (Step 3b) as its goa
 
 Call `get_design_system` (all sections) and keep all of it for the run (`project.lab`, `themes`,
 `preview`, `decisionsFile`, tokens, scales, classes, coverage, gaps, health, rules, guidelines,
-decisions). On `MULTIPLE_PROJECTS`, show the `candidates` and ask which one (open Claude Code
+decisions, brief). On `MULTIPLE_PROJECTS`, show the `candidates` and ask which one (open Claude Code
 there or set `FACHA_UI_ROOT`). Say "Project discovered at …" once.
 
 Stop, and explain why, when:
@@ -113,7 +113,7 @@ Stop, and explain why, when:
 
 **Before this step, read `../_shared/ux-principles.md`:** every principle you cite is one of its
 ids. Then write a short diagnosis, as a senior designer would before touching a screen:
-- **who** uses the screen (role, context, frequency), from the code, the routes and the goal;
+- **who** uses the screen (role, context, frequency): from `brief` (cite its id), else from the code and routes;
 - **their main task** on it, in one sentence;
 - **what costs them today:** 2 to 4 problems, each with evidence (the baseline, `review_ui`,
   `file:line`) and the `ux:*` id it breaks.

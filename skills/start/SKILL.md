@@ -38,8 +38,8 @@ this is a first look, not a report. The principles file named below
 
 ## Step 1 · The project and its design system
 
-Call `get_design_system` with `project`, `tokens`, `coverage`, `health`, `rules` and
-`decisions`.
+Call `get_design_system` with `project`, `tokens`, `coverage`, `health`, `rules`, `decisions`
+and `brief`.
 
 - **`MULTIPLE_PROJECTS`:** list the `candidates` as options and explain the choice: open Claude
   Code in that folder, or set `FACHA_UI_ROOT` before launching it (`$env:FACHA_UI_ROOT = "web"; claude`
@@ -58,7 +58,8 @@ Otherwise, say in 3 to 5 plain lines:
   - `partial`: what is missing from `coverage.missing`, in words ("no hay colores de estado:
     éxito, advertencia, peligro");
   - `missing`: see Step 2;
-- previous design decisions (`decisions`), if any: how many and the latest title.
+- previous design decisions (`decisions`), if any: how many and the latest title; and the design
+  brief (`brief`), if any, in one line (product, personality, density).
 
 Explain "design system" and "token" in one sentence the first time: *los valores con nombre
 (colores, tamaños, radios) que la app reusa en lugar de escribirlos a mano*.
@@ -69,9 +70,11 @@ If `status` is `missing`, say it plainly: the project has no tokens, so every co
 written by hand, the AI has nothing to follow and invents values, and dark mode cannot be kept
 consistent. That is not a failure of the developer: it is the usual starting point.
 
-Recommend `/facha-ui:init`: it reads the colors, sizes and radii the code already uses and
-proposes tokens with a value per theme and verified contrast, and writes nothing until the
-developer approves. The guardian still works without tokens (hand-written colors, arbitrary
+Without a `brief`, recommend starting with `/facha-ui:init brief`: a short brief of what the
+product is and the look it needs, which facha-ui proposes from the code and the developer
+corrects, so the design has a direction before any color. With a brief, recommend
+`/facha-ui:init`: it reads the colors, sizes and radii the code already uses and proposes tokens
+with a value per theme and verified contrast. Neither writes anything until the developer approves. The guardian still works without tokens (hand-written colors, arbitrary
 values, accessibility, responsive, microcopy), so continue with Step 3.
 
 ## Step 3 · Score and the 3 most serious problems
@@ -105,7 +108,7 @@ Explain each term once ("contraste: la diferencia de luz entre el texto y su fon
 Give **one** next step, the one with the most impact, as a command or a request in plain words,
 with one sentence on why. Choose it with this rule, in order:
 
-1. `status` is `missing` → `/facha-ui:init`.
+1. `status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`.
 2. More than half of `audit_project.totals.error` comes from tokens or contrast
    (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`,
    `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`.
@@ -115,7 +118,8 @@ with one sentence on why. Choose it with this rule, in order:
    say why (from the assumptions) and recommend fixing its worst problem by hand with
    `check_ui`'s suggestions instead.
 
-Then 2 alternatives, one line each, from what you found (for example "si querés ir rápido:
+Then 2 alternatives, one line each, from what you found; with tokens and no `brief`, one of them
+is `/facha-ui:init brief`, so the next designs follow the product's direction (for example "si querés ir rápido:
 *mejorá `<route>`, hacelo rápido*", "si querés aprender primero: `/facha-ui:learn`", "para un
 recorrido entero: *revisá el recorrido de alta*").
 

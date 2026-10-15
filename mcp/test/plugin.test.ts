@@ -172,6 +172,35 @@ describe("init skill", () => {
     expect(allowed.filter((t) => /^(Write|Edit|Bash|MultiEdit|NotebookEdit)\b/.test(t))).toEqual([]);
     expect(allowed).toContain("mcp__plugin_facha-ui_facha-ui__scan_styles");
   });
+
+  // B-024: the design brief, for a project with no design yet.
+  const read = (...p: string[]) => fs.readFileSync(path.join(REPO, "skills", ...p), "utf8").replace(/\s+/g, " ");
+
+  it("has a brief mode in its own file, read before it, that writes only one decisions entry", () => {
+    const skill = read("init", "SKILL.md");
+    expect(skill).toContain("`brief`: record what the product is and the look it needs, before any token. **Before this mode, read `brief.md`**");
+    const brief = read("init", "brief.md");
+    expect(brief).toContain("the **only** write is appending one entry to `memory.decisionsFile`");
+    expect(brief).toContain("**at most 3 questions**");
+    expect(brief).toContain("never the brand color until the developer confirms it");
+    expect(brief).toContain("Only an explicit yes in this conversation counts");
+  });
+
+  it("writes the entry with the labels and product ids get_design_system parses", async () => {
+    const { PRODUCT_TYPES } = await import("../src/brief.js");
+    const brief = fs.readFileSync(path.join(REPO, "skills", "init", "brief.md"), "utf8");
+    const entry = brief.match(/```markdown\r?\n(## dec-YYYY-MM-DD-brief[\s\S]*?)```/)?.[1] ?? "";
+    for (const label of ["Fecha", "Producto", "Usuarios", "Tarea principal", "Contexto", "Personalidad", "Densidad", "Color de marca", "Tipografía", "Referencias", "Evitar", "Accesibilidad", "Modo oscuro"])
+      expect(entry, label).toContain(`- **${label}:**`);
+    for (const id of PRODUCT_TYPES) expect(brief, id).toContain(`\`${id}\``);
+  });
+
+  it("start recommends the brief first, and variants takes who uses the screen from it", () => {
+    const start = read("start", "SKILL.md");
+    expect(start).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`");
+    expect(read("variants", "SKILL.md")).toContain("from `brief` (cite its id)");
+    expect(read("help", "SKILL.md")).toContain("/facha-ui:init brief");
+  });
 });
 
 /** Every Markdown file under a folder, recursively. */
@@ -406,7 +435,7 @@ describe("start skill", () => {
     expect(flat).toContain('`configSource: "autodetected"`');
     expect(flat).toContain('"version": 1');
     expect(flat).toContain("## Step 2 · Without a design system");
-    expect(flat).toContain("`status` is `missing` → `/facha-ui:init`");
+    expect(flat).toContain("`status` is `missing` → `/facha-ui:init brief` when `brief` is null, else `/facha-ui:init`");
     expect(flat).toContain("→ `/facha-ui:init colors`");
   });
 
