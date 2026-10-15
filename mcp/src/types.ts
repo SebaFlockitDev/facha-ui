@@ -114,7 +114,8 @@ export class FachaError extends Error {
       | "MULTIPLE_PROJECTS"
       | "PATH_OUTSIDE_PROJECT"
       | "PATH_NOT_FOUND"
-      | "UNSUPPORTED_FILE",
+      | "UNSUPPORTED_FILE"
+      | "INVALID_INPUT",
     message: string,
     public details: Record<string, unknown> = {},
   ) {

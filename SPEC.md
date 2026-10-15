@@ -370,6 +370,15 @@ Las escalas `inferred` salen de los valores que usan las clases de componente de
 
 Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 
+##### `propose_design_system` (B-025, §2.h)
+
+**Descripción (literal):**
+> Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+> **When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve — this is the read-only half of `/facha-ui:init system`. Never present it as existing tokens.
+> **Returns:** JSON with `designSystemStatus`, `brief`, `inputs` (value and origin of each), `typography`, `spacing`, `radius`, `directions` (per direction: `seed`, `scales`, `tokens` with name, role, light and dark value and sources, `proof` with every contrast pair, `adjustments`, `conflicts` with their solution, `notes` and the `css` blocks to write), `sources` and `notes`. Read-only: it never modifies files or accesses the network.
+
+**Entrada:** `{ brandColor?, density?: "compact" | "balanced" | "airy", level?: "AA" | "AAA", fontFamily?, radius?: 0–32, seeds?: 3–5 }`. Lo que falta sale del brief (§2.g) y, si no, de un valor por defecto; `inputs` dice el origen de cada uno. Un `brandColor` que no es un color CSS da `INVALID_INPUT`. El generador (`mcp/src/generate.ts`) es una función pura: solo importa culori y sus constantes (`mcp/src/standards.ts`), y un test lo controla.
+
 ##### `ux_score` (desde 0.12.0, §7.20)
 
 Puntaje de 0 a 100 por pantalla, en cinco categorías (consistencia con el design system, accesibilidad, responsive, microcopy, jerarquía y estados). Cada pantalla cuenta su archivo y los componentes del proyecto que importa (hasta dos niveles). Cada categoría arranca en 100 y pierde 15 por error, 6 por advertencia y 2 por info; el total es el promedio ponderado (0,25 · 0,25 · 0,15 · 0,15 · 0,20). Es una tendencia, no una nota absoluta. **Entrada:** `{ path?: string }` (por defecto, todas las pantallas fuera del lab). Además, el bundle tiene un modo de línea de comandos para CI: `node facha-ui-mcp.js score --root <dir> [--baseline <archivo>] [--min <n>]` imprime el JSON y sale con 1 si una pantalla bajó respecto de la línea base o quedó por debajo de `--min`. Solo lee: la línea base se crea redirigiendo la salida a un archivo.
@@ -449,7 +458,7 @@ Todos de solo lectura y regenerados al leerlos (caché por `mtime`):
 
 #### 2.a.6 Errores
 
-Errores de tool con `isError: true` y `structuredContent.code`: `CONFIG_INVALID`, `MULTIPLE_PROJECTS`, `PROJECT_NOT_FOUND`, `PATH_OUTSIDE_PROJECT`, `PATH_NOT_FOUND`, `UNSUPPORTED_FILE`. Un archivo que no se puede parsear no aborta: va a `skipped` con `PARSE_ERROR` y su línea. Límites: archivos de más de 1 MB se omiten (`skipped: FILE_TOO_LARGE`); máximo 5.000 archivos por auditoría.
+Errores de tool con `isError: true` y `structuredContent.code`: `CONFIG_INVALID`, `MULTIPLE_PROJECTS`, `PROJECT_NOT_FOUND`, `PATH_OUTSIDE_PROJECT`, `PATH_NOT_FOUND`, `UNSUPPORTED_FILE`, `INVALID_INPUT` (un argumento con forma inválida, con `field`). Un archivo que no se puede parsear no aborta: va a `skipped` con `PARSE_ERROR` y su línea. Límites: archivos de más de 1 MB se omiten (`skipped: FILE_TOO_LARGE`); máximo 5.000 archivos por auditoría.
 
 ---
 
@@ -946,7 +955,7 @@ Todos son verificables con un test automático o con un procedimiento manual rep
 
 | ID | Criterio | Verificación |
 |---|---|---|
-| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project`, `scan_styles` (desde 0.2.0), `review_ui` (desde 0.9.0), `ux_score` y `review_flow` (desde 0.12.0), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
+| MCP-1 | Arranca por stdio con `node mcp/dist/facha-ui-mcp.js --root <dir>`. `tools/list` devuelve exactamente `get_design_system`, `check_ui`, `audit_project`, `scan_styles` (desde 0.2.0), `review_ui` (desde 0.9.0), `ux_score` y `review_flow` (desde 0.12.0) y `propose_design_system` (B-025), con `inputSchema`, `outputSchema` y anotaciones `readOnlyHint: true`, `openWorldHint: false`. `resources/list` devuelve los 4 recursos de §2.a.5 | [auto] cliente MCP de test |
 | MCP-2 | **Solo lectura:** las tools (3 en 0.1.0, 4 desde 0.2.0) y los 4 recursos funcionan sobre un fixture con permisos de solo lectura, y el árbol queda idéntico (hash) después de correrlos | [auto] |
 | MCP-3 | **Sin red ni procesos:** el bundle no referencia `child_process`, `net`, `http`, `https`, `dgram`, `fetch` ni APIs de escritura de `fs` | [auto] análisis del bundle + ESLint |
 | MCP-4 | **Determinismo:** dos ejecuciones con la misma entrada producen JSON idéntico byte a byte | [auto] |

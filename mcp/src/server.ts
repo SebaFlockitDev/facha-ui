@@ -4,6 +4,7 @@ import { auditProject, checkUi } from "./check.js";
 import { createContext, type Context } from "./context.js";
 import { getDesignSystem, health, rulesInfo, SECTIONS } from "./design-system.js";
 import { scanStyles } from "./propose.js";
+import { proposeDesignSystem } from "./propose-system.js";
 import { reviewUi } from "./review.js";
 import { uxScore } from "./score.js";
 import { reviewFlow } from "./flow.js";
@@ -33,6 +34,9 @@ export const DESCRIPTIONS = {
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review — this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
 **Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
+  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+**When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve — this is the read-only half of \`/facha-ui:init system\`. Never present it as existing tokens.
+**Returns:** JSON with \`designSystemStatus\`, \`brief\`, \`inputs\` (value and origin of each), \`typography\`, \`spacing\`, \`radius\`, \`directions\` (per direction: \`seed\`, \`scales\`, \`tokens\` with name, role, light and dark value and sources, \`proof\` with every contrast pair, \`adjustments\`, \`conflicts\` with their solution, \`notes\` and the \`css\` blocks to write), \`sources\` and \`notes\`. Read-only: it never modifies files or accesses the network.`,
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
 **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
 **Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
@@ -168,6 +172,36 @@ export function createServer(opts: ServerOptions): McpServer {
         return ok(
           `${s.colorLiterals} color literal(s): ${s.coveredByExistingTokens} match existing tokens, ${s.tokenProposals} token proposal(s), ${s.scaleProposals} scale proposal(s), ${s.filesToMigrate} file(s) to migrate.`,
           data,
+        );
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "propose_design_system",
+    {
+      title: "Propose design system",
+      description: DESCRIPTIONS.propose_design_system,
+      inputSchema: {
+        brandColor: z.string().max(100).optional(),
+        density: z.enum(["compact", "balanced", "airy"]).optional(),
+        level: z.enum(["AA", "AAA"]).optional(),
+        fontFamily: z.string().max(200).optional(),
+        radius: z.number().int().min(0).max(32).optional(),
+        seeds: z.number().int().min(3).max(5).optional(),
+      },
+      annotations: { title: "Propose design system", ...READ_ONLY },
+    },
+    async (args) => {
+      try {
+        const data = proposeDesignSystem(context(), args);
+        const pairs = data.directions.flatMap((d) => d.proof);
+        const failing = pairs.filter((p) => !p.pass).length;
+        return ok(
+          `${data.directions.length} direction(s); ${pairs.length - failing}/${pairs.length} contrast pair(s) pass WCAG ${data.inputs.level!.value}; ${data.directions.reduce((n, d) => n + d.adjustments.length, 0)} adjustment(s), ${data.directions.reduce((n, d) => n + d.conflicts.length, 0)} conflict(s).`,
+          data as unknown as Record<string, unknown>,
         );
       } catch (e) {
         return fail(e);
