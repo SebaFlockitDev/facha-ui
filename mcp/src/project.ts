@@ -4,6 +4,7 @@ import picomatch from "picomatch";
 import { ALWAYS_IGNORED_DIRS, CONFIG_FILE, DEFAULT_INCLUDE, loadConfig, type LoadedConfig } from "./config.js";
 import { FachaError } from "./types.js";
 import { readViteConfig } from "./vite-config.js";
+import { readAppEntry, type AppEntry } from "./app-entry.js";
 
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_FILES = 5000;
@@ -21,6 +22,8 @@ export interface Project extends LoadedConfig {
   framework: Framework;
   /** Vite only: whether vite.config registers facha-ui's live plugin (live mode needs it). */
   liveRegistered?: boolean;
+  /** Vite only: the app entry read statically (global CSS, providers around <App />). */
+  labEntry?: AppEntry | null;
   /** Project root relative to the workspace (POSIX, "." when they are the same). */
   workspacePath: string;
 }
@@ -144,11 +147,13 @@ export function openProject(root: string, ws?: Workspace): Project {
   const framework: Framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
   const assumptions = [...loaded.assumptions];
   let liveRegistered: boolean | undefined;
+  let labEntry: AppEntry | null | undefined;
   // The lab's defaults follow the framework (SPEC §2.b.4): Vite serves facha-lab/ as its own
   // dev-only entry, on the dev server's port read statically from vite.config.
   if (framework === "vite-react") {
     const vite = readViteConfig({ root });
     liveRegistered = vite?.liveRegistered ?? false;
+    labEntry = readAppEntry({ root });
     if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
     if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
     if (vite?.inputs?.length) {
@@ -181,6 +186,7 @@ export function openProject(root: string, ws?: Workspace): Project {
     frameworkDetected,
     framework,
     ...(liveRegistered !== undefined ? { liveRegistered } : {}),
+    ...(labEntry !== undefined ? { labEntry } : {}),
     workspacePath,
   };
 }

@@ -266,6 +266,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
         dir: ctx.project.labDir,
         urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework),
         ...(ctx.project.liveRegistered !== undefined ? { liveRegistered: ctx.project.liveRegistered } : {}),
+        ...(ctx.project.labEntry !== undefined ? { entry: ctx.project.labEntry } : {}),
       },
       screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
