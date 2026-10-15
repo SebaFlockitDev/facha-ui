@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-15
+
 ### Added
 
 - `/facha-ui:init system`: para un proyecto sin tokens, arma un design system completo desde estándares publicados y tu brief: escalas de color de 12 pasos en claro y oscuro (con los roles de Radix Colors y la luminosidad de cada paso calculada por contraste), tipografía de Carbon o Material 3 según la densidad, espaciado y alto de controles de Carbon, radios de Material 3 y sombras de Fluent 2. Cada par de contraste se prueba contra WCAG 2.2, cada ajuste y cada conflicto se muestran con su motivo y su solución, y no escribe nada sin tu aprobación. Sin color de marca, propone 3 direcciones.
@@ -263,7 +265,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...v0.19.0

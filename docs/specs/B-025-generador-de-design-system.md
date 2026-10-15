@@ -1,6 +1,6 @@
 # B-025 · Generador de design system, desde una marca o desde cero
 
-> **Estado:** en curso · **Rama:** `feat/design-generator` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.21.0) · **Rama:** `feat/design-generator` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-024 (brief, hecho en 0.20.0) · **Última actualización:** 2026-10-15
 
@@ -141,7 +141,7 @@ su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test
 - [x] 5. Docs: SPEC §2.h y §7.31, `docs/uso.md`, `CHANGELOG.md` · `354673c`
 - [x] 6. Prueba real en `facha-ui-pruebas/vite-sin-diseno` (brief de B-024): generar, escribir,
   `status: ok`, contraste y `check_ui`; más una revisión visual · `715f093`, `53fcd39`, `ff88bbc`
-- [ ] 7. Release
+- [x] 7. Release 0.21.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -205,9 +205,10 @@ su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test
   - **revisión visual** de una página de muestra (botones, hover, campos con foco, estados, tabla
     y panel, en claro y oscuro): encontró el chip de info claro en el modo oscuro (alias resuelto
     en `:root`), corregido con su test (`53fcd39`). 284 tests en verde.
+- **2026-10-15 · release 0.21.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.31 con la versión; B-025 a Hecho.
 
 ## Cómo retomar
 
-**Estado al 2026-10-15:** tareas 1 a 6 hechas en `feat/design-generator`, sin push. Falta el release
-(tarea 7), con el OK de quien mantiene el repo: versión menor (0.21.0), con el flujo de `CLAUDE.md`, y
-B-025 pasa a Hecho.
+Terminado en 0.21.0. Sigue B-026 (tres direcciones sobre la pantalla real), que usa las
+`directions` de `propose_design_system` y una página de muestra en el laboratorio.

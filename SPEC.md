@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.20.0** (§7.10–§7.30). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.21.0** (§7.10–§7.31). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -713,7 +713,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1461,7 +1461,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Decisiones:** el brief vive en `decisions.md` y no en la config, porque es una decisión de diseño del equipo y ya es una fuente válida; un brief nuevo no borra el anterior; los ids de tipo de producto y densidad son estables y en inglés (los usarán los perfiles de B-027), y las etiquetas, en español con equivalentes en inglés.
 - **Tests:** el lector (brief completo, el más reciente gana, etiquetas en inglés, "ninguno" y "nada", valores inválidos informados, texto con instrucciones como dato, sin archivo, y la sección por el MCP) y los contratos de las skills (modo en su propio archivo, única escritura, como mucho 3 preguntas, etiquetas que el MCP lee, `start` y `variants`). Un test además exige un spec en `docs/specs/` para todo ítem en curso.
 
-### 7.31 Design system desde estándares
+### 7.31 Versión 0.21.0: design system desde estándares
 
 Ítem B-025 del backlog, el segundo del bloque "diseño desde cero". Spec, fuentes verificadas, decisiones y registro: [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
 
