@@ -245,7 +245,9 @@ Con el brief listo y sin tokens, facha-ui arma un sistema completo en el que **c
 - **Tipografía, espaciado, alto de controles, radios y sombras:** de Carbon, Material 3 y Fluent 2, según la densidad del brief.
 - **Prueba de accesibilidad:** cada texto sobre cada fondo y cada borde de control, contra WCAG 2.2 AA (o AAA si el brief lo pide).
 
-Te muestra todo antes de escribir: los colores por rol, **qué tuvo que ajustar y por qué** (por ejemplo, un verde de éxito que se separa del rojo para que se distingan con daltonismo), los conflictos con su solución (una marca verde se confunde con "éxito": ese estado siempre lleva texto e ícono) y exactamente qué va a escribir. Si no tenés color de marca, te muestra 3 direcciones para elegir.
+**Antes de escribir, te muestra 3 direcciones en el laboratorio:** tu color de marca (o 3 semillas si no tenés) en tres estilos con fuente (estándar, sobrio y suave: radio, gris y elevación de Material 3, Radix, Carbon y Fluent 2), sobre una copia de tu pantalla real con tus datos y sobre una página de muestra con todos los estados (hover, foco, deshabilitado, error, vacío), lado a lado y con capturas. Elegís una, o mezclás el color de una con el estilo de otra.
+
+Después te muestra el plan de la elegida: los colores por rol, **qué tuvo que ajustar y por qué** (por ejemplo, un verde de éxito que se separa del rojo para que se distingan con daltonismo), los conflictos con su solución (una marca verde se confunde con "éxito": ese estado siempre lleva texto e ícono) y exactamente qué va a escribir. Si no tenés color de marca, te muestra 3 direcciones para elegir.
 
 Con tu aprobación escribe los tokens al principio de tu CSS global (en Tailwind 4, en `@theme`) y registra la decisión. Tus pantallas no cambian: el guardián va a marcar sus colores escritos a mano, y el paso siguiente es pedir variantes (*"mejorá la pantalla de pedidos"*) que ya usan el sistema.
 

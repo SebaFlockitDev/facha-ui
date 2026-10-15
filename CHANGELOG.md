@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- `/facha-ui:init system` muestra 3 direcciones antes de escribir: en el laboratorio, sobre una copia de tu pantalla real con tus datos y sobre una página de muestra con todos los tokens y estados, lado a lado y con capturas. Elegís una o mezclás (el color de una con el estilo de otra), y recién ahí se escriben los tokens.
+- Cada dirección es una semilla (o tu marca) con un estilo: estándar, sobrio o suave, con radio, gris y elevación tomados de Material 3, Radix, Carbon y Fluent 2. Con marca hay tres direcciones de verdad, no una.
+- `propose_design_system` acepta `style` y devuelve el CSS de cada dirección listo para el laboratorio.
+
 ## [0.21.0] - 2026-10-15
 
 ### Added

@@ -95,41 +95,74 @@ Sin laboratorio posible (`framework: unknown`), el flujo sigue como en 0.21.0: t
 
 ## Criterios de aceptación
 
-- [ ] Cada par de direcciones difiere en al menos dos de: tono, tinte del neutro, radio y elevación
+- [x] Cada par de direcciones difiere en al menos dos de: tono, tinte del neutro, radio y elevación
   (con marca y sin marca), con test.
-- [ ] La página de muestra pasa `check_ui` con 0 errores contra un sistema generado.
-- [ ] Hay capturas de las 3 direcciones, de la muestra y de la pantalla real.
-- [ ] Fuera del laboratorio no se escribe nada sin aprobación.
+- [x] La página de muestra pasa `check_ui` con 0 errores contra un sistema generado (test en Vite y
+  Next con cada estilo; y en la prueba real, 0 errores y 0 avisos).
+- [x] Hay capturas de las 3 direcciones, de la muestra y de la pantalla real (en la prueba real,
+  tomadas con el panel del navegador; la skill las guarda con Playwright).
+- [x] Fuera del laboratorio no se escribe nada sin aprobación (regla en `system.md`, contrato en
+  `plugin.test.ts`).
 
-## Fuentes a verificar (tarea 1)
+## Fuentes verificadas (tarea 1, 2026-10-15)
 
-Modelo de capas de Carbon (superficies sin sombra), escala gris pura de Radix (luminosidad del paso 1
-en claro y oscuro), y que los radios 4, 8 y 16 y las sombras 2 y 8 son los que ya están verificados
-en `standards.ts`.
+- Carbon: `@carbon/themes` 11.83, `layer-01/02/03` alternan `#f4f4f4` y `#ffffff` sobre un fondo
+  `#ffffff`; la sombra es un token aparte para lo que flota.
+- Radix *gray*: croma 0 en los 12 pasos; el paso 1 tiene luminosidad 0.991 en claro y 0.178 en
+  oscuro (re-medido en `standards.test.ts`).
+- Radios 4, 8 y 16 (Material 3) y sombras 2 y 8 (Fluent 2): ya verificados en B-025.
 
 ## Tareas
 
-- [ ] 1. Fuentes; estilos en `standards.ts` y `generate.ts`; `style` en la tool; tests; bundle
-- [ ] 2. Templates: `lab-theme` con dirección, muestra, rutas de `system/` en Next y Vite, comparar en
-  modo `system`, índice y panel; tests
-- [ ] 3. Skills: `system.md`, `lab.md`, `apply`, `variants`, `help`; contratos
-- [ ] 4. Docs: SPEC §2.h y §7.32, `docs/uso.md`, `CHANGELOG.md`
-- [ ] 5. Prueba real en `facha-ui-pruebas/vite-sin-diseno`: tres direcciones sobre la pantalla de
-  pedidos y la muestra, capturas, comparar, elegir, escribir, `check_ui` y limpieza
+- [x] 1. Fuentes; estilos en `standards.ts` y `generate.ts`; `style` en la tool; tests; bundle · `ab9f3b5`
+- [x] 2. Templates: `lab-theme` con dirección, muestra, rutas de `system/` en Next y Vite, comparar
+  direcciones (componente propio), índice y panel; tests · `1d95961`
+- [x] 3. Skills: `system.md`, `lab.md`, `apply`, `variants`, `help`; contratos · `f223dca`
+- [x] 4. Docs: SPEC §2.h y §7.32, `docs/uso.md`, `CHANGELOG.md`
+- [x] 5. Prueba real en `facha-ui-pruebas/vite-sin-diseno`: tres direcciones sobre la pantalla de
+  pedidos y la muestra, capturas, comparar, elegir, escribir, `check_ui` y limpieza · `d149f04`
 - [ ] 6. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Comparar direcciones con un componente propio** (`system/lab-directions.tsx`) en lugar de
+  sumar un modo a la comparación de variantes: esa página está atada a los runs (votos, endpoint
+  en vivo, revisiones), y la de direcciones vive y se borra con `system/`.
+- **Vite carga `system/` con globs** (`import.meta.glob`), que no fallan cuando la carpeta no está:
+  el andamiaje no cambia de lista y un laboratorio sin vista de direcciones sigue respondiendo.
+- **El generador entrega `css.lab`** (cada dirección ya acotada a
+  `html[data-facha-direction="<id>"]`), para que la skill no transforme CSS a mano.
+- **`check_ui` en S5 va sobre la copia y la muestra**, no sobre todo `system/`: `directions.css`
+  guarda los valores (218 "color literal" en la prueba) y `lab-directions.tsx` es UI de facha-ui.
+- **Con marca, las direcciones pueden parecerse sobre la pantalla** (cambian radio, gris y
+  elevación, y una tabla muestra poco de eso): la skill lo dice y remite a la muestra. No se
+  forzaron diferencias sin fuente.
 
 ## Registro
 
 - **2026-10-15:** spec escrito y plan presentado, pendiente de aprobación. Al relevar el laboratorio
   apareció que el `allowed-tools` de `variants` no incluye Write, Edit ni las herramientas de
   Playwright que usa (funcionan con permiso en cada uso); no se cambia acá.
+- **2026-10-15:** plan aprobado ("lo que sea mejor": las cuatro decisiones recomendadas).
+  Tareas 1 a 3 (`ab9f3b5`, `1d95961`, `f223dca`); 299 tests.
+- **2026-10-15 · prueba real** en `facha-ui-pruebas/vite-sin-diseno` (Vite 5, React Query, router;
+  brief con marca `#4f46e5`, densidad compacta), emulando `system.md` con el bundle de la rama:
+  - S2: tres direcciones (`brand-standard`, `brand-sober`, `brand-soft`), 62/62 pares cada una;
+  - S2b: andamiaje de Vite creado, `system/` escrito, copia de la pantalla de pedidos con tokens;
+    `check_ui` sobre la copia: solo `unknown-token` (27), como se espera antes de escribir;
+  - la vista funciona con los datos reales en las tres direcciones, la muestra y la comparación
+    lado a lado, en claro y oscuro;
+  - S4–S5: escrita la dirección sobria; `status: ok`; copia y muestra con 0 errores; laboratorio
+    borrado;
+  - hallazgos corregidos (`d149f04`): `check_ui` sobre todo `system/` no tenía sentido
+    (`directions.css` son los valores), la muestra tenía un enlace «Enlace» (WCAG 2.4.4) y `100vh`
+    dejaba ver el fondo de la app; y sobre la tabla las tres direcciones se parecen: la skill lo
+    dice y remite a la muestra;
+  - límite: la ruta de Next no se probó en ejecución (no hay una app Next de prueba); la cubren los
+    tests de contrato y el de `check_ui` de la muestra en un proyecto Next.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan (sección 5: cuatro decisiones). Con el OK, "Plan (propuesto…)" pasa
-a "Plan aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en la rama
-`feat/design-directions`.
+**Estado al 2026-10-15:** tareas 1 a 5 hechas en `feat/design-directions`, sin push. Falta el release
+(tarea 6), con el OK de quien mantiene el repo: versión menor (0.22.0), con el flujo de `CLAUDE.md`, y
+B-026 pasa a Hecho; en el backlog, actualizar su criterio ("densidad" → "elevación").
