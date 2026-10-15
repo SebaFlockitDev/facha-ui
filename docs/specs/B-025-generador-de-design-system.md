@@ -1,6 +1,6 @@
 # B-025 · Generador de design system, desde una marca o desde cero
 
-> **Estado:** en spec · **Rama:** `feat/design-generator` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/design-generator` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-024 (brief, hecho en 0.20.0) · **Última actualización:** 2026-10-15
 
@@ -12,7 +12,7 @@ sistema con un método (Radix Colors, Adobe Leonardo, Material Color Utilities),
 puede hacerlo **determinístico y con fuente en cada valor**, que es justo lo que ninguna herramienta
 de IA ofrece (ver el estudio).
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-15)
 
 ### 1. Tool `propose_design_system` (MCP, solo lectura, sin red)
 
@@ -88,7 +88,7 @@ diseño): el siguiente paso es `/facha-ui:variants`.
 tokens, el siguiente paso pasa a ser `/facha-ui:init system`), `help`, contratos en
 `plugin.test.ts`.
 
-### 5. Decisiones a confirmar
+### 5. Decisiones confirmadas (2026-10-15: las cuatro, como se recomendaron)
 
 1. **Incluir la escritura (`/facha-ui:init system`) en este ítem.** Recomendado: sin ella el
    generador no se puede usar hasta B-026. B-026 suma ver las direcciones en la pantalla real antes
@@ -116,18 +116,25 @@ más allá de la densidad (B-027), los controles del panel (B-031) y la migraci�
   solución.
 - [ ] `/facha-ui:init system` escribe solo con aprobación, y solo los bloques mostrados.
 
-## Fuentes a verificar (tarea 1)
+## Fuentes verificadas (tarea 1, 2026-10-15)
 
-Antes de fijar cualquier constante se confirma en la documentación primaria y se anota acá con su
-URL: escalas claras y oscuras de Radix Colors (contrastes y croma medidos), tamaños de Carbon
-(*type sets* y *field sizes*), forma y tipografía de Material 3, sombras de Fluent 2, criterios WCAG
-1.4.3, 1.4.6, 1.4.8, 1.4.11 y 2.5.8.
+Leídas de los paquetes publicados en unpkg; las constantes están en `mcp/src/standards.ts`, cada una con
+su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test.ts`.
+
+| Fuente | Qué se tomó |
+|---|---|
+| Radix Colors 3.0.0 (MIT), 25 acentos y 6 grises, claro y oscuro (`test/fixtures/radix-colors-3.0.0.json`) | Contraste mediano de cada paso contra el paso 1; croma de cada paso respecto del 9; luminosidad y croma de los grises teñidos; el paso 9 es igual en claro y oscuro; texto blanco salvo en las 5 escalas brillantes (paso 9 con L ≥ 0.854; las otras ≤ 0.691) |
+| `@carbon/type` 11.69 (Apache-2.0) | Escala productiva 12, 14, 16, 20, 28, 32, 42 (densidad compacta) |
+| `@carbon/layout` 11.61 (Apache-2.0) | Espaciado 2, 4, 8, 12, 16, 24, 32, 40, 48, 64; controles sm 32, md 40, lg 48 |
+| `@material/web` 2.5.0 (Apache-2.0) | Escala 12, 14, 16, 22, 28, 36, 45 (equilibrada y aireada); radios 0, 4, 8, 12, 16, 28, completo; títulos 32/40 = 1.25 |
+| `@fluentui/tokens` 1.0.0-alpha.22 (MIT) | `createShadowTokens`: sombras 2, 8 y 16, ambiente 0.12 y clave 0.14 en claro, 0.24 y 0.28 en oscuro |
+| WCAG 2.2 | 1.4.3 (4.5:1), 1.4.6 (7:1), 1.4.11 (3:1), 1.4.1, 1.4.8 (interlineado 1.5), 2.5.8 (24px) |
 
 ## Tareas
 
-- [ ] 1. Verificar las fuentes; fixture con las escalas de Radix y test que mide las constantes
-- [ ] 2. `mcp/src/standards.ts` (constantes con fuente) y `mcp/src/generate.ts` (escalas, roles,
-  tipografía, espacio, radios, sombras, CSS), con tests
+- [x] 1. Verificar las fuentes; fixture con las escalas de Radix y test que mide las constantes
+- [x] 2. `mcp/src/standards.ts` (constantes con fuente) y `mcp/src/generate.ts` (escalas, roles,
+  tipografía, espacio, radios, sombras, CSS), con tests · `7f1b4c8`
 - [ ] 3. Tool `propose_design_system` (`server.ts`, descripción también en SPEC §2.a.3), tests por el
   MCP y de imports, bundle
 - [ ] 4. `skills/init/system.md`, `init`, `start`, `brief.md`, `help` y contratos
@@ -138,15 +145,45 @@ URL: escalas claras y oscuras de Radix Colors (contrastes y croma medidos), tama
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Escalas tipográficas publicadas tal cual**, no una razón modular: compacta = escala productiva de
+  Carbon; equilibrada y aireada = escala de Material 3. Así cada tamaño tiene fuente directa.
+- **Nombres con los espacios de Tailwind 4** (`--color-*`, `--text-*`, `--radius-*`, `--shadow-*`,
+  `--font-sans`), que facha-ui lee por rol: el mismo sistema va en `:root` (CSS) o en `@theme`
+  (Tailwind 4) sin mapeo. Un test escribe el CSS en un proyecto y comprueba roles y `status: ok`.
+- **Sin nombres de shadcn:** un proyecto shadcn sin tokens casi no existe (`shadcn init` los
+  escribe); esos proyectos siguen con `palette` y `colors`.
+- **Borde de controles y anillo de foco como roles propios** resueltos a 3:1 (WCAG 1.4.11): el paso
+  8 de Radix, que se usa para eso, mide 2.3:1 en claro.
+- **Marca contra el fondo:** con menos de 3:1 no se ajusta, se informa: un botón con texto no
+  necesita borde (WCAG 1.4.11); un control solo con ícono, sí.
+- **Texto sobre el sólido como en Radix:** blanco, salvo en colores brillantes (luminosidad > 0.773,
+  el punto medio medido). Si no llega al mínimo, el sólido se mueve lo menos posible en
+  luminosidad; así el peligro queda rojo con texto blanco (`#d83b43`).
+- **Info sigue a la marca** cuando se confunden (todo azul o violeta queda bajo ΔE 10 con
+  deuteranopía): es el estado menos crítico y siempre lleva texto. Las semillas sin marca se
+  filtran solo contra éxito, advertencia y peligro: quedan índigo, ciruela y cyan.
+- **Estados separados en luminosidad** cuando se confunden con daltonismo (el rojo y el verde de
+  Radix: ΔE 3.9 con deuteranopía). Peligro no se mueve; los demás buscan hacia arriba y hacia
+  abajo el menor cambio que los separa con texto legible. El primer intento (solo oscurecer)
+  dejaba el éxito casi negro (`#003916`): descartado tras revisarlo a ojo.
+- **Conflicto de marca contra la familia del estado:** la marca tal como la dio el dev y la
+  ajustada, contra el estado ajustado y su semilla de Radix (una marca verde se lee como éxito).
+- **El paso 11 (texto de acento) nunca es más claro que la marca** en claro (ni más oscuro en
+  oscuro): en Radix siempre contrasta al menos como el 9.
 
 ## Registro
 
 - **2026-10-15:** spec escrito; plan presentado, pendiente de aprobación. Al revisar el panel en vivo
   apareció que sus paletas predefinidas traen afirmaciones sin fuente ("El más usado en bancos y
   fintech", `lab-panel.tsx:196`): anotado como B-036 en Ideas.
+- **2026-10-15:** plan aprobado con las cuatro decisiones. Tarea 1: fuentes verificadas en los
+  paquetes publicados. Tarea 2: generador y constantes (`7f1b4c8`), 265 tests en verde. La ida y
+  vuelta por facha-ui encontró que el rojo y el verde de Radix se confunden con deuteranopía; la
+  revisión a ojo encontró peligro con texto oscuro, éxito casi negro y texto de acento más claro
+  que la marca. Corregido (ver decisiones).
 
 ## Cómo retomar
 
-Esperar la aprobación del plan (sección 5: cuatro decisiones). Con el OK, el título "Plan
-(propuesto…)" pasa a "Plan aprobado (fecha)", el estado a `en curso` y se arranca por la tarea 1.
+Seguir por la tarea 3: la tool `propose_design_system` en `mcp/src/server.ts`, que arma la entrada
+desde el brief (`parseBrief`) y el proyecto (Tailwind 4 → formato `tailwind4`) y llama a
+`proposeSystem` de `mcp/src/generate.ts`. Con ella, el bundle cambia: `npm run build` en el mismo commit.

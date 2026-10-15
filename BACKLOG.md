@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-025 · Generador de design system, desde una marca o desde cero
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** L
 - **Por qué:** un proyecto sin diseño necesita un sistema completo y accesible, no valores sueltos. Las herramientas profesionales lo derivan con un método (Radix Colors, Adobe Leonardo, Material Color Utilities), no a ojo.
 - **Qué:** una tool del MCP, determinística, que a partir del brief y de un color de marca (o de 3 a 5 semillas si no hay) genera: escalas OKLCH de 12 pasos con los roles de Radix y la luminosidad de cada paso resuelta por contraste (Leonardo); neutros teñidos con el tono de la marca; colores de estado; claro y oscuro generados por separado, no invertidos; escala tipográfica, espaciado de 4/8, radios y elevación. Todo se mapea a las variables de shadcn y a los roles de facha-ui, y cada valor cita su fuente.
