@@ -830,9 +830,9 @@ var require_stringifier = __commonJS({
       }
       rawValue(node2, prop) {
         let value = node2[prop];
-        let raw = node2.raws[prop];
-        if (raw && raw.value === value) {
-          return raw.raw;
+        let raw2 = node2.raws[prop];
+        if (raw2 && raw2.value === value) {
+          return raw2.raw;
         }
         return value;
       }
@@ -2835,13 +2835,13 @@ var require_quick_sort = __commonJS({
       function randomIntInRange(low, high) {
         return Math.round(low + Math.random() * (high - low));
       }
-      function doQuickSort(ary, comparator2, p4, r2) {
-        if (p4 < r2) {
-          var pivotIndex = randomIntInRange(p4, r2);
+      function doQuickSort(ary, comparator2, p4, r4) {
+        if (p4 < r4) {
+          var pivotIndex = randomIntInRange(p4, r4);
           var i = p4 - 1;
-          swap(ary, pivotIndex, r2);
-          var pivot = ary[r2];
-          for (var j = p4; j < r2; j++) {
+          swap(ary, pivotIndex, r4);
+          var pivot = ary[r4];
+          for (var j = p4; j < r4; j++) {
             if (comparator2(ary[j], pivot, false) <= 0) {
               i += 1;
               swap(ary, i, j);
@@ -2850,7 +2850,7 @@ var require_quick_sort = __commonJS({
           swap(ary, i + 1, j);
           var q = i + 1;
           doQuickSort(ary, comparator2, p4, q - 1);
-          doQuickSort(ary, comparator2, q + 1, r2);
+          doQuickSort(ary, comparator2, q + 1, r4);
         }
       }
       return doQuickSort;
@@ -5248,8 +5248,8 @@ var require_parser = __commonJS({
           }
         }
         if (!clean2) {
-          let raw = tokens.reduce((all, i) => all + i[1], "");
-          node2.raws[prop] = { raw, value };
+          let raw2 = tokens.reduce((all, i) => all + i[1], "");
+          node2.raws[prop] = { raw: raw2, value };
         }
         node2[prop] = value;
       }
@@ -11349,9 +11349,9 @@ var require_utils2 = __commonJS({
       let output2 = "";
       for (let i = 0; i < input2.length; i++) {
         if (input2[i] === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            const normalizedHex = hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            const normalizedHex = hex6.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (decodeUnreserved && isUnreserved(decoded)) {
               output2 += decoded;
@@ -11371,9 +11371,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            const normalizedHex = hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            const normalizedHex = hex6.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (decoded !== "." && isUnreserved(decoded)) {
               output2 += decoded;
@@ -11413,9 +11413,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            output2 += "%" + hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            output2 += "%" + hex6.toUpperCase();
             i += 2;
             continue;
           }
@@ -11451,9 +11451,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            output2 += "%" + hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            output2 += "%" + hex6.toUpperCase();
             i += 2;
             continue;
           }
@@ -11498,9 +11498,9 @@ var require_utils2 = __commonJS({
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
         if (ch === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            const normalizedHex = hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            const normalizedHex = hex6.toUpperCase();
             const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
             if (isUnreserved(decoded)) {
               output2 += decoded;
@@ -11538,9 +11538,9 @@ var require_utils2 = __commonJS({
       let output2 = "";
       for (let i = 0; i < input2.length; i++) {
         if (input2[i] === "%" && i + 2 < input2.length) {
-          const hex5 = input2.slice(i + 1, i + 3);
-          if (isHexPair(hex5)) {
-            output2 += "%" + hex5.toUpperCase();
+          const hex6 = input2.slice(i + 1, i + 3);
+          if (isHexPair(hex6)) {
+            output2 += "%" + hex6.toUpperCase();
             i += 2;
             continue;
           }
@@ -15982,9 +15982,9 @@ function putProp(target, key, value) {
     target[key] = value;
 }
 function mirrorShape(target, source, keys, wrap) {
-  const raw = sourceShape(source);
+  const raw2 = sourceShape(source);
   for (const key of keys) {
-    const desc = Object.getOwnPropertyDescriptor(raw, key);
+    const desc = Object.getOwnPropertyDescriptor(raw2, key);
     if (!desc.enumerable)
       continue;
     if (desc.get) {
@@ -16250,10 +16250,10 @@ function pick(schema, mask) {
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function maskedKeys(schema, mask) {
-  const raw = sourceShape(schema);
+  const raw2 = sourceShape(schema);
   const keys = [];
   for (const key of Reflect.ownKeys(mask)) {
-    if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
+    if (!Object.getOwnPropertyDescriptor(raw2, key)?.enumerable) {
       throw new Error(`Unrecognized key: "${String(key)}"`);
     }
     if (mask[key])
@@ -16493,8 +16493,8 @@ function base64urlToUint8Array(base64url3) {
 function uint8ArrayToBase64url(bytes) {
   return uint8ArrayToBase64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
-function hexToUint8Array(hex5) {
-  const cleanHex = hex5.replace(/^0x/, "");
+function hexToUint8Array(hex6) {
+  const cleanHex = hex6.replace(/^0x/, "");
   if (cleanHex.length % 2 !== 0) {
     throw new Error("Invalid hex string length");
   }
@@ -17905,7 +17905,7 @@ var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
     own(this, "~standard", value);
   }
 });
-var toStandardResult = (r2, ctx) => r2.issues.length ? { issues: r2.issues.map((iss) => finalizeIssue(iss, ctx, config())) } : { value: r2.value };
+var toStandardResult = (r4, ctx) => r4.issues.length ? { issues: r4.issues.map((iss) => finalizeIssue(iss, ctx, config())) } : { value: r4.value };
 async function validateAsync2(inst, value) {
   const ctx = { async: true };
   return toStandardResult(await inst._zod.run({ value, issues: [] }, ctx), ctx);
@@ -17915,9 +17915,9 @@ function standardProps(inst) {
     validate: (value) => {
       const ctx = { async: false };
       try {
-        const r2 = inst._zod.run({ value, issues: [] }, ctx);
-        if (!(r2 instanceof Promise))
-          return toStandardResult(r2, ctx);
+        const r4 = inst._zod.run({ value, issues: [] }, ctx);
+        if (!(r4 instanceof Promise))
+          return toStandardResult(r4, ctx);
       } catch (_) {
       }
       return validateAsync2(inst, value);
@@ -18670,11 +18670,11 @@ function handleCatchall(proms, input2, payload, ctx, def, inst, abortEarly) {
       unrecognized.push(key);
       continue;
     }
-    const r2 = _catchall.run({ value: input2[key], issues: [] }, ctx);
-    if (r2 instanceof Promise) {
-      proms.push(r2.then((r3) => handlePropertyResult(r3, payload, key, input2, optin, optout)));
+    const r4 = _catchall.run({ value: input2[key], issues: [] }, ctx);
+    if (r4 instanceof Promise) {
+      proms.push(r4.then((r5) => handlePropertyResult(r5, payload, key, input2, optin, optout)));
     } else {
-      handlePropertyResult(r2, payload, key, input2, optin, optout);
+      handlePropertyResult(r4, payload, key, input2, optin, optout);
     }
   }
   if (unrecognized.length) {
@@ -18758,11 +18758,11 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
       const el = shape[key];
       const optin = el._zod.optin;
       const optout = el._zod.optout;
-      const r2 = el._zod.run({ value: input2[key], issues: [] }, ctx);
-      if (r2 instanceof Promise) {
-        proms.push(r2.then((r3) => handlePropertyResult(r3, payload, key, input2, optin, optout)));
+      const r4 = el._zod.run({ value: input2[key], issues: [] }, ctx);
+      if (r4 instanceof Promise) {
+        proms.push(r4.then((r5) => handlePropertyResult(r5, payload, key, input2, optin, optout)));
       } else {
-        handlePropertyResult(r2, payload, key, input2, optin, optout);
+        handlePropertyResult(r4, payload, key, input2, optin, optout);
       }
     }
     if (!catchall) {
@@ -18905,7 +18905,7 @@ function handleUnionResults(results, final, inst, ctx) {
       return final;
     }
   }
-  const nonaborted = results.filter((r2) => !aborted(r2));
+  const nonaborted = results.filter((r4) => !aborted(r4));
   if (nonaborted.length === 1) {
     final.value = nonaborted[0].value;
     return nonaborted[0];
@@ -19277,15 +19277,15 @@ var $ZodTuple = /* @__PURE__ */ $constructor("$ZodTuple", (inst, def) => {
     const abortEarly = def.rest ? ctx?.abortEarly : void 0;
     let itemAborted = false;
     for (let i = 0; i < items.length; i++) {
-      const r2 = items[i]._zod.run({ value: input2[i], issues: [] }, ctx);
-      if (r2 instanceof Promise) {
-        proms.push(r2.then((rr) => {
+      const r4 = items[i]._zod.run({ value: input2[i], issues: [] }, ctx);
+      if (r4 instanceof Promise) {
+        proms.push(r4.then((rr) => {
           itemResults[i] = rr;
         }));
       } else {
-        itemResults[i] = r2;
-        if (abortEarly && !itemAborted && r2.issues.length)
-          itemAborted = aborted(r2);
+        itemResults[i] = r4;
+        if (abortEarly && !itemAborted && r4.issues.length)
+          itemAborted = aborted(r4);
       }
     }
     if (def.rest && !itemAborted) {
@@ -19301,7 +19301,7 @@ var $ZodTuple = /* @__PURE__ */ $constructor("$ZodTuple", (inst, def) => {
         i++;
         const result = def.rest._zod.run({ value: el, issues: [] }, ctx);
         if (result instanceof Promise) {
-          proms.push(result.then((r2) => handleTupleResult(r2, payload, i)));
+          proms.push(result.then((r4) => handleTupleResult(r4, payload, i)));
         } else {
           handleTupleResult(result, payload, i);
         }
@@ -19329,20 +19329,20 @@ function handleTupleResult(result, final, index2) {
 }
 function handleTupleResults(itemResults, final, items, input2, optoutStart) {
   for (let i = 0; i < items.length; i++) {
-    const r2 = itemResults[i];
+    const r4 = itemResults[i];
     const isPresent = i < input2.length;
     if (!isPresent && i >= optoutStart && items[i]._zod.optin === "optional") {
       final.value.length = i;
       break;
     }
-    if (r2.issues.length) {
+    if (r4.issues.length) {
       if (!isPresent && i >= optoutStart) {
         final.value.length = i;
         break;
       }
-      final.issues.push(...prefixIssues(i, r2.issues));
+      final.issues.push(...prefixIssues(i, r4.issues));
     }
-    final.value[i] = r2.value;
+    final.value[i] = r4.value;
   }
   for (let i = final.value.length - 1; i >= input2.length; i--) {
     if (items[i]._zod.optout === "optional" && final.value[i] === void 0) {
@@ -20183,11 +20183,11 @@ var $ZodCustom = /* @__PURE__ */ $constructor("$ZodCustom", (inst, def) => {
   };
   inst._zod.check = (payload) => {
     const input2 = payload.value;
-    const r2 = def.fn(input2);
-    if (r2 instanceof Promise) {
-      return r2.then((r3) => handleRefineResult(r3, payload, input2, inst));
+    const r4 = def.fn(input2);
+    if (r4 instanceof Promise) {
+      return r4.then((r5) => handleRefineResult(r5, payload, input2, inst));
     }
-    handleRefineResult(r2, payload, input2, inst);
+    handleRefineResult(r4, payload, input2, inst);
     return;
   };
 });
@@ -20263,8 +20263,8 @@ function isRecursive(inst, stack, resolve) {
   const kind = def.type;
   switch (kind) {
     case "object": {
-      const raw = rawShape(def);
-      merge2(raw ? shape(raw, true) : ASSUMED);
+      const raw2 = rawShape(def);
+      merge2(raw2 ? shape(raw2, true) : ASSUMED);
       check2(def.catchall);
       break;
     }
@@ -20462,10 +20462,10 @@ var memo = {
         handoff = void 0;
         const entry = open.length > depth ? open.pop() : void 0;
         if (result instanceof Promise) {
-          return result.then((r2) => {
+          return result.then((r4) => {
             if (entry)
-              entry.issues = r2.issues.length ? cloneIssues(r2.issues) : NO_ISSUES;
-            return r2;
+              entry.issues = r4.issues.length ? cloneIssues(r4.issues) : NO_ISSUES;
+            return r4;
           });
         }
         if (entry)
@@ -28253,8 +28253,8 @@ function runtimeRun(schema, value) {
   const result = schema._zod.run({ value, issues: [] }, {});
   if (result && typeof result.then === "function")
     return INVALID;
-  const r2 = result;
-  return r2.issues.length === 0 ? r2.value : INVALID;
+  const r4 = result;
+  return r4.issues.length === 0 ? r4.value : INVALID;
 }
 function compileChild(doc, ctx, schema, accessor, needsValue = true) {
   const contentLen = doc.content.length;
@@ -29654,9 +29654,9 @@ function runtimeCatch(innerSchema, catchValue, value) {
   const result = innerSchema._zod.run({ value, issues: [] }, {});
   if (result && typeof result.then === "function")
     return INVALID;
-  const r2 = result;
-  if (r2.issues.length === 0)
-    return r2.value;
+  const r4 = result;
+  if (r4.issues.length === 0)
+    return r4.value;
   return catchValue();
 }
 function generateCatchCheck(doc, ctx, schema, accessor) {
@@ -34084,8 +34084,8 @@ function canonicalKey(value, seen) {
   if (type !== "object") {
     if (type === "number" && Number.isNaN(value))
       return null;
-    const raw = String(value);
-    return `${type[0]}${raw.length}:${raw}`;
+    const raw2 = String(value);
+    return `${type[0]}${raw2.length}:${raw2}`;
   }
   if (seen.has(value))
     return null;
@@ -37179,12 +37179,12 @@ function parseRgb(color, parsed) {
     return void 0;
   }
   const res = { mode: "rgb" };
-  const [, r2, g, b, alpha] = parsed;
-  if (r2.type === Tok.Hue || g.type === Tok.Hue || b.type === Tok.Hue) {
+  const [, r4, g, b, alpha] = parsed;
+  if (r4.type === Tok.Hue || g.type === Tok.Hue || b.type === Tok.Hue) {
     return void 0;
   }
-  if (r2.type !== Tok.None) {
-    res.r = r2.type === Tok.Number ? r2.value / 255 : r2.value / 100;
+  if (r4.type !== Tok.None) {
+    res.r = r4.type === Tok.Number ? r4.value / 255 : r4.value / 100;
   }
   if (g.type !== Tok.None) {
     res.g = g.type === Tok.Number ? g.value / 255 : g.value / 100;
@@ -37282,14 +37282,14 @@ var definition_default = definition;
 // node_modules/culori/src/a98/convertA98ToXyz65.js
 var linearize = (v = 0) => Math.pow(Math.abs(v), 563 / 256) * Math.sign(v);
 var convertA98ToXyz65 = (a982) => {
-  let r2 = linearize(a982.r);
+  let r4 = linearize(a982.r);
   let g = linearize(a982.g);
   let b = linearize(a982.b);
   let res = {
     mode: "xyz65",
-    x: 0.5766690429101305 * r2 + 0.1855582379065463 * g + 0.1882286462349947 * b,
-    y: 0.297344975250536 * r2 + 0.6273635662554661 * g + 0.0752914584939979 * b,
-    z: 0.0270313613864123 * r2 + 0.0706888525358272 * g + 0.9913375368376386 * b
+    x: 0.5766690429101305 * r4 + 0.1855582379065463 * g + 0.1882286462349947 * b,
+    y: 0.297344975250536 * r4 + 0.6273635662554661 * g + 0.0752914584939979 * b,
+    z: 0.0270313613864123 * r4 + 0.0706888525358272 * g + 0.9913375368376386 * b
   };
   if (a982.alpha !== void 0) {
     res.alpha = a982.alpha;
@@ -37331,10 +37331,10 @@ var fn = (c2 = 0) => {
   }
   return (Math.sign(c2) || 1) * Math.pow((abs2 + 0.055) / 1.055, 2.4);
 };
-var convertRgbToLrgb = ({ r: r2, g, b, alpha }) => {
+var convertRgbToLrgb = ({ r: r4, g, b, alpha }) => {
   let res = {
     mode: "lrgb",
-    r: fn(r2),
+    r: fn(r4),
     g: fn(g),
     b: fn(b)
   };
@@ -37344,13 +37344,13 @@ var convertRgbToLrgb = ({ r: r2, g, b, alpha }) => {
 var convertRgbToLrgb_default = convertRgbToLrgb;
 
 // node_modules/culori/src/xyz65/convertRgbToXyz65.js
-var convertRgbToXyz65 = (rgb4) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
+var convertRgbToXyz65 = (rgb5) => {
+  let { r: r4, g, b, alpha } = convertRgbToLrgb_default(rgb5);
   let res = {
     mode: "xyz65",
-    x: 0.4123907992659593 * r2 + 0.357584339383878 * g + 0.1804807884018343 * b,
-    y: 0.2126390058715102 * r2 + 0.715168678767756 * g + 0.0721923153607337 * b,
-    z: 0.0193308187155918 * r2 + 0.119194779794626 * g + 0.9505321522496607 * b
+    x: 0.4123907992659593 * r4 + 0.357584339383878 * g + 0.1804807884018343 * b,
+    y: 0.2126390058715102 * r4 + 0.715168678767756 * g + 0.0721923153607337 * b,
+    z: 0.0193308187155918 * r4 + 0.119194779794626 * g + 0.9505321522496607 * b
   };
   if (alpha !== void 0) {
     res.alpha = alpha;
@@ -37367,10 +37367,10 @@ var fn2 = (c2 = 0) => {
   }
   return c2 * 12.92;
 };
-var convertLrgbToRgb = ({ r: r2, g, b, alpha }, mode = "rgb") => {
+var convertLrgbToRgb = ({ r: r4, g, b, alpha }, mode = "rgb") => {
   let res = {
     mode,
-    r: fn2(r2),
+    r: fn2(r4),
     g: fn2(g),
     b: fn2(b)
   };
@@ -37448,11 +37448,11 @@ var radToDeg = 180 / Math.PI;
 var DE = M[3] * M[4];
 var BE = M[1] * M[4];
 var BCAD = M[1] * M[2] - M[0] * M[3];
-var convertRgbToCubehelix = ({ r: r2, g, b, alpha }) => {
-  if (r2 === void 0) r2 = 0;
+var convertRgbToCubehelix = ({ r: r4, g, b, alpha }) => {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
-  let l = (BCAD * b + r2 * DE - g * BE) / (BCAD + DE - BE);
+  let l = (BCAD * b + r4 * DE - g * BE) / (BCAD + DE - BE);
   let x = b - l;
   let y = (M[4] * (g - l) - M[2] * x) / M[3];
   let res = {
@@ -37677,9 +37677,9 @@ var convertXyz65ToLab65 = ({ x, y, z: z2, alpha }) => {
 var convertXyz65ToLab65_default = convertXyz65ToLab65;
 
 // node_modules/culori/src/lab65/convertRgbToLab65.js
-var convertRgbToLab65 = (rgb4) => {
-  let res = convertXyz65ToLab65_default(convertRgbToXyz65_default(rgb4));
-  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
+var convertRgbToLab65 = (rgb5) => {
+  let res = convertXyz65ToLab65_default(convertRgbToXyz65_default(rgb5));
+  if (rgb5.r === rgb5.b && rgb5.b === rgb5.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -37868,18 +37868,18 @@ function convertHsiToRgb({ h, s, i, alpha }) {
 }
 
 // node_modules/culori/src/hsi/convertRgbToHsi.js
-function convertRgbToHsi({ r: r2, g, b, alpha }) {
-  if (r2 === void 0) r2 = 0;
+function convertRgbToHsi({ r: r4, g, b, alpha }) {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
-  let M3 = Math.max(r2, g, b), m = Math.min(r2, g, b);
+  let M3 = Math.max(r4, g, b), m = Math.min(r4, g, b);
   let res = {
     mode: "hsi",
-    s: r2 + g + b === 0 ? 0 : 1 - 3 * m / (r2 + g + b),
-    i: (r2 + g + b) / 3
+    s: r4 + g + b === 0 ? 0 : 1 - 3 * m / (r4 + g + b),
+    i: (r4 + g + b) / 3
   };
   if (M3 - m !== 0)
-    res.h = (M3 === r2 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r2) / (M3 - m) + 2 : (r2 - g) / (M3 - m) + 4) * 60;
+    res.h = (M3 === r4 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r4) / (M3 - m) + 2 : (r4 - g) / (M3 - m) + 4) * 60;
   if (alpha !== void 0) res.alpha = alpha;
   return res;
 }
@@ -37951,18 +37951,18 @@ function convertHslToRgb({ h, s, l, alpha }) {
 }
 
 // node_modules/culori/src/hsl/convertRgbToHsl.js
-function convertRgbToHsl({ r: r2, g, b, alpha }) {
-  if (r2 === void 0) r2 = 0;
+function convertRgbToHsl({ r: r4, g, b, alpha }) {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
-  let M3 = Math.max(r2, g, b), m = Math.min(r2, g, b);
+  let M3 = Math.max(r4, g, b), m = Math.min(r4, g, b);
   let res = {
     mode: "hsl",
     s: M3 === m ? 0 : (M3 - m) / (1 - Math.abs(M3 + m - 1)),
     l: 0.5 * (M3 + m)
   };
   if (M3 - m !== 0)
-    res.h = (M3 === r2 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r2) / (M3 - m) + 2 : (r2 - g) / (M3 - m) + 4) * 60;
+    res.h = (M3 === r4 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r4) / (M3 - m) + 2 : (r4 - g) / (M3 - m) + 4) * 60;
   if (alpha !== void 0) res.alpha = alpha;
   return res;
 }
@@ -38114,18 +38114,18 @@ function convertHsvToRgb({ h, s, v, alpha }) {
 }
 
 // node_modules/culori/src/hsv/convertRgbToHsv.js
-function convertRgbToHsv({ r: r2, g, b, alpha }) {
-  if (r2 === void 0) r2 = 0;
+function convertRgbToHsv({ r: r4, g, b, alpha }) {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
-  let M3 = Math.max(r2, g, b), m = Math.min(r2, g, b);
+  let M3 = Math.max(r4, g, b), m = Math.min(r4, g, b);
   let res = {
     mode: "hsv",
     s: M3 === 0 ? 0 : 1 - m / M3,
     v: M3
   };
   if (M3 - m !== 0)
-    res.h = (M3 === r2 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r2) / (M3 - m) + 2 : (r2 - g) / (M3 - m) + 4) * 60;
+    res.h = (M3 === r4 ? (g - b) / (M3 - m) + (g < b) * 6 : M3 === g ? (b - r4) / (M3 - m) + 2 : (r4 - g) / (M3 - m) + 4) * 60;
   if (alpha !== void 0) res.alpha = alpha;
   return res;
 }
@@ -38438,9 +38438,9 @@ var convertJabToXyz65 = ({ j, a, b, alpha }) => {
 var convertJabToXyz65_default = convertJabToXyz65;
 
 // node_modules/culori/src/jab/convertRgbToJab.js
-var convertRgbToJab = (rgb4) => {
-  let res = convertXyz65ToJab_default(convertRgbToXyz65_default(rgb4));
-  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
+var convertRgbToJab = (rgb5) => {
+  let res = convertXyz65ToJab_default(convertRgbToXyz65_default(rgb5));
+  if (rgb5.r === rgb5.b && rgb5.b === rgb5.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -38595,13 +38595,13 @@ var convertLabToRgb = (lab2) => convertXyz50ToRgb_default(convertLabToXyz50_defa
 var convertLabToRgb_default = convertLabToRgb;
 
 // node_modules/culori/src/xyz50/convertRgbToXyz50.js
-var convertRgbToXyz50 = (rgb4) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
+var convertRgbToXyz50 = (rgb5) => {
+  let { r: r4, g, b, alpha } = convertRgbToLrgb_default(rgb5);
   let res = {
     mode: "xyz50",
-    x: 0.436065742824811 * r2 + 0.3851514688337912 * g + 0.14307845442264197 * b,
-    y: 0.22249319175623702 * r2 + 0.7168870538238823 * g + 0.06061979053616537 * b,
-    z: 0.013923904500943465 * r2 + 0.09708128566574634 * g + 0.7140993584005155 * b
+    x: 0.436065742824811 * r4 + 0.3851514688337912 * g + 0.14307845442264197 * b,
+    y: 0.22249319175623702 * r4 + 0.7168870538238823 * g + 0.06061979053616537 * b,
+    z: 0.013923904500943465 * r4 + 0.09708128566574634 * g + 0.7140993584005155 * b
   };
   if (alpha !== void 0) {
     res.alpha = alpha;
@@ -38633,9 +38633,9 @@ var convertXyz50ToLab = ({ x, y, z: z2, alpha }) => {
 var convertXyz50ToLab_default = convertXyz50ToLab;
 
 // node_modules/culori/src/lab/convertRgbToLab.js
-var convertRgbToLab = (rgb4) => {
-  let res = convertXyz50ToLab_default(convertRgbToXyz50_default(rgb4));
-  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
+var convertRgbToLab = (rgb5) => {
+  let res = convertXyz50ToLab_default(convertRgbToXyz50_default(rgb5));
+  if (rgb5.r === rgb5.b && rgb5.b === rgb5.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -38912,7 +38912,7 @@ var convertLuvToXyz50 = ({ l, u, v, alpha }) => {
 var convertLuvToXyz50_default = convertLuvToXyz50;
 
 // node_modules/culori/src/lchuv/definition.js
-var convertRgbToLchuv = (rgb4) => convertLuvToLchuv_default(convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb4)));
+var convertRgbToLchuv = (rgb5) => convertLuvToLchuv_default(convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb5)));
 var convertLchuvToRgb = (lchuv2) => convertXyz50ToRgb_default(convertLuvToXyz50_default(convertLchuvToLuv_default(lchuv2)));
 var definition17 = {
   mode: "lchuv",
@@ -38971,7 +38971,7 @@ var definition19 = {
   },
   fromMode: {
     xyz50: convertXyz50ToLuv_default,
-    rgb: (rgb4) => convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb4))
+    rgb: (rgb5) => convertXyz50ToLuv_default(convertRgbToXyz50_default(rgb5))
   },
   channels: ["l", "u", "v", "alpha"],
   parse: ["--luv"],
@@ -38991,18 +38991,18 @@ var definition19 = {
 var definition_default19 = definition19;
 
 // node_modules/culori/src/oklab/convertLrgbToOklab.js
-var convertLrgbToOklab = ({ r: r2, g, b, alpha }) => {
-  if (r2 === void 0) r2 = 0;
+var convertLrgbToOklab = ({ r: r4, g, b, alpha }) => {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
   let L = Math.cbrt(
-    0.412221469470763 * r2 + 0.5363325372617348 * g + 0.0514459932675022 * b
+    0.412221469470763 * r4 + 0.5363325372617348 * g + 0.0514459932675022 * b
   );
   let M3 = Math.cbrt(
-    0.2119034958178252 * r2 + 0.6806995506452344 * g + 0.1073969535369406 * b
+    0.2119034958178252 * r4 + 0.6806995506452344 * g + 0.1073969535369406 * b
   );
   let S = Math.cbrt(
-    0.0883024591900564 * r2 + 0.2817188391361215 * g + 0.6299787016738222 * b
+    0.0883024591900564 * r4 + 0.2817188391361215 * g + 0.6299787016738222 * b
   );
   let res = {
     mode: "oklab",
@@ -39018,9 +39018,9 @@ var convertLrgbToOklab = ({ r: r2, g, b, alpha }) => {
 var convertLrgbToOklab_default = convertLrgbToOklab;
 
 // node_modules/culori/src/oklab/convertRgbToOklab.js
-var convertRgbToOklab = (rgb4) => {
-  let res = convertLrgbToOklab_default(convertRgbToLrgb_default(rgb4));
-  if (rgb4.r === rgb4.b && rgb4.b === rgb4.g) {
+var convertRgbToOklab = (rgb5) => {
+  let res = convertLrgbToOklab_default(convertRgbToLrgb_default(rgb5));
+  if (rgb5.r === rgb5.b && rgb5.b === rgb5.g) {
     res.a = res.b = 0;
   }
   return res;
@@ -39121,8 +39121,8 @@ function compute_max_saturation(a, b) {
 }
 function find_cusp(a, b) {
   let S_cusp = compute_max_saturation(a, b);
-  let rgb4 = convertOklabToLrgb_default({ l: 1, a: S_cusp * a, b: S_cusp * b });
-  let L_cusp = Math.cbrt(1 / Math.max(rgb4.r, rgb4.g, rgb4.b));
+  let rgb5 = convertOklabToLrgb_default({ l: 1, a: S_cusp * a, b: S_cusp * b });
+  let L_cusp = Math.cbrt(1 / Math.max(rgb5.r, rgb5.g, rgb5.b));
   let C_cusp = L_cusp * S_cusp;
   return [L_cusp, C_cusp];
 }
@@ -39159,11 +39159,11 @@ function find_gamut_intersection(a, b, L1, C12, L0, cusp = null) {
         let ldt2 = 6 * l_dt * l_dt * l_;
         let mdt2 = 6 * m_dt * m_dt * m_;
         let sdt2 = 6 * s_dt * s_dt * s_;
-        let r2 = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s - 1;
+        let r4 = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s - 1;
         let r1 = 4.0767416621 * ldt - 3.3077115913 * mdt + 0.2309699292 * sdt;
         let r22 = 4.0767416621 * ldt2 - 3.3077115913 * mdt2 + 0.2309699292 * sdt2;
-        let u_r = r1 / (r1 * r1 - 0.5 * r2 * r22);
-        let t_r = -r2 * u_r;
+        let u_r = r1 / (r1 * r1 - 0.5 * r4 * r22);
+        let t_r = -r4 * u_r;
         let g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s - 1;
         let g1 = -1.2684380046 * ldt + 2.6097574011 * mdt - 0.3413193965 * sdt;
         let g2 = -1.2684380046 * ldt2 + 2.6097574011 * mdt2 - 0.3413193965 * sdt2;
@@ -39509,13 +39509,13 @@ var definition21 = {
 var definition_default21 = definition21;
 
 // node_modules/culori/src/p3/convertP3ToXyz65.js
-var convertP3ToXyz65 = (rgb4) => {
-  let { r: r2, g, b, alpha } = convertRgbToLrgb_default(rgb4);
+var convertP3ToXyz65 = (rgb5) => {
+  let { r: r4, g, b, alpha } = convertRgbToLrgb_default(rgb5);
   let res = {
     mode: "xyz65",
-    x: 0.486570948648216 * r2 + 0.265667693169093 * g + 0.1982172852343625 * b,
-    y: 0.2289745640697487 * r2 + 0.6917385218365062 * g + 0.079286914093745 * b,
-    z: 0 * r2 + 0.0451133818589026 * g + 1.043944368900976 * b
+    x: 0.486570948648216 * r4 + 0.265667693169093 * g + 0.1982172852343625 * b,
+    y: 0.2289745640697487 * r4 + 0.6917385218365062 * g + 0.079286914093745 * b,
+    z: 0 * r4 + 0.0451133818589026 * g + 1.043944368900976 * b
   };
   if (alpha !== void 0) {
     res.alpha = alpha;
@@ -39599,14 +39599,14 @@ var linearize2 = (v = 0) => {
   return v / 16;
 };
 var convertProphotoToXyz50 = (prophoto2) => {
-  let r2 = linearize2(prophoto2.r);
+  let r4 = linearize2(prophoto2.r);
   let g = linearize2(prophoto2.g);
   let b = linearize2(prophoto2.b);
   let res = {
     mode: "xyz50",
-    x: 0.7977666449006423 * r2 + 0.1351812974005331 * g + 0.0313477341283922 * b,
-    y: 0.2880748288194013 * r2 + 0.7118352342418731 * g + 899369387256e-16 * b,
-    z: 0 * r2 + 0 * g + 0.8251046025104602 * b
+    x: 0.7977666449006423 * r4 + 0.1351812974005331 * g + 0.0313477341283922 * b,
+    y: 0.2880748288194013 * r4 + 0.7118352342418731 * g + 899369387256e-16 * b,
+    z: 0 * r4 + 0 * g + 0.8251046025104602 * b
   };
   if (prophoto2.alpha !== void 0) {
     res.alpha = prophoto2.alpha;
@@ -39676,14 +39676,14 @@ var linearize3 = (v = 0) => {
   return (Math.sign(v) || 1) * Math.pow((abs2 + \u03B12 - 1) / \u03B12, 1 / 0.45);
 };
 var convertRec2020ToXyz65 = (rec20202) => {
-  let r2 = linearize3(rec20202.r);
+  let r4 = linearize3(rec20202.r);
   let g = linearize3(rec20202.g);
   let b = linearize3(rec20202.b);
   let res = {
     mode: "xyz65",
-    x: 0.6369580483012911 * r2 + 0.1446169035862083 * g + 0.1688809751641721 * b,
-    y: 0.262700212011267 * r2 + 0.6779980715188708 * g + 0.059301716469862 * b,
-    z: 0 * r2 + 0.0280726930490874 * g + 1.0609850577107909 * b
+    x: 0.6369580483012911 * r4 + 0.1446169035862083 * g + 0.1688809751641721 * b,
+    y: 0.262700212011267 * r4 + 0.6779980715188708 * g + 0.059301716469862 * b,
+    z: 0 * r4 + 0.0280726930490874 * g + 1.0609850577107909 * b
   };
   if (rec20202.alpha !== void 0) {
     res.alpha = rec20202.alpha;
@@ -39716,11 +39716,11 @@ var bias_cbrt = Math.cbrt(bias);
 // node_modules/culori/src/xyb/convertRgbToXyb.js
 var transfer = (v) => Math.cbrt(v) - bias_cbrt;
 var convertRgbToXyb = (color) => {
-  const { r: r2, g, b, alpha } = convertRgbToLrgb_default(color);
-  const l = transfer(0.3 * r2 + 0.622 * g + 0.078 * b + bias);
-  const m = transfer(0.23 * r2 + 0.692 * g + 0.078 * b + bias);
+  const { r: r4, g, b, alpha } = convertRgbToLrgb_default(color);
+  const l = transfer(0.3 * r4 + 0.622 * g + 0.078 * b + bias);
+  const m = transfer(0.23 * r4 + 0.692 * g + 0.078 * b + bias);
   const s = transfer(
-    0.2434226892454782 * r2 + 0.2047674442449682 * g + 0.5518098665095535 * b + bias
+    0.2434226892454782 * r4 + 0.2047674442449682 * g + 0.5518098665095535 * b + bias
   );
   const res = {
     mode: "xyb",
@@ -39874,15 +39874,15 @@ var definition27 = {
 var definition_default27 = definition27;
 
 // node_modules/culori/src/yiq/convertRgbToYiq.js
-var convertRgbToYiq = ({ r: r2, g, b, alpha }) => {
-  if (r2 === void 0) r2 = 0;
+var convertRgbToYiq = ({ r: r4, g, b, alpha }) => {
+  if (r4 === void 0) r4 = 0;
   if (g === void 0) g = 0;
   if (b === void 0) b = 0;
   const res = {
     mode: "yiq",
-    y: 0.29889531 * r2 + 0.58662247 * g + 0.11448223 * b,
-    i: 0.59597799 * r2 - 0.2741761 * g - 0.32180189 * b,
-    q: 0.21147017 * r2 - 0.52261711 * g + 0.31114694 * b
+    y: 0.29889531 * r4 + 0.58662247 * g + 0.11448223 * b,
+    i: 0.59597799 * r4 - 0.2741761 * g - 0.32180189 * b,
+    q: 0.21147017 * r4 - 0.52261711 * g + 0.31114694 * b
   };
   if (alpha !== void 0) res.alpha = alpha;
   return res;
@@ -39945,10 +39945,10 @@ var serializeHex = (color) => {
   if (color === void 0) {
     return void 0;
   }
-  let r2 = fixup(color.r);
+  let r4 = fixup(color.r);
   let g = fixup(color.g);
   let b = fixup(color.b);
-  return "#" + (1 << 24 | r2 << 16 | g << 8 | b).toString(16).slice(1);
+  return "#" + (1 << 24 | r4 << 16 | g << 8 | b).toString(16).slice(1);
 };
 var serializeHex8 = (color) => {
   if (color === void 0) {
@@ -39960,8 +39960,112 @@ var serializeHex8 = (color) => {
 var formatHex = (c2) => serializeHex(rgb(c2));
 var formatHex8 = (c2) => serializeHex8(rgb(c2));
 
-// node_modules/culori/src/deficiency.js
+// node_modules/culori/src/clamp.js
 var rgb2 = converter_default("rgb");
+var fixup_rgb = (c2) => {
+  const res = {
+    mode: c2.mode,
+    r: Math.max(0, Math.min(c2.r !== void 0 ? c2.r : 0, 1)),
+    g: Math.max(0, Math.min(c2.g !== void 0 ? c2.g : 0, 1)),
+    b: Math.max(0, Math.min(c2.b !== void 0 ? c2.b : 0, 1))
+  };
+  if (c2.alpha !== void 0) {
+    res.alpha = c2.alpha;
+  }
+  return res;
+};
+var inrange_rgb = (c2) => {
+  return c2 !== void 0 && (c2.r === void 0 || c2.r >= 0 && c2.r <= 1) && (c2.g === void 0 || c2.g >= 0 && c2.g <= 1) && (c2.b === void 0 || c2.b >= 0 && c2.b <= 1);
+};
+function inGamut(mode = "rgb") {
+  const { gamut: gamut2 } = getMode(mode);
+  if (!gamut2) {
+    return (color) => true;
+  }
+  const conv = converter_default(typeof gamut2 === "string" ? gamut2 : mode);
+  return (color) => inrange_rgb(conv(color));
+}
+function clampGamut(mode = "rgb") {
+  const { gamut: gamut2 } = getMode(mode);
+  if (!gamut2) {
+    return (color) => prepare_default(color);
+  }
+  const destMode = typeof gamut2 === "string" ? gamut2 : mode;
+  const destConv = converter_default(destMode);
+  const inDestGamut = inGamut(destMode);
+  return (color) => {
+    const original = prepare_default(color);
+    if (!original) {
+      return void 0;
+    }
+    const converted = destConv(original);
+    if (inDestGamut(converted)) {
+      return original;
+    }
+    const clamped = fixup_rgb(converted);
+    if (original.mode === clamped.mode) {
+      return clamped;
+    }
+    return converter_default(original.mode)(clamped);
+  };
+}
+function toGamut(dest = "rgb", mode = "oklch", delta = differenceEuclidean("oklch"), jnd = 0.02) {
+  const destConv = converter_default(dest);
+  const destMode = getMode(dest);
+  if (!destMode.gamut) {
+    return (color) => destConv(color);
+  }
+  const inDestinationGamut = inGamut(dest);
+  const clipToGamut = clampGamut(dest);
+  const ucs = converter_default(mode);
+  const { ranges } = getMode(mode);
+  if (!ranges.l || !ranges.c) {
+    throw new Error("LCH-like space expected");
+  }
+  return (color) => {
+    color = prepare_default(color);
+    if (color === void 0) {
+      return void 0;
+    }
+    const candidate = { ...ucs(color) };
+    if (candidate.l === void 0) candidate.l = 0;
+    if (candidate.c === void 0) candidate.c = 0;
+    if (candidate.l >= ranges.l[1]) {
+      const res = { ...destMode.white, mode: dest };
+      if (color.alpha !== void 0) {
+        res.alpha = color.alpha;
+      }
+      return res;
+    }
+    if (candidate.l <= ranges.l[0]) {
+      const res = { ...destMode.black, mode: dest };
+      if (color.alpha !== void 0) {
+        res.alpha = color.alpha;
+      }
+      return res;
+    }
+    if (inDestinationGamut(candidate)) {
+      return destConv(candidate);
+    }
+    let start = 0;
+    let end = candidate.c;
+    let epsilon = (ranges.c[1] - ranges.c[0]) / 4e3;
+    let clipped = clipToGamut(candidate);
+    while (end - start > epsilon) {
+      candidate.c = (start + end) * 0.5;
+      clipped = clipToGamut(candidate);
+      if (inDestinationGamut(candidate) || delta && jnd > 0 && delta(candidate, clipped) <= jnd) {
+        start = candidate.c;
+      } else {
+        end = candidate.c;
+      }
+    }
+    return destConv(inDestinationGamut(candidate) ? candidate : clipped);
+  };
+}
+
+// node_modules/culori/src/deficiency.js
+var rgb3 = converter_default("rgb");
 var PROT = [
   [1, 0, -0, 0, 1, 0, -0, -0, 1],
   [
@@ -40202,12 +40306,12 @@ var deficiency = (lut, t) => {
     if (c2 === void 0) {
       return void 0;
     }
-    let { r: r2, g, b } = rgb2(c2);
+    let { r: r4, g, b } = rgb3(c2);
     let ret = {
       mode: "rgb",
-      r: arr[0] * r2 + arr[1] * g + arr[2] * b,
-      g: arr[3] * r2 + arr[4] * g + arr[5] * b,
-      b: arr[6] * r2 + arr[7] * g + arr[8] * b
+      r: arr[0] * r4 + arr[1] * g + arr[2] * b,
+      g: arr[3] * r4 + arr[4] * g + arr[5] * b,
+      b: arr[6] * r4 + arr[7] * g + arr[8] * b
     };
     if (c2.alpha !== void 0) {
       ret.alpha = c2.alpha;
@@ -40255,7 +40359,7 @@ var oklch = useMode(definition_default21);
 var p3 = useMode(definition_default22);
 var prophoto = useMode(definition_default23);
 var rec2020 = useMode(definition_default24);
-var rgb3 = useMode(definition_default);
+var rgb4 = useMode(definition_default);
 var xyb = useMode(definition_default25);
 var xyz50 = useMode(definition_default26);
 var xyz65 = useMode(definition_default27);
@@ -40547,8 +40651,8 @@ function loadConfig(root2) {
   for (const k4 of Object.keys(parsed.data.tailwind ?? {})) if (k4 !== "useDefaultTheme" && k4 !== "allowDefaultScale" && k4 !== "mapped") notEvaluated.push(`tailwind.${k4}`);
   if (parsed.data.lab.viewports) notEvaluated.push("lab.viewports");
   const assumptions = notEvaluated.length ? [`Config keys accepted but not evaluated in this version (roadmap): ${notEvaluated.join(", ")}.`] : [];
-  const raw = json2;
-  const explicit = { labDir: raw?.lab?.dir !== void 0, baseUrl: raw?.preview?.baseUrl !== void 0 };
+  const raw2 = json2;
+  const explicit = { labDir: raw2?.lab?.dir !== void 0, baseUrl: raw2?.preview?.baseUrl !== void 0 };
   return { config: parsed.data, configSource: CONFIG_FILE, assumptions, explicit };
 }
 
@@ -41099,7 +41203,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
       end,
       loc: loc2,
       range,
-      raw,
+      raw: raw2,
       value
     } = node2;
     const cloned = Object.create(node2.constructor.prototype);
@@ -41108,7 +41212,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     cloned.end = end;
     cloned.loc = loc2;
     cloned.range = range;
-    cloned.raw = raw;
+    cloned.raw = raw2;
     cloned.value = value;
     return cloned;
   }
@@ -49720,9 +49824,9 @@ var StatementParser = class extends ExpressionParser {
     const directive = this.castNodeTo(stmt, "Directive");
     const directiveLiteral = this.castNodeTo(stmt.expression, "DirectiveLiteral");
     const expressionValue = directiveLiteral.value;
-    const raw = this.input.slice(this.offsetToSourcePos(directiveLiteral.start), this.offsetToSourcePos(directiveLiteral.end));
-    const val = directiveLiteral.value = raw.slice(1, -1);
-    this.addExtra(directiveLiteral, "raw", raw);
+    const raw2 = this.input.slice(this.offsetToSourcePos(directiveLiteral.start), this.offsetToSourcePos(directiveLiteral.end));
+    const val = directiveLiteral.value = raw2.slice(1, -1);
+    this.addExtra(directiveLiteral, "raw", raw2);
     this.addExtra(directiveLiteral, "rawValue", val);
     this.addExtra(directiveLiteral, "expressionValue", expressionValue);
     directive.value = directiveLiteral;
@@ -55004,8 +55108,8 @@ function rel2(project, abs2) {
   return toPosix(path2.relative(project.root, abs2));
 }
 function isInside(root2, candidate) {
-  const r2 = path2.relative(root2, candidate);
-  return r2 === "" || !r2.startsWith("..") && !path2.isAbsolute(r2);
+  const r4 = path2.relative(root2, candidate);
+  return r4 === "" || !r4.startsWith("..") && !path2.isAbsolute(r4);
 }
 var DISCOVERY_DEPTH = 2;
 function projectTier(dir) {
@@ -55146,7 +55250,7 @@ function walk(dir, out = []) {
 function auditMatcher(project) {
   const inc = (0, import_picomatch.default)(project.include, { dot: false });
   const exc = (0, import_picomatch.default)([...project.exclude, `${project.labDir}/**`], { dot: true });
-  return (r2) => inc(r2) && !exc(r2);
+  return (r4) => inc(r4) && !exc(r4);
 }
 function listProjectFiles(project) {
   const audited = auditMatcher(project);
@@ -55338,8 +55442,8 @@ function trailingComment(decl2) {
 function autodetectSources(project) {
   const priority = ["app/globals.css", "src/index.css", "src/app/globals.css", "styles/globals.css"];
   const cssFiles = listProjectFiles(project).filter((f3) => f3.endsWith(".css")).map((f3) => rel2(project, f3));
-  const withTokens = cssFiles.filter((r2) => {
-    const text = readSource(path4.join(project.root, r2)) ?? "";
+  const withTokens = cssFiles.filter((r4) => {
+    const text = readSource(path4.join(project.root, r4)) ?? "";
     return /(:root|@theme)[^{]*\{[^}]*--[\w-]+\s*:/.test(text);
   });
   return withTokens.sort((a, b) => {
@@ -55354,7 +55458,7 @@ function resolveSources(project) {
   const isMatch = (0, import_picomatch2.default)(globs);
   const all = [];
   for (const g of globs) if (!/[*?{[]/.test(g) && fs3.existsSync(path4.join(project.root, g))) all.push(g);
-  const walked = listProjectFiles({ ...project, include: ["**/*.css"], exclude: [] }).map((f3) => rel2(project, f3)).filter((r2) => isMatch(r2));
+  const walked = listProjectFiles({ ...project, include: ["**/*.css"], exclude: [] }).map((f3) => rel2(project, f3)).filter((r4) => isMatch(r4));
   return [.../* @__PURE__ */ new Set([...all, ...walked])].sort();
 }
 function loadTokens(project) {
@@ -55362,7 +55466,7 @@ function loadTokens(project) {
   const configuredThemes = project.config.tokens.themes;
   const themeOrder = [];
   const themeSelectors = /* @__PURE__ */ new Map();
-  const raw = /* @__PURE__ */ new Map();
+  const raw2 = /* @__PURE__ */ new Map();
   const localCustomProps = /* @__PURE__ */ new Set();
   const parsed = /* @__PURE__ */ new Map();
   if (configuredThemes) {
@@ -55399,7 +55503,7 @@ function loadTokens(project) {
           themeSelectors.set(theme, ctx);
         }
       }
-      const entry = raw.get(decl2.prop) ?? {
+      const entry = raw2.get(decl2.prop) ?? {
         values: /* @__PURE__ */ new Map(),
         comment: null,
         source: `${source}:${decl2.source?.start?.line ?? 0}`
@@ -55409,10 +55513,10 @@ function loadTokens(project) {
         entry.comment = entry.comment ?? trailingComment(decl2);
         entry.source = `${source}:${decl2.source?.start?.line ?? 0}`;
       }
-      raw.set(decl2.prop, entry);
+      raw2.set(decl2.prop, entry);
     });
   }
-  if (themeOrder.length === 0 && raw.size > 0) themeOrder.push("light");
+  if (themeOrder.length === 0 && raw2.size > 0) themeOrder.push("light");
   const themes = themeOrder.map((name, i) => ({
     name,
     selector: themeSelectors.get(name) ?? ":root",
@@ -55420,14 +55524,14 @@ function loadTokens(project) {
   }));
   const defaultTheme2 = themeOrder[0];
   const valueIn = (name, theme) => {
-    const e4 = raw.get(name);
+    const e4 = raw2.get(name);
     if (!e4) return void 0;
     return e4.values.get(theme) ?? (defaultTheme2 ? e4.values.get(defaultTheme2) : void 0) ?? [...e4.values.values()][0];
   };
-  const evidence = colorEvidence(project, raw.keys());
+  const evidence = colorEvidence(project, raw2.keys());
   const channelColors = [];
-  const tokens = [...raw.keys()].sort().map((name) => {
-    const e4 = raw.get(name);
+  const tokens = [...raw2.keys()].sort().map((name) => {
+    const e4 = raw2.get(name);
     const values = {};
     for (const t of themeOrder) {
       const v = valueIn(name, t);
@@ -55570,8 +55674,8 @@ function extractJsx(file2, code2, ext, classHelpers) {
         const touchesNextExpr = ti === tokens.length - 1 && qi < quasis.length - 1 && t.index + t.raw.length === text.length;
         const touchesPrevExpr = ti === 0 && qi > 0 && t.index === 0;
         if (touchesNextExpr || touchesPrevExpr) {
-          const raw = (touchesPrevExpr ? "${\u2026}" : "") + t.raw + (touchesNextExpr ? "${\u2026}" : "");
-          usages.push({ kind: "class-dynamic", raw, ...locAt(t.index) });
+          const raw2 = (touchesPrevExpr ? "${\u2026}" : "") + t.raw + (touchesNextExpr ? "${\u2026}" : "");
+          usages.push({ kind: "class-dynamic", raw: raw2, ...locAt(t.index) });
         } else {
           usages.push({ kind: "class", raw: t.raw, ...locAt(t.index) });
         }
@@ -55778,11 +55882,11 @@ function extractJsx(file2, code2, ext, classHelpers) {
       const tag = nm.tag || "?";
       for (const c2 of n.children) {
         if (c2.type === "JSXText") {
-          const raw = String(c2.value);
-          const lead = raw.search(/\S/);
+          const raw2 = String(c2.value);
+          const lead = raw2.search(/\S/);
           if (lead < 0) continue;
-          const at = makeLocAt(file2, c2.loc.start.line, c2.loc.start.column + 1, raw)(lead);
-          usages.push({ kind: "text", text: raw.replace(/\s+/g, " ").trim(), tag, attr: null, ...at });
+          const at = makeLocAt(file2, c2.loc.start.line, c2.loc.start.column + 1, raw2)(lead);
+          usages.push({ kind: "text", text: raw2.replace(/\s+/g, " ").trim(), tag, attr: null, ...at });
         } else if (c2.type === "JSXExpressionContainer" && c2.expression?.type === "StringLiteral" && c2.expression.value.trim()) {
           const s = inner(c2.expression);
           usages.push({ kind: "text", text: c2.expression.value.trim(), tag, attr: null, file: file2, line: s.line, column: s.column });
@@ -56008,12 +56112,12 @@ function createContext(root2, ws) {
   const tokens = loadTokens(project);
   const cssRoots = new Map(tokens.parsed);
   for (const abs2 of listProjectFiles(project)) {
-    const r2 = rel2(project, abs2);
-    if (!r2.endsWith(".css") || cssRoots.has(r2)) continue;
+    const r4 = rel2(project, abs2);
+    if (!r4.endsWith(".css") || cssRoots.has(r4)) continue;
     const text = readSource(abs2);
     if (text == null) continue;
     try {
-      cssRoots.set(r2, postcss_default.parse(text, { from: r2 }));
+      cssRoots.set(r4, postcss_default.parse(text, { from: r4 }));
     } catch {
     }
   }
@@ -56685,8 +56789,8 @@ function suggestArbitrary(ctx, a) {
       if (Number.isInteger(step)) {
         return { match: "exact", kind: "class", value: `${sign}${prefix2}-${Math.abs(step)}`, detail: `${px}px is step ${Math.abs(step)} of the 4px spacing scale.`, source: null };
       }
-      const r2 = Math.round(step);
-      return { match: "nearest", kind: "class", value: `${sign}${prefix2}-${Math.abs(r2)}`, detail: `Nearest step of the 4px spacing scale (${Math.abs(r2) * 4}px).`, source: null };
+      const r4 = Math.round(step);
+      return { match: "nearest", kind: "class", value: `${sign}${prefix2}-${Math.abs(r4)}`, detail: `Nearest step of the 4px spacing scale (${Math.abs(r4) * 4}px).`, source: null };
     }
     default:
       return NONE2("Layout/sizing value: no design token applies.");
@@ -56709,16 +56813,16 @@ function suggestTokenName(ctx, name) {
 }
 
 // src/tailwind.ts
-function baseUtility(raw) {
+function baseUtility(raw2) {
   let depth = 0;
   let last = 0;
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
+  for (let i = 0; i < raw2.length; i++) {
+    const ch = raw2[i];
     if (ch === "[") depth++;
     else if (ch === "]") depth--;
     else if (ch === ":" && depth === 0) last = i + 1;
   }
-  return raw.slice(last).replace(/^!/, "").replace(/!$/, "");
+  return raw2.slice(last).replace(/^!/, "").replace(/!$/, "");
 }
 var SPACING = /^-?(p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|inset|inset-x|inset-y|top|right|bottom|left|start|end|scroll-m|scroll-p|indent)$/;
 var SIZING = /^(w|h|min-w|min-h|max-w|max-h|size|basis)$/;
@@ -56727,13 +56831,13 @@ var COLOR_ONLY = /^(bg|from|via|to|ring|ring-offset|outline|fill|stroke|decorati
 function isLength(v) {
   return /^-?[\d.]+(px|rem|em|%|vh|vw|vmin|vmax|ch|ex|lh|dvh|svh)?$/.test(v) || /^(calc|clamp|min|max)\(/.test(v);
 }
-function parseArbitrary(raw) {
-  const util2 = baseUtility(raw);
+function parseArbitrary(raw2) {
+  const util2 = baseUtility(raw2);
   const prop = util2.match(/^\[([a-z-]+):(.+)\]$/);
   if (prop) {
     const property2 = prop[1];
     const value2 = prop[2].replace(/_/g, " ");
-    return { raw, prefix: null, value: value2, property: property2, category: categoryForProperty(property2, value2) };
+    return { raw: raw2, prefix: null, value: value2, property: property2, category: categoryForProperty(property2, value2) };
   }
   const m = util2.match(/^(-?[a-z][a-z0-9-]*?)-\[(.+)\](\/[\w.[\]%-]+)?$/);
   if (!m) return null;
@@ -56748,28 +56852,28 @@ function parseArbitrary(raw) {
   const color = hint === "color" || !hint && (isColorValue(value) || /^var\(--/.test(value) && COLOR_ONLY.test(prefix2));
   const p4 = prefix2.replace(/^-/, "");
   if (p4 === "text") {
-    if (color) return { raw, prefix: prefix2, value, property: "color", category: "color" };
-    return { raw, prefix: prefix2, value, property: "font-size", category: "typography" };
+    if (color) return { raw: raw2, prefix: prefix2, value, property: "color", category: "color" };
+    return { raw: raw2, prefix: prefix2, value, property: "font-size", category: "typography" };
   }
-  if (p4 === "font") return { raw, prefix: prefix2, value, property: /^\d+$/.test(value) ? "font-weight" : "font-family", category: "typography" };
-  if (p4 === "leading") return { raw, prefix: prefix2, value, property: "line-height", category: "typography" };
-  if (p4 === "tracking") return { raw, prefix: prefix2, value, property: "letter-spacing", category: "typography" };
-  if (RADIUS.test(p4)) return { raw, prefix: prefix2, value, property: "border-radius", category: "radius" };
+  if (p4 === "font") return { raw: raw2, prefix: prefix2, value, property: /^\d+$/.test(value) ? "font-weight" : "font-family", category: "typography" };
+  if (p4 === "leading") return { raw: raw2, prefix: prefix2, value, property: "line-height", category: "typography" };
+  if (p4 === "tracking") return { raw: raw2, prefix: prefix2, value, property: "letter-spacing", category: "typography" };
+  if (RADIUS.test(p4)) return { raw: raw2, prefix: prefix2, value, property: "border-radius", category: "radius" };
   if (p4 === "shadow" || p4 === "drop-shadow") {
-    return color ? { raw, prefix: prefix2, value, property: "--tw-shadow-color", category: "color" } : { raw, prefix: prefix2, value, property: "box-shadow", category: "shadow" };
+    return color ? { raw: raw2, prefix: prefix2, value, property: "--tw-shadow-color", category: "color" } : { raw: raw2, prefix: prefix2, value, property: "box-shadow", category: "shadow" };
   }
   if (COLOR_ONLY.test(p4)) {
     if (color) {
       const property2 = p4 === "bg" ? "background-color" : p4.startsWith("border") || p4 === "divide" ? "border-color" : p4 === "fill" ? "fill" : p4 === "stroke" ? "stroke" : `${p4}-color`;
-      return { raw, prefix: prefix2, value, property: property2, category: "color" };
+      return { raw: raw2, prefix: prefix2, value, property: property2, category: "color" };
     }
-    if (p4 === "bg") return { raw, prefix: prefix2, value, property: "background", category: "layout" };
-    if (isLength(value)) return { raw, prefix: prefix2, value, property: p4.startsWith("border") ? "border-width" : `${p4}-width`, category: "sizing" };
-    return { raw, prefix: prefix2, value, property: p4, category: "layout" };
+    if (p4 === "bg") return { raw: raw2, prefix: prefix2, value, property: "background", category: "layout" };
+    if (isLength(value)) return { raw: raw2, prefix: prefix2, value, property: p4.startsWith("border") ? "border-width" : `${p4}-width`, category: "sizing" };
+    return { raw: raw2, prefix: prefix2, value, property: p4, category: "layout" };
   }
-  if (SPACING.test(p4)) return { raw, prefix: prefix2, value, property: spacingProperty(p4), category: "spacing" };
-  if (SIZING.test(p4)) return { raw, prefix: prefix2, value, property: sizingProperty(p4), category: "sizing" };
-  return { raw, prefix: prefix2, value, property: p4, category: "layout" };
+  if (SPACING.test(p4)) return { raw: raw2, prefix: prefix2, value, property: spacingProperty(p4), category: "spacing" };
+  if (SIZING.test(p4)) return { raw: raw2, prefix: prefix2, value, property: sizingProperty(p4), category: "sizing" };
+  return { raw: raw2, prefix: prefix2, value, property: p4, category: "layout" };
 }
 function categoryForProperty(property2, value) {
   if (/color|^background$|^fill$|^stroke$/.test(property2) && isColorValue(value)) return "color";
@@ -57208,8 +57312,8 @@ var PALETTE_RE = new RegExp(
   `^(${PALETTE_PREFIXES.map(([p4]) => p4).join("|")})-(${PALETTE_NAMES.join("|")})(?:-(\\d{2,3}))?(?:\\/([\\w.%]+|\\[[^\\]]+\\]))?$`
 );
 var PROPERTY_OF = new Map(PALETTE_PREFIXES);
-function parsePaletteClass(raw) {
-  const utility = baseUtility(raw);
+function parsePaletteClass(raw2) {
+  const utility = baseUtility(raw2);
   const m = utility.match(PALETTE_RE);
   if (!m) return null;
   const key = m[3] ? `${m[2]}-${m[3]}` : m[2];
@@ -57228,34 +57332,34 @@ var compiled = /* @__PURE__ */ new WeakMap();
 function customRules(ctx) {
   const cached2 = compiled.get(ctx);
   if (cached2) return cached2;
-  const out = (ctx.project.config.custom ?? []).map((r2) => {
-    if (r2.kind === "forbid-token") {
+  const out = (ctx.project.config.custom ?? []).map((r4) => {
+    if (r4.kind === "forbid-token") {
       return {
-        id: r2.id,
+        id: r4.id,
         kind: "forbid-token",
-        severity: r2.severity ?? "error",
-        message: r2.message ?? `Custom rule ${r2.id}: ${r2.tokens.join(", ")} cannot be used here.`,
-        selector: r2.selector ? new RegExp(r2.selector) : void 0,
-        property: r2.property ? new RegExp(r2.property) : void 0,
-        tokens: new Set(r2.tokens)
+        severity: r4.severity ?? "error",
+        message: r4.message ?? `Custom rule ${r4.id}: ${r4.tokens.join(", ")} cannot be used here.`,
+        selector: r4.selector ? new RegExp(r4.selector) : void 0,
+        property: r4.property ? new RegExp(r4.property) : void 0,
+        tokens: new Set(r4.tokens)
       };
     }
     return {
-      id: r2.id,
+      id: r4.id,
       kind: "forbid-class",
-      severity: r2.severity ?? "error",
-      message: r2.message ?? `Custom rule ${r2.id}: classes matching /${r2.pattern}/ are not allowed.`,
-      pattern: new RegExp(r2.pattern)
+      severity: r4.severity ?? "error",
+      message: r4.message ?? `Custom rule ${r4.id}: classes matching /${r4.pattern}/ are not allowed.`,
+      pattern: new RegExp(r4.pattern)
     };
   });
   compiled.set(ctx, out);
   return out;
 }
 function customRulesInfo(ctx) {
-  return customRules(ctx).map((r2) => ({
-    id: `custom/${r2.id}`,
-    severity: r2.severity,
-    summary: r2.kind === "forbid-token" ? `${r2.message} (forbid-token: ${[...r2.tokens].join(", ")}${r2.selector ? ` in selectors /${r2.selector.source}/` : ""}${r2.property ? `, property /${r2.property.source}/` : ""})` : `${r2.message} (forbid-class: /${r2.pattern.source}/)`
+  return customRules(ctx).map((r4) => ({
+    id: `custom/${r4.id}`,
+    severity: r4.severity,
+    summary: r4.kind === "forbid-token" ? `${r4.message} (forbid-token: ${[...r4.tokens].join(", ")}${r4.selector ? ` in selectors /${r4.selector.source}/` : ""}${r4.property ? `, property /${r4.property.source}/` : ""})` : `${r4.message} (forbid-class: /${r4.pattern.source}/)`
   }));
 }
 var themeVars = /* @__PURE__ */ new WeakMap();
@@ -57294,8 +57398,8 @@ function scaleTable(kind, m) {
       return m[1] === "inset-shadow" ? TAILWIND_SCALES.insetShadow : m[1] === "drop-shadow" ? TAILWIND_SCALES.dropShadow : TAILWIND_SCALES.shadow;
   }
 }
-function parseScaleClass(raw) {
-  const utility = baseUtility(raw);
+function parseScaleClass(raw2) {
+  const utility = baseUtility(raw2);
   for (const p4 of SCALE_PATTERNS) {
     const m = utility.match(p4.re);
     if (!m) continue;
@@ -57339,7 +57443,7 @@ function suggestScale(ctx, s) {
       };
     }
     return none(
-      radii.length ? `No radius token within 2px of ${px}px. Project radius tokens: ${radii.map((r2) => `${r2.name} (${r2.px}px)`).join(", ")}.` : "No radius tokens in the project: it is a gap (/facha-ui:init scales can propose a scale)."
+      radii.length ? `No radius token within 2px of ${px}px. Project radius tokens: ${radii.map((r4) => `${r4.name} (${r4.px}px)`).join(", ")}.` : "No radius tokens in the project: it is a gap (/facha-ui:init scales can propose a scale)."
     );
   }
   if (s.kind === "shadow") {
@@ -57391,11 +57495,11 @@ function sprawl(ctx, usages) {
     for (const lit of findColorLiterals(u.value, u.property)) {
       const c2 = parseColor(lit.text);
       if (!c2) continue;
-      const hex5 = toHex(c2).toLowerCase();
+      const hex6 = toHex(c2).toLowerCase();
       const loc2 = u.locAt(lit.index);
-      const e4 = literals.get(hex5) ?? { color: c2, where: [] };
+      const e4 = literals.get(hex6) ?? { color: c2, where: [] };
       e4.where.push(`${loc2.file}:${loc2.line}`);
-      literals.set(hex5, e4);
+      literals.set(hex6, e4);
     }
   }
   const lits = [...literals.entries()].sort(([a], [b]) => a < b ? -1 : 1);
@@ -57478,9 +57582,9 @@ function surfaces(ctx) {
   if (configured?.length) return { names: configured, configured: true };
   return { names: ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name), configured: false };
 }
-function colorOf(ctx, raw, theme) {
-  if (!raw) return void 0;
-  const v = raw.trim();
+function colorOf(ctx, raw2, theme) {
+  if (!raw2) return void 0;
+  const v = raw2.trim();
   const only = v.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*([^()]+))?\)$/);
   if (only) return tokenColor(ctx.tokens, only[1], theme) ?? (only[2] ? parseColor(only[2]) : void 0);
   const direct = parseColor(v);
@@ -57569,9 +57673,9 @@ function textContrast(ctx, value, background, selector, minRatio, opts = { text:
     for (const s of surf.names) {
       const bg = tokenColor(ctx.tokens, s, th);
       if (!bg) continue;
-      const r2 = contrast2(fg, bg, baseSurface);
-      if (r2 < worst) {
-        worst = r2;
+      const r4 = contrast2(fg, bg, baseSurface);
+      if (r4 < worst) {
+        worst = r4;
         worstName = s;
       }
     }
@@ -57591,10 +57695,10 @@ function textContrast(ctx, value, background, selector, minRatio, opts = { text:
     certain: !!background || surf.configured
   };
 }
-function describeContrast(r2) {
-  return r2.failing.map((th) => `${r2.ratios[th]}:1 on ${r2.against[th]} in ${th}`).join("; ") + ` (needs ${r2.minRatio}:1)`;
+function describeContrast(r4) {
+  return r4.failing.map((th) => `${r4.ratios[th]}:1 on ${r4.against[th]} in ${th}`).join("; ") + ` (needs ${r4.minRatio}:1)`;
 }
-function suggestReadable(ctx, value, background, selector, r2) {
+function suggestReadable(ctx, value, background, selector, r4) {
   const defaultTheme2 = ctx.tokens.themes[0]?.name ?? "light";
   const current = colorOf(ctx, value, defaultTheme2);
   const readable = (role2) => /^(text\.|on-accent|accent|status\.)/.test(role2);
@@ -57606,7 +57710,7 @@ function suggestReadable(ctx, value, background, selector, r2) {
   }) : void 0;
   const statusKind = selector ? statusKindOf(selector) : null;
   const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null);
-  const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r2.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
+  const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r4.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
     const c2 = tokenColor(ctx.tokens, x.t.name, defaultTheme2);
     return { ...x, d: current && c2 ? oklabDistance2(current, c2) : Number.POSITIVE_INFINITY };
   }).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
@@ -57614,7 +57718,7 @@ function suggestReadable(ctx, value, background, selector, r2) {
   const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
   const textLike = !role || !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
   const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
-  const why = describeContrast(r2);
+  const why = describeContrast(r4);
   if (candidates.length === 0) {
     return {
       match: "none",
@@ -57950,18 +58054,18 @@ function checkUsages(ctx, usages) {
         }
         const finding = classContrast(ctx, util2);
         if (finding) {
-          const r2 = finding.result;
+          const r4 = finding.result;
           push(
             "class-contrast",
-            r2.certain ? "error" : "warning",
+            r4.certain ? "error" : "warning",
             { file: u.file, line: u.line, column: u.column },
             u.raw,
             "color",
             "className",
-            { ...suggestReadable(ctx, finding.value, finding.background, finding.selector, r2), source: finding.source },
-            r2.failing,
+            { ...suggestReadable(ctx, finding.value, finding.background, finding.selector, r4), source: finding.source },
+            r4.failing,
             false,
-            `.${u.raw} sets color: ${finding.value} (${finding.source}): ${describeContrast(r2)}.`
+            `.${u.raw} sets color: ${finding.value} (${finding.source}): ${describeContrast(r4)}.`
           );
         }
         continue;
@@ -58021,19 +58125,19 @@ function checkUsages(ctx, usages) {
     }
     if (u.property === "color" && (u.context === "css" || u.context === "inline-style")) {
       const bg = u.siblingBackground ?? null;
-      const r2 = textContrast(ctx, u.value, bg, u.selector, minRatioOf(ctx));
-      if (r2 && r2.failing.length > 0) {
+      const r4 = textContrast(ctx, u.value, bg, u.selector, minRatioOf(ctx));
+      if (r4 && r4.failing.length > 0) {
         push(
           "theme-contrast",
-          r2.certain ? "error" : "warning",
+          r4.certain ? "error" : "warning",
           { file: u.file, line: u.line, column: u.column },
           u.value,
           "color",
           context,
-          suggestReadable(ctx, u.value, bg, u.selector, r2),
-          r2.failing,
+          suggestReadable(ctx, u.value, bg, u.selector, r4),
+          r4.failing,
           false,
-          `Text color ${u.value.trim()}: ${describeContrast(r2)}.`
+          `Text color ${u.value.trim()}: ${describeContrast(r4)}.`
         );
       }
     }
@@ -58068,8 +58172,8 @@ function checkUsages(ctx, usages) {
     }
     if (isNonTextTarget(u.property, u.selector, u.context)) {
       const bg = u.siblingBackground ?? null;
-      const r2 = nonTextContrast(ctx, u.value, bg, u.selector);
-      if (r2 && r2.failing.length > 0) {
+      const r4 = nonTextContrast(ctx, u.value, bg, u.selector);
+      if (r4 && r4.failing.length > 0) {
         push(
           "non-text-contrast",
           "warning",
@@ -58077,10 +58181,10 @@ function checkUsages(ctx, usages) {
           u.value,
           u.property,
           context,
-          { match: "none", kind: "none", value: null, detail: describeContrast(r2), source: null },
-          r2.failing,
+          { match: "none", kind: "none", value: null, detail: describeContrast(r4), source: null },
+          r4.failing,
           false,
-          `${u.property}: ${u.value.trim()}: ${describeContrast(r2)}.`
+          `${u.property}: ${u.value.trim()}: ${describeContrast(r4)}.`
         );
       }
     }
@@ -58119,9 +58223,9 @@ function scanFiles(ctx, absFiles) {
     result.files.push(rel2(ctx.project, abs2));
     const { usages, skipped } = extractFile(ctx, abs2);
     if (skipped) result.skipped.push(skipped);
-    const r2 = checkUsages(ctx, usages);
-    result.violations.push(...r2.violations);
-    result.unresolved.push(...r2.unresolved);
+    const r4 = checkUsages(ctx, usages);
+    result.violations.push(...r4.violations);
+    result.unresolved.push(...r4.unresolved);
     result.usages.push(...usages);
   }
   result.violations.sort(byLocation);
@@ -58313,14 +58417,14 @@ function parseBrief(ctx) {
   for (const [key, got] of Object.entries(f3)) {
     if (key === "date") continue;
     brief.at[key] = `${file2}:${got.line}`;
-    const raw = got.value.trim();
-    const text = clean(raw);
+    const raw2 = got.value.trim();
+    const text = clean(raw2);
     switch (key) {
       case "product": {
-        const id = (raw.match(/`([^`]+)`/)?.[1] ?? raw.match(/^[a-z]+(?:-[a-z]+)*/i)?.[0] ?? "").trim().toLowerCase();
+        const id = (raw2.match(/`([^`]+)`/)?.[1] ?? raw2.match(/^[a-z]+(?:-[a-z]+)*/i)?.[0] ?? "").trim().toLowerCase();
         const type = PRODUCT_TYPES.includes(id) ? id : null;
-        if (!type) bad("product", raw, `the product type is one of: ${PRODUCT_TYPES.join(", ")}`);
-        brief.product = { type, text: clean(raw.replace(/`[^`]+`/, "").replace(/^\s*[—–:-]\s*/, "")) || text };
+        if (!type) bad("product", raw2, `the product type is one of: ${PRODUCT_TYPES.join(", ")}`);
+        brief.product = { type, text: clean(raw2.replace(/`[^`]+`/, "").replace(/^\s*[—–:-]\s*/, "")) || text };
         break;
       }
       case "users":
@@ -58332,30 +58436,30 @@ function parseBrief(ctx) {
       case "personality":
       case "references":
       case "avoid":
-        brief[key] = list2(raw);
+        brief[key] = list2(raw2);
         break;
       case "density": {
         const word = text.toLowerCase().match(/[a-záéíóú]+/)?.[0] ?? "";
         brief.density = DENSITY_WORDS[word] ?? null;
-        if (!brief.density) bad("density", raw, "the density is compact, balanced or airy (compacta, equilibrada o aireada)");
+        if (!brief.density) bad("density", raw2, "the density is compact, balanced or airy (compacta, equilibrada o aireada)");
         break;
       }
       case "brandColor": {
         if (NONE3.test(text)) break;
-        const value = raw.match(/`([^`]+)`/)?.[1] ?? raw.match(/#[0-9a-f]{3,8}\b|(?:oklch|rgb|hsl)a?\([^)]*\)/i)?.[0] ?? text;
+        const value = raw2.match(/`([^`]+)`/)?.[1] ?? raw2.match(/#[0-9a-f]{3,8}\b|(?:oklch|rgb|hsl)a?\([^)]*\)/i)?.[0] ?? text;
         const color = parseColor(value);
         if (color) brief.brandColor = { value: clean(value), hex: toHex(color) };
-        else bad("brandColor", raw, "not a CSS color (hex, rgb(), hsl() or oklch())");
+        else bad("brandColor", raw2, "not a CSS color (hex, rgb(), hsl() or oklch())");
         break;
       }
       case "accessibility":
         brief.accessibility = /\bAAA\b/i.test(text) ? "AAA" : /\bAA\b/i.test(text) ? "AA" : null;
-        if (!brief.accessibility) bad("accessibility", raw, "the target is WCAG 2.2 AA or AAA");
+        if (!brief.accessibility) bad("accessibility", raw2, "the target is WCAG 2.2 AA or AAA");
         break;
       case "darkMode": {
         const v = text.toLowerCase();
         brief.darkMode = /^(sí|si|yes)\b/.test(v) ? "yes" : /^(no)\b/.test(v) ? "no" : /^(más adelante|mas adelante|later|después|despues)\b/.test(v) ? "later" : null;
-        if (!brief.darkMode) bad("darkMode", raw, "dark mode is yes, no or later (s\xED, no o m\xE1s adelante)");
+        if (!brief.darkMode) bad("darkMode", raw2, "dark mode is yes, no or later (s\xED, no o m\xE1s adelante)");
         break;
       }
     }
@@ -58447,9 +58551,9 @@ function health(ctx, usages) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
         const base4 = tokenColor(ctx.tokens, surfaces2[0], th);
-        const r2 = contrast2(fg, bg, base4);
-        if (r2 < worst) {
-          worst = r2;
+        const r4 = contrast2(fg, bg, base4);
+        if (r4 < worst) {
+          worst = r4;
           worstName = s;
         }
       }
@@ -58585,7 +58689,7 @@ function parseDecisions(ctx) {
 }
 function rulesInfo(ctx) {
   return [
-    ...RULES.map((r2) => ({ id: r2.id, severity: effectiveSeverity(ctx, r2.id, r2.severity), summary: r2.summary })),
+    ...RULES.map((r4) => ({ id: r4.id, severity: effectiveSeverity(ctx, r4.id, r4.severity), summary: r4.summary })),
     ...customRulesInfo(ctx)
   ];
 }
@@ -58608,9 +58712,9 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
       tailwind: {
         detected: ctx.project.hasTailwind,
         version: twVersion,
-        themeMapped: [...ctx.tokens.parsed.values()].some((r2) => {
+        themeMapped: [...ctx.tokens.parsed.values()].some((r4) => {
           let found = false;
-          r2.walkAtRules("theme", () => {
+          r4.walkAtRules("theme", () => {
             found = true;
           });
           return found;
@@ -58757,7 +58861,7 @@ function reviewUi(ctx, input2) {
   if (!isDir && files.length === 0) throw new FachaError("UNSUPPORTED_FILE", `review_ui reads JSX/TSX files: ${relPath}`, { path: input2 });
   const roleOf = (token) => ctx.tokens.byName.get(token)?.role ?? "";
   const classRule = new Map(ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector)).map((c2) => [c2.selector.slice(1), c2]));
-  const typography = new Map(ctx.typographyClasses.map((t) => [t.className, t.fontSizePx]));
+  const typography2 = new Map(ctx.typographyClasses.map((t) => [t.className, t.fontSizePx]));
   const results = [];
   const findings = [];
   for (const f3 of files.sort()) {
@@ -58791,7 +58895,7 @@ function reviewUi(ctx, input2) {
     for (const e4 of elements) {
       for (const c2 of e4.classes) {
         const b = base3(c2);
-        const typo = typography.get(b);
+        const typo = typography2.get(b);
         if (typo != null) sizes.add(typo);
         const fs9 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
         const ccPx = fs9 ? toPx(fs9.value) : null;
@@ -58964,14 +59068,14 @@ function uxScore(ctx, input2) {
         findings.push({ category: categoryOf(v.rule), severity: v.severity, rule: v.rule, file: v.file, line: v.line, message: v.message });
       }
     }
-    for (const r2 of reviewUi(ctx, screen).findings) {
-      findings.push({ category: "hierarchy", severity: r2.severity, rule: `review/${r2.heuristic}`, file: r2.file, line: r2.line, message: r2.why });
+    for (const r4 of reviewUi(ctx, screen).findings) {
+      findings.push({ category: "hierarchy", severity: r4.severity, rule: `review/${r4.heuristic}`, file: r4.file, line: r4.line, message: r4.why });
     }
     const { score: score2, categories } = scoreOf(findings);
     const worst = [...findings].sort((a, b) => PENALTY[b.severity] - PENALTY[a.severity] || (a.file < b.file ? -1 : 1) || a.line - b.line).slice(0, 5).map((f3) => ({ rule: f3.rule, severity: f3.severity, at: `${f3.file}:${f3.line}`, message: f3.message }));
     return { screen, score: score2, categories, files: files.map((f3) => rel2(ctx.project, f3)).sort(), worst };
   });
-  const average = results.length ? Math.round(results.reduce((s, r2) => s + r2.score, 0) / results.length) : null;
+  const average = results.length ? Math.round(results.reduce((s, r4) => s + r4.score, 0) / results.length) : null;
   return {
     configSource: ctx.project.configSource,
     average,
@@ -64737,7 +64841,7 @@ var Protocol = class {
         }
         await this.notification(notification, notificationOptions);
       },
-      sendRequest: async (r2, resultSchema, options) => {
+      sendRequest: async (r4, resultSchema, options) => {
         if (abortController.signal.aborted) {
           throw new McpError(ErrorCode.ConnectionClosed, "Request was cancelled");
         }
@@ -64749,7 +64853,7 @@ var Protocol = class {
         if (effectiveTaskId && taskStore) {
           await taskStore.updateTaskStatus(effectiveTaskId, "input_required");
         }
-        return await this.request(r2, resultSchema, requestOptions);
+        return await this.request(r4, resultSchema, requestOptions);
       },
       authInfo: extra?.authInfo,
       requestId: request.id,
@@ -67066,11 +67170,11 @@ function scanStyles(ctx) {
   const surfaceName = ctx.project.config.contrast?.surfaces?.[0] ?? ctx.tokens.tokens.find((t) => t.role === "surface.raised")?.name ?? ctx.tokens.tokens.find((t) => t.role === "surface.base")?.name ?? null;
   const surfaceIn = (theme) => (surfaceName ? tokenColor(ctx.tokens, surfaceName, theme) : void 0) ?? parseColor(theme === defaultTheme2 ? "#ffffff" : "#111111");
   const accentName = ctx.tokens.tokens.find((t) => t.role === "accent.primary")?.name ?? null;
-  const colorOfValue = (raw, theme) => {
-    if (!raw) return void 0;
-    const v = raw.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/);
+  const colorOfValue = (raw2, theme) => {
+    if (!raw2) return void 0;
+    const v = raw2.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/);
     if (v) return tokenColor(ctx.tokens, v[1], theme);
-    return parseColor(raw);
+    return parseColor(raw2);
   };
   const themeScope2 = (selector) => {
     if (!selector) return { theme: null, base: null };
@@ -67366,6 +67470,444 @@ function scanStyles(ctx) {
   };
 }
 
+// src/standards.ts
+var SOURCES = {
+  radix: "Radix Colors 3.0.0 (MIT): 12-step scales, step roles and paired tinted grays \xB7 https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+  leonardo: "Adobe Leonardo: each color solved for a target contrast against the background \xB7 https://github.com/adobe/leonardo",
+  carbonType: "Carbon productive type set (@carbon/type 11.69: label-01 12, body-compact-01 14, body-02 16, heading-03 20, heading-04 28, heading-05 32, heading-06 42) \xB7 https://carbondesignsystem.com/elements/typography/type-sets/",
+  material3Type: "Material 3 type scale (@material/web 2.5.0 md-sys-typescale: body-small 12, body-medium 14, body-large 16, title-large 22, headline-medium 28, display-small 36, display-medium 45) \xB7 https://m3.material.io/styles/typography/type-scale-tokens",
+  material3Heading: "Material 3 headline-large: 32px on a 40px line, 1.25 \xB7 https://m3.material.io/styles/typography/type-scale-tokens",
+  carbonSpacing: "Carbon spacing scale (@carbon/layout 11.61: spacing-01\u202610 = 2, 4, 8, 12, 16, 24, 32, 40, 48, 64px) \xB7 https://carbondesignsystem.com/elements/spacing/overview/",
+  carbonSize: "Carbon component sizes (@carbon/layout 11.61: sm 32, md 40, lg 48px) \xB7 https://carbondesignsystem.com/elements/spacing/overview/",
+  material3Shape: "Material 3 corner scale (@material/web 2.5.0 md-sys-shape: 0, 4, 8, 12, 16, 28, full) \xB7 https://m3.material.io/styles/shape/corner-radius-scale",
+  fluentShadow: "Fluent 2 shadows (@fluentui/tokens 1.0.0-alpha.22 createShadowTokens; ambient 0.12 / key 0.14 light, 0.24 / 0.28 dark) \xB7 https://fluent2.microsoft.design/elevation",
+  tailwindNames: "Tailwind CSS v4 theme variable namespaces (--color-*, --text-*, --font-*, --radius-*, --shadow-*) \xB7 https://tailwindcss.com/docs/theme",
+  wcag143: "WCAG 2.2 SC 1.4.3 Contrast (Minimum): text 4.5:1 \xB7 https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+  wcag146: "WCAG 2.2 SC 1.4.6 Contrast (Enhanced): text 7:1 \xB7 https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html",
+  wcag1411: "WCAG 2.2 SC 1.4.11 Non-text Contrast: UI components and focus 3:1 \xB7 https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+  wcag141: "WCAG 2.2 SC 1.4.1 Use of Color: a state is never told by color alone \xB7 https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html",
+  wcag148: "WCAG 2.2 SC 1.4.8 Visual Presentation: line spacing at least 1.5 within paragraphs \xB7 https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html",
+  wcag258: "WCAG 2.2 SC 2.5.8 Target Size (Minimum): 24 by 24 CSS pixels \xB7 https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
+  statusDeltaE: "facha-ui status-confusable: two states closer than \u0394E OKLab\xD7100 10, also under deuteranopia and protanopia (mcp/src/visual.ts)",
+  systemFont: "facha-ui init never installs dependencies (skills/init/SKILL.md, hard rule 4): the system font stack needs none"
+};
+var WCAG = {
+  AA: { text: 4.5, nonText: 3, source: "wcag143" },
+  AAA: { text: 7, nonText: 3, source: "wcag146" }
+};
+var RADIX = {
+  light: {
+    accentContrast: [1, 1.034, 1.103, 1.199, 1.32, 1.501, 1.802, 2.302, 3.682, 4.003, 5.173, 12.018],
+    accentChroma: [0.022, 0.065, 0.162, 0.259, 0.364, 0.483, 0.626, 0.746, 1, 0.991, 0.903, 0.449],
+    grayL: [0.992, 0.983, 0.956, 0.932, 0.91, 0.886, 0.851, 0.792, 0.641, 0.607, 0.501, 0.242],
+    grayC: [2e-3, 3e-3, 3e-3, 3e-3, 5e-3, 5e-3, 6e-3, 8e-3, 0.012, 0.012, 0.011, 0.011],
+    grayContrast: [1, 1.027, 1.113, 1.197, 1.283, 1.377, 1.537, 1.875, 3.257, 3.72, 5.809, 15.995]
+  },
+  dark: {
+    accentContrast: [1, 1.048, 1.207, 1.355, 1.559, 1.887, 2.419, 3.507, 4.976, 6.277, 9.657, 14.289],
+    accentChroma: [0.092, 0.133, 0.314, 0.458, 0.504, 0.527, 0.59, 0.715, 1, 0.951, 0.818, 0.293],
+    grayL: [0.18, 0.213, 0.252, 0.283, 0.312, 0.348, 0.4, 0.489, 0.535, 0.582, 0.767, 0.949],
+    grayC: [4e-3, 4e-3, 4e-3, 6e-3, 6e-3, 7e-3, 9e-3, 0.013, 0.017, 0.015, 0.01, 3e-3],
+    grayContrast: [1, 1.073, 1.186, 1.307, 1.443, 1.656, 2.054, 3.007, 3.673, 4.447, 9.015, 16.248]
+  },
+  source: "radix"
+};
+var BRIGHT_SOLID = { brightMinL: 0.854, otherMaxL: 0.691, threshold: 0.773, source: "radix" };
+var HOVER_DELTA_E = { light: 2.961, dark: 4.074, source: "radix" };
+var STATUS_SEEDS = {
+  success: { radix: "green", hex: "#30a46c" },
+  warning: { radix: "amber", hex: "#ffc53d" },
+  danger: { radix: "red", hex: "#e5484d" },
+  info: { radix: "blue", hex: "#0090ff" }
+};
+var ACCENT_SEEDS = [
+  { radix: "indigo", hex: "#3e63dd" },
+  { radix: "teal", hex: "#12a594" },
+  { radix: "plum", hex: "#ab4aba" },
+  { radix: "violet", hex: "#6e56cf" },
+  { radix: "cyan", hex: "#00a2c7" },
+  { radix: "crimson", hex: "#e93d82" },
+  { radix: "iris", hex: "#5b5bd6" },
+  { radix: "jade", hex: "#29a383" },
+  { radix: "purple", hex: "#8e4ec6" },
+  { radix: "pink", hex: "#d6409f" }
+];
+var DENSITY = {
+  compact: { typeScale: [12, 14, 16, 20, 28, 32, 42], base: 14, control: 32, typeSource: "carbonType" },
+  balanced: { typeScale: [12, 14, 16, 22, 28, 36, 45], base: 16, control: 40, typeSource: "material3Type" },
+  airy: { typeScale: [12, 14, 16, 22, 28, 36, 45], base: 16, control: 48, typeSource: "material3Type" }
+};
+var TYPE_NAMES = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl"];
+var LINE_HEIGHT = { body: 1.5, heading: 1.25 };
+var SYSTEM_FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+var SPACING2 = [2, 4, 8, 12, 16, 24, 32, 40, 48, 64];
+var MIN_TARGET = 24;
+var RADII = [["none", 0], ["xs", 4], ["sm", 8], ["md", 12], ["lg", 16], ["xl", 28], ["full", 9999]];
+var DEFAULT_RADIUS = 8;
+var SHADOWS = {
+  levels: [["sm", 2], ["md", 8], ["lg", 16]],
+  alpha: { light: { ambient: 0.12, key: 0.14 }, dark: { ambient: 0.24, key: 0.28 } }
+};
+function fluentShadow(depth, mode) {
+  const { ambient, key } = SHADOWS.alpha[mode];
+  const ambientBlur = depth >= 28 ? 8 : 2;
+  const y = depth === 2 ? 1 : depth / 2;
+  return `0 0 ${ambientBlur}px rgba(0, 0, 0, ${ambient}), 0 ${y}px ${depth}px rgba(0, 0, 0, ${key})`;
+}
+var STATUS_MIN_DELTA_E = 10;
+
+// src/generate.ts
+var MODES = ["light", "dark"];
+var KINDS = ["success", "warning", "danger", "info"];
+var toOklch2 = converter_default("oklch");
+var gamut = toGamut("rgb", "oklch");
+var oklabDistance3 = differenceEuclidean("oklab");
+var deuteranopia2 = filterDeficiencyDeuter(1);
+var protanopia2 = filterDeficiencyProt(1);
+var hex5 = (c2) => formatHex(gamut(c2));
+var raw = (a, b) => contrast(a, b);
+var r2 = (n) => Math.round(n * 100) / 100;
+var r3 = (n) => Math.round(n * 1e3) / 1e3;
+var lch2 = (h) => {
+  const c2 = toOklch2(parse_default(h));
+  return { mode: "oklch", l: c2.l, c: c2.c ?? 0, h: Number.isFinite(c2.h) ? c2.h : 0 };
+};
+var fmtOklch = (h) => {
+  const c2 = lch2(h);
+  return `oklch(${r3(c2.l)} ${r3(c2.c)} ${r3(c2.h)})`;
+};
+function solve(mode, h, c2, target, bg) {
+  const lbg = lch2(bg).l;
+  const at = (l) => hex5({ mode: "oklch", l, c: c2, h });
+  if (target <= 1) return at(lbg);
+  let lo = mode === "light" ? 0 : lbg;
+  let hi = mode === "light" ? lbg : 1;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    const ok2 = raw(at(mid), bg) >= target;
+    if (mode === "light") ok2 ? lo = mid : hi = mid;
+    else ok2 ? hi = mid : lo = mid;
+  }
+  return at(mode === "light" ? lo : hi);
+}
+function neutralScale(mode, h) {
+  const m = RADIX[mode];
+  const bg = hex5({ mode: "oklch", l: m.grayL[0], c: m.grayC[0], h });
+  return m.grayContrast.map((t, i) => i === 0 ? bg : solve(mode, h, m.grayC[i], t, bg));
+}
+function accentScale(mode, solid, bg, onText, textMin) {
+  const m = RADIX[mode];
+  const s = lch2(solid);
+  const solidRatio = raw(solid, bg);
+  const target = (t, i) => i === 10 ? Math.max(t, solidRatio) : t;
+  const steps = m.accentContrast.map((t, i) => i === 8 ? solid : i === 9 ? "" : solve(mode, s.h, s.c * m.accentChroma[i], target(t, i), bg));
+  const away = mode === "light" ? -1 : 1;
+  const hover = (dir) => {
+    for (let step = 1; step <= 300; step++) {
+      const c2 = hex5({ mode: "oklch", l: s.l + dir * step / 1e3, c: s.c * m.accentChroma[9], h: s.h });
+      if (oklabDistance3(parse_default(c2), parse_default(solid)) * 100 >= HOVER_DELTA_E[mode]) return c2;
+    }
+    return solid;
+  };
+  steps[9] = [hover(away), hover(-away)].find((c2) => c2 !== solid && raw(onText, c2) >= textMin) ?? solid;
+  return steps;
+}
+function textOn(solid, darkText) {
+  return lch2(solid).l > BRIGHT_SOLID.threshold ? darkText : "#ffffff";
+}
+function legibleSolid(seed, darkText, min) {
+  const text = textOn(seed, darkText);
+  if (raw(text, seed) >= min) return seed;
+  const s = lch2(seed);
+  const dir = text === "#ffffff" ? -1 : 1;
+  for (let step = 1; step <= 100; step++) {
+    const c2 = hex5({ mode: "oklch", l: s.l + dir * step / 200, c: s.c, h: s.h });
+    if (raw(text, c2) >= min) return c2;
+  }
+  return text === "#ffffff" ? "#000000" : "#ffffff";
+}
+function confusable(a, b) {
+  const ca = parse_default(a);
+  const cb = parse_default(b);
+  return r2(Math.min(oklabDistance3(ca, cb), oklabDistance3(deuteranopia2(ca), deuteranopia2(cb)), oklabDistance3(protanopia2(ca), protanopia2(cb))) * 100);
+}
+function buildDirection(id, seed, from, input2) {
+  const min = WCAG[input2.level];
+  const textRule = input2.level === "AAA" ? "wcag146" : "wcag143";
+  const adjustments = [];
+  const notes = [];
+  const h = lch2(seed).h;
+  const neutral = { light: neutralScale("light", h), dark: neutralScale("dark", h) };
+  const darkText = neutral.light[11];
+  const solids = { accent: legibleSolid(seed, darkText, min.text) };
+  const onText = {};
+  const why = {};
+  const textReason = `text on it did not reach ${min.text}:1 (${SOURCES[textRule].split(" \xB7 ")[0]}); its lightness moved the least that does`;
+  if (solids.accent !== seed) why.accent = [textReason];
+  for (const k4 of KINDS) {
+    solids[k4] = legibleSolid(STATUS_SEEDS[k4].hex, darkText, min.text);
+    if (solids[k4] !== STATUS_SEEDS[k4].hex) why[k4] = [textReason];
+  }
+  const infoDelta = confusable(solids.accent, solids.info);
+  const infoFollowsBrand = infoDelta < STATUS_MIN_DELTA_E;
+  if (infoFollowsBrand) {
+    solids.info = solids.accent;
+    delete why.info;
+    notes.push(`The info state uses the brand's colors: a separate blue would not be told apart from it (\u0394E ${infoDelta} under color-vision deficiency). Like every state, it always carries its text (WCAG 1.4.1).`);
+  }
+  const legible = (c2) => [textOn(c2, darkText), textOn(c2, darkText) === darkText ? "#ffffff" : darkText].find((t) => raw(t, c2) >= min.text);
+  const ORDER = ["danger", "warning", "success", "info"];
+  for (let i = 1; i < ORDER.length; i++) {
+    const k4 = ORDER[i];
+    if (k4 === "info" && infoFollowsBrand) continue;
+    const others = ORDER.slice(0, i).map((o) => solids[o]);
+    const apart = (c2) => others.every((o) => confusable(c2, o) >= STATUS_MIN_DELTA_E + 1);
+    if (apart(solids[k4])) continue;
+    const s = lch2(STATUS_SEEDS[k4].hex);
+    search: for (let step = 1; step <= 60; step++)
+      for (const dir of [1, -1]) {
+        const c2 = hex5({ mode: "oklch", l: s.l + dir * step / 100, c: s.c, h: s.h });
+        if (legible(c2) && apart(c2)) {
+          solids[k4] = c2;
+          why[k4] = [`moved in lightness so it is told apart from ${ORDER.slice(0, i).join(" and ")} also under deuteranopia and protanopia (\u0394E \u2265 ${STATUS_MIN_DELTA_E}, WCAG 1.4.1), with legible text on it`];
+          break search;
+        }
+      }
+  }
+  for (const k4 of ["accent", ...KINDS]) onText[k4] = legible(solids[k4]) ?? textOn(solids[k4], darkText);
+  for (const k4 of ["accent", ...KINDS]) {
+    const from2 = k4 === "accent" ? seed : STATUS_SEEDS[k4].hex;
+    if (why[k4] && solids[k4] !== from2)
+      adjustments.push({ token: k4 === "accent" ? "--color-primary" : `--color-${k4}`, mode: "both", from: from2, to: solids[k4], why: why[k4].join("; ") });
+  }
+  const scales2 = {};
+  for (const mode of MODES) {
+    const bg = neutral[mode][0];
+    scales2[mode] = {
+      neutral: neutral[mode],
+      accent: accentScale(mode, solids.accent, bg, onText.accent, min.text),
+      ...Object.fromEntries(KINDS.map((k4) => [k4, accentScale(mode, solids[k4], bg, onText[k4], min.text)]))
+    };
+  }
+  const tokens = [];
+  const proof = [];
+  const value = (name, mode) => tokens.find((t) => t.name === name)[mode];
+  const add = (name, role, sources, pick2) => tokens.push({ name, role, light: pick2("light"), dark: pick2("dark"), sources });
+  const ensure = (name, on, threshold, rule2) => {
+    const t = tokens.find((x) => x.name === name);
+    for (const mode of MODES) {
+      const before = t[mode];
+      const c2 = lch2(before);
+      let current = before;
+      for (let pass = 0; pass < 3; pass++) {
+        const worst = on.map((s) => value(s, mode)).sort((a2, b) => raw(current, a2) - raw(current, b))[0];
+        if (raw(current, worst) >= threshold) break;
+        current = solve(mode, c2.h, c2.c, threshold, worst);
+      }
+      if (current !== before) {
+        t[mode] = current;
+        if (!t.sources.includes(rule2)) t.sources.push(rule2);
+        adjustments.push({ token: name, mode, from: before, to: current, why: `${threshold}:1 on ${on.join(", ")} (${SOURCES[rule2].split(" \xB7 ")[0]})` });
+      }
+    }
+  };
+  const prove = (fg, on, threshold, rule2) => {
+    for (const mode of MODES)
+      for (const bg of on) {
+        const ratio = raw(value(fg, mode), value(bg, mode));
+        proof.push({ mode, fg, bg, ratio: r2(ratio), min: threshold, pass: ratio >= threshold, rule: rule2 });
+      }
+  };
+  const n = (i) => (mode) => scales2[mode].neutral[i];
+  const a = (i) => (mode) => scales2[mode].accent[i];
+  add("--color-background", "surface.base", ["radix"], n(0));
+  add("--color-panel", "surface.raised", ["radix"], n(1));
+  add("--color-muted", "generic", ["radix"], n(2));
+  add("--color-foreground", "text.primary", ["radix"], n(11));
+  add("--color-muted-foreground", "text.secondary", ["radix"], n(10));
+  add("--color-border", "border.default", ["radix"], n(5));
+  add("--color-border-strong", "border.default", ["leonardo", "wcag1411"], (mode) => solveOn(mode, lch2(scales2[mode].neutral[7]), min.nonText, [n(0)(mode), n(1)(mode)]));
+  add("--color-ring", "generic", ["leonardo", "wcag1411"], (mode) => solveOn(mode, lch2(scales2[mode].accent[7]), min.nonText, [n(0)(mode), n(1)(mode)]));
+  add("--color-primary", "accent.primary", ["radix"], a(8));
+  add("--color-primary-hover", "accent", ["radix"], a(9));
+  add("--color-primary-subtle", "accent", ["radix"], a(2));
+  add("--color-primary-strong", "accent", ["radix"], a(10));
+  add("--color-on-primary", "on-accent", [textRule], () => onText.accent);
+  for (const k4 of KINDS) {
+    const s = (i) => (mode) => scales2[mode][k4][i];
+    add(`--color-${k4}`, `status.${k4}`, ["radix"], s(8));
+    add(`--color-${k4}-text`, `status.${k4}`, ["radix"], s(10));
+    add(`--color-${k4}-bg`, `status.${k4}`, ["radix"], s(2));
+    add(`--color-${k4}-border`, `status.${k4}`, ["radix"], s(6));
+    add(`--color-on-${k4}`, "on-accent", [textRule], () => onText[k4]);
+  }
+  const surfaces2 = ["--color-background", "--color-panel", "--color-muted"];
+  ensure("--color-foreground", surfaces2, min.text, textRule);
+  ensure("--color-muted-foreground", surfaces2, min.text, textRule);
+  ensure("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
+  for (const k4 of KINDS) ensure(`--color-${k4}-text`, ["--color-background", "--color-panel", `--color-${k4}-bg`], min.text, textRule);
+  if (infoFollowsBrand)
+    for (const [info, brand] of [["--color-info", "--color-primary"], ["--color-info-text", "--color-primary-strong"], ["--color-info-bg", "--color-primary-subtle"], ["--color-on-info", "--color-on-primary"]]) {
+      const t = tokens.find((x) => x.name === info);
+      Object.assign(t, { light: value(brand, "light"), dark: value(brand, "dark"), alias: brand });
+    }
+  prove("--color-foreground", surfaces2, min.text, textRule);
+  prove("--color-muted-foreground", surfaces2, min.text, textRule);
+  prove("--color-primary-strong", ["--color-background", "--color-panel", "--color-primary-subtle"], min.text, textRule);
+  prove("--color-on-primary", ["--color-primary", "--color-primary-hover"], min.text, textRule);
+  for (const k4 of KINDS) {
+    prove(`--color-${k4}-text`, ["--color-background", "--color-panel", `--color-${k4}-bg`], min.text, textRule);
+    prove(`--color-on-${k4}`, [`--color-${k4}`], min.text, textRule);
+  }
+  prove("--color-border-strong", ["--color-background", "--color-panel"], min.nonText, "wcag1411");
+  prove("--color-ring", ["--color-background", "--color-panel"], min.nonText, "wcag1411");
+  for (const mode of MODES) {
+    const r4 = raw(value("--color-primary", mode), value("--color-background", mode));
+    if (r4 < min.nonText)
+      notes.push(`${mode}: the brand color is ${Math.floor(r4 * 100) / 100}:1 on the background, under 3:1. Buttons with a text label are fine (the label identifies them); an icon-only control needs --color-border-strong around it (WCAG 1.4.11).`);
+  }
+  for (const mode of MODES)
+    if (value("--color-primary-hover", mode) === value("--color-primary", mode))
+      notes.push(`${mode}: the hover step equals the brand color: no lighter or darker step kept the text on it legible.`);
+  const conflicts = [];
+  for (const k4 of KINDS) {
+    if (k4 === "info" && infoFollowsBrand) continue;
+    const d = Math.min(...[solids.accent, seed].flatMap((b) => [confusable(b, solids[k4]), confusable(b, STATUS_SEEDS[k4].hex)]));
+    if (d < STATUS_MIN_DELTA_E)
+      conflicts.push({
+        with: `status.${k4}`,
+        deltaE: d,
+        solution: `The brand and the ${k4} state look alike (\u0394E ${d}). Always show the ${k4} state with its text label and an icon, never by color alone; or pick a brand seed further from it.`,
+        source: "wcag141"
+      });
+  }
+  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, scales: scales2, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
+}
+function solveOn(mode, c2, minRatio, on) {
+  let current = hex5(c2);
+  for (let pass = 0; pass < 3; pass++) {
+    const worst = [...on].sort((x, y) => raw(current, x) - raw(current, y))[0];
+    if (raw(current, worst) >= minRatio) return current;
+    current = solve(mode, c2.h, c2.c, minRatio, worst);
+  }
+  return current;
+}
+function seedColors(count) {
+  const out = [];
+  for (const s of ACCENT_SEEDS) {
+    if (["success", "warning", "danger"].some((k4) => confusable(s.hex, STATUS_SEEDS[k4].hex) < STATUS_MIN_DELTA_E)) continue;
+    const h = lch2(s.hex).h;
+    if (out.some((o) => Math.min(Math.abs(o.h - h), 360 - Math.abs(o.h - h)) < 45)) continue;
+    out.push({ hex: s.hex, from: `Radix ${s.radix}-9`, h });
+    if (out.length === count) break;
+  }
+  return out.map(({ hex: hex6, from }) => ({ hex: hex6, from }));
+}
+function typography(input2) {
+  const d = DENSITY[input2.density];
+  return {
+    family: input2.fontFamily ?? SYSTEM_FONT,
+    familySource: input2.fontFamily ? "brief" : "systemFont",
+    base: d.base,
+    scale: TYPE_NAMES.map((name, i) => ({ name, px: d.typeScale[i] })),
+    scaleSource: d.typeSource,
+    lineHeight: { body: LINE_HEIGHT.body, heading: LINE_HEIGHT.heading, sources: ["wcag148", "material3Heading"] },
+    weights: { regular: 400, medium: 500, semibold: 600, bold: 700 }
+  };
+}
+function sharedTokens(input2) {
+  const t = typography(input2);
+  const same = (name, role, v, sources) => ({ name, role, light: v, dark: v, sources });
+  const radius = input2.radius ?? DEFAULT_RADIUS;
+  return [
+    same("--font-sans", "font", t.family, input2.fontFamily ? ["brief"] : ["systemFont"]),
+    ...t.scale.map((s) => same(`--text-${s.name}`, "font-size", `${s.px}px`, [t.scaleSource])),
+    same("--leading-normal", "generic", String(LINE_HEIGHT.body), ["wcag148"]),
+    same("--leading-tight", "generic", String(LINE_HEIGHT.heading), ["material3Heading"]),
+    ...SPACING2.map((px, i) => same(`--space-${i + 1}`, "spacing", `${px}px`, ["carbonSpacing"])),
+    same("--size-control", "generic", `${DENSITY[input2.density].control}px`, ["carbonSize", "wcag258"]),
+    same("--radius", "radius", `${radius}px`, ["material3Shape"]),
+    ...RADII.filter(([name]) => name !== "none").map(([name, px]) => same(`--radius-${name}`, "radius", `${px}px`, ["material3Shape"])),
+    ...SHADOWS.levels.map(([name, depth]) => ({ name: `--shadow-${name}`, role: "shadow", light: fluentShadow(depth, "light"), dark: fluentShadow(depth, "dark"), sources: ["fluentShadow"] }))
+  ];
+}
+function cssBlocks(id, tokens, format) {
+  const light = format === "tailwind4" ? "@theme" : ":root";
+  const lines = (pick2) => tokens.map((t) => [t.name, pick2(t)]).filter(([, v]) => v !== null).map(([n, v]) => `  ${n}: ${v};`).join("\n");
+  return {
+    light: { selector: light, text: `/* facha-ui system \xB7 ${id} */
+${light} {
+${lines((t) => t.alias ? `var(${t.alias})` : t.light)}
+}` },
+    dark: { selector: ".dark", text: `/* facha-ui system \xB7 ${id} \xB7 dark */
+.dark {
+${lines((t) => t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null)}
+}` }
+  };
+}
+function proposeSystem(input2) {
+  const seeds = input2.brandColor ? [{ hex: formatHex(parse_default(input2.brandColor)), from: "brand" }] : seedColors(Math.min(5, Math.max(3, input2.seeds ?? 3)));
+  const shared = sharedTokens(input2);
+  const directions = seeds.map((s, i) => {
+    const d = buildDirection(input2.brandColor ? "brand" : `seed-${i + 1}`, s.hex, s.from, input2);
+    d.tokens.push(...shared);
+    d.css = cssBlocks(d.id, d.tokens, input2.format);
+    return d;
+  });
+  const used = /* @__PURE__ */ new Set(["radix", "leonardo", "wcag1411", "wcag141", "statusDeltaE", "tailwindNames", input2.level === "AAA" ? "wcag146" : "wcag143"]);
+  for (const t of shared) for (const s of t.sources) if (s !== "brief") used.add(s);
+  return {
+    typography: typography(input2),
+    spacing: { scale: SPACING2, control: DENSITY[input2.density].control, minTarget: MIN_TARGET, sources: ["carbonSpacing", "carbonSize", "wcag258"] },
+    radius: { default: input2.radius ?? DEFAULT_RADIUS, scale: Object.fromEntries(RADII), source: "material3Shape" },
+    directions,
+    sources: Object.fromEntries([...used].sort().map((k4) => [k4, SOURCES[k4]]))
+  };
+}
+
+// src/propose-system.ts
+function proposeDesignSystem(ctx, args) {
+  const brief = parseBrief(ctx);
+  const at = (field) => `brief ${brief.id} (${brief.at[field]})`;
+  let brandColor;
+  let brandFrom = "none: seeds from Radix accents";
+  if (args.brandColor !== void 0) {
+    const c2 = parseColor(args.brandColor);
+    if (!c2) throw new FachaError("INVALID_INPUT", `brandColor is not a CSS color: ${JSON.stringify(args.brandColor.slice(0, 60))}`, { field: "brandColor" });
+    brandColor = toHex(c2);
+    brandFrom = "argument";
+  } else if (brief?.brandColor) {
+    brandColor = brief.brandColor.hex;
+    brandFrom = at("brandColor");
+  }
+  const density = args.density ?? brief?.density ?? "balanced";
+  const densityFrom = args.density ? "argument" : brief?.density ? at("density") : "default (no brief): balanced";
+  const level = args.level ?? brief?.accessibility ?? "AA";
+  const levelFrom = args.level ? "argument" : brief?.accessibility ? at("accessibility") : "default: WCAG 2.2 AA";
+  const project = getDesignSystem(ctx, ["project"]).project;
+  const format = project.tailwind.detected && project.tailwind.version === "4" ? "tailwind4" : "css";
+  const inputs = {
+    brandColor: { value: brandColor ?? null, from: brandFrom },
+    density: { value: density, from: densityFrom },
+    level: { value: level, from: levelFrom },
+    format: { value: format, from: format === "tailwind4" ? "package.json: tailwindcss 4 (default theme in @theme)" : "plain CSS custom properties in :root" },
+    fontFamily: { value: args.fontFamily ?? null, from: args.fontFamily ? "argument" : "none: the system font stack" },
+    radius: { value: args.radius ?? null, from: args.radius !== void 0 ? "argument" : "default: 8px (Material 3 small)" }
+  };
+  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds });
+  const cov = coverage(ctx);
+  return {
+    designSystemStatus: cov.status,
+    brief: brief ? { id: brief.id, source: brief.source } : null,
+    inputs,
+    ...system,
+    notes: [
+      "A proposal: nothing is written. /facha-ui:init system shows it and writes it only with the developer's approval.",
+      ...cov.status !== "missing" ? [`The project already has tokens (status ${cov.status}): this system would replace its colors; /facha-ui:init colors or palette keep what exists.`] : []
+    ]
+  };
+}
+
 // src/flow.ts
 var SYNONYMS = [
   ["guardar", "grabar", "salvar", "save", "store"],
@@ -67497,7 +68039,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.20.0";
+var VERSION = "0.21.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
@@ -67516,6 +68058,9 @@ var DESCRIPTIONS = {
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review \u2014 this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
 **Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
+  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+**When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve \u2014 this is the read-only half of \`/facha-ui:init system\`. Never present it as existing tokens.
+**Returns:** JSON with \`designSystemStatus\`, \`brief\`, \`inputs\` (value and origin of each), \`typography\`, \`spacing\`, \`radius\`, \`directions\` (per direction: \`seed\`, \`scales\`, \`tokens\` with name, role, light and dark value and sources, \`proof\` with every contrast pair, \`adjustments\`, \`conflicts\` with their solution, \`notes\` and the \`css\` blocks to write), \`sources\` and \`notes\`. Read-only: it never modifies files or accesses the network.`,
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
 **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
 **Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
@@ -67639,6 +68184,35 @@ function createServer(opts) {
     }
   );
   server.registerTool(
+    "propose_design_system",
+    {
+      title: "Propose design system",
+      description: DESCRIPTIONS.propose_design_system,
+      inputSchema: {
+        brandColor: external_exports.string().max(100).optional(),
+        density: external_exports.enum(["compact", "balanced", "airy"]).optional(),
+        level: external_exports.enum(["AA", "AAA"]).optional(),
+        fontFamily: external_exports.string().max(200).optional(),
+        radius: external_exports.number().int().min(0).max(32).optional(),
+        seeds: external_exports.number().int().min(3).max(5).optional()
+      },
+      annotations: { title: "Propose design system", ...READ_ONLY }
+    },
+    async (args) => {
+      try {
+        const data2 = proposeDesignSystem(context(), args);
+        const pairs = data2.directions.flatMap((d) => d.proof);
+        const failing = pairs.filter((p4) => !p4.pass).length;
+        return ok(
+          `${data2.directions.length} direction(s); ${pairs.length - failing}/${pairs.length} contrast pair(s) pass WCAG ${data2.inputs.level.value}; ${data2.directions.reduce((n, d) => n + d.adjustments.length, 0)} adjustment(s), ${data2.directions.reduce((n, d) => n + d.conflicts.length, 0)} conflict(s).`,
+          data2
+        );
+      } catch (e4) {
+        return fail(e4);
+      }
+    }
+  );
+  server.registerTool(
     "review_ui",
     {
       title: "Review UI",
@@ -67732,7 +68306,7 @@ function score(argv) {
   const down = baselineFile && fs8.existsSync(baselineFile) ? regressions(result, JSON.parse(fs8.readFileSync(baselineFile, "utf8"))) : [];
   const low = min ? result.screens.filter((s) => s.score < Number(min)).map((s) => ({ screen: s.screen, score: s.score })) : [];
   process.stdout.write(JSON.stringify(result, null, 2) + "\n");
-  for (const r2 of down) process.stderr.write(`UX score went down: ${r2.screen} ${r2.before} \u2192 ${r2.after}
+  for (const r4 of down) process.stderr.write(`UX score went down: ${r4.screen} ${r4.before} \u2192 ${r4.after}
 `);
   for (const l of low) process.stderr.write(`UX score below ${min}: ${l.screen} ${l.score}
 `);

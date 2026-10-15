@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-025 · Generador de design system, desde una marca o desde cero
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** L
-- **Por qué:** un proyecto sin diseño necesita un sistema completo y accesible, no valores sueltos. Las herramientas profesionales lo derivan con un método (Radix Colors, Adobe Leonardo, Material Color Utilities), no a ojo.
-- **Qué:** una tool del MCP, determinística, que a partir del brief y de un color de marca (o de 3 a 5 semillas si no hay) genera: escalas OKLCH de 12 pasos con los roles de Radix y la luminosidad de cada paso resuelta por contraste (Leonardo); neutros teñidos con el tono de la marca; colores de estado; claro y oscuro generados por separado, no invertidos; escala tipográfica, espaciado de 4/8, radios y elevación. Todo se mapea a las variables de shadcn y a los roles de facha-ui, y cada valor cita su fuente.
-- **Criterios de aceptación:** todo par texto/fondo pasa WCAG 2.2 AA en los dos modos (test), con APCA solo como dato; la misma entrada da la misma salida; sin red ni ejecución de código (S2); cada valor dice de qué regla sale.
-- **Depende de:** B-024
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale , https://github.com/adobe/leonardo , https://api.flutter.dev/flutter/package-material_color_utilities_dynamiccolor_dynamic_scheme/DynamicScheme-class.html , https://ui-v4.shadcn.com/docs/theming
-
 ### B-026 · Tres direcciones de diseño sobre la pantalla real
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** L
@@ -224,12 +215,15 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 - **B-020 · Export para Cursor:** los flujos de `variants` y `apply` como reglas de Cursor.
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
+- **B-037 · `near-duplicate-tokens` según el rol:** visto en la prueba de B-025: la regla de paleta inflada compara tokens de cualquier rol, y en un sistema generado marca pares que se parecen por diseño (fondo y panel, que son los pasos 1 y 2 de Radix; el blanco del texto sobre acento y el casi blanco del fondo). Su propia nota dice que se ignoren "si son roles distintos": que la regla los deje afuera y siga marcando los del mismo rol.
+- **B-036 · Paletas del panel sin fuente:** las paletas predefinidas del panel en vivo traen afirmaciones sin fuente ("El más usado en bancos y fintech: transmite seguridad", `skills/variants/templates/next-app/lab-panel.tsx:196`), contra la regla de que toda decisión de UI tiene una fuente. Reemplazarlas por las semillas del generador (B-025), con su fuente, o sacar las afirmaciones.
 - **B-035 · `scan_styles` en un proyecto sin temas:** visto en la prueba de B-024, sobre una app sin ningún bloque de tema: las propuestas salen con `values: {}` (falta el valor del tema por defecto), un gris de texto secundario (`#475569`, usado en "Cancelado", `.muted` y encabezados) se propone como `--status-danger-fg`, y el color de marca se parte en dos propuestas, una como `status.info`. Con un brief, su color de marca debería proponerse como `accent.primary`.
 
 ## Hecho
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.21.0:** B-025, design system desde estándares (`propose_design_system`, `/facha-ui:init system`); spec en [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
 - **0.20.0:** B-024, brief de diseño para un proyecto sin diseño (`/facha-ui:init brief`, sección `brief` de `get_design_system`); spec en [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).
 - **0.19.1:** B-023, el "Connection closed" del MCP en sesiones abiertas en el repo de facha-ui (los servidores pasan a `plugin.json`).
 - **0.19.0:** B-003, el revisor independiente ve las capturas (verificado; sin cambios de código).

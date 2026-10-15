@@ -36,6 +36,7 @@ Generás con IA variantes de una pantalla o de un componente, y facha-ui las aju
 | "Enseñame a usar facha-ui" | Curso de 9 lecciones sobre tu proyecto | `/facha-ui:learn` |
 | "Aplicá la B" | Claude te responde con el comando exacto: aplicar lo lanzás vos | `/facha-ui:apply orders b` |
 | "No tengo nada de diseño definido" | Un brief de tu producto, propuesto desde el código: qué es, para quién y qué impresión tiene que dar | `/facha-ui:init brief` |
+| "Armame un design system" | Un sistema completo desde estándares publicados y tu brief, con el contraste verificado | `/facha-ui:init system` |
 | "Armá los tokens que faltan" | Claude te da el comando: crear tokens lo lanzás vos | `/facha-ui:init` |
 
 Además, cada vez que Claude escribe un archivo de UI, el guardián automático lo chequea solo (ver **tools**).
@@ -53,6 +54,7 @@ Además, cada vez que Claude escribe un archivo de UI, el guardián automático 
 | `/facha-ui:apply <slug> <a\|b\|c>` | Aplica la variante que elegiste (solo vos lo podés lanzar; pide aprobación y motivo) |
 | `/facha-ui:init [colors\|scales\|all]` | Propone los tokens que faltan a partir de los valores que el proyecto ya usa, y los crea solo si aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init brief` | Arma el brief de diseño de un proyecto sin diseño: Claude lee el código, te propone cada respuesta (producto, usuarios, personalidad, densidad, color de marca) con su evidencia y te pregunta solo lo que el código no dice. Lo guarda en `decisions.md` solo si aprobás (solo vos lo podés lanzar) |
+| `/facha-ui:init system` | Para un proyecto sin tokens: arma un design system completo (escalas de color en claro y oscuro, tipografía, espaciado, radios y sombras) desde estándares publicados (Radix, Carbon, Material 3, Fluent 2) y tu brief, con cada par de contraste verificado contra WCAG 2.2. Lo escribe solo si aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
 | `/facha-ui:learn [1-9\|<tema>]` | Curso práctico sobre tu propio proyecto: design system, IA y UI con criterio, en 9 lecciones. Solo lee |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
@@ -132,6 +134,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"aju
 ```text
 /facha-ui:init [colors|scales|all]
 /facha-ui:init brief
+/facha-ui:init system
 /facha-ui:init palette <archivo>
 ```
 
@@ -146,6 +149,7 @@ Entre el 3 y el 4, si querés ajustar la que te gustó mientras la mirás: *"aju
 - Agrega los tokens, valida el antes y el después con `audit_project` y registra la decisión.
   Nunca cambia ni borra tokens existentes (salvo los valores que aprobás en modo `palette`). No commitea.
 - **Brief:** `/facha-ui:init brief`, para un proyecto sin diseño definido. Antes de cualquier color, entiende el producto: te muestra un brief ya completado desde el código (tipo de producto, quién lo usa y para qué, personalidad, densidad, color de marca, referencias, qué evitar), con la evidencia de cada respuesta, y te pregunta como mucho 3 cosas. Lo guarda como decisión solo si aprobás; desde ahí, `variants` lo usa y lo cita.
+- **Sistema desde cero:** `/facha-ui:init system`, para un proyecto sin tokens y con brief. Cada valor sale de un estándar publicado: escalas de color de 12 pasos como Radix, con la luminosidad de cada paso calculada por contraste y el modo oscuro aparte; tipografía de Carbon o Material 3 según la densidad; espaciado y alto de controles de Carbon; radios de Material 3; sombras de Fluent 2. Te muestra cada ajuste y cada conflicto con su solución, y escribe los tokens solo si aprobás. Sin color de marca, te muestra 3 direcciones para elegir.
 - **Paleta:** `/facha-ui:init palette <archivo>` adopta una paleta propuesta desde el panel en vivo. Muestra cada token antes y después, el contraste y los conflictos con su solución; cambia solo esos valores después de tu aprobación y registra la decisión.
 
 ### learn

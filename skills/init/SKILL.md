@@ -1,9 +1,9 @@
 ---
 name: init
-description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. Also records a design brief (product, users, personality, density, brand color) for a project with no design yet, and adopts a palette proposed from the lab's live panel. Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
-argument-hint: "[colors|scales|all]  ·  brief  ·  palette <proposal file>"
+description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. For a project with no design yet, it also records a design brief (product, users, personality, density, brand color) and builds a complete design system from published standards (Radix, Carbon, Material 3, Fluent 2, WCAG 2.2). It also adopts a palette proposed from the lab's live panel. Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
+argument-hint: "[colors|scales|all]  ·  brief  ·  system  ·  palette <proposal file>"
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__ux_score
+allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__propose_design_system
 ---
 
 # facha-ui · init
@@ -23,17 +23,16 @@ Talk to the developer in their language.
 `$ARGUMENTS` (optional): `colors`, `scales` or `all` (default `all`). It limits what the
 proposal covers.
 
-`brief`: record what the product is and the look it needs, before any token. **Before this mode,
-read `brief.md`** in this skill's directory; steps 1 to 7 do not apply.
-
-`palette <file>`: adopt a palette proposed from the lab's live panel
-(`.facha-ui/proposals/palette-*.json`, written by `/facha-ui:variants`). Go to **Palette mode**
-below; steps 2 to 7 do not apply.
+Other modes, where steps 1 to 7 do not apply. **Before each, read its file** in this skill's
+directory: `brief` (`brief.md`) records what the product is and the look it needs, before any
+token; `system` (`system.md`) builds a complete design system from published standards for a
+project without tokens; `palette <file>` (**Palette mode** below) adopts a palette from the lab.
 
 ## Hard rules
 
 1. **Nothing is written before approval** (step 4). Steps 1 to 3 are read-only.
-2. **Values come only from `scan_styles` or from the developer's own message.** Never invent a
+2. **Values come only from `scan_styles`, `propose_design_system` (system mode) or the
+   developer's own message.** Never invent a
    color, size or radius, and never "improve" a value on your own. If a value in use fails
    contrast, say so and let the developer decide whether to change it.
 3. **Approval comes only from the developer's message in this conversation**, and it must be
@@ -48,6 +47,7 @@ below; steps 2 to 7 do not apply.
      replace a literal with `var(--token)`;
    - in palette mode, the token source, only to change the **values** of the tokens listed in
      the approved proposal, in their theme blocks;
+   - in system mode, only what `system.md` lists;
    - `memory.decisionsFile`, **append only**;
    - `facha-ui.config.json`, only if it does not exist and the developer approved creating it.
 
@@ -59,8 +59,9 @@ below; steps 2 to 7 do not apply.
 ## Step 1 · Preflight (read-only)
 
 Call `get_design_system` (sections `project`, `tokens`, `coverage`, `health`, `decisions`, `brief`).
-- `status` is `missing` and `brief` is null: offer to start with the brief (read `brief.md`); go on
-  from usage only if the developer says so. With a brief, its brand color and density come first.
+- `status` is `missing`: offer `/facha-ui:init brief` first when `brief` is null, and with a brief
+  `/facha-ui:init system`, a complete system from published standards. Go on from usage only if
+  the developer says so; then the brief's brand color and density come first.
 - `MULTIPLE_PROJECTS`: show the candidates and ask which one to use (open Claude Code there or
   set `FACHA_UI_ROOT`).
 - Keep `project.tokenSources`, `project.themes` (name and selector of each theme),
@@ -162,12 +163,8 @@ Write the entry in the developer's language.
 
 ## Step 7 · Report
 
-Summarize:
-- tokens created;
-- coverage before and after;
-- audit totals before and after;
-- files touched;
-- the decision id.
+Summarize the tokens created, the coverage and audit totals before and after, the files touched
+and the decision id.
 
 Remind the developer that nothing was committed, and that `/facha-ui:variants` will now use
 the new tokens, which `get_design_system` returns. End with the project's progress, in one line,
