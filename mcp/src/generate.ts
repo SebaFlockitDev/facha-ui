@@ -1,7 +1,7 @@
 import { converter, differenceEuclidean, filterDeficiencyDeuter, filterDeficiencyProt, formatHex, parse, toGamut, wcagContrast } from "culori";
 import type { Color } from "culori";
 import {
-  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, HOVER_DELTA_E, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
+  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, HOVER_DELTA_E, PURE_GRAY_L1, STYLE_ORDER, STYLES, type StyleId, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
   SPACING, STATUS_MIN_DELTA_E, STATUS_SEEDS, SYSTEM_FONT, TYPE_NAMES, WCAG, type SourceId,
 } from "./standards.js";
 
@@ -41,6 +41,8 @@ export interface SystemInput {
   radius?: number;
   /** How many seed directions to build when there is no brand color (3 to 5). */
   seeds?: number;
+  /** One style for every direction; without it, directions take the styles in STYLE_ORDER. */
+  style?: StyleId;
 }
 
 export interface Token {
@@ -67,6 +69,7 @@ export interface ProofRow {
 export interface Direction {
   id: string;
   seed: { hex: string; oklch: string; from: string };
+  style: { id: StyleId; label: string; radius: number; neutral: "tinted" | "pure"; card: string; sources: SourceId[] };
   scales: Record<Mode, Record<"accent" | "neutral" | Kind, string[]>>;
   tokens: Token[];
   proof: ProofRow[];
@@ -110,10 +113,12 @@ function solve(mode: Mode, h: number, c: number, target: number, bg: string): st
   return at(mode === "light" ? lo : hi);
 }
 
-function neutralScale(mode: Mode, h: number): string[] {
+/** Radix's tinted grays, with the seed's hue; or its untinted gray (chroma 0) for a pure neutral. */
+function neutralScale(mode: Mode, h: number, pure: boolean): string[] {
   const m = RADIX[mode];
-  const bg = hex({ mode: "oklch", l: m.grayL[0]!, c: m.grayC[0]!, h });
-  return m.grayContrast.map((t, i) => (i === 0 ? bg : solve(mode, h, m.grayC[i]!, t, bg)));
+  const chroma = (i: number) => (pure ? 0 : m.grayC[i]!);
+  const bg = hex({ mode: "oklch", l: pure ? PURE_GRAY_L1[mode] : m.grayL[0]!, c: chroma(0), h });
+  return m.grayContrast.map((t, i) => (i === 0 ? bg : solve(mode, h, chroma(i), t, bg)));
 }
 
 /** A 12-step scale whose step 9 is the solid color given; the hover step keeps on-text legible. */
@@ -168,14 +173,16 @@ function confusable(a: string, b: string): number {
   return r2(Math.min(oklabDistance(ca, cb), oklabDistance(deuteranopia(ca), deuteranopia(cb)), oklabDistance(protanopia(ca), protanopia(cb))) * 100);
 }
 
-function buildDirection(id: string, seed: string, from: string, input: SystemInput): Direction {
+function buildDirection(id: string, seed: string, from: string, input: SystemInput, styleId: StyleId): Direction {
+  const style = STYLES[styleId];
   const min = WCAG[input.level];
   const textRule: SourceId = input.level === "AAA" ? "wcag146" : "wcag143";
   const adjustments: Direction["adjustments"] = [];
   const notes: string[] = [];
   const h = lch(seed).h;
 
-  const neutral = { light: neutralScale("light", h), dark: neutralScale("dark", h) };
+  const pure = style.neutral === "pure";
+  const neutral = { light: neutralScale("light", h, pure), dark: neutralScale("dark", h, pure) };
   const darkText = neutral.light[11]!;
 
   // Step 9 is the brand in both modes (as in every Radix scale), once text on it is legible.
@@ -286,6 +293,11 @@ function buildDirection(id: string, seed: string, from: string, input: SystemInp
   add("--color-primary-subtle", "accent", ["radix"], a(2));
   add("--color-primary-strong", "accent", ["radix"], a(10));
   add("--color-on-primary", "on-accent", [textRule], () => onText.accent);
+  const radius = input.radius ?? style.radius;
+  add("--radius", "radius", input.radius === undefined ? ["material3Shape"] : ["brief"], () => `${radius}px`);
+  add("--shadow-card", style.card === "layer" ? "generic" : "shadow", style.card === "layer" ? ["carbonLayering"] : ["fluentShadow"], (mode) =>
+    style.card === "layer" ? "none" : fluentShadow(style.card, mode),
+  );
   for (const k of KINDS) {
     const s = (i: number) => (mode: Mode) => scales[mode][k][i]!;
     add(`--color-${k}`, `status.${k}`, ["radix"], s(8));
@@ -342,7 +354,7 @@ function buildDirection(id: string, seed: string, from: string, input: SystemInp
       });
   }
 
-  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, scales, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
+  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
 }
 
 /** The color with c's hue and chroma that reaches min on every background given. */
@@ -386,7 +398,6 @@ export function typography(input: SystemInput) {
 function sharedTokens(input: SystemInput): Token[] {
   const t = typography(input);
   const same = (name: string, role: string, v: string, sources: Token["sources"]): Token => ({ name, role, light: v, dark: v, sources });
-  const radius = input.radius ?? DEFAULT_RADIUS;
   return [
     same("--font-sans", "font", t.family, input.fontFamily ? ["brief"] : ["systemFont"]),
     ...t.scale.map((s) => same(`--text-${s.name}`, "font-size", `${s.px}px`, [t.scaleSource])),
@@ -394,7 +405,6 @@ function sharedTokens(input: SystemInput): Token[] {
     same("--leading-tight", "generic", String(LINE_HEIGHT.heading), ["material3Heading"]),
     ...SPACING.map((px, i) => same(`--space-${i + 1}`, "spacing", `${px}px`, ["carbonSpacing"])),
     same("--size-control", "generic", `${DENSITY[input.density].control}px`, ["carbonSize", "wcag258"]),
-    same("--radius", "radius", `${radius}px`, ["material3Shape"]),
     ...RADII.filter(([name]) => name !== "none").map(([name, px]) => same(`--radius-${name}`, "radius", `${px}px`, ["material3Shape"])),
     ...SHADOWS.levels.map(([name, depth]) => ({ name: `--shadow-${name}`, role: "shadow", light: fluentShadow(depth, "light"), dark: fluentShadow(depth, "dark"), sources: ["fluentShadow"] as SourceId[] })),
   ];
@@ -412,21 +422,28 @@ function cssBlocks(id: string, tokens: Token[], format: Format) {
 
 export function proposeSystem(input: SystemInput) {
   const seeds = input.brandColor
-    ? [{ hex: formatHex(parse(input.brandColor)!), from: "brand" }]
-    : seedColors(Math.min(5, Math.max(3, input.seeds ?? 3)));
+    ? [{ hex: formatHex(parse(input.brandColor)!), from: "brand", name: "brand" }]
+    : seedColors(Math.min(5, Math.max(3, input.seeds ?? 3))).map((x) => ({ ...x, name: x.from.replace(/^Radix ([a-z]+)-9$/, "$1") }));
+  // With a brand: the brand in each style. Without: each seed with the next style, so every pair of
+  // directions differs in hue and neutral tint, and in radius or elevation (B-026).
+  const pairs = input.brandColor
+    ? (input.style ? [input.style] : STYLE_ORDER).map((style) => ({ seed: seeds[0]!, style }))
+    : seeds.map((seed, i) => ({ seed, style: input.style ?? STYLE_ORDER[i % STYLE_ORDER.length]! }));
   const shared = sharedTokens(input);
-  const directions = seeds.map((s, i) => {
-    const d = buildDirection(input.brandColor ? "brand" : `seed-${i + 1}`, s.hex, s.from, input);
+  const directions = pairs.map(({ seed, style }) => {
+    const d = buildDirection(`${seed.name}-${style}`, seed.hex, seed.from, input, style);
     d.tokens.push(...shared);
     d.css = cssBlocks(d.id, d.tokens, input.format);
     return d;
   });
   const used = new Set<string>(["radix", "leonardo", "wcag1411", "wcag141", "statusDeltaE", "tailwindNames", input.level === "AAA" ? "wcag146" : "wcag143"]);
-  for (const t of shared) for (const s of t.sources) if (s !== "brief") used.add(s);
+  for (const t of [...shared, ...directions.flatMap((d) => d.tokens)]) for (const x of t.sources) if (x !== "brief") used.add(x);
+  for (const d of directions) for (const x of d.style.sources) used.add(x);
   return {
     typography: typography(input),
     spacing: { scale: SPACING, control: DENSITY[input.density].control, minTarget: MIN_TARGET, sources: ["carbonSpacing", "carbonSize", "wcag258"] },
-    radius: { default: input.radius ?? DEFAULT_RADIUS, scale: Object.fromEntries(RADII), source: "material3Shape" },
+    radius: { scale: Object.fromEntries(RADII), source: "material3Shape" },
+    styles: STYLES,
     directions,
     sources: Object.fromEntries([...used].sort().map((k) => [k, SOURCES[k as SourceId]])),
   };

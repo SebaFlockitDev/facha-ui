@@ -54,9 +54,9 @@ describe("propose_design_system", () => {
     expect(d.inputs.density.value).toBe("compact");
     expect(d.inputs.format.value).toBe("css");
     expect(d.typography.scaleSource).toBe("carbonType");
-    expect(d.directions).toHaveLength(1);
+    expect(d.directions.map((x: { id: string }) => x.id)).toEqual(["brand-standard", "brand-sober", "brand-soft"]);
     expect(d.directions[0].proof.every((p: { pass: boolean }) => p.pass)).toBe(true);
-    expect(r.content[0]!.text).toMatch(/^1 direction\(s\); (\d+)\/\1 contrast pair\(s\) pass WCAG AA/);
+    expect(r.content[0]!.text).toMatch(/^3 direction\(s\); (\d+)\/\1 contrast pair\(s\) pass WCAG AA/);
     await close();
   });
 

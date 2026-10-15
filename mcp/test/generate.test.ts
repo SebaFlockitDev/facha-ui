@@ -5,9 +5,9 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/context.js";
 import { coverage, getDesignSystem } from "../src/design-system.js";
-import { proposeSystem, seedColors, type SystemInput } from "../src/generate.js";
+import { proposeSystem, seedColors, type Direction, type SystemInput } from "../src/generate.js";
 import { HOVER_DELTA_E, SOURCES } from "../src/standards.js";
-import { differenceEuclidean } from "culori";
+import { converter, differenceEuclidean } from "culori";
 
 // The design-system generator (B-025, SPEC §2.h).
 
@@ -22,12 +22,13 @@ const base: SystemInput = { density: "balanced", level: "AA", format: "css" };
 const BRANDS = ["#4f46e5", "#e11d48", "#f59e0b", "#0f766e", "#fde047", "#64748b", "#000080", "#84cc16", "#16a34a", "#111111"];
 
 describe("propose_design_system · color", () => {
-  it.each(BRANDS)("every text and control pair passes WCAG 2.2 AA in light and dark (%s)", (brand) => {
-    const d = proposeSystem({ ...base, brandColor: brand }).directions[0]!;
-    const failing = d.proof.filter((p) => !p.pass);
-    expect(failing, JSON.stringify(failing)).toEqual([]);
-    expect(d.proof.filter((p) => p.min === 4.5).length).toBeGreaterThan(30);
-    expect(d.proof.filter((p) => p.min === 3).length).toBe(8);
+  it.each(BRANDS)("every text and control pair passes WCAG 2.2 AA in light and dark, in every direction (%s)", (brand) => {
+    for (const d of proposeSystem({ ...base, brandColor: brand }).directions) {
+      const failing = d.proof.filter((p) => !p.pass);
+      expect(failing, `${d.id}: ${JSON.stringify(failing)}`).toEqual([]);
+      expect(d.proof.filter((p) => p.min === 4.5).length).toBeGreaterThan(30);
+      expect(d.proof.filter((p) => p.min === 3).length).toBe(8);
+    }
   });
 
   it.each(BRANDS)("AAA raises every text pair to 7:1 (%s)", (brand) => {
@@ -86,10 +87,48 @@ describe("propose_design_system · color", () => {
 
   it("without a brand, builds 3 to 5 directions from Radix accents no state is confused with, spread by hue", () => {
     const s = proposeSystem({ ...base });
-    expect(s.directions.map((d) => d.id)).toEqual(["seed-1", "seed-2", "seed-3"]);
+    expect(s.directions.map((d) => d.id)).toEqual(["indigo-standard", "plum-sober", "cyan-soft"]);
     expect(s.directions.every((d) => d.conflicts.length === 0 && d.seed.from.startsWith("Radix "))).toBe(true);
     expect(proposeSystem({ ...base, seeds: 5 }).directions.length).toBeLessThanOrEqual(5);
     expect(seedColors(5).length).toBeGreaterThanOrEqual(3);
+  });
+
+  // B-026: each direction is a seed (or the brand) plus a style.
+  const value = (d: { tokens: { name: string; light: string }[] }, name: string) => d.tokens.find((t) => t.name === name)!.light;
+  /** The axes two directions differ in: hue, neutral tint, radius, elevation. */
+  const axes = (a: Direction, b: Direction) =>
+    [
+      a.seed.hex !== b.seed.hex && "hue",
+      a.style.neutral !== b.style.neutral || (a.style.neutral === "tinted" && a.seed.hex !== b.seed.hex) ? "tint" : false,
+      value(a, "--radius") !== value(b, "--radius") && "radius",
+      value(a, "--shadow-card") !== value(b, "--shadow-card") && "elevation",
+    ].filter(Boolean);
+
+  it.each([["#4f46e5"], [undefined]])("every pair of directions differs in at least two of hue, tint, radius and elevation (brand %s)", (brand) => {
+    const ds = proposeSystem({ ...base, brandColor: brand }).directions;
+    expect(ds).toHaveLength(3);
+    for (let i = 0; i < ds.length; i++)
+      for (let j = i + 1; j < ds.length; j++) expect(axes(ds[i]!, ds[j]!).length, `${ds[i]!.id} vs ${ds[j]!.id}`).toBeGreaterThanOrEqual(2);
+  });
+
+  it("styles take their radius, neutral and card elevation from published systems", () => {
+    const [standard, sober, soft] = proposeSystem({ ...base, brandColor: "#4f46e5" }).directions;
+    expect([standard!.id, sober!.id, soft!.id]).toEqual(["brand-standard", "brand-sober", "brand-soft"]);
+    expect([value(standard!, "--radius"), value(sober!, "--radius"), value(soft!, "--radius")]).toEqual(["8px", "4px", "16px"]);
+    expect(value(sober!, "--shadow-card")).toBe("none");
+    expect(value(standard!, "--shadow-card")).toBe("0 0 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14)");
+    expect(value(soft!, "--shadow-card")).toBe("0 0 2px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.14)");
+    // Sober's neutral is Radix's untinted gray; the others are tinted with the brand's hue.
+    const chroma = (hex: string) => converter("oklch")(hex)!.c ?? 0;
+    expect(chroma(value(sober!, "--color-panel"))).toBeLessThan(0.001);
+    expect(chroma(value(standard!, "--color-panel"))).toBeGreaterThan(0.001);
+    expect(sober!.style.sources).toContain("carbonLayering");
+  });
+
+  it("a brand color and a style give one direction: that is how two directions are mixed", () => {
+    const s = proposeSystem({ ...base, brandColor: "#ab4aba", style: "soft" });
+    expect(s.directions.map((d) => d.id)).toEqual(["brand-soft"]);
+    expect(value(s.directions[0]!, "--radius")).toBe("16px");
   });
 
   it("is deterministic", () => {

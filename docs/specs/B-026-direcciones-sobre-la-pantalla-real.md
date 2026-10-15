@@ -1,6 +1,6 @@
 # B-026 · Tres direcciones de diseño sobre la pantalla real
 
-> **Estado:** en spec · **Rama:** `feat/design-directions` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/design-directions` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-025 (generador, hecho en 0.21.0) · **Última actualización:** 2026-10-15
 
@@ -11,7 +11,7 @@ sobre maquetas; facha-ui puede mostrarlas **sobre la pantalla real, con los dato
 con cada valor justificado. Hoy `/facha-ui:init system` muestra tablas de colores y escribe: el dev
 no ve cómo queda su producto antes de decidir.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-15)
 
 ### 1. Direcciones que se diferencian de verdad (MCP)
 
@@ -82,7 +82,7 @@ Sin laboratorio posible (`framework: unknown`), el flujo sigue como en 0.21.0: t
   `system`), el test de imports del andamiaje con los archivos nuevos, contratos de las skills.
 - Docs: SPEC §2.h y §7.32, `docs/uso.md`, `CHANGELOG.md`.
 
-### 5. Decisiones a confirmar
+### 5. Decisiones confirmadas (2026-10-15: las cuatro recomendadas, "lo que sea mejor")
 
 1. **Direcciones = semilla + estilo**, con los tres estilos de la tabla. Recomendado: con marca
    también hay tres direcciones de verdad, y cada parámetro tiene fuente.

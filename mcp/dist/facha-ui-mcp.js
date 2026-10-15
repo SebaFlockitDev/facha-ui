@@ -67489,7 +67489,9 @@ var SOURCES = {
   wcag148: "WCAG 2.2 SC 1.4.8 Visual Presentation: line spacing at least 1.5 within paragraphs \xB7 https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html",
   wcag258: "WCAG 2.2 SC 2.5.8 Target Size (Minimum): 24 by 24 CSS pixels \xB7 https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
   statusDeltaE: "facha-ui status-confusable: two states closer than \u0394E OKLab\xD7100 10, also under deuteranopia and protanopia (mcp/src/visual.ts)",
-  systemFont: "facha-ui init never installs dependencies (skills/init/SKILL.md, hard rule 4): the system font stack needs none"
+  systemFont: "facha-ui init never installs dependencies (skills/init/SKILL.md, hard rule 4): the system font stack needs none",
+  radixGray: "Radix Colors 3.0.0 gray: the untinted gray scale (chroma 0 in all 12 steps) \xB7 https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
+  carbonLayering: "Carbon layering model (@carbon/themes 11.83: layer-01/02/03 alternate #f4f4f4 and #ffffff on a #ffffff background; shadow is a separate token for floating elements) \xB7 https://carbondesignsystem.com/elements/color/overview/"
 };
 var WCAG = {
   AA: { text: 4.5, nonText: 3, source: "wcag143" },
@@ -67543,7 +67545,6 @@ var SYSTEM_FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 var SPACING2 = [2, 4, 8, 12, 16, 24, 32, 40, 48, 64];
 var MIN_TARGET = 24;
 var RADII = [["none", 0], ["xs", 4], ["sm", 8], ["md", 12], ["lg", 16], ["xl", 28], ["full", 9999]];
-var DEFAULT_RADIUS = 8;
 var SHADOWS = {
   levels: [["sm", 2], ["md", 8], ["lg", 16]],
   alpha: { light: { ambient: 0.12, key: 0.14 }, dark: { ambient: 0.24, key: 0.28 } }
@@ -67554,6 +67555,13 @@ function fluentShadow(depth, mode) {
   const y = depth === 2 ? 1 : depth / 2;
   return `0 0 ${ambientBlur}px rgba(0, 0, 0, ${ambient}), 0 ${y}px ${depth}px rgba(0, 0, 0, ${key})`;
 }
+var PURE_GRAY_L1 = { light: 0.991, dark: 0.178, source: "radixGray" };
+var STYLES = {
+  standard: { label: "Est\xE1ndar", radius: 8, neutral: "tinted", card: 2, sources: ["material3Shape", "radix", "fluentShadow"] },
+  sober: { label: "Sobrio", radius: 4, neutral: "pure", card: "layer", sources: ["material3Shape", "radixGray", "carbonLayering"] },
+  soft: { label: "Suave", radius: 16, neutral: "tinted", card: 8, sources: ["material3Shape", "radix", "fluentShadow"] }
+};
+var STYLE_ORDER = ["standard", "sober", "soft"];
 var STATUS_MIN_DELTA_E = 10;
 
 // src/generate.ts
@@ -67590,10 +67598,11 @@ function solve(mode, h, c2, target, bg) {
   }
   return at(mode === "light" ? lo : hi);
 }
-function neutralScale(mode, h) {
+function neutralScale(mode, h, pure) {
   const m = RADIX[mode];
-  const bg = hex5({ mode: "oklch", l: m.grayL[0], c: m.grayC[0], h });
-  return m.grayContrast.map((t, i) => i === 0 ? bg : solve(mode, h, m.grayC[i], t, bg));
+  const chroma = (i) => pure ? 0 : m.grayC[i];
+  const bg = hex5({ mode: "oklch", l: pure ? PURE_GRAY_L1[mode] : m.grayL[0], c: chroma(0), h });
+  return m.grayContrast.map((t, i) => i === 0 ? bg : solve(mode, h, chroma(i), t, bg));
 }
 function accentScale(mode, solid, bg, onText, textMin) {
   const m = RADIX[mode];
@@ -67631,13 +67640,15 @@ function confusable(a, b) {
   const cb = parse_default(b);
   return r2(Math.min(oklabDistance3(ca, cb), oklabDistance3(deuteranopia2(ca), deuteranopia2(cb)), oklabDistance3(protanopia2(ca), protanopia2(cb))) * 100);
 }
-function buildDirection(id, seed, from, input2) {
+function buildDirection(id, seed, from, input2, styleId) {
+  const style = STYLES[styleId];
   const min = WCAG[input2.level];
   const textRule = input2.level === "AAA" ? "wcag146" : "wcag143";
   const adjustments = [];
   const notes = [];
   const h = lch2(seed).h;
-  const neutral = { light: neutralScale("light", h), dark: neutralScale("dark", h) };
+  const pure = style.neutral === "pure";
+  const neutral = { light: neutralScale("light", h, pure), dark: neutralScale("dark", h, pure) };
   const darkText = neutral.light[11];
   const solids = { accent: legibleSolid(seed, darkText, min.text) };
   const onText = {};
@@ -67733,6 +67744,14 @@ function buildDirection(id, seed, from, input2) {
   add("--color-primary-subtle", "accent", ["radix"], a(2));
   add("--color-primary-strong", "accent", ["radix"], a(10));
   add("--color-on-primary", "on-accent", [textRule], () => onText.accent);
+  const radius = input2.radius ?? style.radius;
+  add("--radius", "radius", input2.radius === void 0 ? ["material3Shape"] : ["brief"], () => `${radius}px`);
+  add(
+    "--shadow-card",
+    style.card === "layer" ? "generic" : "shadow",
+    style.card === "layer" ? ["carbonLayering"] : ["fluentShadow"],
+    (mode) => style.card === "layer" ? "none" : fluentShadow(style.card, mode)
+  );
   for (const k4 of KINDS) {
     const s = (i) => (mode) => scales2[mode][k4][i];
     add(`--color-${k4}`, `status.${k4}`, ["radix"], s(8));
@@ -67781,7 +67800,7 @@ function buildDirection(id, seed, from, input2) {
         source: "wcag141"
       });
   }
-  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, scales: scales2, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
+  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input2.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales: scales2, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
 }
 function solveOn(mode, c2, minRatio, on) {
   let current = hex5(c2);
@@ -67818,7 +67837,6 @@ function typography(input2) {
 function sharedTokens(input2) {
   const t = typography(input2);
   const same = (name, role, v, sources) => ({ name, role, light: v, dark: v, sources });
-  const radius = input2.radius ?? DEFAULT_RADIUS;
   return [
     same("--font-sans", "font", t.family, input2.fontFamily ? ["brief"] : ["systemFont"]),
     ...t.scale.map((s) => same(`--text-${s.name}`, "font-size", `${s.px}px`, [t.scaleSource])),
@@ -67826,7 +67844,6 @@ function sharedTokens(input2) {
     same("--leading-tight", "generic", String(LINE_HEIGHT.heading), ["material3Heading"]),
     ...SPACING2.map((px, i) => same(`--space-${i + 1}`, "spacing", `${px}px`, ["carbonSpacing"])),
     same("--size-control", "generic", `${DENSITY[input2.density].control}px`, ["carbonSize", "wcag258"]),
-    same("--radius", "radius", `${radius}px`, ["material3Shape"]),
     ...RADII.filter(([name]) => name !== "none").map(([name, px]) => same(`--radius-${name}`, "radius", `${px}px`, ["material3Shape"])),
     ...SHADOWS.levels.map(([name, depth]) => ({ name: `--shadow-${name}`, role: "shadow", light: fluentShadow(depth, "light"), dark: fluentShadow(depth, "dark"), sources: ["fluentShadow"] }))
   ];
@@ -67846,20 +67863,23 @@ ${lines((t) => t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.
   };
 }
 function proposeSystem(input2) {
-  const seeds = input2.brandColor ? [{ hex: formatHex(parse_default(input2.brandColor)), from: "brand" }] : seedColors(Math.min(5, Math.max(3, input2.seeds ?? 3)));
+  const seeds = input2.brandColor ? [{ hex: formatHex(parse_default(input2.brandColor)), from: "brand", name: "brand" }] : seedColors(Math.min(5, Math.max(3, input2.seeds ?? 3))).map((x) => ({ ...x, name: x.from.replace(/^Radix ([a-z]+)-9$/, "$1") }));
+  const pairs = input2.brandColor ? (input2.style ? [input2.style] : STYLE_ORDER).map((style) => ({ seed: seeds[0], style })) : seeds.map((seed, i) => ({ seed, style: input2.style ?? STYLE_ORDER[i % STYLE_ORDER.length] }));
   const shared = sharedTokens(input2);
-  const directions = seeds.map((s, i) => {
-    const d = buildDirection(input2.brandColor ? "brand" : `seed-${i + 1}`, s.hex, s.from, input2);
+  const directions = pairs.map(({ seed, style }) => {
+    const d = buildDirection(`${seed.name}-${style}`, seed.hex, seed.from, input2, style);
     d.tokens.push(...shared);
     d.css = cssBlocks(d.id, d.tokens, input2.format);
     return d;
   });
   const used = /* @__PURE__ */ new Set(["radix", "leonardo", "wcag1411", "wcag141", "statusDeltaE", "tailwindNames", input2.level === "AAA" ? "wcag146" : "wcag143"]);
-  for (const t of shared) for (const s of t.sources) if (s !== "brief") used.add(s);
+  for (const t of [...shared, ...directions.flatMap((d) => d.tokens)]) for (const x of t.sources) if (x !== "brief") used.add(x);
+  for (const d of directions) for (const x of d.style.sources) used.add(x);
   return {
     typography: typography(input2),
     spacing: { scale: SPACING2, control: DENSITY[input2.density].control, minTarget: MIN_TARGET, sources: ["carbonSpacing", "carbonSize", "wcag258"] },
-    radius: { default: input2.radius ?? DEFAULT_RADIUS, scale: Object.fromEntries(RADII), source: "material3Shape" },
+    radius: { scale: Object.fromEntries(RADII), source: "material3Shape" },
+    styles: STYLES,
     directions,
     sources: Object.fromEntries([...used].sort().map((k4) => [k4, SOURCES[k4]]))
   };
@@ -67892,9 +67912,10 @@ function proposeDesignSystem(ctx, args) {
     level: { value: level, from: levelFrom },
     format: { value: format, from: format === "tailwind4" ? "package.json: tailwindcss 4 (default theme in @theme)" : "plain CSS custom properties in :root" },
     fontFamily: { value: args.fontFamily ?? null, from: args.fontFamily ? "argument" : "none: the system font stack" },
-    radius: { value: args.radius ?? null, from: args.radius !== void 0 ? "argument" : "default: 8px (Material 3 small)" }
+    radius: { value: args.radius ?? null, from: args.radius !== void 0 ? "argument" : "each direction's style (Material 3 corner scale)" },
+    style: { value: args.style ?? null, from: args.style ? "argument" : "none: directions take the standard, sober and soft styles" }
   };
-  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds });
+  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds, style: args.style });
   const cov = coverage(ctx);
   return {
     designSystemStatus: cov.status,
@@ -68058,7 +68079,7 @@ var DESCRIPTIONS = {
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review \u2014 this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
 **Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
-  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Each direction is a seed plus a style (standard, sober or soft: default radius from the Material 3 corner scale, a tinted or untinted neutral, and cards raised by a Fluent 2 shadow or by Carbon's layers); with a brand color, the brand in the three styles; without one, 3 to 5 Radix accent seeds, each with a style; with brandColor and style, one direction (to mix two). Inputs come from the arguments, then the design brief, then a default. Deterministic: the same input gives the same output.
 **When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve \u2014 this is the read-only half of \`/facha-ui:init system\`. Never present it as existing tokens.
 **Returns:** JSON with \`designSystemStatus\`, \`brief\`, \`inputs\` (value and origin of each), \`typography\`, \`spacing\`, \`radius\`, \`directions\` (per direction: \`seed\`, \`scales\`, \`tokens\` with name, role, light and dark value and sources, \`proof\` with every contrast pair, \`adjustments\`, \`conflicts\` with their solution, \`notes\` and the \`css\` blocks to write), \`sources\` and \`notes\`. Read-only: it never modifies files or accesses the network.`,
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
@@ -68194,7 +68215,8 @@ function createServer(opts) {
         level: external_exports.enum(["AA", "AAA"]).optional(),
         fontFamily: external_exports.string().max(200).optional(),
         radius: external_exports.number().int().min(0).max(32).optional(),
-        seeds: external_exports.number().int().min(3).max(5).optional()
+        seeds: external_exports.number().int().min(3).max(5).optional(),
+        style: external_exports.enum(["standard", "sober", "soft"]).optional()
       },
       annotations: { title: "Propose design system", ...READ_ONLY }
     },
