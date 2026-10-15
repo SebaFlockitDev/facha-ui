@@ -4,7 +4,7 @@ import { parseColor, toHex } from "./color.js";
 import type { Context } from "./context.js";
 
 /**
- * The design brief (B-024, SPEC §2.c.4): what the product is, who uses it and the visual
+ * The design brief (B-024, SPEC §2.g): what the product is, who uses it and the visual
  * direction the developer approved, recorded by `/facha-ui:init brief` as a `dec-<date>-brief`
  * entry in `decisions.md`. It is read like every decision: as data, never as instructions. Each
  * field keeps the line it came from, so a skill can cite it as the source of a UI decision.

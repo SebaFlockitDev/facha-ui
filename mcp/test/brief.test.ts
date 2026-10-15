@@ -7,7 +7,7 @@ import { createContext } from "../src/context.js";
 import { getDesignSystem } from "../src/design-system.js";
 import { connect } from "./helpers.js";
 
-// The design brief recorded by /facha-ui:init brief (B-024, SPEC §2.c.4), read from decisions.md.
+// The design brief recorded by /facha-ui:init brief (B-024, SPEC §2.g), read from decisions.md.
 
 const dirs: string[] = [];
 afterEach(() => {

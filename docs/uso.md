@@ -219,6 +219,20 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 
 Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste, los **estados que se confunden por color** (también simulando deuteranopía y protanopía) y la **paleta inflada**: tokens o colores casi idénticos que podrían ser uno solo, y tamaños de letra o radios que difieren en medio píxel. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
 
+### 5.0 Si no tenés ningún diseño definido: `/facha-ui:init brief`
+
+Si tu proyecto no tiene paleta, tipografía ni estilo decididos, empezá por el brief. Es lo que haría un diseñador en la primera reunión: entender el producto antes de elegir un color.
+
+```text
+/facha-ui:init brief
+```
+
+1. **Te muestra lo que entiende de tu producto**, leído del código: tipo de producto, quién lo usa y para qué, contexto, densidad, el color que más usás (como candidato a color de marca), tipografía y modo oscuro. Cada respuesta trae su evidencia (`archivo:línea`).
+2. **Te pregunta como mucho 3 cosas** que el código no dice, con opciones: la personalidad (3 adjetivos), productos que te gustan o no como referencia, y qué tiene que evitar.
+3. **Vos corregís y aprobás**, con un motivo. Recién ahí lo guarda en `decisions.md` como una decisión más; no toca ningún otro archivo.
+
+Desde ese momento, `get_design_system` devuelve el brief, y `variants` lo usa para saber quién usa cada pantalla y lo cita. El paso siguiente es `/facha-ui:init` (5.1). Si cambia la dirección, corré el brief de nuevo: el anterior queda como historial.
+
 ### 5.1 Si faltan tokens: `/facha-ui:init`
 
 Cuando el design system no existe o le faltan roles, como los colores de estado, `/facha-ui:init` te ayuda a crearlos **sin inventar**:
@@ -493,6 +507,7 @@ Atajos útiles:
 | `/facha-ui:flow "<objetivo>" <pantalla> <pantalla>…` | Vos, o Claude cuando pedís revisar un flujo | Solo capturas y `.facha-ui/flows/<slug>.json` |
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos (si le pedís "aplicá la B", Claude te da el comando) | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
+| `/facha-ui:init brief` | Solo vos | Una entrada en `decisions.md` con el brief, después de tu aprobación |
 | `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
 | `/facha-ui:learn [1-9\|<tema>]` | Vos, o Claude cuando pedís que te enseñe | Nada: solo lee y explica |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |

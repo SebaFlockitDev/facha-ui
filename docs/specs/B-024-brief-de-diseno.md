@@ -56,22 +56,19 @@ oscuro (sí, no o más adelante).
 
 ## Criterios de aceptación (del backlog)
 
-- [ ] En un proyecto sin tokens, `start` recomienda el brief.
-- [ ] Cada pregunta trae opciones sugeridas con su evidencia del código.
-- [ ] El brief se guarda solo con el sí del dev, en `decisions.md` con id.
+- [ ] En un proyecto sin tokens, `start` recomienda el brief (contrato en `plugin.test.ts`; falta verlo en un proyecto real).
+- [ ] Cada pregunta trae opciones sugeridas con su evidencia del código (lo pide `brief.md`; falta la prueba real).
+- [x] El brief se guarda solo con el sí del dev, en `decisions.md` con id (regla en `brief.md`, contrato en `plugin.test.ts`).
 - [x] `get_design_system` lo devuelve (test).
-- [ ] `variants` lo cita en sus hipótesis.
+- [x] `variants` lo cita en su diagnóstico (paso 3b), del que salen las hipótesis (contrato en `plugin.test.ts`).
 
 ## Tareas
 
 - [x] 1–2. MCP: `brief.ts`, sección `brief`, descripción de la tool (también en SPEC §2.a.3),
   tests y bundle · `5211ba0`
-- [ ] 3. `skills/init/brief.md`
-- [ ] 4. `skills/init/SKILL.md`
-- [ ] 5. `skills/start/SKILL.md`
-- [ ] 6. `skills/variants/SKILL.md`
-- [ ] 7. `skills/help/SKILL.md` y contratos en `plugin.test.ts`
-- [ ] 8. Docs: SPEC §2.c.4 y §7.30, `docs/uso.md`, `CHANGELOG.md`
+- [x] 3–7. Skills: `init/brief.md` (nuevo), `init`, `start`, `variants`, `help` y contratos en
+  `plugin.test.ts` · `54ee5e4` (antes, `5d9110b`: el lector toma "nada" y "nothing" como vacío)
+- [x] 8. Docs: SPEC §2.g y §7.30 (y §2.e, árbol de archivos), `docs/uso.md` §5.0, `CHANGELOG.md`
 - [ ] 9. Prueba en la app de Vite de prueba y release
 
 ## Decisiones tomadas durante el trabajo
@@ -91,10 +88,18 @@ oscuro (sí, no o más adelante).
 - **2026-10-15:** plan aprobado. Tareas 1–2 hechas (`5211ba0`), 223 tests en verde. La prueba de
   etiquetas en inglés encontró un bug antes del commit: un tipo sin backticks con guion
   (`consumer-app`) se cortaba en el guion; corregido.
+- **2026-10-15:** tareas 3 a 8. Al escribir la skill apareció que "Evitar: nada" no se leía como
+  vacío: se sumaron "nada" y "nothing" (`5d9110b`). El test de `start` que pedía siempre
+  `/facha-ui:init` sin tokens pasó a pedir el brief cuando no hay. La sección de la SPEC quedó
+  en §2.g (el plan decía §2.c.4, que es de `apply`). 227 tests en verde.
 
 ## Cómo retomar
 
-Seguir por la tarea 3 (`skills/init/brief.md`), en la rama `feat/design-brief`. Releer antes
-`skills/init/SKILL.md` (está en 245 líneas: el puntero a `brief.md` tiene que entrar sin pasar
-de 250) y la regla dura 2 de `init` (los valores salen solo de `scan_styles` o del dev: el brief
-solo guarda el color de marca que diga el dev).
+**Estado al 2026-10-15:** tareas 1 a 8 hechas en `feat/design-brief`, sin push. Falta la tarea 9.
+
+
+Seguir por la tarea 9: en la app de prueba de Vite (`facha-ui-pruebas/vite-react-app`, fuera del repo),
+emular `/facha-ui:init brief` siguiendo `skills/init/brief.md` (la skill la lanza solo el dev),
+escribir la entrada en su `decisions.md` y verificar con `get_design_system` (`brief`, `invalid`
+vacío). Después, release (versión menor: agrega una función) con el flujo de `CLAUDE.md`, y B-024
+pasa a Hecho.

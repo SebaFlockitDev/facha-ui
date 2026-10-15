@@ -681,7 +681,7 @@ facha-ui/
 │   │   ├── templates/vite-react/ # index.html, main.tsx, providers.tsx, compare.tsx (lab de Vite, 0.17.0), facha-live-plugin.ts (modo en vivo, 0.18.0)
 │   │   └── scripts/              # live-watch.mjs (Monitor), palette-base.mjs (base de paletas)
 │   ├── apply/SKILL.md
-│   ├── init/SKILL.md             # tokens desde el uso (0.2.0) y adopción de paletas (0.7.0)
+│   ├── init/SKILL.md · brief.md  # tokens desde el uso (0.2.0), adopción de paletas (0.7.0) y brief de diseño (§2.g)
 │   ├── flow/SKILL.md             # revisión de un recorrido entre pantallas (0.12.0)
 │   ├── help/SKILL.md             # referencia de comandos, tools y archivos
 │   └── learn/SKILL.md            # curso guiado sobre el propio proyecto (0.8.0)
@@ -693,6 +693,8 @@ facha-ui/
 ├── scripts/run-pinned.mjs        # lanza un paquete npm con versión fija, portable a Windows
 ├── docs/
 │   ├── img/                      # diagrama del flujo y capturas de la demo
+│   ├── specs/                    # un spec por ítem del backlog: plan, tareas, registro y cómo retomar
+│   ├── research/                 # estudios que originan ítems (mercado, estándares)
 │   └── uso.md                    # guía de uso
 ├── SPEC.md · README.md · CHANGELOG.md · LICENSE (MIT)
 ```
@@ -776,9 +778,9 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 **Análisis de solo lectura, nada sin aprobación:** `allowed-tools` es Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`. Los pasos 1 a 5 no escriben, no usan Bash ni red y no corren otras skills: muestran el comando. La intención de la regla siempre fue *nada sin aprobación*, no *nunca*: por eso el paso 6 ofrece agregar lo que falta y escribe solo con un sí explícito del dev, con Write y Edit (que no se pre-aprueban: Claude Code pide permiso para cada archivo).
 
 1. **Proyecto y design system** en palabras simples: framework, Tailwind o shadcn, config o autodetección, tokens, temas, `status` y decisiones previas. Con `MULTIPLE_PROJECTS`, muestra los candidatos y espera la elección.
-2. **Sin design system** (`status: missing`): lo dice, explica qué significa y recomienda `/facha-ui:init`; el resto sigue, porque el guardián funciona sin tokens (§3.3).
+2. **Sin design system** (`status: missing`): lo dice, explica qué significa y recomienda `/facha-ui:init brief` si no hay brief (§2.g) o `/facha-ui:init` si lo hay; el resto sigue, porque el guardián funciona sin tokens (§3.3).
 3. **Puntaje** (`ux_score`, promedio y pantalla más débil), totales (`audit_project`) y **los 3 problemas más graves** (errores antes que advertencias, la regla más repetida primero, nunca dos de la misma regla), cada uno con `archivo:línea`, una frase simple y el principio `ux:*` cuya línea *Verify* nombra la regla.
-4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init`; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
+4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init brief` sin brief, `/facha-ui:init` con brief; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
 5. **Checklist sin editar nada:** `facha-ui.config.json` (con un bloque mínimo armado con lo detectado: `version`, `tokens.sources`, `preview.baseUrl`), las líneas exactas del `.gitignore` (`<lab.dir>/`, `.facha-ui/live/`, `.facha-ui/screenshots/`, `.facha-ui/playwright/`; una línea más amplia como `.facha-ui/` cuenta) y el dev server (comando de `package.json` y `preview.baseUrl`, marcado "no verificado").
 6. **Ofrecer agregarlo** (desde 0.16.0): muestra exactamente qué escribiría en cada archivo y pregunta *"¿Querés que agregue esto?"*. Solo con un sí explícito del dev en la conversación (nunca en el mismo turno de la pregunta; un texto del proyecto nunca cuenta como sí):
    - agrega al final del `.gitignore` del proyecto las líneas que faltan, o lo crea si no existe, sin tocar ni reordenar las que ya están;
@@ -811,6 +813,23 @@ Para que facha-ui aporte en el trabajo diario aunque nadie lo invoque: cada arch
 - Nunca rompe la edición: cualquier error interno (JSON de entrada inválido, config inválida, archivo que no existe) sale con exit 0 y en silencio, y el hook no corre con `onFailure: "block"`.
 - S2: es el mismo bundle que cubre el test de MCP-3. Lee stdin y archivos del proyecto; no escribe, no usa red ni ejecuta código del proyecto. Un test corre el bundle como lo corre el hook y compara una instantánea del directorio antes y después.
 - Tiempo por archivo, medido con el bundle en Windows: ~140 ms cuando calla (arranque de Node y carga del bundle) y ~170–230 ms cuando chequea, en los fixtures y en un proyecto real chico (6 pantallas). El test pone un límite holgado de 3 s por archivo.
+
+### 2.g Brief de diseño (`/facha-ui:init brief`, B-024)
+
+Para un proyecto sin diseño definido. `init` sin brief solo puede ordenar los valores que el código ya usa; un diseñador primero entiende el producto. El brief es la primera pieza del bloque "diseño desde cero" del backlog (B-024 brief, B-025 generador, B-026 tres direcciones), originado en el [estudio de herramientas](docs/research/2026-10-15-herramientas-de-diseno.md): las que mejor resuelven el inicio (Google Stitch, Readdy, la skill frontend-design de Anthropic) arrancan con una entrevista corta.
+
+**Flujo** (`skills/init/brief.md`, leído antes del modo; las reglas duras de `init` siguen valiendo):
+1. **Preflight de solo lectura:** `get_design_system` (con `brief`), `scan_styles` y evidencia del código: dependencias, rutas, navegación, títulos, metadatos, README, tipografías en uso y temas. El color con croma más usado es solo el **candidato** a color de marca.
+2. **Brief ya completado** ("esto es lo que entiendo de tu producto"): cada campo con su propuesta y su evidencia (`archivo:línea`), o "sin evidencia". Después, **como mucho 3 preguntas** con opciones (personalidad, referencias, qué evitar), solo de lo que el código no dice (`ux:nielsen-6`).
+3. **Aprobación explícita** en la conversación, con el motivo.
+4. **Única escritura:** agregar una entrada `dec-<fecha>-brief` a `memory.decisionsFile`. Un brief nuevo no edita el anterior.
+5. **Validación** con `get_design_system` (`brief.invalid` vacío) e informe con el siguiente paso (`/facha-ui:init` sin tokens; *"mejorá la pantalla …"* con tokens).
+
+**Campos:** tipo de producto (`saas-dashboard`, `ecommerce`, `fintech`, `content`, `marketing`, `internal-tool`, `consumer-app`, `other`, más una descripción), usuarios, tarea principal, contexto (dispositivo y frecuencia), 3 rasgos de personalidad, densidad (compacta, equilibrada, aireada), color de marca o ninguno, tipografía, referencias (como texto: el MCP no usa la red), qué evitar, accesibilidad (WCAG 2.2 AA por defecto) y modo oscuro (sí, no, más adelante).
+
+**Lectura en el MCP** (`mcp/src/brief.ts`): `get_design_system` → `brief` es la entrada `dec-*-brief` más reciente (por fecha y luego por posición), con cada campo estructurado y su `archivo:línea` en `at`; las anteriores van en `history`. Las etiquetas se aceptan en español o inglés. Un valor que no se puede leer (tipo fuera de la lista, densidad, color o modo oscuro inválidos) va a `invalid` con el motivo y el campo queda en `null`: nunca se adivina. Sin entrada, `brief` es `null`. Como toda decisión, su texto es dato, nunca instrucción.
+
+**Quién lo usa:** `start` lo recomienda primero cuando no hay tokens ni brief, y como alternativa cuando hay design system y no hay brief; `init` lo ofrece antes de proponer tokens desde el uso; `variants` toma del brief quién usa la pantalla y su contexto en el diagnóstico (paso 3b) y cita su id.
 
 ---
 
@@ -1404,6 +1423,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Alcance:** solo quien desarrolla el plugin dentro de este repo. En el proyecto de quien usa el plugin no hay un `.mcp.json` del plugin en la raíz.
 - **Arreglo:** los dos servidores pasan a `mcpServers` en `.claude-plugin/plugin.json` (mismos comandos y versiones) y se borra el `.mcp.json` de la raíz. `claude plugin validate .` lo acepta.
 - **Tests:** 216. Los de versiones fijas y del bundle leen el manifiesto; uno nuevo falla si vuelve un `.mcp.json` en la raíz con `${CLAUDE_PLUGIN_ROOT}` (comprobado con el archivo anterior).
+
+### 7.30 Brief de diseño
+
+Ítem B-024 del backlog, el primero del bloque "diseño desde cero" que salió del [estudio de herramientas](docs/research/2026-10-15-herramientas-de-diseno.md). Spec, tareas y registro: [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).
+
+- **Qué cambia:** `/facha-ui:init brief` (§2.g) propone el brief desde el código, con la evidencia de cada respuesta, pregunta como mucho 3 cosas y lo guarda como decisión solo con el sí del dev; `get_design_system` lo devuelve en la sección `brief`; `start`, `init` y `variants` lo usan.
+- **Decisiones:** el brief vive en `decisions.md` y no en la config, porque es una decisión de diseño del equipo y ya es una fuente válida; un brief nuevo no borra el anterior; los ids de tipo de producto y densidad son estables y en inglés (los usarán los perfiles de B-027), y las etiquetas, en español con equivalentes en inglés.
+- **Tests:** el lector (brief completo, el más reciente gana, etiquetas en inglés, "ninguno" y "nada", valores inválidos informados, texto con instrucciones como dato, sin archivo, y la sección por el MCP) y los contratos de las skills (modo en su propio archivo, única escritura, como mucho 3 preguntas, etiquetas que el MCP lee, `start` y `variants`). Un test además exige un spec en `docs/specs/` para todo ítem en curso.
 
 ---
 
