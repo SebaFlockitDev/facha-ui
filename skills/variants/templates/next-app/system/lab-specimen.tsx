@@ -82,7 +82,7 @@ export function LabSpecimen() {
         <div className={styles.row}>
           <button type="button" className={styles.secondary}>Ver detalle</button>
           <button type="button" className={styles.dangerButton}>Eliminar</button>
-          <a className={styles.link} href="#sp-actions">Enlace</a>
+          <a className={styles.link} href="#sp-surfaces">Ver todos los pedidos</a>
         </div>
       </section>
 

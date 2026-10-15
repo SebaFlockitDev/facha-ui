@@ -2,7 +2,7 @@
 /* Only the generated system's tokens: every value here is a var(). */
 
 .page {
-  min-height: 100%;
+  min-height: 100dvh;
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);

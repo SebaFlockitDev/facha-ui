@@ -75,7 +75,9 @@ Show, in the developer's language:
   how cards stand out, each with its source from `sources`), how many contrast pairs pass, and its
   `adjustments`, `conflicts` and `notes` in plain words.
 
-All of them pass WCAG and none confuses its states. The choice is a brand decision: relate each to
+All of them pass WCAG and none confuses its states. If they look alike on the screen (with a
+brand color they change radius, neutral and elevation, and a screen with few cards or controls shows
+little of that), say so and point to the specimen, where every element shows the difference. The choice is a brand decision: relate each to
 the brief's personality, but do not present one as better without a source. Ask which one, or a
 **mix** (the color of one with the style of another): call the tool again with that seed as
 `brandColor` and that `style`, add its `css.lab` to `directions.css`, capture it and show it before
@@ -126,8 +128,9 @@ If anything has to differ from the plan, stop and go back to S3.
    hand-written colors or classes. Anything else: show it; the developer decides whether to keep
    the change or undo it (`git restore`, only if they say so).
 2. `check_ui` on the target file: no violation inside the written block; the ones below it are the
-   screens' own colors, the same as before. `check_ui` on `<lab.dir>/system/`: 0 errors now that
-   the tokens exist.
+   screens' own colors, the same as before. `check_ui` on the screen copy (`<lab.dir>/system/<slug>`)
+   and on the specimen (`lab-specimen.tsx`, `lab-specimen.module.css`): 0 errors now that the tokens
+   exist. Not on `directions.css`: it holds the values themselves.
 3. `audit_project` and `ux_score` with no arguments: the **after**. The literals in the screens
    are now reported against real tokens; say so, it is the expected starting point.
 4. Remove `<lab.dir>/system/`, and the lab scaffold if S2b created it and no run of variants uses
