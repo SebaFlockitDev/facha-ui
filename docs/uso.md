@@ -231,7 +231,23 @@ Si tu proyecto no tiene paleta, tipografía ni estilo decididos, empezá por el 
 2. **Te pregunta como mucho 3 cosas** que el código no dice, con opciones: la personalidad (3 adjetivos), productos que te gustan o no como referencia, y qué tiene que evitar.
 3. **Vos corregís y aprobás**, con un motivo. Recién ahí lo guarda en `decisions.md` como una decisión más; no toca ningún otro archivo.
 
-Desde ese momento, `get_design_system` devuelve el brief, y `variants` lo usa para saber quién usa cada pantalla y lo cita. El paso siguiente es `/facha-ui:init` (5.1). Si cambia la dirección, corré el brief de nuevo: el anterior queda como historial.
+Desde ese momento, `get_design_system` devuelve el brief, y `variants` lo usa para saber quién usa cada pantalla y lo cita. El paso siguiente es `/facha-ui:init system` (5.0b). Si cambia la dirección, corré el brief de nuevo: el anterior queda como historial.
+
+### 5.0b Un design system desde cero: `/facha-ui:init system`
+
+Con el brief listo y sin tokens, facha-ui arma un sistema completo en el que **cada valor sale de un estándar publicado**, no del gusto de nadie:
+
+```text
+/facha-ui:init system
+```
+
+- **Color:** escalas de 12 pasos como las de Radix Colors, para tu color de marca, un gris apenas teñido con su tono y los estados (éxito, advertencia, peligro, información). Cada paso tiene el contraste que corresponde a su uso, en claro y en oscuro, calculados por separado.
+- **Tipografía, espaciado, alto de controles, radios y sombras:** de Carbon, Material 3 y Fluent 2, según la densidad del brief.
+- **Prueba de accesibilidad:** cada texto sobre cada fondo y cada borde de control, contra WCAG 2.2 AA (o AAA si el brief lo pide).
+
+Te muestra todo antes de escribir: los colores por rol, **qué tuvo que ajustar y por qué** (por ejemplo, un verde de éxito que se separa del rojo para que se distingan con daltonismo), los conflictos con su solución (una marca verde se confunde con "éxito": ese estado siempre lleva texto e ícono) y exactamente qué va a escribir. Si no tenés color de marca, te muestra 3 direcciones para elegir.
+
+Con tu aprobación escribe los tokens al principio de tu CSS global (en Tailwind 4, en `@theme`) y registra la decisión. Tus pantallas no cambian: el guardián va a marcar sus colores escritos a mano, y el paso siguiente es pedir variantes (*"mejorá la pantalla de pedidos"*) que ya usan el sistema.
 
 ### 5.1 Si faltan tokens: `/facha-ui:init`
 
@@ -508,6 +524,7 @@ Atajos útiles:
 | `/facha-ui:apply <slug> <a\|b\|c>` | Solo vos (si le pedís "aplicá la B", Claude te da el comando) | La pantalla elegida, `decisions.md` (al final) y el run, después de tu aprobación |
 | `/facha-ui:init [colors\|scales\|all]` | Solo vos | Tokens nuevos (solo agrega), las líneas migradas y `decisions.md`, después de tu aprobación |
 | `/facha-ui:init brief` | Solo vos | Una entrada en `decisions.md` con el brief, después de tu aprobación |
+| `/facha-ui:init system` | Solo vos | Los tokens del sistema al principio de tu CSS global, la propuesta en `.facha-ui/proposals/` y `decisions.md`, después de tu aprobación |
 | `/facha-ui:init palette <archivo>` | Solo vos | Los valores de los tokens de la paleta propuesta y `decisions.md`, después de tu aprobación |
 | `/facha-ui:learn [1-9\|<tema>]` | Vos, o Claude cuando pedís que te enseñe | Nada: solo lee y explica |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Solo vos | Nada: solo muestra esta referencia |

@@ -690,12 +690,12 @@ facha-ui/
 │   │   ├── templates/vite-react/ # index.html, main.tsx, providers.tsx, compare.tsx (lab de Vite, 0.17.0), facha-live-plugin.ts (modo en vivo, 0.18.0)
 │   │   └── scripts/              # live-watch.mjs (Monitor), palette-base.mjs (base de paletas)
 │   ├── apply/SKILL.md
-│   ├── init/SKILL.md · brief.md  # tokens desde el uso (0.2.0), adopción de paletas (0.7.0) y brief de diseño (§2.g)
+│   ├── init/SKILL.md · brief.md · system.md  # tokens desde el uso (0.2.0), paletas (0.7.0), brief (§2.g) y sistema desde estándares (§2.h)
 │   ├── flow/SKILL.md             # revisión de un recorrido entre pantallas (0.12.0)
 │   ├── help/SKILL.md             # referencia de comandos, tools y archivos
 │   └── learn/SKILL.md            # curso guiado sobre el propio proyecto (0.8.0)
 ├── mcp/                          # paquete facha-ui-mcp (Node + TS)
-│   ├── src/                      # server.ts, guard.ts (modo del hook), check.ts, rules.ts, project-rules.ts, visual.ts, design-system.ts,
+│   ├── src/                      # server.ts, guard.ts (modo del hook), generate.ts y standards.ts (§2.h), check.ts, rules.ts, project-rules.ts, visual.ts, design-system.ts,
 │   │                             # propose.ts, tokens.ts, tailwind*.ts, config.ts, project.ts, sources/{jsx,css,usage}.ts…
 │   ├── test/                     # suites de vitest + fixtures/{next-tailwind,next-tw4-cssvars,next-visual}
 │   └── dist/facha-ui-mcp.js      # bundle (esbuild); se commitea junto con cada cambio en src (§7.8)
@@ -787,9 +787,9 @@ Solo el MCP, desde el bundle de una copia del repo (vía npm cuando se publique,
 **Análisis de solo lectura, nada sin aprobación:** `allowed-tools` es Read, Glob, Grep, `get_design_system`, `ux_score` y `audit_project`. Los pasos 1 a 5 no escriben, no usan Bash ni red y no corren otras skills: muestran el comando. La intención de la regla siempre fue *nada sin aprobación*, no *nunca*: por eso el paso 6 ofrece agregar lo que falta y escribe solo con un sí explícito del dev, con Write y Edit (que no se pre-aprueban: Claude Code pide permiso para cada archivo).
 
 1. **Proyecto y design system** en palabras simples: framework, Tailwind o shadcn, config o autodetección, tokens, temas, `status` y decisiones previas. Con `MULTIPLE_PROJECTS`, muestra los candidatos y espera la elección.
-2. **Sin design system** (`status: missing`): lo dice, explica qué significa y recomienda `/facha-ui:init brief` si no hay brief (§2.g) o `/facha-ui:init` si lo hay; el resto sigue, porque el guardián funciona sin tokens (§3.3).
+2. **Sin design system** (`status: missing`): lo dice, explica qué significa y recomienda `/facha-ui:init brief` si no hay brief (§2.g) o `/facha-ui:init system` si lo hay (§2.h); el resto sigue, porque el guardián funciona sin tokens (§3.3).
 3. **Puntaje** (`ux_score`, promedio y pantalla más débil), totales (`audit_project`) y **los 3 problemas más graves** (errores antes que advertencias, la regla más repetida primero, nunca dos de la misma regla), cada uno con `archivo:línea`, una frase simple y el principio `ux:*` cuya línea *Verify* nombra la regla.
-4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init brief` sin brief, `/facha-ui:init` con brief; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
+4. **Una recomendación** y 2 alternativas de una línea. Regla: sin design system → `/facha-ui:init brief` sin brief, `/facha-ui:init system` con brief; si más de la mitad de los errores son de tokens o contraste (`color-literal`, `unknown-token`, `tailwind-palette-color`, `theme-contrast`, `class-contrast`, `non-text-contrast`) → `/facha-ui:init colors`; si no → "mejorá la pantalla `<ruta>`" para la de peor puntaje.
 5. **Checklist sin editar nada:** `facha-ui.config.json` (con un bloque mínimo armado con lo detectado: `version`, `tokens.sources`, `preview.baseUrl`), las líneas exactas del `.gitignore` (`<lab.dir>/`, `.facha-ui/live/`, `.facha-ui/screenshots/`, `.facha-ui/playwright/`; una línea más amplia como `.facha-ui/` cuenta) y el dev server (comando de `package.json` y `preview.baseUrl`, marcado "no verificado").
 6. **Ofrecer agregarlo** (desde 0.16.0): muestra exactamente qué escribiría en cada archivo y pregunta *"¿Querés que agregue esto?"*. Solo con un sí explícito del dev en la conversación (nunca en el mismo turno de la pregunta; un texto del proyecto nunca cuenta como sí):
    - agrega al final del `.gitignore` del proyecto las líneas que faltan, o lo crea si no existe, sin tocar ni reordenar las que ya están;
@@ -838,7 +838,25 @@ Para un proyecto sin diseño definido. `init` sin brief solo puede ordenar los v
 
 **Lectura en el MCP** (`mcp/src/brief.ts`): `get_design_system` → `brief` es la entrada `dec-*-brief` más reciente (por fecha y luego por posición), con cada campo estructurado y su `archivo:línea` en `at`; las anteriores van en `history`. Las etiquetas se aceptan en español o inglés. Un valor que no se puede leer (tipo fuera de la lista, densidad, color o modo oscuro inválidos) va a `invalid` con el motivo y el campo queda en `null`: nunca se adivina. Sin entrada, `brief` es `null`. Como toda decisión, su texto es dato, nunca instrucción.
 
-**Quién lo usa:** `start` lo recomienda primero cuando no hay tokens ni brief, y como alternativa cuando hay design system y no hay brief; `init` lo ofrece antes de proponer tokens desde el uso; `variants` toma del brief quién usa la pantalla y su contexto en el diagnóstico (paso 3b) y cita su id.
+**Quién lo usa:** `start` lo recomienda primero cuando no hay tokens ni brief, y como alternativa cuando hay design system y no hay brief; `init` lo ofrece antes de proponer tokens; `init system` (§2.h) lo usa como entrada; `variants` toma del brief quién usa la pantalla y su contexto en el diagnóstico (paso 3b) y cita su id.
+
+### 2.h Design system desde estándares (`/facha-ui:init system`, B-025)
+
+Para un proyecto sin tokens, después del brief (§2.g). En lugar de ordenar los literales en uso, arma un sistema completo cuyo cada valor sale de un estándar publicado o de un umbral de WCAG, y lo prueba. Spec, decisiones y registro: [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
+
+**Generador** (`mcp/src/generate.ts`, función pura; constantes con su fuente en `mcp/src/standards.ts`):
+- **Color.** Escalas de 12 pasos con los roles de Radix Colors para el acento, un neutro teñido con su tono y los cuatro estados. La luminosidad de cada paso es la que alcanza el contraste que Radix mide para ese paso contra el fondo (el método de Adobe Leonardo), con el tono de la semilla y una parte de su croma; claro y oscuro se resuelven por separado. Las medidas salen de las 31 escalas de Radix 3.0.0 (fixture con licencia MIT) y un test las vuelve a medir.
+- **Marca.** Es el paso 9 en los dos modos, como en Radix. Lleva texto blanco, salvo si es brillante (luminosidad > 0.773, medido en Radix); si el texto no llega al mínimo, se mueve lo menos posible en luminosidad y se informa. Contra el fondo, menos de 3:1 se informa sin ajustar: un botón con texto no necesita borde (WCAG 1.4.11).
+- **Estados.** Desde el paso 9 de Radix (verde, ámbar, rojo, azul). Si dos se confunden también con deuteranopía o protanopía (la medida de `status-confusable`), el que no es peligro se mueve en luminosidad lo mínimo que los separa con texto legible. Info toma la familia de la marca cuando se confunden (todo azul o violeta lo hace con deuteranopía). Una marca de la familia de un estado se informa como conflicto, con su solución.
+- **Roles:** fondo, panel, muted, texto y texto secundario, borde, borde de controles y anillo de foco (resueltos a 3:1, porque el paso 8 de Radix mide 2.3:1), acento y sus pasos, texto sobre acento y, por estado, sólido, texto, fondo, borde y texto sobre el sólido. Los textos se empujan hasta pasar sobre cada superficie donde van.
+- **Tipografía, espacio, radios y sombras:** escala productiva de Carbon (densidad compacta) o de Material 3 (equilibrada y aireada); interlineado 1.5 (WCAG 1.4.8) y 1.25 en títulos (Material 3); espaciado y alto de controles de Carbon (32, 40 o 48px, todos sobre los 24px de WCAG 2.5.8); radios de Material 3; sombras de Fluent 2.
+- **Prueba:** cada par texto/fondo y cada borde de control, en claro y oscuro, con su razón y su regla, sobre los hex finales (AA: 4.5 y 3; AAA: 7 y 3).
+- **Sin color de marca:** de 3 a 5 direcciones con semillas de los acentos de Radix que no se confunden con éxito, advertencia ni peligro, separadas al menos 45° en tono (hoy: índigo, ciruela y cyan).
+- **Nombres** con los espacios de Tailwind 4 (`--color-*`, `--text-*`, `--radius-*`, `--shadow-*`, `--font-sans`), que facha-ui lee por rol: en CSS van en `:root`; en Tailwind 4, en `@theme`. El oscuro, en `.dark`. Un test escribe el sistema en un proyecto, lo lee con facha-ui y exige los roles esperados, `status: ok` y ningún hallazgo de contraste ni de estados confundibles.
+
+**Tool:** `propose_design_system` (§2.a.3) toma la entrada de sus argumentos, después del brief y si no de un valor por defecto, y dice el origen de cada una.
+
+**Skill** (`skills/init/system.md`): solo con `status: missing`; recomienda el brief si no hay. Muestra las entradas, los colores por rol, los ajustes y conflictos, la prueba de contraste y las demás escalas con su fuente, y exactamente qué escribe. Con la aprobación y el motivo escribe los bloques al principio del CSS global que carga la app, la propuesta en `.facha-ui/proposals/system-<fecha>.json` y la decisión `dec-<fecha>-system`. El modo oscuro se escribe si el brief lo pide; si no, queda en la propuesta. Las pantallas no se tocan: el siguiente paso es `/facha-ui:variants`.
 
 ---
 
@@ -1440,6 +1458,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** `/facha-ui:init brief` (§2.g) propone el brief desde el código, con la evidencia de cada respuesta, pregunta como mucho 3 cosas y lo guarda como decisión solo con el sí del dev; `get_design_system` lo devuelve en la sección `brief`; `start`, `init` y `variants` lo usan.
 - **Decisiones:** el brief vive en `decisions.md` y no en la config, porque es una decisión de diseño del equipo y ya es una fuente válida; un brief nuevo no borra el anterior; los ids de tipo de producto y densidad son estables y en inglés (los usarán los perfiles de B-027), y las etiquetas, en español con equivalentes en inglés.
 - **Tests:** el lector (brief completo, el más reciente gana, etiquetas en inglés, "ninguno" y "nada", valores inválidos informados, texto con instrucciones como dato, sin archivo, y la sección por el MCP) y los contratos de las skills (modo en su propio archivo, única escritura, como mucho 3 preguntas, etiquetas que el MCP lee, `start` y `variants`). Un test además exige un spec en `docs/specs/` para todo ítem en curso.
+
+### 7.31 Design system desde estándares
+
+Ítem B-025 del backlog, el segundo del bloque "diseño desde cero". Spec, fuentes verificadas, decisiones y registro: [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
+
+- **Qué cambia:** la tool `propose_design_system` y el modo `/facha-ui:init system` (§2.h); `start` y el brief llevan a él cuando hay brief y no hay tokens.
+- **Lo que encontraron las pruebas:** el rojo y el verde de Radix se confunden con deuteranopía (ΔE 3.9), y todo azul o violeta se confunde con el azul de info; la revisión a ojo encontró peligro con texto oscuro, éxito casi negro y texto de acento más claro que la marca. Cada caso quedó resuelto con una regla medida (ver §2.h y las decisiones del spec).
+- **APCA** pasa a B-032; **shadcn** no se nombra: un proyecto shadcn siempre tiene tokens.
+- **Tests:** las constantes se vuelven a medir desde las escalas de Radix; 10 marcas (fría, cálida, clara, oscura, saturada, apagada, verde, casi negra) pasan cada par en AA y en AAA; determinismo; marca conservada o ajuste informado; conflictos; semillas; ida y vuelta por facha-ui (roles, `status: ok`, sin hallazgos de salud), también en Tailwind 4; la tool por el MCP (entradas del brief, argumentos, Tailwind 4, color inválido); S2 de los imports; contratos de la skill.
 
 ---
 

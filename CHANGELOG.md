@@ -7,6 +7,15 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- `/facha-ui:init system`: para un proyecto sin tokens, arma un design system completo desde estándares publicados y tu brief: escalas de color de 12 pasos en claro y oscuro (con los roles de Radix Colors y la luminosidad de cada paso calculada por contraste), tipografía de Carbon o Material 3 según la densidad, espaciado y alto de controles de Carbon, radios de Material 3 y sombras de Fluent 2. Cada par de contraste se prueba contra WCAG 2.2, cada ajuste y cada conflicto se muestran con su motivo y su solución, y no escribe nada sin tu aprobación. Sin color de marca, propone 3 direcciones.
+- Tool `propose_design_system`: el sistema generado, determinístico y con la fuente de cada valor.
+
+### Changed
+
+- `start` y el brief recomiendan `/facha-ui:init system` cuando hay brief y no hay tokens.
+
 ## [0.20.0] - 2026-10-15
 
 ### Added
