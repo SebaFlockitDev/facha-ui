@@ -743,7 +743,7 @@ describe("BACKLOG.md", () => {
       const file = path.join(REPO, spec![1]!);
       expect(fs.existsSync(file), spec![1]).toBe(true);
       const doc = fs.readFileSync(file, "utf8");
-      for (const h of ["## Plan aprobado", "## Tareas", "## Registro", "## Cómo retomar"]) expect(doc, `${spec![1]}: ${h}`).toContain(h);
+      for (const h of ["## Plan", "## Tareas", "## Registro", "## Cómo retomar"]) expect(doc, `${spec![1]}: ${h}`).toContain(h);
     }
   });
 
