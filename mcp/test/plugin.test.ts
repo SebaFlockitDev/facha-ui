@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 const MCP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REPO = path.resolve(MCP_DIR, "..");
+const MANIFEST = path.join(REPO, ".claude-plugin", "plugin.json");
 
 describe("PLG-2 · pinned versions", () => {
   it("run-pinned accepts only exact versions", async () => {
@@ -16,8 +17,9 @@ describe("PLG-2 · pinned versions", () => {
       expect(isExactSpec(bad), String(bad)).toBe(false);
   });
 
-  it(".mcp.json launches every server with node and an exact version", () => {
-    const config = JSON.parse(fs.readFileSync(path.join(REPO, ".mcp.json"), "utf8"));
+  it("plugin.json launches every server with node and an exact version", () => {
+    const config = JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
+    expect(Object.keys(config.mcpServers).sort()).toEqual(["facha-ui", "playwright"]);
     for (const [name, server] of Object.entries<{ command: string; args: string[] }>(config.mcpServers)) {
       expect(server.command, name).toBe("node");
       const text = server.args.join(" ");
@@ -27,12 +29,21 @@ describe("PLG-2 · pinned versions", () => {
   });
 });
 
+describe("B-023 · the servers live in the manifest, not in a root .mcp.json", () => {
+  // A root .mcp.json is also read as the project's own config when a session opens in this repo,
+  // where ${CLAUDE_PLUGIN_ROOT} has no value: that copy fails with "Connection closed" (SPEC §7.29).
+  it("no .mcp.json at the root uses ${CLAUDE_PLUGIN_ROOT}", () => {
+    const file = path.join(REPO, ".mcp.json");
+    if (fs.existsSync(file)) expect(fs.readFileSync(file, "utf8")).not.toContain("CLAUDE_PLUGIN_ROOT");
+  });
+});
+
 describe("MCP-3 · committed bundle", () => {
   const bundle = path.join(MCP_DIR, "dist", "facha-ui-mcp.js");
 
-  it("exists, as referenced by .mcp.json", () => {
+  it("exists, as referenced by plugin.json", () => {
     expect(fs.existsSync(bundle)).toBe(true);
-    expect(fs.readFileSync(path.join(REPO, ".mcp.json"), "utf8")).toContain("mcp/dist/facha-ui-mcp.js");
+    expect(fs.readFileSync(MANIFEST, "utf8")).toContain("mcp/dist/facha-ui-mcp.js");
   });
 
   it("only loads fs, path, url, process and module from node", () => {
