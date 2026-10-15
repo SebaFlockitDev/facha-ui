@@ -698,3 +698,23 @@ describe("BACKLOG.md", () => {
     expect(fs.readFileSync(path.join(REPO, "SPEC.md"), "utf8")).toContain("[`BACKLOG.md`](BACKLOG.md)");
   });
 });
+
+describe("Vite lab: providers from the entry, and a failing variant that explains itself", () => {
+  const read = (p: string) => fs.readFileSync(path.join(REPO, "skills", "variants", p), "utf8").replace(/\r\n/g, "\n");
+
+  it("main.tsx shows why a variant failed and keeps the panel outside the boundary", () => {
+    const main = read("templates/vite-react/main.tsx");
+    expect(main).toContain("class VariantBoundary extends Component");
+    expect(main).toContain("La variante no se pudo mostrar");
+    expect(main).toMatch(/No QueryClient set/);
+    expect(main.indexOf("</VariantBoundary>")).toBeLessThan(main.indexOf("<LabPanel />"));
+  });
+
+  it("lab.md writes providers.tsx from project.lab.entry, by kind", () => {
+    const lab = read("lab.md");
+    expect(lab).toContain("`project.lab.entry`");
+    for (const k of ["`strict`", "`router`", "`query-cache`", "`provider`"]) expect(lab, k).toContain(k);
+    expect(lab).toContain("create one in `providers.tsx` with the same\n    options");
+    expect(lab).toContain("never re-create it");
+  });
+});

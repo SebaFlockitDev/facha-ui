@@ -1,5 +1,5 @@
 // facha-ui lab scaffold (Vite) · removed by /facha-ui:apply when no runs remain
-import { StrictMode, Suspense, lazy, useMemo, type ComponentType } from "react";
+import { Component, StrictMode, Suspense, lazy, useMemo, type ComponentType, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 /*__GLOBAL_CSS__*/
 import { CompareVariants } from "./compare";
@@ -29,19 +29,52 @@ export function labIndex(): Map<string, string[]> {
   return out;
 }
 
+/** Messages of a missing provider: the variant uses a hook whose provider is not in providers.tsx. */
+const MISSING_PROVIDER = /No QueryClient set|useNavigate\(\)|useLocation\(\)|useHref\(\)|<Router>|react-redux context|could not find.*context|must be used (with)?in/i;
+
+/**
+ * A variant that fails to render shows why, in plain words, instead of a blank page; the live
+ * panel stays outside it, so the developer can still ask for the fix from there.
+ */
+class VariantBoundary extends Component<{ screen: string; children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    const { error } = this.state;
+    if (!error) return this.props.children;
+    const provider = MISSING_PROVIDER.test(error.message);
+    return (
+      <div role="alert" style={{ font: "14px/1.5 system-ui, sans-serif", padding: 24, maxWidth: 720 }}>
+        <h1 style={{ fontSize: 18, margin: "0 0 8px" }}>La variante no se pudo mostrar</h1>
+        <p style={{ margin: "0 0 8px" }}>
+          {provider
+            ? "Usa un hook de la app cuyo provider no está en el laboratorio. Falta agregarlo en facha-lab/providers.tsx, igual que en el main.tsx de la app."
+            : "Se produjo un error al dibujarla. Pedile a Claude Code que lo revise, con el mensaje de abajo."}
+        </p>
+        <pre style={{ whiteSpace: "pre-wrap", background: "#f1f5f9", color: "#0f172a", padding: 12, borderRadius: 8, fontSize: 12 }}>{error.message}</pre>
+        <p style={{ margin: 0, color: "#475569" }}>Pantalla: {this.props.screen}</p>
+      </div>
+    );
+  }
+}
+
 function Variant({ screen, variant }: { screen: string; variant: string }) {
   const key = Object.keys(PAGES).find((k) => k.startsWith(`./${screen}/${variant}/Page.`));
   const Page = useMemo(() => (key ? lazy(PAGES[key]!) : null), [key]);
   if (!Page) return <p style={{ font: "14px system-ui", padding: 16 }}>No existe la variante {variant} de {screen} en el laboratorio.</p>;
   return (
     <>
-      <LabProviders screen={screen}>
-        <LabTheme />
-        <Suspense fallback={null}>
-          <Page />
-        </Suspense>
-        <LabResponsive />
-      </LabProviders>
+      <VariantBoundary screen={screen}>
+        <LabProviders screen={screen}>
+          <LabTheme />
+          <Suspense fallback={null}>
+            <Page />
+          </Suspense>
+          <LabResponsive />
+        </LabProviders>
+      </VariantBoundary>
       {/* facha-ui's own live panel, outside the app's providers: it only talks to the lab endpoint. */}
       <LabPanel />
     </>

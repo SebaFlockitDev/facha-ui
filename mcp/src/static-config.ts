@@ -22,6 +22,11 @@ export function parseConfig(code: string): Node {
   return parse(code, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true }) as unknown as Node;
 }
 
+/** Parses a module that may contain JSX (an app's entry, main.tsx). Never runs it. */
+export function parseModule(code: string): Node {
+  return parse(code, { sourceType: "module", plugins: ["typescript", "jsx"], errorRecovery: true }) as unknown as Node;
+}
+
 /** Unwraps `x satisfies Config`, `x as Config`, `<Config>x` and parentheses. */
 export function unwrap(n: Node | undefined | null): Node | undefined {
   let cur = n ?? undefined;

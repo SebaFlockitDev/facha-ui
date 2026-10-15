@@ -54787,6 +54787,9 @@ var lineOf = (n) => n?.loc?.start.line ?? 0;
 function parseConfig(code2) {
   return parse5(code2, { sourceType: "unambiguous", plugins: ["typescript"], errorRecovery: true });
 }
+function parseModule(code2) {
+  return parse5(code2, { sourceType: "module", plugins: ["typescript", "jsx"], errorRecovery: true });
+}
 function unwrap(n) {
   let cur = n ?? void 0;
   while (cur && ["TSSatisfiesExpression", "TSAsExpression", "TSTypeAssertion", "ParenthesizedExpression", "TSNonNullExpression"].includes(cur.type)) cur = cur.expression;
@@ -54871,6 +54874,125 @@ function readViteConfig(project) {
   return out;
 }
 
+// src/app-entry.ts
+var ENTRY_CANDIDATES = ["src/main.tsx", "src/main.jsx", "src/main.ts", "src/main.js", "src/index.tsx", "src/index.jsx"];
+var ROUTERS = /* @__PURE__ */ new Set(["BrowserRouter", "HashRouter", "MemoryRouter", "RouterProvider", "Router"]);
+var QUERY_CACHES = { QueryClientProvider: /^(@tanstack\/react-query|react-query)$/, SWRConfig: /^swr$/ };
+var MAX_INIT = 300;
+function entryFile(project) {
+  const html = readRootFile(project, "index.html") ?? "";
+  const src = html.match(/<script[^>]*type=["']module["'][^>]*src=["']\/?([^"']+)["']/)?.[1];
+  for (const f3 of [src, ...ENTRY_CANDIDATES]) if (f3 && readRootFile(project, f3) !== null) return f3;
+  return null;
+}
+function jsxName(n) {
+  if (n.type === "JSXIdentifier") return n.name;
+  if (n.type === "JSXMemberExpression") return `${jsxName(n.object)}.${jsxName(n.property)}`;
+  return "?";
+}
+function elementChildren(el) {
+  return el.children.filter((c2) => c2.type === "JSXElement");
+}
+function hasOtherContent(el) {
+  return el.children.some((c2) => c2.type === "JSXText" ? c2.value.trim() !== "" : c2.type !== "JSXElement");
+}
+function readAppEntry(project) {
+  const file2 = entryFile(project);
+  if (!file2) return null;
+  const code2 = readRootFile(project, file2) ?? "";
+  const out = { file: file2, css: [], providers: [], app: null, unread: [] };
+  let ast;
+  try {
+    ast = parseModule(code2);
+  } catch (e4) {
+    out.unread.push({ what: `the file does not parse (${e4.message.slice(0, 120)})`, line: 0 });
+    return out;
+  }
+  const body = ast.program.body;
+  const imports = /* @__PURE__ */ new Map();
+  const locals = /* @__PURE__ */ new Map();
+  const exported = /* @__PURE__ */ new Set();
+  for (const st of body) {
+    if (st.type === "ImportDeclaration") {
+      const from = st.source.value;
+      if (st.specifiers.length === 0 && /\.(css|scss|sass|less)$/.test(from)) out.css.push(from);
+      for (const s of st.specifiers) imports.set(s.local.name, from);
+    }
+    const decl2 = st.type === "ExportNamedDeclaration" ? st.declaration : st;
+    if (decl2?.type === "VariableDeclaration") {
+      for (const d of decl2.declarations) {
+        if (d.id?.type !== "Identifier") continue;
+        locals.set(d.id.name, d.init);
+        if (st.type === "ExportNamedDeclaration") exported.add(d.id.name);
+      }
+    }
+    if ((decl2?.type === "FunctionDeclaration" || decl2?.type === "ClassDeclaration") && decl2.id) {
+      locals.set(decl2.id.name, decl2);
+      if (st.type === "ExportNamedDeclaration") exported.add(decl2.id.name);
+    }
+    if (st.type === "ExportNamedDeclaration" && !st.declaration) for (const s of st.specifiers) exported.add(s.local.name);
+  }
+  let root2;
+  const visit2 = (n) => {
+    if (root2 || !n || typeof n !== "object") return;
+    const node2 = n;
+    if (node2.type === "CallExpression" && node2.callee?.type === "MemberExpression" && node2.callee.property?.name === "render") {
+      const arg = unwrap(node2.arguments?.[0]);
+      if (arg?.type === "JSXElement") {
+        root2 = arg;
+        return;
+      }
+    }
+    for (const [k4, v] of Object.entries(node2)) {
+      if (k4 === "loc" || k4 === "start" || k4 === "end") continue;
+      if (Array.isArray(v)) v.forEach(visit2);
+      else if (v && typeof v === "object") visit2(v);
+    }
+  };
+  visit2(ast.program);
+  if (!root2) {
+    out.unread.push({ what: "no render(<\u2026/>) call with JSX found in the entry", line: 0 });
+    return out;
+  }
+  const origin = (expr) => {
+    const text = code2.slice(expr.start, expr.end).slice(0, MAX_INIT);
+    if (expr.type !== "Identifier") return { text };
+    if (imports.has(expr.name)) return { text, origin: "import", module: imports.get(expr.name) };
+    if (locals.has(expr.name)) {
+      const init = locals.get(expr.name);
+      return { text, origin: "local", exported: exported.has(expr.name), ...init ? { init: code2.slice(init.start, init.end).slice(0, MAX_INIT) } : {} };
+    }
+    return { text, origin: "unknown" };
+  };
+  let el = root2;
+  for (; ; ) {
+    const name = jsxName(el.openingElement.name);
+    const module = imports.get(name.split(".")[0]) ?? (locals.has(name) ? "local" : null);
+    const children = elementChildren(el);
+    if (children.length === 0) {
+      out.app = { name, module };
+      break;
+    }
+    const props = {};
+    for (const a of el.openingElement.attributes) {
+      if (a.type !== "JSXAttribute") {
+        out.unread.push({ what: `a spread of props on <${name}>`, line: lineOf(a) });
+        continue;
+      }
+      const v = a.value?.type === "JSXExpressionContainer" ? a.value.expression : a.value;
+      props[a.name.name] = v ? origin(v) : { text: "true" };
+    }
+    const base4 = name.split(".").pop();
+    const kind = /StrictMode$/.test(name) ? "strict" : ROUTERS.has(base4) && /^react-router(-dom)?$/.test(module ?? "") ? "router" : QUERY_CACHES[base4]?.test(module ?? "") ? "query-cache" : "provider";
+    out.providers.push({ name, kind, module, props, line: lineOf(el) });
+    if (children.length > 1 || hasOtherContent(el)) {
+      out.unread.push({ what: `<${name}> wraps more than the app; only its first element is followed`, line: lineOf(el) });
+    }
+    el = children[0];
+  }
+  return out;
+}
+
 // src/project.ts
 var MAX_FILE_BYTES = 1024 * 1024;
 var MAX_FILES = 5e3;
@@ -54951,9 +55073,11 @@ function openProject(root2, ws) {
   const framework = loaded.config.framework === "auto" ? frameworkDetected : loaded.config.framework;
   const assumptions = [...loaded.assumptions];
   let liveRegistered;
+  let labEntry;
   if (framework === "vite-react") {
     const vite = readViteConfig({ root: root2 });
     liveRegistered = vite?.liveRegistered ?? false;
+    labEntry = readAppEntry({ root: root2 });
     if (!loaded.explicit.labDir) loaded.config.lab.dir = "facha-lab";
     if (!loaded.explicit.baseUrl) loaded.config.preview.baseUrl = `http://localhost:${vite?.port ?? 5173}`;
     if (vite?.inputs?.length) {
@@ -54984,6 +55108,7 @@ function openProject(root2, ws) {
     frameworkDetected,
     framework,
     ...liveRegistered !== void 0 ? { liveRegistered } : {},
+    ...labEntry !== void 0 ? { labEntry } : {},
     workspacePath
   };
 }
@@ -58335,7 +58460,8 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
       lab: {
         dir: ctx.project.labDir,
         urlPattern: labUrlPattern(ctx.project.labDir, ctx.project.framework),
-        ...ctx.project.liveRegistered !== void 0 ? { liveRegistered: ctx.project.liveRegistered } : {}
+        ...ctx.project.liveRegistered !== void 0 ? { liveRegistered: ctx.project.liveRegistered } : {},
+        ...ctx.project.labEntry !== void 0 ? { entry: ctx.project.labEntry } : {}
       },
       screenshotsDir: ctx.project.workspacePath === "." ? ".facha-ui/screenshots" : `${ctx.project.workspacePath}/.facha-ui/screenshots`,
       preview: ctx.project.config.preview,
@@ -67208,7 +67334,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.18.1";
+var VERSION = "0.19.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
