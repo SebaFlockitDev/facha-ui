@@ -704,6 +704,20 @@ describe("BACKLOG.md", () => {
     }
   });
 
+  it("gives every item in spec, approved or in progress a spec file that says how to resume", () => {
+    for (const m of items) {
+      const block = text.slice(m.index!).split(/\n### |\n## /)[0]!;
+      if (!/- \*\*Estado:\*\* (en spec|aprobado|en curso)$/m.test(block)) continue;
+      const spec = block.match(/- \*\*Spec:\*\* .*?\((docs\/specs\/(B-\d{3})-[a-z0-9-]+\.md)\)/);
+      expect(spec, m[1]).not.toBeNull();
+      expect(spec![2], m[1]).toBe(m[1]);
+      const file = path.join(REPO, spec![1]!);
+      expect(fs.existsSync(file), spec![1]).toBe(true);
+      const doc = fs.readFileSync(file, "utf8");
+      for (const h of ["## Plan aprobado", "## Tareas", "## Registro", "## Cómo retomar"]) expect(doc, `${spec![1]}: ${h}`).toContain(h);
+    }
+  });
+
   it("is what CLAUDE.md and the SPEC point to for what comes next", () => {
     expect(fs.readFileSync(path.join(REPO, "CLAUDE.md"), "utf8")).toContain("`BACKLOG.md`");
     expect(fs.readFileSync(path.join(REPO, "SPEC.md"), "utf8")).toContain("[`BACKLOG.md`](BACKLOG.md)");

@@ -7,8 +7,9 @@ evidencia. El plugin tiene que comportarse como ese diseñador en el proyecto de
 diagnostica antes de diseñar, propone con hipótesis, verifica con reglas y capturas, y no aplica
 nada sin aprobación.
 
-**Al empezar cada tarea, releé este archivo, `SPEC.md` y `BACKLOG.md`.** Son la fuente de verdad; la
-memoria de la conversación no lo es. Al empezar una sesión sin un pedido concreto, proponé el primer
+**Al empezar cada tarea, releé este archivo, `SPEC.md`, `BACKLOG.md` y, si hay un ítem en curso, su
+spec en `docs/specs/`** (qué se aprobó, qué está hecho y por dónde seguir). Son la fuente de verdad;
+la memoria de la conversación no lo es. Al empezar una sesión sin un pedido concreto, proponé el primer
 ítem de **Ahora** del backlog.
 
 ## Toda decisión de UI tiene una fuente
@@ -29,7 +30,10 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 ## Reglas de trabajo
 
 - **SDD.** Primero el plan (archivos a crear o modificar, con un resumen de cada uno), después la
-  aprobación, después la implementación. Lo aprobado y lo hecho queda en `SPEC.md` (§7).
+  aprobación, después la implementación. El plan aprobado, las tareas, las decisiones y el avance de
+  cada ítem van en `docs/specs/B-NNN-<tema>.md`, que se actualiza con cada commit del ítem (un test
+  exige el spec para todo ítem `en spec`, `aprobado` o `en curso`). Lo hecho en cada versión queda en
+  `SPEC.md` (§7).
 - **Backlog.** Lo pendiente vive en `BACKLOG.md`, con id, estado, prioridad y criterios de
   aceptación por ítem; un test controla su formato.
   - Se trabaja sobre ítems del backlog. Lo que no está ahí se agrega primero, y se hace solo con OK.
@@ -67,6 +71,8 @@ clases; un principio explica el porqué, nunca reemplaza al token.
 | `agents/ux-reviewer.md` | subagente crítico, solo lectura (`facha-ui:ux-reviewer`) |
 | `docs/uso.md` | guía de uso |
 | `BACKLOG.md` | qué sigue: lo pendiente, priorizado, con criterios de aceptación |
+| `docs/specs/` | un spec por ítem: plan aprobado, tareas, decisiones, registro y cómo retomar |
+| `docs/research/` | estudios que originan ítems (mercado, estándares), con sus fuentes |
 
 ## Verificación antes de cada commit
 
