@@ -32,16 +32,29 @@ whose `main.tsx` imports a file that is not there gets it copied from the same t
 - In `lab-panel.tsx` and `compare.tsx`, set `LAB_BASE` to `/<lab.dir>` (`"/facha-lab"`). Without
   live mode the panel shows that it is off and the command to start it.
 
-- In `main.tsx`, replace `/*__GLOBAL_CSS__*/` with the same global stylesheet imports as the app's
-  entry (`src/main.tsx`, `src/main.jsx` or the one `index.html` loads), in the same order, with
-  paths relative to `<lab.dir>/`: `import "../src/index.css";`.
-- Write `providers.tsx` from the app's entry: **import** the providers that wrap `<App />` (router,
-  query client, store, theme, i18n) from the app, in the same order; never copy their code. A
-  `BrowserRouter` or `HashRouter` becomes a `MemoryRouter` with
-  `initialEntries={[ROUTES[screen] ?? "/"]}`, and `ROUTES` gets the screen's route
-  (`{ orders: "/orders" }`, one entry per run). A provider whose instance the app creates inside
-  its entry and does not export (`new QueryClient()` in `main.tsx`) is a **gap**: report it with
-  the fix (export it from a module) and use a new instance only if the developer agrees.
+- `get_design_system` → `project.lab.entry` has the app's entry read statically: `file`, `css`
+  (its global stylesheet imports, in order) and `providers` (what wraps `<App />`, outermost
+  first: `name`, `kind`, `module` and, for each prop, where its value comes from). Work from it,
+  not from a reading by eye; if `entry` is `null` or has `unread` items, read the entry file too.
+- In `main.tsx`, replace `/*__GLOBAL_CSS__*/` with `entry.css`, in order, with paths relative to
+  `<lab.dir>/` (`./index.css` in `src/main.tsx` → `import "../src/index.css";`).
+- Write `providers.tsx` with the same providers in the same order, by `kind`, never copying the
+  app's code:
+  - `strict`: leave it out (`main.tsx` already renders `StrictMode`).
+  - `router` (`BrowserRouter`, `HashRouter`): a `MemoryRouter` with
+    `initialEntries={[ROUTES[screen] ?? "/"]}`, and `ROUTES` gets the screen's route
+    (`{ orders: "/orders" }`, one entry per run). When `entry.app` is a `RouterProvider` (a data
+    router), use a `MemoryRouter` too; if the variant needs its loaders' data, that is a **gap**.
+  - `query-cache` (`QueryClientProvider`, `SWRConfig`): import the instance when it is exported or
+    imported; when it is `local` and not exported, create one in `providers.tsx` with the same
+    options (the prop's `init`, as written). The data comes from the same hooks and fetchers;
+    say that only the cache is the lab's.
+  - `provider` (a store, a theme, i18n, auth, a client with credentials): import the component and
+    any instance it receives from where the app gets them. An instance the app creates in its
+    entry and does not export is a **gap**: report it with the fix (export it from a module) and
+    never re-create it, since its setup (auth, initial state, middleware) is the app's code.
+- If a variant uses a hook whose provider is missing, the lab shows "La variante no se pudo
+  mostrar" with the error and keeps the panel: add the provider here.
 - `vite build` only builds the root `index.html`, so `<lab.dir>/` never ships, and `main.tsx`
   renders nothing in production. If `get_design_system` says `vite.config` lists the lab in
   `build.rollupOptions.input`, stop and ask the developer to remove it.
