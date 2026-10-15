@@ -8,6 +8,7 @@ import { coverage, getDesignSystem } from "../src/design-system.js";
 import { proposeSystem, seedColors, type Direction, type SystemInput } from "../src/generate.js";
 import { HOVER_DELTA_E, SOURCES } from "../src/standards.js";
 import { converter, differenceEuclidean } from "culori";
+import { connect } from "./helpers.js";
 
 // The design-system generator (B-025, SPEC §2.h).
 
@@ -206,6 +207,39 @@ describe("propose_design_system · facha-ui reads what it generates", () => {
     const ctx = createContext(project(`${d.css.light.text}\n\n${d.css.dark.text}\n`));
     const info = ctx.tokens.tokens.find((t) => t.name === "--color-info-bg")!;
     expect(Object.keys(info.values).sort()).toEqual(["dark", "light"]);
+  });
+
+  it.each(["vite", "next"] as const)("B-026: the lab's specimen draws only with the system's tokens: check_ui finds 0 errors (%s)", async (framework) => {
+    const SYSTEM = path.join(SRC, "..", "..", "skills", "variants", "templates", "next-app", "system");
+    for (const d of proposeSystem({ ...base, brandColor: "#4f46e5" }).directions) {
+      const css = `${d.css.light.text}\n\n${d.css.dark.text}\n`;
+      const root =
+        framework === "vite"
+          ? project(css)
+          : project("", { dependencies: { next: "15.3.0", react: "19.0.0", "react-dom": "19.0.0" } });
+      if (framework === "next") {
+        fs.mkdirSync(path.join(root, "app"), { recursive: true });
+        fs.writeFileSync(path.join(root, "app", "globals.css"), css);
+        fs.writeFileSync(path.join(root, "app", "layout.tsx"), 'import "./globals.css";\nexport default function L({ children }: { children: React.ReactNode }) { return <html><body>{children}</body></html>; }\n');
+      }
+      const dir = framework === "vite" ? "src/preview" : "app/preview";
+      fs.mkdirSync(path.join(root, dir), { recursive: true });
+      for (const f of ["lab-specimen.tsx", "lab-specimen.module.css"]) fs.copyFileSync(path.join(SYSTEM, f), path.join(root, dir, f));
+      const { call, close } = await connect(root);
+      const r = await call("check_ui", { path: dir });
+      const errors = (r.structuredContent.violations ?? []).filter((v: { severity: string }) => v.severity === "error");
+      expect(r.structuredContent.summary.files, `${framework}: files checked`).toBe(2);
+      expect(r.structuredContent.summary.error, `${framework} ${d.id}: ${JSON.stringify(errors.slice(0, 3))}`).toBe(0);
+      await close();
+    }
+  });
+
+  it("B-026: css.lab scopes each direction to html[data-facha-direction], light and dark", () => {
+    const d = proposeSystem({ ...base, brandColor: "#4f46e5", style: "sober" }).directions[0]!;
+    expect(d.css.lab).toContain('html[data-facha-direction="brand-sober"] {');
+    expect(d.css.lab).toContain('html.dark[data-facha-direction="brand-sober"] {');
+    expect(d.css.lab).toContain("--color-info-bg: var(--color-primary-subtle);");
+    expect(d.css.lab).not.toMatch(/:root|@theme|^\.dark/m);
   });
 
   it("in Tailwind 4 the default theme goes in @theme, which facha-ui reads too", () => {

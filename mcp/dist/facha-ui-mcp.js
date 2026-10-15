@@ -67800,7 +67800,7 @@ function buildDirection(id, seed, from, input2, styleId) {
         source: "wcag141"
       });
   }
-  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input2.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales: scales2, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
+  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input2.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales: scales2, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" }, lab: "" } };
 }
 function solveOn(mode, c2, minRatio, on) {
   let current = hex5(c2);
@@ -67851,15 +67851,25 @@ function sharedTokens(input2) {
 function cssBlocks(id, tokens, format) {
   const light = format === "tailwind4" ? "@theme" : ":root";
   const lines = (pick2) => tokens.map((t) => [t.name, pick2(t)]).filter(([, v]) => v !== null).map(([n, v]) => `  ${n}: ${v};`).join("\n");
+  const lightValue = (t) => t.alias ? `var(${t.alias})` : t.light;
+  const darkValue = (t) => t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null;
+  const scope = `html[data-facha-direction="${id}"]`;
   return {
     light: { selector: light, text: `/* facha-ui system \xB7 ${id} */
 ${light} {
-${lines((t) => t.alias ? `var(${t.alias})` : t.light)}
+${lines(lightValue)}
 }` },
     dark: { selector: ".dark", text: `/* facha-ui system \xB7 ${id} \xB7 dark */
 .dark {
-${lines((t) => t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null)}
-}` }
+${lines(darkValue)}
+}` },
+    lab: `/* facha-ui lab \xB7 direction ${id} */
+${scope} {
+${lines(lightValue)}
+}
+html.dark[data-facha-direction="${id}"] {
+${lines(darkValue)}
+}`
   };
 }
 function proposeSystem(input2) {

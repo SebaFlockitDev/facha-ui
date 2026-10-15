@@ -333,7 +333,8 @@ function variantFromPath(): { slug: string; variant: string } | null {
     if (!path.startsWith(LAB_BASE + "/")) return null;
     [slug, variant] = path.slice(LAB_BASE.length + 1).split("/");
   }
-  if (!slug || !variant || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !/^[a-z][0-9]?$/.test(variant)) return null;
+  // `system` is /facha-ui:init system's direction preview, never a run of variants.
+  if (!slug || slug === "system" || !variant || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !/^[a-z][0-9]?$/.test(variant)) return null;
   return { slug, variant };
 }
 

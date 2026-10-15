@@ -76,7 +76,12 @@ export interface Direction {
   adjustments: { token: string; mode: Mode | "both"; from: string; to: string; why: string }[];
   conflicts: { with: string; deltaE: number; solution: string; source: SourceId }[];
   notes: string[];
-  css: { light: { selector: string; text: string }; dark: { selector: string; text: string } };
+  css: {
+    light: { selector: string; text: string };
+    dark: { selector: string; text: string };
+    /** The same tokens scoped to html[data-facha-direction="<id>"], for the lab's direction preview (B-026). */
+    lab: string;
+  };
 }
 
 const hex = (c: Color): string => formatHex(gamut(c));
@@ -354,7 +359,7 @@ function buildDirection(id: string, seed: string, from: string, input: SystemInp
       });
   }
 
-  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" } } };
+  return { id, seed: { hex: seed, oklch: fmtOklch(seed), from }, style: { id: styleId, label: style.label, radius: input.radius ?? style.radius, neutral: style.neutral, card: style.card === "layer" ? "layers with a border, no shadow" : `shadow ${style.card}`, sources: [...style.sources] }, scales, tokens, proof, adjustments, conflicts, notes, css: { light: { selector: "", text: "" }, dark: { selector: ".dark", text: "" }, lab: "" } };
 }
 
 /** The color with c's hue and chroma that reaches min on every background given. */
@@ -414,9 +419,13 @@ function cssBlocks(id: string, tokens: Token[], format: Format) {
   const light = format === "tailwind4" ? "@theme" : ":root";
   const lines = (pick: (t: Token) => string | null) =>
     tokens.map((t) => [t.name, pick(t)] as const).filter(([, v]) => v !== null).map(([n, v]) => `  ${n}: ${v};`).join("\n");
+  const lightValue = (t: Token) => (t.alias ? `var(${t.alias})` : t.light);
+  const darkValue = (t: Token) => (t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null);
+  const scope = `html[data-facha-direction="${id}"]`;
   return {
-    light: { selector: light, text: `/* facha-ui system · ${id} */\n${light} {\n${lines((t) => (t.alias ? `var(${t.alias})` : t.light))}\n}` },
-    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines((t) => (t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null))}\n}` },
+    light: { selector: light, text: `/* facha-ui system · ${id} */\n${light} {\n${lines(lightValue)}\n}` },
+    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines(darkValue)}\n}` },
+    lab: `/* facha-ui lab · direction ${id} */\n${scope} {\n${lines(lightValue)}\n}\nhtml.dark[data-facha-direction="${id}"] {\n${lines(darkValue)}\n}`,
   };
 }
 
