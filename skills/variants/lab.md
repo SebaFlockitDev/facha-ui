@@ -1,7 +1,7 @@
 # facha-ui · variants · the lab
 
-Read by `SKILL.md` before Step 5 (scaffold and conventions) and before Step 7 (screenshots), and by
-`refine.md` before R5. Every hard rule of `SKILL.md` still applies.
+Read by `SKILL.md` before Step 5 (scaffold and conventions) and before Step 7 (screenshots), by
+`refine.md` before R5, and by `init`'s `../init/system.md` before S2b (scaffold and direction preview). Every hard rule of `SKILL.md` still applies.
 
 ## Scaffold (once per project)
 
@@ -146,3 +146,38 @@ manually.
   output, unchanged, to `.facha-ui/reports/<slug>.html` with the Write tool. It links the
   screenshots relatively, so share the `.facha-ui/reports/` and `.facha-ui/screenshots/` folders
   together.
+
+## Direction preview (`/facha-ui:init system`)
+
+`<lab.dir>/system/` belongs to `/facha-ui:init system`: it shows the directions of a generated design
+system on a real screen and on a specimen before the developer chooses one. It is never a run of
+variants (`system` is a reserved slug: `/facha-ui:variants` never uses it), and `init system` removes
+it when the system is written.
+
+- **Files.** From this skill's `templates/next-app/system/` into `<lab.dir>/system/`:
+  `lab-specimen.tsx`, `lab-specimen.module.css` and `lab-directions.tsx`; in Next also
+  `layout.tsx`, `specimen/page.tsx` and `compare/page.tsx`, with `LAB_BASE` set as in
+  `lab-panel.tsx`. Vite needs no route file: its `main.tsx` finds them.
+- **`directions.css`**: the `css.lab` of every direction from `propose_design_system`, one after
+  the other, unchanged, after the line `/* facha-ui lab · direction preview · removed by
+  /facha-ui:init system */`. Each direction is scoped to `html[data-facha-direction="<id>"]`,
+  and `lab-theme.tsx` sets it from `?direction=<id>`.
+- **Dark:** if `lab-theme.tsx` has no `dark` entry, add `dark: { attribute: "class", value: "dark" }`:
+  the directions' dark blocks use `.dark`.
+- **The copy of the screen**: Next `system/<slug>/page.tsx` (keep `"use client"` if the original
+  has it), Vite `system/<slug>/Page.tsx` with a default export. First line:
+  `// facha-ui lab · direction preview · removed by /facha-ui:init system`. Same structure, data
+  and hooks as the original, with its imports from the app made relative to the new place; in
+  Vite its providers come from `providers.tsx` (Scaffold), with the screen's route in `ROUTES`
+  under its slug. Every hand-written value becomes the token of its role; a style that has no
+  class goes in a CSS module next to it, with `var(--token)` values only.
+- **URLs** (`preview.baseUrl` + path; add `&theme=dark` for dark):
+
+| Page | Next | Vite |
+|---|---|---|
+| Specimen | `<LAB_BASE>/system/specimen?direction=<id>` | `/<lab.dir>/?system=specimen&direction=<id>` |
+| Screen copy | `<LAB_BASE>/system/<slug>?direction=<id>` | `/<lab.dir>/?system=<slug>&direction=<id>` |
+| Side by side | `<LAB_BASE>/system/compare?d=<id>,<id>,<id>&page=<slug or specimen>` | `/<lab.dir>/?system=compare&d=<id>,<id>,<id>&page=<slug or specimen>` |
+
+- **Captures** (the Screenshots rules above, at desktop width):
+  `<project.screenshotsDir>/system/<direction>-<specimen or slug>-desktop-<theme>.png`.

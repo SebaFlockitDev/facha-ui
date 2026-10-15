@@ -711,6 +711,27 @@ describe("B-026 · the direction preview in the lab", () => {
     expect(main).not.toMatch(/^import .*\.\/system\//m);
   });
 
+  it("init system shows the directions on the real screen before writing, and cleans system/ up", () => {
+    const system = fs.readFileSync(path.join(REPO, "skills", "init", "system.md"), "utf8").replace(/\s+/g, " ");
+    expect(system).toContain("## S2b · Show the directions on the real screen");
+    expect(system).toContain("**Before this step, read `../variants/lab.md`**");
+    expect(system).toContain("It is today's screen dressed in each direction, not a redesign");
+    expect(system).toContain("a **mix** (the color of one with the style of another)");
+    expect(system).toContain("Remove `<lab.dir>/system/`");
+    expect(system).toContain("within hard rule 6 of `/facha-ui:variants`");
+  });
+
+  it("lab.md explains every system/ template; apply and variants keep system/ apart from runs", () => {
+    const lab = fs.readFileSync(path.join(REPO, "skills", "variants", "lab.md"), "utf8").replace(/\r\n/g, "\n");
+    const section = lab.split("## Direction preview (`/facha-ui:init system`)")[1] ?? "";
+    expect(section).toContain("`system` is a reserved slug");
+    const walk = (dir: string, base = ""): string[] =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name), `${base}${e.name}/`) : [`${base}${e.name}`]));
+    for (const f of walk(path.join(T, "next-app", "system"))) expect(section, f).toContain(`\`${f}\``);
+    expect(fs.readFileSync(path.join(REPO, "skills", "apply", "SKILL.md"), "utf8").replace(/\s+/g, " ")).toContain("(`<lab.dir>/system/`, an open `init system` preview, counts as one)");
+    expect(fs.readFileSync(path.join(REPO, "skills", "variants", "SKILL.md"), "utf8")).toContain("never `system`, reserved by `init`");
+  });
+
   it("the live panel never reads system/ as a run", () => {
     expect(read("next-app/lab-panel.tsx")).toContain('slug === "system"');
   });

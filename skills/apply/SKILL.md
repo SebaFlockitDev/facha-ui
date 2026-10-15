@@ -170,7 +170,8 @@ Delete only what the approved plan listed, after checking that every path resolv
 - the screenshots of the variants that were not chosen (paths from `run.variants[].screenshots`
   and from their `revisions`). Keep the chosen variant's screenshots, from every revision;
 - the scaffold, **only** if no other run in `.facha-ui/runs/` has `status: "generated"` and
-  `<lab.dir>` has no other screen directories: `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`
+  `<lab.dir>` has no other screen directories (`<lab.dir>/system/`, an open `init system`
+  preview, counts as one): `<lab.dir>/lab-theme.tsx`, `<lab.dir>/lab-state.ts`
   and `<lab.dir>/lab-responsive.tsx`; plus `layout.tsx`, `compare/`, `lab-panel.tsx` and
   `facha-live/` (Next) or `index.html`, `main.tsx`, `providers.tsx`, `compare.tsx`,
   `lab-panel.tsx`, `facha-live-plugin.ts` and `facha-live/` (Vite), in `<lab.dir>`; then
