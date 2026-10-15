@@ -67841,7 +67841,7 @@ ${lines((t) => t.alias ? `var(${t.alias})` : t.light)}
 }` },
     dark: { selector: ".dark", text: `/* facha-ui system \xB7 ${id} \xB7 dark */
 .dark {
-${lines((t) => t.alias ? null : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null)}
+${lines((t) => t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null)}
 }` }
   };
 }

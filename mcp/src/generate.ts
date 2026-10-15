@@ -406,7 +406,7 @@ function cssBlocks(id: string, tokens: Token[], format: Format) {
     tokens.map((t) => [t.name, pick(t)] as const).filter(([, v]) => v !== null).map(([n, v]) => `  ${n}: ${v};`).join("\n");
   return {
     light: { selector: light, text: `/* facha-ui system · ${id} */\n${light} {\n${lines((t) => (t.alias ? `var(${t.alias})` : t.light))}\n}` },
-    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines((t) => (t.alias ? null : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null))}\n}` },
+    dark: { selector: ".dark", text: `/* facha-ui system · ${id} · dark */\n.dark {\n${lines((t) => (t.alias ? `var(${t.alias})` : t.name.startsWith("--color-") || t.dark !== t.light ? t.dark : null))}\n}` },
   };
 }
 

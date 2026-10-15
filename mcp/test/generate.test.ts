@@ -159,6 +159,16 @@ describe("propose_design_system · facha-ui reads what it generates", () => {
     expect(findings).toEqual([]);
   });
 
+  it("an alias is declared again in the dark block: a var() in :root resolves there, with the light value", () => {
+    const d = proposeSystem({ ...base, brandColor: "#4f46e5" }).directions[0]!;
+    const aliases = d.tokens.filter((t) => t.alias);
+    expect(aliases.map((t) => t.name)).toContain("--color-info-bg");
+    for (const t of aliases) expect(d.css.dark.text, t.name).toContain(`${t.name}: var(${t.alias});`);
+    const ctx = createContext(project(`${d.css.light.text}\n\n${d.css.dark.text}\n`));
+    const info = ctx.tokens.tokens.find((t) => t.name === "--color-info-bg")!;
+    expect(Object.keys(info.values).sort()).toEqual(["dark", "light"]);
+  });
+
   it("in Tailwind 4 the default theme goes in @theme, which facha-ui reads too", () => {
     const d = proposeSystem({ ...base, brandColor: "#4f46e5", format: "tailwind4" }).directions[0]!;
     expect(d.css.light.selector).toBe("@theme");
