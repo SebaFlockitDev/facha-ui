@@ -7,6 +7,21 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-15
+
+### Added
+- En proyectos React con Vite, el laboratorio arma los providers de las variantes a partir del `main.tsx` de la app, leído sin ejecutarlo: CSS global, router, React Query y los demás, en el mismo orden (§7.28).
+- `get_design_system` devuelve el entry de la app de Vite (`project.lab.entry`): su CSS global y los providers que envuelven a `<App />`, con de dónde sale cada instancia (§7.28).
+
+### Changed
+- Un `QueryClient` (o `SWRConfig`) que la app crea en su `main.tsx` sin exportarlo ya no frena las variantes: el laboratorio crea uno igual, con las mismas opciones, y avisa que solo la caché es del lab. Otras instancias sin exportar (un store, un cliente con credenciales) siguen pidiendo exportarlas (§7.28).
+
+### Fixed
+- Una variante de Vite que falla al dibujarse ya no deja la página en blanco, panel incluido: muestra qué pasó y, si falta un provider, dónde agregarlo, y el panel sigue visible (§7.28).
+
+### Security
+- El `main.tsx` de la app solo se parsea; nunca se importa ni se ejecuta (§7.28).
+
 ## [0.18.1] - 2026-10-14
 
 ### Added
@@ -225,7 +240,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.16.0...v0.17.0

@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.18.1** (§7.10–§7.27). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.19.0** (§7.10–§7.28). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -703,7 +703,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.18.1",
+  "version": "0.19.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1385,6 +1385,17 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Test que lo hubiera detectado:** para cada framework, todo archivo que copia el andamiaje inicial encuentra en esa misma lista cada archivo que importa (y el `index.html`, su `main.tsx`). Sin el arreglo, falla con el mensaje del bug.
 - **Verificado** en el mismo proyecto: con el andamiaje corregido, la variante renderiza y el panel aparece con «modo en vivo apagado»; el endpoint sin plugin registrado responde HTML y el panel lo trata como apagado.
 - **Tests:** 206.
+
+### 7.28 Versión 0.19.0: providers reales en el laboratorio de Vite
+
+Ítem B-002 del backlog. Probado en una app Vite 5 + React 18 + React Query 5 + React Router 6 con el `QueryClient` creado en `main.tsx` y sin exportar.
+
+- **Lo que pasaba:** sin el provider que una variante necesita, la variante fallaba ("No QueryClient set") y, como el panel vive en el mismo árbol de React, **la página quedaba en blanco, panel incluido**, sin ninguna pista. Además, `lab.md` trataba un `QueryClient` no exportado como brecha y pedía tocar la app, aunque uno nuevo con las mismas opciones trae los mismos datos.
+- **Entry de la app leído de forma estática** (`mcp/src/app-entry.ts`, S2): `get_design_system` → `project.lab.entry` con el archivo (el que carga `index.html`), sus imports de CSS global en orden y los providers que envuelven a `<App />`, de afuera hacia adentro: `kind` (`router`, `query-cache`, `strict`, `provider`), módulo y, por cada prop, si su valor es local (y si se exporta, con su inicializador tal cual), importado (y de dónde) o desconocido. Un `RouterProvider` es la app. Los spreads y los providers que envuelven más que la app se informan en `unread`.
+- **Reglas por tipo en `lab.md`:** `strict` queda afuera (el lab ya renderiza `StrictMode`); `router` pasa a `MemoryRouter`; `query-cache` local sin exportar se crea en el lab con las mismas opciones (misma fuente de datos, caché propia del lab); cualquier otra instancia local sin exportar sigue siendo brecha, porque recrearla copiaría código de la app (autenticación, estado inicial, middleware).
+- **Una variante que falla se explica:** `main.tsx` la envuelve en un manejador de errores que muestra el error y, si falta un provider, dónde agregarlo; el panel queda afuera y sigue visible.
+- **Verificado** en la app de prueba: el entry se lee exacto; con el provider faltante, el lab muestra el aviso y el panel; con `providers.tsx` según las reglas, la variante trae los pedidos con React Query y navega con `useNavigate` dentro del lab.
+- **Tests:** 215. Lector del entry (React Query local, store importado, provider local, instancia exportada, `RouterProvider`, `ReactDOM.render`, entry con otra ruta, lo que no sigue), solo en Vite, S2 (entry con efectos secundarios que no se ejecuta, imports del lector) y el contrato del manejador de errores y de `lab.md`.
 ---
 
 ## Anexo A · Config completa de ejemplo

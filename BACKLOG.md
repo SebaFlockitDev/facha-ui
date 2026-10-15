@@ -23,15 +23,6 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 
 ## Ahora
 
-### B-002 · Modo en vivo de Vite con los providers reales de una app
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** se probó en una app de prueba con React Router y un context simple; las apps reales suelen tener React Query, un store o i18n creados dentro de `main.tsx`.
-- **Qué:** probar `providers.tsx` en un proyecto con `QueryClientProvider` y un store; si la instancia no se exporta, que la brecha y su arreglo queden claros.
-- **Criterios de aceptación:** una variante con React Query renderiza con datos reales en el lab; el caso "instancia no exportada" está documentado en `lab.md` con el arreglo exacto.
-- **Depende de:** B-001
-- **Referencias:** `skills/variants/lab.md`, SPEC §2.b.4
-
 ### B-003 · El revisor independiente ve las capturas
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** S
@@ -174,6 +165,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.19.0:** B-002, providers reales en el laboratorio de Vite (entry leído de forma estática) y variantes que fallan sin dejar la página en blanco.
 - **0.18.1:** B-001, el laboratorio de Vite se rompía antes del modo en vivo (faltaba `lab-panel.tsx` en el andamiaje).
 - **0.18.0:** modo en vivo en React + Vite.
 - **0.17.0:** laboratorio de variantes en React + Vite.
