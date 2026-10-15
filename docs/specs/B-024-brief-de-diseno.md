@@ -56,8 +56,8 @@ oscuro (sí, no o más adelante).
 
 ## Criterios de aceptación (del backlog)
 
-- [ ] En un proyecto sin tokens, `start` recomienda el brief (contrato en `plugin.test.ts`; falta verlo en un proyecto real).
-- [ ] Cada pregunta trae opciones sugeridas con su evidencia del código (lo pide `brief.md`; falta la prueba real).
+- [x] En un proyecto sin tokens, `start` recomienda el brief (contrato en `plugin.test.ts`; en la prueba real, `get_design_system` da `status: missing` y `brief: null`, la condición de la regla).
+- [x] Cada pregunta trae opciones sugeridas con su evidencia del código (lo pide `brief.md`; en la prueba real, cada campo del borrador salió con su `archivo:línea`).
 - [x] El brief se guarda solo con el sí del dev, en `decisions.md` con id (regla en `brief.md`, contrato en `plugin.test.ts`).
 - [x] `get_design_system` lo devuelve (test).
 - [x] `variants` lo cita en su diagnóstico (paso 3b), del que salen las hipótesis (contrato en `plugin.test.ts`).
@@ -69,7 +69,8 @@ oscuro (sí, no o más adelante).
 - [x] 3–7. Skills: `init/brief.md` (nuevo), `init`, `start`, `variants`, `help` y contratos en
   `plugin.test.ts` · `54ee5e4` (antes, `5d9110b`: el lector toma "nada" y "nothing" como vacío)
 - [x] 8. Docs: SPEC §2.g y §7.30 (y §2.e, árbol de archivos), `docs/uso.md` §5.0, `CHANGELOG.md`
-- [ ] 9. Prueba en la app de Vite de prueba y release
+- [x] 9a. Prueba en una app de Vite sin design system (ver Registro)
+- [ ] 9b. Release
 
 ## Decisiones tomadas durante el trabajo
 
@@ -92,14 +93,25 @@ oscuro (sí, no o más adelante).
   vacío: se sumaron "nada" y "nothing" (`5d9110b`). El test de `start` que pedía siempre
   `/facha-ui:init` sin tokens pasó a pedir el brief cuando no hay. La sección de la SPEC quedó
   en §2.g (el plan decía §2.c.4, que es de `apply`). 227 tests en verde.
+- **2026-10-15 · prueba real:** copia de la app de prueba sin tokens (`facha-ui-pruebas/vite-sin-diseno`,
+  colores escritos a mano), con el bundle de la rama por stdio, como lo llama Claude Code.
+  - B1: `get_design_system` → `status: missing`, `brief: null`; `scan_styles` → `#4f46e5` es el
+    único color con croma usado más de una vez (`index.css:6, 16, 19`): el candidato a marca.
+  - B2: el borrador sale con evidencia en cada campo: `internal-tool` (título «Tienda · Pedidos»,
+    barra lateral, tabla de pedidos, sin carrito ni pagos: un backoffice, no una tienda pública),
+    densidad compacta (tabla), escritorio (barra fija sin `@media`), fuente del sistema.
+  - B4–B5: con respuestas de prueba a las 3 preguntas, la entrada se lee completa por el MCP,
+    cada campo con su línea, `invalid` vacío.
+  - Hallazgo ajeno al ítem, anotado como **B-035** en Ideas: en un proyecto sin temas,
+    `scan_styles` deja `values` vacío, propone un gris como `status-danger` y parte el color de
+    marca en dos propuestas.
+  - Límite de la prueba: las skills no se corrieron de punta a punta (`init` la lanza solo el
+    dev, y el MCP de esta sesión tiene como raíz el repo de facha-ui); se emularon sus pasos.
 
 ## Cómo retomar
 
-**Estado al 2026-10-15:** tareas 1 a 8 hechas en `feat/design-brief`, sin push. Falta la tarea 9.
+**Estado al 2026-10-15:** tareas 1 a 9a hechas en `feat/design-brief`, sin push. Falta el release.
 
-
-Seguir por la tarea 9: en la app de prueba de Vite (`facha-ui-pruebas/vite-react-app`, fuera del repo),
-emular `/facha-ui:init brief` siguiendo `skills/init/brief.md` (la skill la lanza solo el dev),
-escribir la entrada en su `decisions.md` y verificar con `get_design_system` (`brief`, `invalid`
-vacío). Después, release (versión menor: agrega una función) con el flujo de `CLAUDE.md`, y B-024
-pasa a Hecho.
+Falta el release (9b), con el OK de quien mantiene el repo: versión menor (agrega una función),
+con el flujo de `CLAUDE.md` (versión en los 4 lugares, CHANGELOG con fecha y enlaces, SPEC §7.30
+con la versión, B-024 a Hecho), merge de `feat/design-brief` a `main`, tag y push.

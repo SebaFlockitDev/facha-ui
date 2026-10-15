@@ -233,6 +233,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 - **B-020 · Export para Cursor:** los flujos de `variants` y `apply` como reglas de Cursor.
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
+- **B-035 · `scan_styles` en un proyecto sin temas:** visto en la prueba de B-024, sobre una app sin ningún bloque de tema: las propuestas salen con `values: {}` (falta el valor del tema por defecto), un gris de texto secundario (`#475569`, usado en "Cancelado", `.muted` y encabezados) se propone como `--status-danger-fg`, y el color de marca se parte en dos propuestas, una como `status.info`. Con un brief, su color de marca debería proponerse como `accent.primary`.
 
 ## Hecho
 
