@@ -85,10 +85,13 @@ If anything has to differ from the plan, stop and go back to S3.
 ## S5 · Validate
 
 1. `get_design_system` again: `status` is `ok` (every role present), the tokens have the
-   expected roles, and `health` has no contrast or status-confusable finding for them. If it has,
-   show it: the developer decides whether to keep the change or undo it (`git restore`, only if
-   they say so).
-2. `check_ui` on the target file: no errors.
+   expected roles, and `health` has no contrast, status-confusable or theme-missing finding
+   between two of the new tokens. Expected, and said in one line: near-duplicates between tokens
+   of different roles (the rule's own note says to ignore them), and findings about the screens'
+   hand-written colors or classes. Anything else: show it; the developer decides whether to keep
+   the change or undo it (`git restore`, only if they say so).
+2. `check_ui` on the target file: no violation inside the written block; the ones below it are the
+   screens' own colors, the same as before.
 3. `audit_project` and `ux_score` with no arguments: the **after**. The literals in the screens
    are now reported against real tokens; say so, it is the expected starting point.
 
