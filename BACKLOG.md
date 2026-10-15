@@ -23,17 +23,6 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 
 ## Ahora
 
-### B-023 · El MCP de facha-ui no conecta en algunas sesiones
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** S
-- **Por qué:** en una sesión de Claude Code abierta en el repo de facha-ui, el servidor figuró como "Connection closed", aunque el bundle 0.18.0 instalado, corrido a mano con `--root` sobre la misma carpeta, arranca y responde. Sin MCP no hay guardián ni design system.
-- **Qué:** reproducir (sesión nueva, después de actualizar, en un repo con y sin frontend), leer el log del servidor (stderr) y corregir la causa; si es del entorno, que `start` y la guía digan cómo resolverlo.
-- **Criterios de aceptación:** se identifica la causa con evidencia; si es del plugin, un test la cubre y el servidor conecta en una sesión nueva; si es del entorno, `docs/uso.md` lo explica en Problemas frecuentes.
-- **Pista (0.19.0):** en una sesión donde el MCP figuraba "Connection closed", un subagente de la misma sesión (el revisor) sí tuvo las herramientas del MCP: el servidor arranca y responde; lo que falla es la conexión de la sesión principal.
-- **Referencias:** `.claude-plugin/plugin.json`, `mcp/src/index.ts`, SPEC §7.10, §7.29
-
-## Siguiente
-
 ### B-004 · Regla `a11y-color-only`
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -41,6 +30,8 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 - **Qué:** el guardián marca chips, puntos o filas de estado cuyo único diferenciador es una clase o token de color, sin texto ni ícono en el mismo elemento.
 - **Criterios de aceptación:** positivos y negativos en un fixture; 0 falsos positivos en los fixtures existentes; `ux-principles.md` la pasa a "verificado por el guardián".
 - **Referencias:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md`
+
+## Siguiente
 
 ### B-005 · Regla `ux-missing-states`
 - **Estado:** listo para spec
@@ -158,6 +149,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.19.1:** B-023, el "Connection closed" del MCP en sesiones abiertas en el repo de facha-ui (los servidores pasan a `plugin.json`).
 - **0.19.0:** B-003, el revisor independiente ve las capturas (verificado; sin cambios de código).
 - **0.19.0:** B-002, providers reales en el laboratorio de Vite (entry leído de forma estática) y variantes que fallan sin dejar la página en blanco.
 - **0.18.1:** B-001, el laboratorio de Vite se rompía antes del modo en vivo (faltaba `lab-panel.tsx` en el andamiaje).

@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.19.0** (§7.10–§7.28). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.19.1** (§7.10–§7.29). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -702,7 +702,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1396,7 +1396,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Una variante que falla se explica:** `main.tsx` la envuelve en un manejador de errores que muestra el error y, si falta un provider, dónde agregarlo; el panel queda afuera y sigue visible.
 - **Verificado** en la app de prueba: el entry se lee exacto; con el provider faltante, el lab muestra el aviso y el panel; con `providers.tsx` según las reglas, la variante trae los pedidos con React Query y navega con `useNavigate` dentro del lab.
 - **Tests:** 215. Lector del entry (React Query local, store importado, provider local, instancia exportada, `RouterProvider`, `ReactDOM.render`, entry con otra ruta, lo que no sigue), solo en Vite, S2 (entry con efectos secundarios que no se ejecuta, imports del lector) y el contrato del manejador de errores y de `lab.md`.
-### 7.29 Los servidores MCP en el manifiesto
+### 7.29 Versión 0.19.1: los servidores MCP en el manifiesto
 
 Ítem B-023 del backlog: en sesiones abiertas en el repo de facha-ui, `facha-ui` y `playwright` figuraban "Connection closed".
 

@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.19.1] - 2026-10-15
+
 ### Fixed
 
 - Los servidores MCP se declaran en `plugin.json`: una sesión abierta en el repo de facha-ui ya no levanta una copia de `facha-ui` y `playwright` que fallaba con "Connection closed". Para quien usa el plugin, los servidores y sus versiones no cambian.
@@ -244,7 +246,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.1...HEAD
+[0.19.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.17.0...v0.18.0
