@@ -583,6 +583,45 @@ describe("Vite lab template", () => {
   });
 });
 
+describe("lab scaffold: every file the scaffold copies finds what it imports", () => {
+  // B-001: 0.18.0 added `import { LabPanel } from "./lab-panel"` to Vite's main.tsx but not
+  // lab-panel.tsx to the scaffold, so every Vite lab answered 500 until live mode was started.
+  const TEMPLATES = path.join(REPO, "skills", "variants", "templates");
+  const lab = fs.readFileSync(path.join(REPO, "skills", "variants", "lab.md"), "utf8").replace(/\r\n/g, "\n");
+  /** The files one framework's scaffold copies, from the first paragraph of its lab.md section. */
+  const scaffold = (heading: string, next: string) => {
+    const section = lab.split(heading)[1]!.split(next)[0]!;
+    const paragraph = section.trim().split("\n\n")[0]!;
+    return new Set([...paragraph.matchAll(/`([\w[\]/.-]+\.(?:tsx|ts|html))`/g)].map((m) => m[1]!));
+  };
+  const source = (file: string) =>
+    [path.join(TEMPLATES, "vite-react", file), path.join(TEMPLATES, "next-app", file)].find((f) => fs.existsSync(f));
+
+  for (const [framework, heading, next] of [
+    ["next-app", "### Next.js App Router (`next-app`)", "### React + Vite"],
+    ["vite-react", "### React + Vite (`vite-react`)", "### Both"],
+  ] as const) {
+    it(`${framework}: the scaffold list is complete`, () => {
+      const files = scaffold(heading, next);
+      expect(files.size, framework).toBeGreaterThan(3);
+      for (const file of files) {
+        const src = framework === "next-app" ? path.join(TEMPLATES, "next-app", file) : source(file);
+        expect(src && fs.existsSync(src), `${framework}: ${file} has a template`).toBe(true);
+        const code = fs.readFileSync(src!, "utf8");
+        const imports = [
+          ...[...code.matchAll(/^import .* from "(\.{1,2}\/[^"]+)";$/gm)].map((m) => m[1]!),
+          ...[...code.matchAll(/<script type="module" src="(\.{1,2}\/[^"]+)">/g)].map((m) => m[1]!),
+        ];
+        for (const spec of imports) {
+          const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), spec));
+          const found = [target, `${target}.tsx`, `${target}.ts`].some((t) => files.has(t));
+          expect(found, `${framework}: ${file} imports ${spec}, which the scaffold does not copy`).toBe(true);
+        }
+      }
+    });
+  }
+});
+
 describe("skills with a Vite lab", () => {
   const skill = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8");
 

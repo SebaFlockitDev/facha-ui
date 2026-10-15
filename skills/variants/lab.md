@@ -24,8 +24,13 @@ If `<lab.dir>/layout.tsx` does not exist, copy from this skill's `templates/next
 
 The lab is its own dev-only entry, so no file of the app changes. If `<lab.dir>/main.tsx` does not
 exist, copy `index.html`, `main.tsx`, `providers.tsx` and `compare.tsx` from
-`templates/vite-react/`, and `lab-theme.tsx`, `lab-state.ts` and `lab-responsive.tsx` from
-`templates/next-app/`, into `<lab.dir>/` (`facha-lab/` by default). Then:
+`templates/vite-react/`, and `lab-theme.tsx`, `lab-state.ts`, `lab-responsive.tsx` and
+`lab-panel.tsx` from `templates/next-app/`, into `<lab.dir>/` (`facha-lab/` by default). `main.tsx`
+imports every one of them: a missing one breaks the whole lab (Vite answers 500). An existing lab
+whose `main.tsx` imports a file that is not there gets it copied from the same template. Then:
+
+- In `lab-panel.tsx` and `compare.tsx`, set `LAB_BASE` to `/<lab.dir>` (`"/facha-lab"`). Without
+  live mode the panel shows that it is off and the command to start it.
 
 - In `main.tsx`, replace `/*__GLOBAL_CSS__*/` with the same global stylesheet imports as the app's
   entry (`src/main.tsx`, `src/main.jsx` or the one `index.html` loads), in the same order, with
