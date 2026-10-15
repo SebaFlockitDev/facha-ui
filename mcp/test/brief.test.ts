@@ -91,9 +91,9 @@ describe("reading the design brief", () => {
   });
 
   it("reads the English labels too, and 'none' as no brand color", () => {
-    const text = `## dec-2026-10-15-brief · Design brief\n- **Date:** 2026-10-15\n- **Product:** consumer-app\n- **Density:** balanced\n- **Brand color:** none\n- **Accessibility:** AAA\n- **Dark mode:** yes\n- **Avoid:** none\n`;
+    const text = `## dec-2026-10-15-brief · Design brief\n- **Date:** 2026-10-15\n- **Product:** consumer-app\n- **Density:** balanced\n- **Brand color:** none\n- **Accessibility:** AAA\n- **Dark mode:** yes\n- **Avoid:** nothing\n- **References:** nada\n`;
     const b = brief(project(text))!;
-    expect(b).toMatchObject({ product: { type: "consumer-app" }, density: "balanced", brandColor: null, accessibility: "AAA", darkMode: "yes", avoid: [], invalid: [] });
+    expect(b).toMatchObject({ product: { type: "consumer-app" }, density: "balanced", brandColor: null, accessibility: "AAA", darkMode: "yes", avoid: [], references: [], invalid: [] });
   });
 
   it("reports what it cannot read instead of guessing", () => {

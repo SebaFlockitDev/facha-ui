@@ -58252,7 +58252,7 @@ var DENSITY_WORDS = {
   espaciosa: "airy",
   espacioso: "airy"
 };
-var NONE3 = /^(ninguno|ninguna|none|no|-|—)$/i;
+var NONE3 = /^(ninguno|ninguna|nada|none|nothing|no|-|—)$/i;
 var MAX = 300;
 function clean(s) {
   return s.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().replace(/^[`"'“«]+|[`"'”»]+$/g, "").slice(0, MAX);

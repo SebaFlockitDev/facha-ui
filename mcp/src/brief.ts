@@ -40,7 +40,7 @@ const DENSITY_WORDS: Record<string, (typeof DENSITIES)[number]> = {
   balanced: "balanced", equilibrada: "balanced", equilibrado: "balanced", media: "balanced",
   airy: "airy", aireada: "airy", aireado: "airy", espaciosa: "airy", espacioso: "airy",
 };
-const NONE = /^(ninguno|ninguna|none|no|-|—)$/i;
+const NONE = /^(ninguno|ninguna|nada|none|nothing|no|-|—)$/i;
 const MAX = 300;
 
 export interface Brief {
