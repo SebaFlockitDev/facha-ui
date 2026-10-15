@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseBrief } from "./brief.js";
 import { contrast, round, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { toPx } from "./context.js";
@@ -13,7 +14,7 @@ import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
 
 export const SECTIONS = [
-  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions",
+  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -288,6 +289,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
     out.copy = ctx.project.config.copy ?? null;
   }
   if (want.has("decisions")) out.decisions = parseDecisions(ctx);
+  if (want.has("brief")) out.brief = parseBrief(ctx);
   return out;
 }
 

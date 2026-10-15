@@ -237,9 +237,9 @@ Las descripciones se escriben en inglés porque son la interfaz del producto ope
 ##### `get_design_system`
 
 **Descripción (literal):**
-> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines and previously approved design decisions.
+> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one.
 > **When to use:** before writing or modifying any UI, and to answer questions such as "which color/size/component should I use for X?". If no token covers the need, the correct answer is that there is no token: report the gap — never invent a value.
-> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`. Read-only: it never modifies files or accesses the network.
+> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`, `brief`. Read-only: it never modifies files or accesses the network.
 
 **Entrada:** `{ sections?: ("project"|"tokens"|"scales"|"componentClasses"|"coverage"|"gaps"|"health"|"rules"|"guidelines"|"decisions")[] }`. Por defecto, todas.
 
