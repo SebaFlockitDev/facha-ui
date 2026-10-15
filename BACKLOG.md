@@ -23,6 +23,76 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 
 ## Ahora
 
+### B-024 · Brief de diseño para un proyecto sin diseño
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** en un proyecto sin tokens ni dirección visual, `init` solo puede ordenar los valores que ya están en el código: no propone un diseño. Un diseñador primero entiende el producto, y las herramientas que mejor resuelven el inicio (Google Stitch, Readdy, la skill frontend-design de Anthropic) arrancan con una entrevista corta.
+- **Qué:** un modo de `init` que entrevista al dev en pocas preguntas, con opciones sugeridas a partir de lo que el código ya muestra: tipo de producto, quién lo usa y para qué, tres rasgos de personalidad, densidad, referencias, qué evitar y color de marca si lo hay. El brief queda como decisión en `decisions.md` y `get_design_system` lo devuelve, para que `variants`, el revisor y el generador (B-025) lo usen como fuente. `start` lo recomienda cuando el proyecto no tiene tokens.
+- **Criterios de aceptación:** en un proyecto sin tokens, `start` recomienda el brief; cada pregunta trae opciones sugeridas con su evidencia del código; el brief se guarda solo con el sí del dev, en `decisions.md` con id; `get_design_system` lo devuelve (test); `variants` lo cita en sus hipótesis.
+- **Referencias:** `skills/init/SKILL.md`, `skills/start/SKILL.md`; https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/ , https://raw.githubusercontent.com/anthropics/skills/main/skills/frontend-design/SKILL.md
+
+### B-025 · Generador de design system, desde una marca o desde cero
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** L
+- **Por qué:** un proyecto sin diseño necesita un sistema completo y accesible, no valores sueltos. Las herramientas profesionales lo derivan con un método (Radix Colors, Adobe Leonardo, Material Color Utilities), no a ojo.
+- **Qué:** una tool del MCP, determinística, que a partir del brief y de un color de marca (o de 3 a 5 semillas si no hay) genera: escalas OKLCH de 12 pasos con los roles de Radix y la luminosidad de cada paso resuelta por contraste (Leonardo); neutros teñidos con el tono de la marca; colores de estado; claro y oscuro generados por separado, no invertidos; escala tipográfica, espaciado de 4/8, radios y elevación. Todo se mapea a las variables de shadcn y a los roles de facha-ui, y cada valor cita su fuente.
+- **Criterios de aceptación:** todo par texto/fondo pasa WCAG 2.2 AA en los dos modos (test), con APCA solo como dato; la misma entrada da la misma salida; sin red ni ejecución de código (S2); cada valor dice de qué regla sale.
+- **Depende de:** B-024
+- **Referencias:** https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale , https://github.com/adobe/leonardo , https://api.flutter.dev/flutter/package-material_color_utilities_dynamiccolor_dynamic_scheme/DynamicScheme-class.html , https://ui-v4.shadcn.com/docs/theming
+
+### B-026 · Tres direcciones de diseño sobre la pantalla real
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** L
+- **Por qué:** elegir una paleta en abstracto es elegir a ciegas. Stitch muestra varias direcciones, pero sobre maquetas; facha-ui puede mostrarlas sobre la pantalla real, con datos reales.
+- **Qué:** `init` genera 3 direcciones con B-025 y el laboratorio muestra la misma pantalla con cada una, más una página de muestra con todos los tokens y estados (hover, foco, deshabilitado, error, vacío). El dev elige una, o pide mezclar, y recién entonces `init` escribe los tokens.
+- **Criterios de aceptación:** las 3 direcciones difieren en al menos dos de: tono, tinte de los neutros, radio y densidad; la página de muestra pasa `check_ui` con 0 errores; hay capturas de las 3; fuera del laboratorio no se escribe nada sin aprobación.
+- **Depende de:** B-025
+- **Referencias:** SPEC §2.b (laboratorio), `skills/init/SKILL.md` (modo paleta)
+
+## Siguiente
+
+### B-027 · Perfiles por tipo de producto, con fuentes
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** "profesional" depende del producto: un panel de datos y una tienda no tienen la misma densidad ni el mismo tamaño base. Los design systems de referencia ya lo resuelven, y citarlos evita decidir por gusto.
+- **Qué:** perfiles que fijan tamaño base, densidad, razón de la escala tipográfica, nivel de croma y radio: SaaS o panel (Carbon productive), e-commerce (Baymard, Polaris), fintech (croma moderado, cifras tabulares, estados marcados) y contenido (Carbon expressive, tipografía fluida de Utopia). El brief elige el perfil y el generador lo usa.
+- **Criterios de aceptación:** cada valor de un perfil cita su fuente, verificada en la documentación primaria antes de fijarla; un test controla que ningún perfil tenga valores sin fuente.
+- **Depende de:** B-025
+- **Referencias:** https://carbondesignsystem.com/elements/typography/type-sets/ , https://polaris.shopify.com/ , https://baymard.com/ , https://utopia.fyi/
+
+### B-029 · Reglas contra el "look genérico de IA"
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** los generadores de UI tienden al promedio de la web. Las defensas que existen (frontend-design, Impeccable) son instrucciones en el prompt y nadie las verifica; un guardián determinístico que sí lo haga es un diferencial de facha-ui.
+- **Qué:** reglas del guardián, cada una con su principio `ux:`: texto gris sobre fondo de color, neutros grises puros cuando hay color de marca, tarjetas dentro de tarjetas, el mismo radio y sombra en todos los bloques, degradados de fondo decorativos, animación de entrada en cada sección y una sola tipografía sin escala.
+- **Criterios de aceptación:** positivos y negativos en un fixture; severidad de aviso; 0 falsos positivos en los fixtures existentes; cada regla figura en `ux-principles.md` como "verificado por el guardián".
+- **Referencias:** https://claude.com/resources/articles/improving-frontend-design-through-skills , `skills/_shared/ux-principles.md`
+
+### B-031 · Controles de diseño en el panel en vivo
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** ajustar el diseño con controles directos y ver el efecto en el momento ya es lo esperable (Claude Design, Realtime Colors, tweakcn); hoy el panel solo prueba paletas armadas.
+- **Qué:** en el panel, controles de tono, tinte de los neutros, radio, densidad y nivel de contraste (como el `contrastLevel` de Material), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`.
+- **Criterios de aceptación:** cada cambio muestra los pares que dejan de pasar WCAG y una solución; la combinación elegida queda como propuesta en `.facha-ui/proposals/`; fuera del laboratorio no cambia ningún archivo.
+- **Depende de:** B-025
+- **Referencias:** `skills/variants/live.md`, https://www.realtimecolors.com/docs/how-it-works
+
+### B-032 · Matriz completa de contraste
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** hoy se controla el contraste de los pares que aparecen en el código; un sistema accesible garantiza cada texto sobre cada fondo donde puede aparecer. Además, `theme-contrast` puede sugerir para un texto rojo de error un gris secundario, y el aviso pasa a parecer información común (absorbe B-008).
+- **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.
+- **Criterios de aceptación:** la matriz sale en `get_design_system` o en `audit_project`; un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris (criterio de B-008).
+- **Referencias:** SPEC §6, https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
+
+### B-030 · Componente reimplementado y cobertura del design system
+- **Estado:** listo para spec
+- **Prioridad:** P2 · **Tamaño:** M
+- **Por qué:** la IA suele rehacer a mano lo que el proyecto ya tiene como componente; Lovable y v0 ya controlan que se use el sistema.
+- **Qué:** un aviso cuando se arma a mano un elemento que el proyecto ya tiene como componente (un `<button>` con clases, existiendo `components/ui/button`), con el import sugerido. `ux_score` suma la cobertura: cuánto de la UI usa componentes y tokens del sistema.
+- **Criterios de aceptación:** positivo y negativo en el fixture de shadcn; la cobertura sale en `ux_score` (test).
+- **Referencias:** https://docs.lovable.dev/features/design-systems
+
 ### B-004 · Regla `a11y-color-only`
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -31,7 +101,22 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 - **Criterios de aceptación:** positivos y negativos en un fixture; 0 falsos positivos en los fixtures existentes; `ux-principles.md` la pasa a "verificado por el guardián".
 - **Referencias:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md`
 
-## Siguiente
+### B-028 · De referencias a tokens
+- **Estado:** listo para spec
+- **Prioridad:** P2 · **Tamaño:** L
+- **Por qué:** "quiero algo como esta página" es la forma más natural de pedir un estilo, y ya es estándar (Stitch, Visily, Uizard, Banani).
+- **Qué:** extraer colores y tipografías de una captura o de una página de referencia y normalizarlos en escalas accesibles con B-025, informando qué valor de la referencia no pasaba contraste y cuál lo reemplaza.
+- **Criterios de aceptación:** antes de la spec se decide cómo convive con S2 (el MCP no usa la red): la captura la toma la skill, con permiso del dev, y el MCP solo lee el archivo; cada valor extraído dice de dónde salió.
+- **Depende de:** B-025
+- **Referencias:** https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/
+
+### B-033 · Accesibilidad en ejecución sobre el laboratorio
+- **Estado:** listo para spec
+- **Prioridad:** P2 · **Tamaño:** M
+- **Por qué:** el análisis estático no ve el contraste real con capas, ni el tamaño final de los objetivos, ni los nombres accesibles; axe-core sí.
+- **Qué:** correr axe-core, empaquetado y sin red, sobre cada variante del laboratorio, y sumar los hallazgos a la revisión y a `ux_score`.
+- **Criterios de aceptación:** hallazgos con criterio WCAG y selector; se decide cómo se inyecta axe sin ampliar las herramientas de Playwright permitidas (regla dura 6) o se amplían con su justificación.
+- **Referencias:** https://storybook.js.org/docs/9/writing-tests/accessibility-testing.md
 
 ### B-005 · Regla `ux-missing-states`
 - **Estado:** listo para spec
@@ -57,14 +142,6 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 - **Criterios de aceptación:** positivos y negativos en un fixture; el umbral es configurable.
 - **Referencias:** SPEC §6
 
-### B-008 · Sugerencias de contraste que respetan el significado
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** `theme-contrast` puede sugerir para un texto rojo de error un gris secundario: el aviso pasa a parecer información común.
-- **Qué:** la sugerencia conserva el significado (estado, acento, texto) y, si no hay token que lo cumpla, lo reporta como brecha.
-- **Criterios de aceptación:** un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris.
-- **Referencias:** SPEC §6
-
 ### B-009 · Regla `unknown-class`
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** L
@@ -82,6 +159,14 @@ Lo que aparece mientras se trabaja se anota en **Ideas**; no se hace sin aprobac
 - **Referencias:** SPEC §6
 
 ## Después
+
+### B-034 · `DESIGN.md` y tokens en formato DTCG
+- **Estado:** listo para spec
+- **Prioridad:** P2 · **Tamaño:** M
+- **Por qué:** los equipos diseñan también en otras herramientas (Stitch, Claude Design, v0, tweakcn); facha-ui puede ser la capa que verifica en el repo lo que llega de ellas. El formato W3C DTCG tiene su primera versión estable (2025.10). Absorbe B-019.
+- **Qué:** `init` exporta los tokens en DTCG y un `DESIGN.md` con la intención de cada color y regla; `get_design_system` lee un `DESIGN.md` o un JSON DTCG como fuente, y `check_ui` verifica lo que llega.
+- **Criterios de aceptación:** ida y vuelta sin pérdidas para colores, tipografía, espaciado y radios; fixtures de `DESIGN.md` y DTCG; antes de la spec se confirma el formato publicado de `DESIGN.md`.
+- **Referencias:** https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/ , https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/
 
 ### B-011 · CI de violaciones
 - **Estado:** listo para spec
@@ -140,7 +225,6 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 - **B-017 · Más frameworks de laboratorio:** Remix/React Router como framework, Astro, Expo.
 - **B-018 · Otros lenguajes de UI:** Vue, Svelte, Angular (adapters de fuente).
-- **B-019 · Otros formatos de tokens:** DTCG, Style Dictionary, SCSS, CSS-in-JS (styled-components, Emotion).
 - **B-020 · Export para Cursor:** los flujos de `variants` y `apply` como reglas de Cursor.
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
@@ -160,4 +244,13 @@ El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
 ## Descartado
 
-Nada por ahora.
+### B-008 · Sugerencias de contraste que respetan el significado
+- **Estado:** descartado
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** `theme-contrast` puede sugerir para un texto rojo de error un gris secundario: el aviso pasa a parecer información común.
+- **Qué:** la sugerencia conserva el significado (estado, acento, texto) y, si no hay token que lo cumpla, lo reporta como brecha.
+- **Criterios de aceptación:** un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris.
+- **Referencias:** SPEC §6
+- **Motivo:** absorbido por B-032 (matriz completa de contraste), que incluye su criterio de aceptación.
+
+- **B-019 · Otros formatos de tokens:** DTCG, Style Dictionary, SCSS, CSS-in-JS (styled-components, Emotion). Absorbido por B-034 (DTCG); el resto de los formatos sigue abierto si se vuelve a pedir.
