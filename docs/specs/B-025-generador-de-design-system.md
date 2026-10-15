@@ -104,17 +104,17 @@ más allá de la densidad (B-027), los controles del panel (B-031) y la migraci�
 
 ## Criterios de aceptación
 
-- [ ] Todo par texto/fondo pasa WCAG 2.2 AA en los dos modos (AAA si el brief lo pide), con test
+- [x] Todo par texto/fondo pasa WCAG 2.2 AA en los dos modos (AAA si el brief lo pide), con test
   sobre varias marcas (fría, cálida, clara, oscura, saturada, apagada) y sin marca.
-- [ ] La misma entrada da la misma salida.
-- [ ] Sin red ni ejecución de código (S2), con test de imports.
-- [ ] Cada valor dice de qué regla y fuente sale; un test controla que ninguna constante quede sin
+- [x] La misma entrada da la misma salida.
+- [x] Sin red ni ejecución de código (S2), con test de imports.
+- [x] Cada valor dice de qué regla y fuente sale; un test controla que ninguna constante quede sin
   fuente.
-- [ ] Los tokens generados, leídos por facha-ui, dan los roles esperados y `status: ok` (ida y
+- [x] Los tokens generados, leídos por facha-ui, dan los roles esperados y `status: ok` (ida y
   vuelta).
-- [ ] La marca se conserva o el ajuste se informa; un conflicto con un estado se informa con su
+- [x] La marca se conserva o el ajuste se informa; un conflicto con un estado se informa con su
   solución.
-- [ ] `/facha-ui:init system` escribe solo con aprobación, y solo los bloques mostrados.
+- [x] `/facha-ui:init system` escribe solo con aprobación, y solo los bloques mostrados.
 
 ## Fuentes verificadas (tarea 1, 2026-10-15)
 
@@ -135,12 +135,12 @@ su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test
 - [x] 1. Verificar las fuentes; fixture con las escalas de Radix y test que mide las constantes
 - [x] 2. `mcp/src/standards.ts` (constantes con fuente) y `mcp/src/generate.ts` (escalas, roles,
   tipografía, espacio, radios, sombras, CSS), con tests · `7f1b4c8`
-- [ ] 3. Tool `propose_design_system` (`server.ts`, descripción también en SPEC §2.a.3), tests por el
-  MCP y de imports, bundle
-- [ ] 4. `skills/init/system.md`, `init`, `start`, `brief.md`, `help` y contratos
-- [ ] 5. Docs: SPEC §2.h y §7.31, `docs/uso.md`, `CHANGELOG.md`
-- [ ] 6. Prueba real en `facha-ui-pruebas/vite-sin-diseno` (brief de B-024): generar, escribir,
-  `status: ok`, contraste y `check_ui`
+- [x] 3. Tool `propose_design_system` (`server.ts`, descripción también en SPEC §2.a.3), tests por el
+  MCP y de imports, bundle · `8f62453`
+- [x] 4. `skills/init/system.md`, `init`, `start`, `brief.md`, `help` y contratos · `3ae47b7`
+- [x] 5. Docs: SPEC §2.h y §7.31, `docs/uso.md`, `CHANGELOG.md` · `354673c`
+- [x] 6. Prueba real en `facha-ui-pruebas/vite-sin-diseno` (brief de B-024): generar, escribir,
+  `status: ok`, contraste y `check_ui`; más una revisión visual · `715f093`, `53fcd39`, `ff88bbc`
 - [ ] 7. Release
 
 ## Decisiones tomadas durante el trabajo
@@ -170,6 +170,17 @@ su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test
   ajustada, contra el estado ajustado y su semilla de Radix (una marca verde se lee como éxito).
 - **El paso 11 (texto de acento) nunca es más claro que la marca** en claro (ni más oscuro en
   oscuro): en Radix siempre contrasta al menos como el 9.
+- **Hover a la distancia de Radix:** el paso 10 se aleja del 9 al menos ΔE 2.961 en claro y 4.074
+  en oscuro (mediana medida); con el método por contraste quedaba bajo ΔE 2 y no se notaba
+  (`ux:nielsen-1`).
+- **Info como alias** de la marca cuando la sigue (`--color-info: var(--color-primary)`), y los
+  alias se declaran también en `.dark`: un `var()` en `:root` se resuelve ahí, con el valor claro,
+  y `.dark` hereda ese valor (lo encontró la revisión visual: el chip de info salía claro en oscuro).
+- **El bloque `.dark` repite todos los colores**, aunque no cambien, para que facha-ui no los marque
+  como `theme-missing`.
+- **Casi duplicados entre roles distintos** (fondo y panel, blanco del texto sobre acento y fondo)
+  son esperables en un sistema generado: la skill los explica en S5 y la mejora de la regla quedó
+  como B-037 en Ideas.
 
 ## Registro
 
@@ -181,9 +192,22 @@ su fuente, y las medidas de Radix se vuelven a medir en `mcp/test/standards.test
   vuelta por facha-ui encontró que el rojo y el verde de Radix se confunden con deuteranopía; la
   revisión a ojo encontró peligro con texto oscuro, éxito casi negro y texto de acento más claro
   que la marca. Corregido (ver decisiones).
+- **2026-10-15:** tareas 3 a 5 (tool, skill, docs). Tarea 6, prueba real en
+  `facha-ui-pruebas/vite-sin-diseno` con el brief de B-024, por el bundle y stdio:
+  - entradas tomadas del brief, cada una con su línea; 62/62 pares pasan; ajustes: éxito
+    `#30a46c → #38aa72` (separado del rojo con daltonismo) y peligro `#e5484d → #d83b43` (texto
+    blanco legible); info sigue a la marca;
+  - escrito el tema por defecto (el brief dice oscuro "más adelante"): `status: ok`; `check_ui` sin
+    errores en el bloque escrito y los mismos 19 de antes en los colores de la pantalla;
+  - la salud mostró `theme-missing` (con el oscuro escrito), un hover casi invisible y casi
+    duplicados entre roles: los dos primeros corregidos (`715f093`), el tercero explicado en S5 y
+    anotado como B-037;
+  - **revisión visual** de una página de muestra (botones, hover, campos con foco, estados, tabla
+    y panel, en claro y oscuro): encontró el chip de info claro en el modo oscuro (alias resuelto
+    en `:root`), corregido con su test (`53fcd39`). 284 tests en verde.
 
 ## Cómo retomar
 
-Seguir por la tarea 3: la tool `propose_design_system` en `mcp/src/server.ts`, que arma la entrada
-desde el brief (`parseBrief`) y el proyecto (Tailwind 4 → formato `tailwind4`) y llama a
-`proposeSystem` de `mcp/src/generate.ts`. Con ella, el bundle cambia: `npm run build` en el mismo commit.
+**Estado al 2026-10-15:** tareas 1 a 6 hechas en `feat/design-generator`, sin push. Falta el release
+(tarea 7), con el OK de quien mantiene el repo: versión menor (0.21.0), con el flujo de `CLAUDE.md`, y
+B-025 pasa a Hecho.
