@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- Perfiles por tipo de producto: el tipo de producto del brief elige la escala tipográfica, un piso para el alto de controles, tokens (`--numerals` para cifras tabulares, `--size-row`, `--measure` para el largo de línea) y pautas de diseño, cada una con su fuente (Carbon, WCAG, Baymard, GOV.UK, MDN). La densidad del brief sigue mandando.
+- `get_design_system` devuelve el perfil del producto (`profile`), y `variants` cita sus pautas en el diagnóstico.
+- Principios nuevos: `ux:line-length`, `ux:numeric-alignment` y `ux:wcag-2.5.5`.
+
 ## [0.22.0] - 2026-10-16
 
 ### Added
