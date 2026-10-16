@@ -1,6 +1,6 @@
 # B-030 · Componente reimplementado y cobertura del design system
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/component-reuse` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.27.0) · **Rama:** `feat/component-reuse` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -96,7 +96,7 @@ Junto al puntaje de cada pantalla y del proyecto, un bloque `coverage`:
 - [x] 3. Cobertura en `ux_score`, tests · `75f11d3`
 - [x] 4. Skills y docs · `eb983cf`
 - [x] 5. Prueba real
-- [ ] 6. Release (cuando lo pida quien mantiene el repo)
+- [x] 6. Release 0.27.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -122,9 +122,9 @@ Junto al puntaje de cada pantalla y del proyecto, un bloque `coverage`:
     `import { Button } from "../components/ui/button";`; el propio `button.tsx` no avisa;
   - en `shadcn-tw4`, la cobertura da 0 para la pantalla con el botón a mano y 1 para la que usa
     `Button` e `Input`.
+- **2026-10-16 · release 0.27.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; B-030 a Hecho y B-004 a Ahora.
 
 ## Cómo retomar
 
-Todo hecho y probado en `feat/component-reuse`; falta el release (tarea 6), solo cuando quien
-mantiene el repo lo pida: versión 0.27.0 con el flujo de `CLAUDE.md`; B-030 a **Hecho** y el primero
-de **Siguiente** a **Ahora**.
+Terminado en 0.27.0.

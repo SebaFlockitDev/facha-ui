@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-16
+
 ### Added
 
 - `get_design_system` conoce los componentes de tu carpeta de UI (sección `components`: `components.json` o `components/ui`), con su import y qué elemento nativo reemplaza cada uno.
@@ -329,7 +331,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...v0.24.0
