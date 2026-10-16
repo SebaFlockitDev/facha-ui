@@ -28,12 +28,13 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-027 · Perfiles por tipo de producto, con fuentes
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** "profesional" depende del producto: un panel de datos y una tienda no tienen la misma densidad ni el mismo tamaño base. Los design systems de referencia ya lo resuelven, y citarlos evita decidir por gusto.
 - **Qué:** perfiles que fijan tamaño base, densidad, razón de la escala tipográfica, nivel de croma y radio: SaaS o panel (Carbon productive), e-commerce (Baymard, Polaris), fintech (croma moderado, cifras tabulares, estados marcados) y contenido (Carbon expressive, tipografía fluida de Utopia). El brief elige el perfil y el generador lo usa.
 - **Criterios de aceptación:** cada valor de un perfil cita su fuente, verificada en la documentación primaria antes de fijarla; un test controla que ningún perfil tenga valores sin fuente.
 - **Depende de:** B-025
+- **Spec:** [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md)
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://carbondesignsystem.com/elements/typography/type-sets/ , https://polaris.shopify.com/ , https://baymard.com/ , https://utopia.fyi/
 
 ## Siguiente
