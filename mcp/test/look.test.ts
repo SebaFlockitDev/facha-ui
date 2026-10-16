@@ -29,17 +29,17 @@ const lines = (vs: V[], rule: string) => vs.filter((v) => v.rule === rule).map((
 describe("generic-look rules on the fixture", () => {
   it("CSS: each rule finds its positive case and none of the negatives, as a warning", async () => {
     const vs = await check(FIXTURE, "src/index.css");
-    expect(lines(vs, "ux-gray-on-color")).toEqual([10]);
-    expect(lines(vs, "a11y-gradient-text")).toEqual([19]);
-    expect(lines(vs, "a11y-motion")).toEqual([25]);
+    expect(lines(vs, "ux-gray-on-color")).toEqual([10, 12]);
+    expect(lines(vs, "a11y-gradient-text")).toEqual([21]);
+    expect(lines(vs, "a11y-motion")).toEqual([27]);
     expect(vs.filter((v) => NEW.includes(v.rule)).every((v) => v.severity === "warning")).toBe(true);
     expect(vs.find((v) => v.rule === "a11y-gradient-text")!.message).toContain("against the stop #f5f3ff");
   });
 
   it("theme-contrast no longer measures a gradient as if it were its first color", async () => {
     const vs = await check(FIXTURE, "src/index.css");
-    expect(lines(vs, "theme-contrast")).not.toContain(19);
     expect(lines(vs, "theme-contrast")).not.toContain(21);
+    expect(lines(vs, "theme-contrast")).not.toContain(23);
   });
 
   it("JSX with Tailwind: gray on a palette color, a failing gradient and a bare animate-*; variants and motion-safe are fine", async () => {

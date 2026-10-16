@@ -24,8 +24,11 @@ export type LookReport = (rule: RuleId, base: Severity, loc: Loc, found: string,
 const toOklch = converter("oklch");
 const chroma = (c: Color) => toOklch(c)?.c ?? 0;
 const lightness = (c: Color) => toOklch(c)?.l ?? 0;
-/** A gray of middle lightness: not near black or white, with almost no chroma. */
-const isMidGray = (c: Color) => (c.alpha ?? 1) >= 1 && chroma(c) < 0.03 && lightness(c) >= 0.3 && lightness(c) <= 0.85;
+/**
+ * A gray of middle lightness: not near black or white, with almost no chroma. 0.045 takes in every
+ * Tailwind gray (slate-500 is 0.041, the typical generated gray) and leaves out a real blue-gray (0.063).
+ */
+const isMidGray = (c: Color) => (c.alpha ?? 1) >= 1 && chroma(c) < 0.045 && lightness(c) >= 0.3 && lightness(c) <= 0.85;
 /** A background with real color: a solid or a saturated tint, not a barely tinted surface. */
 const isColored = (c: Color) => (c.alpha ?? 1) >= 1 && chroma(c) >= 0.06;
 const GRADIENT = /(?:linear|radial|conic)-gradient\(/;

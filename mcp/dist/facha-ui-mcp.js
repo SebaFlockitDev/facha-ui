@@ -57747,7 +57747,7 @@ function partsHex(item, theme) {
 var toOklch = converter_default("oklch");
 var chroma = (c2) => toOklch(c2)?.c ?? 0;
 var lightness = (c2) => toOklch(c2)?.l ?? 0;
-var isMidGray = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) < 0.03 && lightness(c2) >= 0.3 && lightness(c2) <= 0.85;
+var isMidGray = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) < 0.045 && lightness(c2) >= 0.3 && lightness(c2) <= 0.85;
 var isColored = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) >= 0.06;
 var GRADIENT = /(?:linear|radial|conic)-gradient\(/;
 var themesOf = (ctx) => ctx.tokens.themes.length ? ctx.tokens.themes.map((t) => t.name) : ["default"];

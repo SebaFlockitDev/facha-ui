@@ -8,6 +8,8 @@
 
 /* ux-gray-on-color: positive, a mid gray on the brand color. */
 .promo { background: var(--color-primary); color: #6b7280; }
+/* ux-gray-on-color: positive, Tailwind's slate-500 (a slightly blue gray) on the brand. */
+.promo-slate { background: var(--color-primary); color: #64748b; }
 /* negative: the on-color of the brand. */
 .promo-ok { background: var(--color-primary); color: var(--color-on-primary); }
 /* negative: a barely tinted surface is not a colored background. */
