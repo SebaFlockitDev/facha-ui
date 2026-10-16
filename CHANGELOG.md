@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Fixed
+
+- `/facha-ui:center` cargaba sin su descripción (el YAML de su encabezado no se podía leer), así que *"abrí facha-ui"* no lo abría: solo funcionaba escribiendo el comando.
+
 ## [0.32.0] - 2026-10-16
 
 ### Added
