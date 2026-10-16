@@ -66,9 +66,10 @@ Write `.facha-ui/live/center.json` with the Write tool, from C1 and nothing else
 }
 ```
 
-If `ux_score` returns no screens (a Vite app: it only knows `page.tsx`), list the screen files under
-`src/pages/` or `src/routes/` (or the components the router renders) with `score: null` and `worst` from
-`check_ui` on each file (its error first, else its warning, else its info).
+Each screen comes from `ux_score.screens`: `file` is its `screen`, `route` its `route`, `score` its
+`score` and `worst` its first `worst`, with the message in the developer's language. In Vite, those are
+the components the router mounts and the files of `src/pages/`, `src/routes/`, `src/views/` and
+`src/screens/`.
 
 Then the palette base for the Diseño tab of every variant's panel: `live.md` L1 step 5.
 

@@ -131,6 +131,7 @@ Claves útiles:
 | `tokens.sources` | Archivos CSS con los tokens | Autodetectado |
 | `tokens.themes` | Selector de cada tema, p. ej. `{ "light": ":root", "dark": "html.dark" }` | Autodetectado (`:root`, `.dark`, `html.dark`, `[data-theme=…]`) |
 | `include` / `exclude` | Qué archivos audita `audit_project` | `app/**`, `components/**`, … |
+| `screens` | Qué archivos son pantallas para el puntaje de UX, si la detección no acierta (p. ej. `["src/features/**/*Page.tsx"]`) | En Next, cada `page.tsx`; en Vite, lo que monta el router y `src/pages/`, `src/routes/`, `src/views/`, `src/screens/` |
 | `contrast.surfaces` | Superficies contra las que se mide el contraste del texto | Autodetectado |
 | `guidelines` | Reglas del equipo en texto libre; guían el diseño de las variantes | `[]` |
 | `lab.dir` | Carpeta del laboratorio | `app/lab` |

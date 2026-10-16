@@ -7,6 +7,15 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- **El puntaje de UX en apps Vite:** `ux_score` (y el centro, y el modo `score` de CI) reconoce las pantallas de Vite: las que monta el router, con su ruta, y las de `src/pages/`, `src/routes/`, `src/views/` y `src/screens/`. Si no acierta, la opción `screens` de la config dice cuáles son. Antes, en Vite no medía ninguna.
+- Cada pantalla de `ux_score` trae su ruta (`route`), y un archivo que le pasás se mide siempre, aunque sea un componente.
+
+### Changed
+
+- `review_ui` pide título y estados (carga, vacío, error) también a las pantallas de Vite: la primera vez, su puntaje puede bajar un poco porque ahora se miden.
+
 ### Fixed
 
 - `/facha-ui:center` cargaba sin su descripción (el YAML de su encabezado no se podía leer), así que *"abrí facha-ui"* no lo abría: solo funcionaba escribiendo el comando.
