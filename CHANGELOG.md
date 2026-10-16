@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-10-16
+
 ### Added
 
 - Regla `a11y-color-only` (aviso): un estado que se muestra solo con color, como un punto verde o rojo sin texto, ícono ni nombre accesible (WCAG 1.4.1). Lee el estado del nombre de la clase (`dot-paid`), de un color con token de estado (`bg-success`) o de un `className` que depende de un estado (`dot-${order.status}`).
@@ -335,7 +337,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.28.0...HEAD
+[0.28.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...v0.25.0

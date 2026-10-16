@@ -27,17 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-004 · Regla `a11y-color-only`
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** un estado que se distingue solo por color falla WCAG 1.4.1 (`ux:wcag-1.4.1`); hoy solo lo ve la revisión.
-- **Qué:** el guardián marca chips, puntos o filas de estado cuyo único diferenciador es una clase o token de color, sin texto ni ícono en el mismo elemento.
-- **Criterios de aceptación:** positivos y negativos en un fixture; 0 falsos positivos en los fixtures existentes; `ux-principles.md` la pasa a "verificado por el guardián".
-- **Spec:** [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md)
-- **Referencias:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md`
-
-## Siguiente
-
 ### B-028 · De referencias a tokens
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** L
@@ -46,6 +35,9 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Criterios de aceptación:** antes de la spec se decide cómo convive con S2 (el MCP no usa la red): la captura la toma la skill, con permiso del dev, y el MCP solo lee el archivo; cada valor extraído dice de dónde salió.
 - **Depende de:** B-025
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/
+
+
+## Siguiente
 
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
@@ -173,6 +165,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.28.0:** B-004, la regla `a11y-color-only` (un estado que se muestra solo con color, WCAG 1.4.1); spec en [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md).
 - **0.27.0:** B-030, componentes del proyecto en `get_design_system`, la regla `ds-component-reuse` con el import exacto y la cobertura del design system en `ux_score`; spec en [`docs/specs/B-030-componente-reimplementado.md`](docs/specs/B-030-componente-reimplementado.md).
 - **0.26.0:** B-032 (absorbe B-008), matriz completa de contraste en `get_design_system`, contraste sin redondear y sugerencias que conservan el significado; spec en [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md).
 - **0.25.0:** B-031 (incluye B-036), controles de diseño en el panel en vivo: tono, grises, radio, alto de controles y contraste del texto, con presets de Radix y el contraste y los conflictos recalculados en cada cambio; spec en [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).

@@ -1,6 +1,6 @@
 # B-004 · Regla `a11y-color-only`
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/color-only` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.28.0) · **Rama:** `feat/color-only` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md` ·
 > **Última actualización:** 2026-10-16
 
@@ -79,7 +79,7 @@ o un ícono con nombre, junto al color. Fuente: WCAG 1.4.1, `ux:wcag-1.4.1`.
 - [x] 2. Regla `a11y-color-only`, fixture y tests · `a677f36`
 - [x] 3. Principios, SPEC, guía, CHANGELOG · `b679840`
 - [x] 4. Prueba real
-- [ ] 5. Release
+- [x] 5. Release 0.28.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -97,9 +97,9 @@ o un ícono con nombre, junto al color. Fuente: WCAG 1.4.1, `ux:wcag-1.4.1`.
   `shadcn-tw4`, `next-ux` y `vite-react`: los mismos totales que la 0.27.0 (la tabla de pedidos de la
   app de Vite muestra el estado con texto en el chip, y no avisa). En el fixture, los tres positivos y
   ninguno de los ocho negativos.
+- **2026-10-16 · release 0.28.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; B-004 a Hecho y B-028 a Ahora.
 
 ## Cómo retomar
 
-Todo hecho y probado en `feat/color-only`; falta el release (tarea 5), solo cuando quien mantiene
-el repo lo pida: versión 0.28.0 con el flujo de `CLAUDE.md`; B-004 a **Hecho** y el primero de
-**Siguiente** a **Ahora**.
+Terminado en 0.28.0.
