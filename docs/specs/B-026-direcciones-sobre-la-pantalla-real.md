@@ -1,6 +1,6 @@
 # B-026 · Tres direcciones de diseño sobre la pantalla real
 
-> **Estado:** en curso · **Rama:** `feat/design-directions` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.22.0) · **Rama:** `feat/design-directions` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-025 (generador, hecho en 0.21.0) · **Última actualización:** 2026-10-15
 
@@ -121,7 +121,7 @@ Sin laboratorio posible (`framework: unknown`), el flujo sigue como en 0.21.0: t
 - [x] 4. Docs: SPEC §2.h y §7.32, `docs/uso.md`, `CHANGELOG.md`
 - [x] 5. Prueba real en `facha-ui-pruebas/vite-sin-diseno`: tres direcciones sobre la pantalla de
   pedidos y la muestra, capturas, comparar, elegir, escribir, `check_ui` y limpieza · `d149f04`
-- [ ] 6. Release
+- [x] 6. Release 0.22.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -160,9 +160,11 @@ Sin laboratorio posible (`framework: unknown`), el flujo sigue como en 0.21.0: t
     dice y remite a la muestra;
   - límite: la ruta de Next no se probó en ejecución (no hay una app Next de prueba); la cubren los
     tests de contrato y el de `check_ui` de la muestra en un proyecto Next.
+- **2026-10-16 · release 0.22.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.32 con la versión; B-026 a Hecho y B-027 a Ahora.
 
 ## Cómo retomar
 
-**Estado al 2026-10-15:** tareas 1 a 5 hechas en `feat/design-directions`, sin push. Falta el release
-(tarea 6), con el OK de quien mantiene el repo: versión menor (0.22.0), con el flujo de `CLAUDE.md`, y
-B-026 pasa a Hecho; en el backlog, actualizar su criterio ("densidad" → "elevación").
+Terminado en 0.22.0. El bloque "diseño desde cero" sigue con B-027 (perfiles por tipo de producto):
+el brief ya guarda el tipo y la densidad, y el generador ya tiene estilos; los perfiles fijarían base,
+escala, croma y estilo por tipo de producto, con fuente.

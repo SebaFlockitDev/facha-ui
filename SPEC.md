@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.21.0** (§7.10–§7.31). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.22.0** (§7.10–§7.32). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -713,7 +713,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1473,7 +1473,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **APCA** pasa a B-032; **shadcn** no se nombra: un proyecto shadcn siempre tiene tokens.
 - **Tests:** las constantes se vuelven a medir desde las escalas de Radix; 10 marcas (fría, cálida, clara, oscura, saturada, apagada, verde, casi negra) pasan cada par en AA y en AAA; determinismo; marca conservada o ajuste informado; conflictos; semillas; ida y vuelta por facha-ui (roles, `status: ok`, sin hallazgos de salud), también en Tailwind 4; la tool por el MCP (entradas del brief, argumentos, Tailwind 4, color inválido); S2 de los imports; contratos de la skill.
 
-### 7.32 Tres direcciones sobre la pantalla real
+### 7.32 Versión 0.22.0: tres direcciones sobre la pantalla real
 
 Ítem B-026 del backlog, el tercero del bloque "diseño desde cero". Spec, decisiones y registro: [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).
 
