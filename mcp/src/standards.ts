@@ -20,11 +20,17 @@ export const SOURCES = {
   wcag146: "WCAG 2.2 SC 1.4.6 Contrast (Enhanced): text 7:1 · https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html",
   wcag1411: "WCAG 2.2 SC 1.4.11 Non-text Contrast: UI components and focus 3:1 · https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
   wcag141: "WCAG 2.2 SC 1.4.1 Use of Color: a state is never told by color alone · https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html",
-  wcag148: "WCAG 2.2 SC 1.4.8 Visual Presentation: line spacing at least 1.5 within paragraphs · https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html",
+  wcag148: "WCAG 2.2 SC 1.4.8 Visual Presentation: lines no wider than 80 characters, line spacing at least 1.5 within paragraphs, paragraph spacing at least 1.5 times the line spacing · https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html",
   wcag258: "WCAG 2.2 SC 2.5.8 Target Size (Minimum): 24 by 24 CSS pixels · https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
   statusDeltaE: "facha-ui status-confusable: two states closer than ΔE OKLab×100 10, also under deuteranopia and protanopia (mcp/src/visual.ts)",
   systemFont: "facha-ui init never installs dependencies (skills/init/SKILL.md, hard rule 4): the system font stack needs none",
   radixGray: "Radix Colors 3.0.0 gray: the untinted gray scale (chroma 0 in all 12 steps) · https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
+  carbonStyleStrategies: "Carbon type style strategies: the productive set (14px base) was made for product design, the expressive set (16px base) for editorial pages · https://carbondesignsystem.com/elements/typography/style-strategies/",
+  carbonTableRows: "Carbon data table row heights: xs 24, sm 32 (compact interfaces), md 40, lg 48, xl 64 · https://carbondesignsystem.com/components/data-table/usage/",
+  wcag255: "WCAG 2.2 SC 2.5.5 Target Size (Enhanced): 44 by 44 CSS pixels, for touch · https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced.html",
+  baymardLineLength: "Baymard Institute, Readability: The Optimal Line Length (2022): 50–75 characters for body text, from e-commerce testing · https://baymard.com/blog/line-length-readability",
+  govukTableNumbers: "GOV.UK Design System, Table: when comparing columns of numbers, align the numbers to the right · https://design-system.service.gov.uk/components/table/",
+  mdnTabularNums: "MDN, font-variant-numeric: tabular-nums makes figures the same width, so they align as in tables · https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-numeric",
   carbonLayering: "Carbon layering model (@carbon/themes 11.83: layer-01/02/03 alternate #f4f4f4 and #ffffff on a #ffffff background; shadow is a separate token for floating elements) · https://carbondesignsystem.com/elements/color/overview/",
 } as const;
 
@@ -108,11 +114,93 @@ export const ACCENT_SEEDS = [
   { radix: "pink", hex: "#d6409f" },
 ] as const;
 
-export const DENSITY = {
-  compact: { typeScale: [12, 14, 16, 20, 28, 32, 42], base: 14, control: 32, typeSource: "carbonType" as SourceId },
-  balanced: { typeScale: [12, 14, 16, 22, 28, 36, 45], base: 16, control: 40, typeSource: "material3Type" as SourceId },
-  airy: { typeScale: [12, 14, 16, 22, 28, 36, 45], base: 16, control: 48, typeSource: "material3Type" as SourceId },
+/** The two published type scales: Carbon's productive set and Material 3's. */
+export const TYPE_SETS = {
+  productive: { scale: [12, 14, 16, 20, 28, 32, 42], base: 14, source: "carbonType" as SourceId },
+  standard: { scale: [12, 14, 16, 22, 28, 36, 45], base: 16, source: "material3Type" as SourceId },
 } as const;
+export type TypeSetId = keyof typeof TYPE_SETS;
+
+export const DENSITY = {
+  compact: { typeScale: TYPE_SETS.productive.scale, base: 14, control: 32, typeSource: "carbonType" as SourceId, typeSet: "productive" as TypeSetId },
+  balanced: { typeScale: TYPE_SETS.standard.scale, base: 16, control: 40, typeSource: "material3Type" as SourceId, typeSet: "standard" as TypeSetId },
+  airy: { typeScale: TYPE_SETS.standard.scale, base: 16, control: 48, typeSource: "material3Type" as SourceId, typeSet: "standard" as TypeSetId },
+} as const;
+
+/** A value a profile sets, with the sources that justify it. */
+type Sourced<T> = { value: T; sources: SourceId[] };
+
+export interface Profile {
+  label: string;
+  /** The density when the brief does not say one. */
+  density?: Sourced<"compact" | "balanced" | "airy">;
+  typeSet?: Sourced<TypeSetId>;
+  /** A floor for the control height (the larger of this and the density's wins). */
+  control?: Sourced<number>;
+  tokens: { name: string; value: string; sources: SourceId[] }[];
+  guidelines: { text: string; principle?: string; sources: SourceId[] }[];
+}
+
+const NUMBERS = {
+  text: "Numbers compared in columns (amounts, totals, counts) are right-aligned and use tabular figures (`font-variant-numeric: var(--numerals)`).",
+  principle: "ux:numeric-alignment",
+  sources: ["govukTableNumbers", "mdnTabularNums"] as SourceId[],
+};
+const TOUCH = {
+  text: "Touch targets are at least 44×44px; `--size-control` already meets it.",
+  principle: "ux:wcag-2.5.5",
+  sources: ["wcag255"] as SourceId[],
+};
+const LINES = {
+  text: "Running text (descriptions, articles) is 50 to 75 characters per line: `max-width: var(--measure)`.",
+  principle: "ux:line-length",
+  sources: ["baymardLineLength", "wcag148"] as SourceId[],
+};
+const PRODUCT_UI = { value: "productive" as TypeSetId, sources: ["carbonStyleStrategies", "carbonType"] as SourceId[] };
+const EDITORIAL = { value: "standard" as TypeSetId, sources: ["carbonStyleStrategies", "material3Type"] as SourceId[] };
+const TABULAR = { name: "--numerals", value: "tabular-nums", sources: ["mdnTabularNums"] as SourceId[] };
+const MEASURE = { name: "--measure", value: "75ch", sources: ["baymardLineLength", "wcag148"] as SourceId[] };
+const DENSE: Profile = {
+  label: "",
+  density: { value: "compact", sources: ["carbonTableRows"] },
+  typeSet: PRODUCT_UI,
+  control: { value: 32, sources: ["carbonSize", "carbonTableRows"] },
+  tokens: [{ name: "--size-row", value: "32px", sources: ["carbonTableRows"] }, TABULAR],
+  guidelines: [NUMBERS, { text: "Rows of dense tables are 32px high (`--size-row`).", sources: ["carbonTableRows"] }],
+};
+
+/**
+ * Product profiles (B-027): what a type of product sets by default, each value with its source,
+ * verified in the primary documentation on 2026-10-16. The brief's own values win; a value no
+ * source supports is not set ("other" has no profile).
+ */
+export const PROFILES: Record<string, Profile> = {
+  "saas-dashboard": { ...DENSE, label: "SaaS or dashboard" },
+  "internal-tool": { ...DENSE, label: "Internal tool" },
+  fintech: { label: "Fintech", typeSet: PRODUCT_UI, tokens: [TABULAR], guidelines: [NUMBERS] },
+  ecommerce: {
+    label: "E-commerce",
+    typeSet: EDITORIAL,
+    control: { value: 48, sources: ["wcag255", "carbonSize"] },
+    tokens: [MEASURE],
+    guidelines: [TOUCH, LINES],
+  },
+  "consumer-app": { label: "Consumer app", control: { value: 48, sources: ["wcag255", "carbonSize"] }, tokens: [], guidelines: [TOUCH] },
+  content: {
+    label: "Content",
+    density: { value: "airy", sources: ["carbonStyleStrategies"] },
+    typeSet: EDITORIAL,
+    tokens: [MEASURE],
+    guidelines: [LINES, { text: "Paragraphs are spaced at least 1.5 times their line spacing.", sources: ["wcag148"] }],
+  },
+  marketing: {
+    label: "Marketing",
+    density: { value: "airy", sources: ["carbonStyleStrategies"] },
+    typeSet: EDITORIAL,
+    tokens: [MEASURE],
+    guidelines: [LINES],
+  },
+};
 
 export const TYPE_NAMES = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl"] as const;
 export const LINE_HEIGHT = { body: 1.5, heading: 1.25 };

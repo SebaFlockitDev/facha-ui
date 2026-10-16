@@ -1,6 +1,6 @@
 # B-027 · Perfiles por tipo de producto, con fuentes
 
-> **Estado:** en spec · **Rama:** `feat/product-profiles` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/product-profiles` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-025 y B-026 (hechos en 0.21.0 y 0.22.0) · **Última actualización:** 2026-10-16
 
@@ -27,7 +27,7 @@ por gusto.
 **Sin fuente, queda afuera:** el "croma moderado" de fintech que nombraba el backlog. Si aparece una
 fuente, se suma.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Perfiles (`mcp/src/standards.ts`)
 

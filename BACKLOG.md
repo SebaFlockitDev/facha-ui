@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-027 · Perfiles por tipo de producto, con fuentes
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** "profesional" depende del producto: un panel de datos y una tienda no tienen la misma densidad ni el mismo tamaño base. Los design systems de referencia ya lo resuelven, y citarlos evita decidir por gusto.
 - **Qué:** perfiles que fijan tamaño base, densidad, razón de la escala tipográfica, nivel de croma y radio: SaaS o panel (Carbon productive), e-commerce (Baymard, Polaris), fintech (croma moderado, cifras tabulares, estados marcados) y contenido (Carbon expressive, tipografía fluida de Utopia). El brief elige el perfil y el generador lo usa.

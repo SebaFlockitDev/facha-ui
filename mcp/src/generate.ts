@@ -1,7 +1,7 @@
 import { converter, differenceEuclidean, filterDeficiencyDeuter, filterDeficiencyProt, formatHex, parse, toGamut, wcagContrast } from "culori";
 import type { Color } from "culori";
 import {
-  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, HOVER_DELTA_E, PURE_GRAY_L1, STYLE_ORDER, STYLES, type StyleId, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
+  ACCENT_SEEDS, BRIGHT_SOLID, DEFAULT_RADIUS, PROFILES, TYPE_SETS, type Profile, HOVER_DELTA_E, PURE_GRAY_L1, STYLE_ORDER, STYLES, type StyleId, DENSITY, fluentShadow, LINE_HEIGHT, MIN_TARGET, RADII, RADIX, SHADOWS, SOURCES,
   SPACING, STATUS_MIN_DELTA_E, STATUS_SEEDS, SYSTEM_FONT, TYPE_NAMES, WCAG, type SourceId,
 } from "./standards.js";
 
@@ -43,6 +43,8 @@ export interface SystemInput {
   seeds?: number;
   /** One style for every direction; without it, directions take the styles in STYLE_ORDER. */
   style?: StyleId;
+  /** The brief's product type: its profile (B-027) sets the type scale, a control floor and tokens. */
+  productType?: string;
 }
 
 export interface Token {
@@ -387,14 +389,22 @@ export function seedColors(count: number): { hex: string; from: string }[] {
   return out.map(({ hex, from }) => ({ hex, from }));
 }
 
+const profileOf = (input: SystemInput): Profile | undefined => (input.productType ? PROFILES[input.productType] : undefined);
+
+/** The control height: the density's, raised to the profile's floor. */
+const controlOf = (input: SystemInput): number => Math.max(DENSITY[input.density].control, profileOf(input)?.control?.value ?? 0);
+
 export function typography(input: SystemInput) {
-  const d = DENSITY[input.density];
+  // The type scale comes from the product's profile (Carbon's productive set for product UI,
+  // Material 3 for editorial and touch-first products); without one, from the density.
+  const set = TYPE_SETS[profileOf(input)?.typeSet?.value ?? DENSITY[input.density].typeSet];
   return {
     family: input.fontFamily ?? SYSTEM_FONT,
     familySource: (input.fontFamily ? "brief" : "systemFont") as SourceId | "brief",
-    base: d.base,
-    scale: TYPE_NAMES.map((name, i) => ({ name, px: d.typeScale[i]! })),
-    scaleSource: d.typeSource,
+    base: set.base,
+    scale: TYPE_NAMES.map((name, i) => ({ name, px: set.scale[i]! })),
+    scaleSource: set.source,
+    scaleFrom: profileOf(input)?.typeSet ? `profile ${input.productType}` : `density ${input.density}`,
     lineHeight: { body: LINE_HEIGHT.body, heading: LINE_HEIGHT.heading, sources: ["wcag148", "material3Heading"] as SourceId[] },
     weights: { regular: 400, medium: 500, semibold: 600, bold: 700 },
   };
@@ -409,9 +419,10 @@ function sharedTokens(input: SystemInput): Token[] {
     same("--leading-normal", "generic", String(LINE_HEIGHT.body), ["wcag148"]),
     same("--leading-tight", "generic", String(LINE_HEIGHT.heading), ["material3Heading"]),
     ...SPACING.map((px, i) => same(`--space-${i + 1}`, "spacing", `${px}px`, ["carbonSpacing"])),
-    same("--size-control", "generic", `${DENSITY[input.density].control}px`, ["carbonSize", "wcag258"]),
+    same("--size-control", "generic", `${controlOf(input)}px`, controlOf(input) > DENSITY[input.density].control ? [...profileOf(input)!.control!.sources, "wcag258"] : ["carbonSize", "wcag258"]),
     ...RADII.filter(([name]) => name !== "none").map(([name, px]) => same(`--radius-${name}`, "radius", `${px}px`, ["material3Shape"])),
     ...SHADOWS.levels.map(([name, depth]) => ({ name: `--shadow-${name}`, role: "shadow", light: fluentShadow(depth, "light"), dark: fluentShadow(depth, "dark"), sources: ["fluentShadow"] as SourceId[] })),
+    ...(profileOf(input)?.tokens ?? []).map((t) => same(t.name, "generic", t.value, [...t.sources])),
   ];
 }
 
@@ -448,9 +459,12 @@ export function proposeSystem(input: SystemInput) {
   const used = new Set<string>(["radix", "leonardo", "wcag1411", "wcag141", "statusDeltaE", "tailwindNames", input.level === "AAA" ? "wcag146" : "wcag143"]);
   for (const t of [...shared, ...directions.flatMap((d) => d.tokens)]) for (const x of t.sources) if (x !== "brief") used.add(x);
   for (const d of directions) for (const x of d.style.sources) used.add(x);
+  const profile = profileOf(input);
+  if (profile) for (const v of [profile.density, profile.typeSet, profile.control, ...profile.tokens, ...profile.guidelines]) for (const x of v?.sources ?? []) used.add(x);
   return {
     typography: typography(input),
-    spacing: { scale: SPACING, control: DENSITY[input.density].control, minTarget: MIN_TARGET, sources: ["carbonSpacing", "carbonSize", "wcag258"] },
+    spacing: { scale: SPACING, control: controlOf(input), minTarget: MIN_TARGET, sources: ["carbonSpacing", "carbonSize", "wcag258"] },
+    profile: profileOf(input) ? { type: input.productType!, ...profileOf(input)! } : null,
     radius: { scale: Object.fromEntries(RADII), source: "material3Shape" },
     styles: STYLES,
     directions,

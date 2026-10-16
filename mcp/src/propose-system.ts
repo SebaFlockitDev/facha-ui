@@ -3,7 +3,7 @@ import { parseColor, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { coverage, getDesignSystem } from "./design-system.js";
 import { proposeSystem, type Density, type Format, type Level } from "./generate.js";
-import type { StyleId } from "./standards.js";
+import { PROFILES, type StyleId } from "./standards.js";
 import { FachaError } from "./types.js";
 
 /**
@@ -39,8 +39,17 @@ export function proposeDesignSystem(ctx: Context, args: ProposeArgs) {
     brandFrom = at("brandColor");
   }
 
-  const density: Density = args.density ?? brief?.density ?? "balanced";
-  const densityFrom = args.density ? "argument" : brief?.density ? at("density") : "default (no brief): balanced";
+  // The product type picks a profile (B-027); the brief's own density still wins over the profile's.
+  const productType = brief?.product?.type && PROFILES[brief.product.type] ? brief.product.type : undefined;
+  const profile = productType ? PROFILES[productType] : undefined;
+  const density: Density = args.density ?? brief?.density ?? profile?.density?.value ?? "balanced";
+  const densityFrom = args.density
+    ? "argument"
+    : brief?.density
+      ? at("density")
+      : profile?.density
+        ? `profile ${productType} (${profile.density.sources.join(", ")})`
+        : "default: balanced";
   const level: Level = args.level ?? brief?.accessibility ?? "AA";
   const levelFrom = args.level ? "argument" : brief?.accessibility ? at("accessibility") : "default: WCAG 2.2 AA";
 
@@ -48,6 +57,7 @@ export function proposeDesignSystem(ctx: Context, args: ProposeArgs) {
   const format: Format = project.tailwind.detected && project.tailwind.version === "4" ? "tailwind4" : "css";
 
   const inputs: Record<string, From> = {
+    productType: { value: productType ?? null, from: productType ? at("product") : brief?.product?.type ? `brief: ${brief.product.type} has no profile` : "no brief: no profile" },
     brandColor: { value: brandColor ?? null, from: brandFrom },
     density: { value: density, from: densityFrom },
     level: { value: level, from: levelFrom },
@@ -57,7 +67,7 @@ export function proposeDesignSystem(ctx: Context, args: ProposeArgs) {
     style: { value: args.style ?? null, from: args.style ? "argument" : "none: directions take the standard, sober and soft styles" },
   };
 
-  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds, style: args.style });
+  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds, style: args.style, productType });
   const cov = coverage(ctx);
   return {
     designSystemStatus: cov.status,
