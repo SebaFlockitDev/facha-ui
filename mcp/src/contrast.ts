@@ -42,7 +42,7 @@ const CONTROL_BORDER = /(^|-)(strong|input|control|field)(-|$)/;
 const FOCUS_RING = /(^|-)(ring|focus)(-|$)/;
 
 /** Backgrounds a token is named for: X-foreground → X, on-X → X, X-text → X-bg, X-subtle… */
-function namedBackgrounds(name: string): string[] {
+export function namedBackgrounds(name: string): string[] {
   const out: string[] = [];
   // Something must come before the suffix: --text and --foreground are plain text, not pairs.
   const fg = name.match(/^(--.+)-(foreground|fg)$/);

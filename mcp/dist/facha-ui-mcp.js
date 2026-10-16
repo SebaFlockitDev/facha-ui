@@ -59048,7 +59048,8 @@ function health(ctx, usages) {
   );
   const out = [];
   for (const t of candidates) {
-    if (t.role === "on-accent") continue;
+    const grounds = t.role === "on-accent" ? namedBackgrounds(t.name).filter((n) => ctx.tokens.byName.get(n)?.type === "color") : surfaces2;
+    if (grounds.length === 0) continue;
     const ratios = {};
     const against = {};
     for (const th of themes) {
@@ -59056,7 +59057,7 @@ function health(ctx, usages) {
       if (!fg) continue;
       let worst = Number.POSITIVE_INFINITY;
       let worstName = "";
-      for (const s of surfaces2) {
+      for (const s of grounds) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
         const base4 = tokenColor(ctx.tokens, surfaces2[0], th);

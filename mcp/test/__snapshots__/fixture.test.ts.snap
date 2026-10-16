@@ -91,6 +91,29 @@ exports[`audit_project (fixture) > returns consistent totals (MCP-10) and is det
         "light": "#e5e7eb",
       },
     },
+    {
+      "against": {
+        "dark": "--color-primary",
+        "light": "--color-primary",
+      },
+      "breaksIn": [
+        "dark",
+      ],
+      "kind": "token-contrast",
+      "minRatio": 4.5,
+      "ratios": {
+        "dark": 3.67,
+        "light": 5.16,
+      },
+      "role": "on-accent",
+      "status": "breaks-in-theme",
+      "token": "--color-on-primary",
+      "usagesAsTextColor": 0,
+      "values": {
+        "dark": "#ffffff",
+        "light": "#ffffff",
+      },
+    },
   ],
   "ignored": 0,
   "skipped": [],
@@ -434,6 +457,29 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "values": {
         "dark": "#27272a",
         "light": "#e5e7eb",
+      },
+    },
+    {
+      "against": {
+        "dark": "--color-primary",
+        "light": "--color-primary",
+      },
+      "breaksIn": [
+        "dark",
+      ],
+      "kind": "token-contrast",
+      "minRatio": 4.5,
+      "ratios": {
+        "dark": 3.67,
+        "light": 5.16,
+      },
+      "role": "on-accent",
+      "status": "breaks-in-theme",
+      "token": "--color-on-primary",
+      "usagesAsTextColor": 0,
+      "values": {
+        "dark": "#ffffff",
+        "light": "#ffffff",
       },
     },
   ],
