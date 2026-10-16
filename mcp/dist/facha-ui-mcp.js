@@ -683,9 +683,9 @@ var require_stringifier = __commonJS({
         }
         if (!parent) return DEFAULT_RAW[detect];
         let root2 = node2.root();
-        let cache2 = root2.rawCache || (root2.rawCache = {});
-        if (typeof cache2[detect] !== "undefined") {
-          return cache2[detect];
+        let cache3 = root2.rawCache || (root2.rawCache = {});
+        if (typeof cache3[detect] !== "undefined") {
+          return cache3[detect];
         }
         if (detect === "before" || detect === "after") {
           return this.beforeAfter(node2, detect);
@@ -701,7 +701,7 @@ var require_stringifier = __commonJS({
           }
         }
         if (typeof value === "undefined") value = DEFAULT_RAW[detect];
-        cache2[detect] = value;
+        cache3[detect] = value;
         return value;
       }
       rawBeforeClose(root2) {
@@ -2038,49 +2038,49 @@ var require_util = __commonJS({
     exports.urlGenerate = urlGenerate;
     var MAX_CACHED_INPUTS = 32;
     function lruMemoize(f3) {
-      var cache2 = [];
+      var cache3 = [];
       return function(input2) {
-        for (var i = 0; i < cache2.length; i++) {
-          if (cache2[i].input === input2) {
-            var temp = cache2[0];
-            cache2[0] = cache2[i];
-            cache2[i] = temp;
-            return cache2[0].result;
+        for (var i = 0; i < cache3.length; i++) {
+          if (cache3[i].input === input2) {
+            var temp = cache3[0];
+            cache3[0] = cache3[i];
+            cache3[i] = temp;
+            return cache3[0].result;
           }
         }
         var result = f3(input2);
-        cache2.unshift({
+        cache3.unshift({
           input: input2,
           result
         });
-        if (cache2.length > MAX_CACHED_INPUTS) {
-          cache2.pop();
+        if (cache3.length > MAX_CACHED_INPUTS) {
+          cache3.pop();
         }
         return result;
       };
     }
     var normalize2 = lruMemoize(function normalize3(aPath) {
-      var path14 = aPath;
+      var path15 = aPath;
       var url2 = urlParse(aPath);
       if (url2) {
         if (!url2.path) {
           return aPath;
         }
-        path14 = url2.path;
+        path15 = url2.path;
       }
-      var isAbsolute = exports.isAbsolute(path14);
+      var isAbsolute = exports.isAbsolute(path15);
       var parts = [];
       var start = 0;
       var i = 0;
       while (true) {
         start = i;
-        i = path14.indexOf("/", start);
+        i = path15.indexOf("/", start);
         if (i === -1) {
-          parts.push(path14.slice(start));
+          parts.push(path15.slice(start));
           break;
         } else {
-          parts.push(path14.slice(start, i));
-          while (i < path14.length && path14[i] === "/") {
+          parts.push(path15.slice(start, i));
+          while (i < path15.length && path15[i] === "/") {
             i++;
           }
         }
@@ -2101,15 +2101,15 @@ var require_util = __commonJS({
           }
         }
       }
-      path14 = parts.join("/");
-      if (path14 === "") {
-        path14 = isAbsolute ? "/" : ".";
+      path15 = parts.join("/");
+      if (path15 === "") {
+        path15 = isAbsolute ? "/" : ".";
       }
       if (url2) {
-        url2.path = path14;
+        url2.path = path15;
         return urlGenerate(url2);
       }
-      return path14;
+      return path15;
     });
     exports.normalize = normalize2;
     function join(aRoot, aPath) {
@@ -3834,11 +3834,11 @@ var require_previous_map = __commonJS({
     var { existsSync, readFileSync, realpathSync } = __require("fs");
     var { dirname, isAbsolute, join, relative, sep } = __require("path");
     var { SourceMapConsumer, SourceMapGenerator } = require_source_map();
-    function realPath(path14) {
+    function realPath(path15) {
       try {
-        return realpathSync(path14);
+        return realpathSync(path15);
       } catch {
-        return path14;
+        return path15;
       }
     }
     function fromBase64(str) {
@@ -3901,19 +3901,19 @@ var require_previous_map = __commonJS({
           this.annotation = this.getAnnotationURL(css.substring(start, end));
         }
       }
-      loadFile(path14, cssFile, trusted) {
+      loadFile(path15, cssFile, trusted) {
         if (!trusted && !this.unsafeMap) {
-          if (!/\.map$/i.test(path14)) return void 0;
+          if (!/\.map$/i.test(path15)) return void 0;
           if (!cssFile) return void 0;
-          let rel3 = relative(realPath(dirname(cssFile)), realPath(path14));
+          let rel3 = relative(realPath(dirname(cssFile)), realPath(path15));
           if (rel3 === ".." || rel3.startsWith(".." + sep) || isAbsolute(rel3)) {
             return void 0;
           }
         }
-        this.root = dirname(path14);
-        if (existsSync(path14)) {
-          this.mapFile = path14;
-          return readFileSync(path14, "utf-8").toString().trim();
+        this.root = dirname(path15);
+        if (existsSync(path15)) {
+          this.mapFile = path15;
+          return readFileSync(path15, "utf-8").toString().trim();
         }
       }
       loadMap(file2, prev) {
@@ -4709,9 +4709,9 @@ var require_map_generator = __commonJS({
         if (typeof this.mapOpts.annotation === "string") {
           from = dirname(resolve(from, this.mapOpts.annotation));
         }
-        let path14 = relative(from, file2);
-        this.memoizedPaths.set(file2, path14);
-        return path14;
+        let path15 = relative(from, file2);
+        this.memoizedPaths.set(file2, path15);
+        return path15;
       }
       previous() {
         if (!this.previousMaps) {
@@ -4766,12 +4766,12 @@ var require_map_generator = __commonJS({
           return window.btoa(unescape(encodeURIComponent(str)));
         }
       }
-      toFileUrl(path14) {
-        let cached2 = this.memoizedFileURLs.get(path14);
+      toFileUrl(path15) {
+        let cached2 = this.memoizedFileURLs.get(path15);
         if (cached2) return cached2;
         if (pathToFileURL) {
-          let fileURL = pathToFileURL(path14).toString();
-          this.memoizedFileURLs.set(path14, fileURL);
+          let fileURL = pathToFileURL(path15).toString();
+          this.memoizedFileURLs.set(path15, fileURL);
           return fileURL;
         } else {
           throw new Error(
@@ -4779,14 +4779,14 @@ var require_map_generator = __commonJS({
           );
         }
       }
-      toUrl(path14) {
-        let cached2 = this.memoizedURLs.get(path14);
+      toUrl(path15) {
+        let cached2 = this.memoizedURLs.get(path15);
         if (cached2) return cached2;
         if (sep === "\\") {
-          path14 = path14.replace(/\\/g, "/");
+          path15 = path15.replace(/\\/g, "/");
         }
-        let url2 = encodeURI(path14).replace(/[#?]/g, encodeURIComponent);
-        this.memoizedURLs.set(path14, url2);
+        let url2 = encodeURI(path15).replace(/[#?]/g, encodeURIComponent);
+        this.memoizedURLs.set(path15, url2);
         return url2;
       }
     };
@@ -5031,19 +5031,19 @@ var require_parser = __commonJS({
             if (string4 !== " !important") node2.raws.important = string4;
             break;
           } else if (token[1].toLowerCase() === "important") {
-            let cache2 = tokens.slice(0);
+            let cache3 = tokens.slice(0);
             let str = "";
             for (let j = i; j > 0; j--) {
-              let type = cache2[j][0];
+              let type = cache3[j][0];
               if (str.trim().startsWith("!") && type !== "space") {
                 break;
               }
-              str = cache2.pop()[1] + str;
+              str = cache3.pop()[1] + str;
             }
             if (str.trim().startsWith("!")) {
               node2.important = true;
               node2.raws.important = str;
-              tokens = cache2;
+              tokens = cache3;
             }
           }
           if (token[0] !== "space" && token[0] !== "comment") {
@@ -6213,11 +6213,11 @@ var require_postcss = __commonJS({
         transformer.postcssVersion = new Processor2().version;
         return transformer;
       }
-      let cache2;
+      let cache3;
       Object.defineProperty(creator, "postcss", {
         get() {
-          if (!cache2) cache2 = creator();
-          return cache2;
+          if (!cache3) cache3 = creator();
+          return cache3;
         }
       });
       creator.process = function(css, processOpts, pluginOpts) {
@@ -6509,8 +6509,8 @@ var require_utils = __commonJS({
       }
       return output2;
     };
-    exports.basename = (path14, { windows } = {}) => {
-      const segs = path14.split(windows ? /[\\/]/ : "/");
+    exports.basename = (path15, { windows } = {}) => {
+      const segs = path15.split(windows ? /[\\/]/ : "/");
       const last = segs[segs.length - 1];
       if (last === "") {
         return segs[segs.length - 2];
@@ -7882,9 +7882,9 @@ var require_picomatch = __commonJS({
     var utils = require_utils();
     var constants = require_constants();
     var isObject2 = (val) => val && typeof val === "object" && !Array.isArray(val);
-    var picomatch3 = (glob, options, returnState = false) => {
+    var picomatch4 = (glob, options, returnState = false) => {
       if (Array.isArray(glob)) {
-        const fns = glob.map((input2) => picomatch3(input2, options, returnState));
+        const fns = glob.map((input2) => picomatch4(input2, options, returnState));
         const arrayMatcher = (str) => {
           for (const isMatch of fns) {
             const state2 = isMatch(str);
@@ -7900,16 +7900,16 @@ var require_picomatch = __commonJS({
       }
       const opts = options || {};
       const posix = opts.windows;
-      const regex2 = isState ? picomatch3.compileRe(glob, options) : picomatch3.makeRe(glob, options, false, true);
+      const regex2 = isState ? picomatch4.compileRe(glob, options) : picomatch4.makeRe(glob, options, false, true);
       const state = regex2.state;
       delete regex2.state;
       let isIgnored = () => false;
       if (opts.ignore) {
         const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
-        isIgnored = picomatch3(opts.ignore, ignoreOpts, returnState);
+        isIgnored = picomatch4(opts.ignore, ignoreOpts, returnState);
       }
       const matcher = (input2, returnObject = false) => {
-        const { isMatch, match, output: output2 } = picomatch3.test(input2, regex2, options, { glob, posix });
+        const { isMatch, match, output: output2 } = picomatch4.test(input2, regex2, options, { glob, posix });
         const result = { glob, state, regex: regex2, posix, input: input2, output: output2, match, isMatch };
         if (typeof opts.onResult === "function") {
           opts.onResult(result);
@@ -7935,7 +7935,7 @@ var require_picomatch = __commonJS({
       }
       return matcher;
     };
-    picomatch3.test = (input2, regex2, options, { glob, posix } = {}) => {
+    picomatch4.test = (input2, regex2, options, { glob, posix } = {}) => {
       if (typeof input2 !== "string") {
         throw new TypeError("Expected input to be a string");
       }
@@ -7952,24 +7952,24 @@ var require_picomatch = __commonJS({
       }
       if (match === false || opts.capture === true) {
         if (opts.matchBase === true || opts.basename === true) {
-          match = picomatch3.matchBase(input2, regex2, options, posix);
+          match = picomatch4.matchBase(input2, regex2, options, posix);
         } else {
           match = regex2.exec(output2);
         }
       }
       return { isMatch: Boolean(match), match, output: output2 };
     };
-    picomatch3.matchBase = (input2, glob, options, posix = options && options.windows) => {
-      const regex2 = glob instanceof RegExp ? glob : picomatch3.makeRe(glob, options);
+    picomatch4.matchBase = (input2, glob, options, posix = options && options.windows) => {
+      const regex2 = glob instanceof RegExp ? glob : picomatch4.makeRe(glob, options);
       return regex2.test(utils.basename(input2, { windows: posix }));
     };
-    picomatch3.isMatch = (str, patterns, options) => picomatch3(patterns, options)(str);
-    picomatch3.parse = (pattern, options) => {
-      if (Array.isArray(pattern)) return pattern.map((p4) => picomatch3.parse(p4, options));
+    picomatch4.isMatch = (str, patterns, options) => picomatch4(patterns, options)(str);
+    picomatch4.parse = (pattern, options) => {
+      if (Array.isArray(pattern)) return pattern.map((p4) => picomatch4.parse(p4, options));
       return parse6(pattern, { ...options, fastpaths: false });
     };
-    picomatch3.scan = (input2, options) => scan(input2, options);
-    picomatch3.compileRe = (state, options, returnOutput = false, returnState = false) => {
+    picomatch4.scan = (input2, options) => scan(input2, options);
+    picomatch4.compileRe = (state, options, returnOutput = false, returnState = false) => {
       if (returnOutput === true) {
         return state.output;
       }
@@ -7980,13 +7980,13 @@ var require_picomatch = __commonJS({
       if (state && state.negated === true) {
         source = `^(?!${source}).*$`;
       }
-      const regex2 = picomatch3.toRegex(source, options);
+      const regex2 = picomatch4.toRegex(source, options);
       if (returnState === true) {
         regex2.state = state;
       }
       return regex2;
     };
-    picomatch3.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
+    picomatch4.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
       if (!input2 || typeof input2 !== "string") {
         throw new TypeError("Expected a non-empty string");
       }
@@ -7997,9 +7997,9 @@ var require_picomatch = __commonJS({
       if (!parsed.output) {
         parsed = parse6(input2, options);
       }
-      return picomatch3.compileRe(parsed, options, returnOutput, returnState);
+      return picomatch4.compileRe(parsed, options, returnOutput, returnState);
     };
-    picomatch3.toRegex = (source, options) => {
+    picomatch4.toRegex = (source, options) => {
       try {
         const opts = options || {};
         return new RegExp(source, opts.flags || (opts.nocase ? "i" : ""));
@@ -8008,8 +8008,8 @@ var require_picomatch = __commonJS({
         return /$^/;
       }
     };
-    picomatch3.constants = constants;
-    module.exports = picomatch3;
+    picomatch4.constants = constants;
+    module.exports = picomatch4;
   }
 });
 
@@ -8019,14 +8019,14 @@ var require_picomatch2 = __commonJS({
     "use strict";
     var pico = require_picomatch();
     var utils = require_utils();
-    function picomatch3(glob, options, returnState = false) {
+    function picomatch4(glob, options, returnState = false) {
       if (options && (options.windows === null || options.windows === void 0)) {
         options = { ...options, windows: utils.isWindows() };
       }
       return pico(glob, options, returnState);
     }
-    Object.assign(picomatch3, pico);
-    module.exports = picomatch3;
+    Object.assign(picomatch4, pico);
+    module.exports = picomatch4;
   }
 });
 
@@ -11259,8 +11259,8 @@ var require_utils2 = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path14) {
-      let input2 = path14;
+    function removeDotSegments(path15) {
+      let input2 = path15;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -11669,8 +11669,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path14 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path14 && path14 !== "/" ? path14 : void 0;
+        const path15 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path15 && path15 !== "/" ? path15 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -15183,12 +15183,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f3;
     };
-    function addFormats(ajv, list3, fs11, exportName) {
+    function addFormats(ajv, list3, fs12, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f3 of list3)
-        ajv.addFormat(f3, fs11[f3]);
+        ajv.addFormat(f3, fs12[f3]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15197,7 +15197,7 @@ var require_dist = __commonJS({
 });
 
 // src/index.ts
-import fs10 from "node:fs";
+import fs11 from "node:fs";
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 import process2 from "node:process";
@@ -16018,10 +16018,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path14) {
-  if (!path14)
+function getElementAtPath(obj, path15) {
+  if (!path15)
     return obj;
-  return path14.reduce((acc, key) => acc?.[key], obj);
+  return path15.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -16361,11 +16361,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path14, issues) {
+function prefixIssues(path15, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path14);
+    iss.path.unshift(path15);
     return iss;
   });
 }
@@ -16815,16 +16815,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path14 = []) => {
+  const processError = (error63, path15 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path14, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path14, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path14, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path14, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -16863,17 +16863,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path14 = []) => {
+  const processError = (error63, path15 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path14, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path14, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path14, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path14, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -16912,8 +16912,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path14 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path14) {
+  const path15 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path15) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -34015,13 +34015,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path14 = ref.slice(1).split("/").filter(Boolean);
-  if (path14.length === 0) {
+  const path15 = ref.slice(1).split("/").filter(Boolean);
+  if (path15.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path14[0] === defsKey) {
-    const key = path14[1] === void 0 ? void 0 : decodeJSONPointerSegment(path14[1]);
+  if (path15[0] === defsKey) {
+    const key = path15[1] === void 0 ? void 0 : decodeJSONPointerSegment(path15[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -34655,21 +34655,21 @@ function visit(schema, fnOrHandlers) {
     const h = fnOrHandlers[node2._zod.def.type];
     return h ? h(node2, rewritten) : node2;
   };
-  const cache2 = /* @__PURE__ */ new Map();
+  const cache3 = /* @__PURE__ */ new Map();
   function run(s) {
-    const cached2 = cache2.get(s);
+    const cached2 = cache3.get(s);
     if (cached2 === RESOLVING) {
       return new $ZodLazy({
         type: "lazy",
-        getter: () => cache2.get(s)
+        getter: () => cache3.get(s)
       });
     }
     if (cached2 !== void 0)
       return cached2;
-    cache2.set(s, RESOLVING);
+    cache3.set(s, RESOLVING);
     const inner = mapInner(s);
     const mapped = fn5(inner, inner !== s);
-    cache2.set(s, mapped);
+    cache3.set(s, mapped);
     return mapped;
   }
   function mapInner(s) {
@@ -40533,6 +40533,8 @@ var ConfigSchema = external_exports.object({
     invariant: external_exports.array(external_exports.string().regex(/^--/)).optional()
   }).strict().default({}),
   include: external_exports.array(external_exports.string().min(1)).optional(),
+  /** Globs of the screen files (B-043); when present they replace the detection by framework. */
+  screens: external_exports.array(external_exports.string().min(1)).min(1).optional(),
   exclude: external_exports.array(external_exports.string().min(1)).optional(),
   rules: external_exports.partialRecord(external_exports.enum(RULE_IDS), severity).optional(),
   allow: external_exports.object({ literals: external_exports.array(external_exports.string()).default([]) }).strict().optional(),
@@ -56199,10 +56201,10 @@ function createContext(root2, ws) {
         literals
       });
       const single = rule2.selector.trim().match(/^\.([\w-]+)$/);
-      const fs11 = decls.find((d) => d.prop === "font-size");
+      const fs12 = decls.find((d) => d.prop === "font-size");
       const atRule2 = rule2.parent?.name;
-      if (single && fs11 && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule2 || atRule2 === "layer")) {
-        const px2 = toPx(fs11.value);
+      if (single && fs12 && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule2 || atRule2 === "layer")) {
+        const px2 = toPx(fs12.value);
         if (px2 != null) typographyClasses.push({ className: single[1], fontSizePx: px2, source });
       }
     });
@@ -59554,14 +59556,195 @@ function guardMain() {
 }
 
 // src/score.ts
+import fs9 from "node:fs";
+import path14 from "node:path";
+
+// src/screens.ts
+var import_picomatch3 = __toESM(require_picomatch2(), 1);
 import fs8 from "node:fs";
-import path13 from "node:path";
+import path12 from "node:path";
+var NEXT_PAGE = /(^|\/)page\.[jt]sx$/;
+var SCREEN_DIRS = /^src\/(pages|routes|views|screens)\/(.+\/)?[^/]+\.[jt]sx$/;
+var NOT_A_SCREEN = /(^|\/)_[^/]*$|\.(test|spec|stories)\.[jt]sx$/;
+var ROUTER = /<Route\b|create(Browser|Hash|Memory)Router\s*\(|\buseRoutes\s*\(/;
+var EXTENSIONS = [".tsx", ".jsx", ".ts", ".js"];
+var cache2 = /* @__PURE__ */ new WeakMap();
+function projectScreens(ctx) {
+  const hit = cache2.get(ctx.project);
+  if (hit) return hit;
+  const files = listProjectFiles(ctx.project);
+  const out = /* @__PURE__ */ new Map();
+  const add = (file2, route) => {
+    const prev = out.get(file2);
+    if (!prev || route !== null && (prev.route === null || prev.route === "/" && route !== "/")) out.set(file2, { file: file2, route });
+  };
+  const globs = ctx.project.config.screens;
+  if (globs?.length) {
+    const match = (0, import_picomatch3.default)(globs, { dot: false });
+    for (const abs2 of files) {
+      const r4 = rel2(ctx.project, abs2);
+      if (match(r4)) add(r4, NEXT_PAGE.test(r4) ? nextRoute(r4) : null);
+    }
+  } else {
+    const next = ctx.project.framework === "next-app";
+    for (const abs2 of files) {
+      const r4 = rel2(ctx.project, abs2);
+      if (NEXT_PAGE.test(r4) && (next || ctx.project.framework === "unknown")) add(r4, nextRoute(r4));
+    }
+    if (!next) {
+      for (const abs2 of files) {
+        const r4 = rel2(ctx.project, abs2);
+        if (!/\.[jt]sx?$/.test(r4)) continue;
+        const source = readSource(abs2);
+        if (source && ROUTER.test(source)) for (const s of routedScreens(ctx, abs2, source)) add(s.file, s.route);
+      }
+      for (const abs2 of files) {
+        const r4 = rel2(ctx.project, abs2);
+        if (SCREEN_DIRS.test(r4) && !NOT_A_SCREEN.test(r4)) add(r4, null);
+      }
+    }
+  }
+  cache2.set(ctx.project, out);
+  return out;
+}
+function isScreen(ctx, relPath) {
+  return projectScreens(ctx).has(relPath);
+}
+function routeOf(ctx, relPath) {
+  return projectScreens(ctx).get(relPath)?.route ?? null;
+}
+function nextRoute(relPath) {
+  const parts = relPath.split("/");
+  const app = parts.lastIndexOf("app");
+  const segs = parts.slice(app + 1, -1).filter((s) => !/^\(.*\)$/.test(s) && !s.startsWith("@"));
+  return "/" + segs.join("/");
+}
+function routedScreens(ctx, abs2, source) {
+  const code2 = source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:"'`])\/\/[^\n]*/g, "$1");
+  const imports = importMap(code2);
+  const found = [];
+  const push = (target, route) => {
+    if (!target) return;
+    const file2 = resolveImport(ctx, abs2, target);
+    if (file2) found.push({ file: file2, route });
+  };
+  const byName = (name) => name ? imports.get(name) : void 0;
+  for (const m of code2.matchAll(/<Route\b/g)) {
+    const tag = tagText(code2, m.index + m[0].length);
+    if (!tag.trimEnd().endsWith("/")) continue;
+    const route = absolute(tag.match(/\bpath=\s*(?:\{\s*)?["'`]([^"'`]*)["'`]/)?.[1]);
+    const element2 = attrExpr(tag, "element");
+    const name = element2 !== null ? mountedName(element2) : tag.match(/\bComponent=\{\s*([A-Z][\w]*)\s*\}/)?.[1];
+    push(byName(name), route);
+  }
+  for (const m of code2.matchAll(/\b(element|Component|lazy)\s*:/g)) {
+    const own2 = objectAround(code2, m.index);
+    if (own2 === null || /\bchildren\s*:/.test(own2)) continue;
+    const route = absolute(own2.match(/\bpath\s*:\s*["'`]([^"'`]*)["'`]/)?.[1]);
+    const value = readExpr(code2, m.index + m[0].length);
+    if (m[1] === "element") push(byName(mountedName(value)), route);
+    else if (m[1] === "Component") push(byName(value.trim().match(/^([A-Z]\w*)/)?.[1]), route);
+    else push(value.match(/import\(\s*["'`]([^"'`]+)["'`]\s*\)/)?.[1], route);
+  }
+  return found;
+}
+function importMap(code2) {
+  const map2 = /* @__PURE__ */ new Map();
+  for (const m of code2.matchAll(/import\s+([\w$]+)?\s*,?\s*(?:\{([^}]*)\})?\s*from\s*["']([^"']+)["']/g)) {
+    if (m[1]) map2.set(m[1], m[3]);
+    for (const part of (m[2] ?? "").split(",")) {
+      const local = part.trim().split(/\s+as\s+/).pop()?.trim();
+      if (local) map2.set(local, m[3]);
+    }
+  }
+  for (const m of code2.matchAll(/(?:const|let)\s+([\w$]+)\s*=\s*(?:React\.)?lazy\(\s*\(\)\s*=>\s*import\(\s*["']([^"']+)["']/g)) map2.set(m[1], m[2]);
+  return map2;
+}
+function resolveImport(ctx, fromAbs, spec) {
+  const root2 = ctx.project.root;
+  const bases = spec.startsWith(".") ? [path12.resolve(path12.dirname(fromAbs), spec)] : spec.startsWith("@/") ? [path12.join(root2, "src", spec.slice(2)), path12.join(root2, spec.slice(2))] : [];
+  for (const b of bases) {
+    const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path12.join(b, "index" + e4))].find(
+      (p4) => fs8.existsSync(p4) && fs8.statSync(p4).isFile()
+    );
+    if (hit && !hit.includes(`${path12.sep}node_modules${path12.sep}`) && hit.startsWith(root2)) return rel2(ctx.project, hit);
+  }
+  return null;
+}
+function mountedName(expr) {
+  const self = [...expr.matchAll(/<([A-Z][\w]*)\b[^<>]*\/>/g)].pop()?.[1];
+  return self ?? expr.match(/<([A-Z][\w]*)\b/)?.[1];
+}
+function absolute(route) {
+  return route !== void 0 && route.startsWith("/") ? route : null;
+}
+function tagText(code2, from) {
+  let depth = 0;
+  for (let i = from; i < code2.length; i++) {
+    const c2 = code2[i];
+    if (c2 === "{") depth++;
+    else if (c2 === "}") depth--;
+    else if (c2 === ">" && depth === 0) return code2.slice(from, i);
+  }
+  return code2.slice(from);
+}
+function attrExpr(tag, name) {
+  const m = new RegExp(`\\b${name}=\\{`).exec(tag);
+  if (!m) return null;
+  let depth = 1;
+  for (let i = m.index + m[0].length; i < tag.length; i++) {
+    if (tag[i] === "{") depth++;
+    else if (tag[i] === "}" && --depth === 0) return tag.slice(m.index + m[0].length, i);
+  }
+  return tag.slice(m.index + m[0].length);
+}
+function readExpr(code2, from) {
+  let depth = 0;
+  for (let i = from; i < code2.length; i++) {
+    const c2 = code2[i];
+    if ("([{".includes(c2)) depth++;
+    else if (")]}".includes(c2)) {
+      if (depth === 0) return code2.slice(from, i);
+      depth--;
+    } else if (c2 === "," && depth === 0) return code2.slice(from, i);
+  }
+  return code2.slice(from);
+}
+function objectAround(code2, at) {
+  let depth = 0;
+  let start = -1;
+  for (let i = at - 1; i >= 0; i--) {
+    const c2 = code2[i];
+    if (c2 === "}" || c2 === "]" || c2 === ")") depth++;
+    else if (c2 === "{" || c2 === "[" || c2 === "(") {
+      if (depth === 0) {
+        if (c2 !== "{") return null;
+        start = i;
+        break;
+      }
+      depth--;
+    }
+  }
+  if (start < 0) return null;
+  let out = "";
+  depth = 0;
+  for (let i = start + 1; i < code2.length; i++) {
+    const c2 = code2[i];
+    if ("([{".includes(c2)) depth++;
+    else if (")]}".includes(c2)) {
+      if (depth === 0) return out;
+      depth--;
+      continue;
+    }
+    if (depth === 0) out += c2;
+  }
+  return out;
+}
 
 // src/review.ts
-import path12 from "node:path";
+import path13 from "node:path";
 var MAX_ACCENTS = 2;
 var MAX_FONT_SIZES = 4;
-var SCREEN_FILE = /(^|\/)page\.[jt]sx$/;
 var TITLE_PROP = /<[A-Z][\w.]*[^>]*\btitle=/;
 var RENDERS_LIST = /\.map\(/;
 var LOADS_DATA = /\buse[A-Z]\w*\(|\bfetch\(|\bawait\s|\buseQuery\(|\buseSWR\(/;
@@ -59599,7 +59782,7 @@ function looksLikeCard(classes, classRule) {
 function reviewUi(ctx, input2) {
   const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
   const relPath = rel2(ctx.project, abs2) || ".";
-  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path12.extname(f3)) && !f3.endsWith(".css"));
+  const files = (isDir ? walk(abs2) : [abs2]).filter((f3) => SOURCE_EXTENSIONS.has(path13.extname(f3)) && !f3.endsWith(".css"));
   if (!isDir && files.length === 0) throw new FachaError("UNSUPPORTED_FILE", `review_ui reads JSX/TSX files: ${relPath}`, { path: input2 });
   const roleOf = (token) => ctx.tokens.byName.get(token)?.role ?? "";
   const classRule = new Map(ctx.componentClasses.filter((c2) => /^\.[\w-]+$/.test(c2.selector)).map((c2) => [c2.selector.slice(1), c2]));
@@ -59639,8 +59822,8 @@ function reviewUi(ctx, input2) {
         const b = base3(c2);
         const typo = typography2.get(b);
         if (typo != null) sizes.add(typo);
-        const fs11 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
-        const ccPx = fs11 ? toPx(fs11.value) : null;
+        const fs12 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
+        const ccPx = fs12 ? toPx(fs12.value) : null;
         if (ccPx != null) sizes.add(ccPx);
         const scale = parseScaleClass(b);
         if (scale?.kind === "fontSize" && scale.value) {
@@ -59656,7 +59839,7 @@ function reviewUi(ctx, input2) {
       if (px2 != null) sizes.add(px2);
     }
     const headings = elements.filter((e4) => /^h[1-6]$/.test(e4.tag)).map((e4) => ({ level: Number(e4.tag[1]), text: e4.text, line: e4.line }));
-    const isScreen = SCREEN_FILE.test(file2);
+    const screen = isScreen(ctx, file2);
     const states = Object.fromEntries(
       Object.keys(STATE_SIGNALS).map((k4) => [k4, lineOf2(source, STATE_SIGNALS[k4])])
     );
@@ -59666,7 +59849,7 @@ function reviewUi(ctx, input2) {
       accents: [...accents].sort(),
       fontSizesPx: [...sizes].sort((a, b) => a - b),
       headings,
-      states: isScreen ? states : null
+      states: screen ? states : null
     });
     const add = (heuristic, severity3, line, evidence, why, fix) => findings.push({ id: `${file2}:${line}:${heuristic}`, heuristic, severity: severity3, file: file2, line, evidence, why, fix });
     if (primary.length > 1) {
@@ -59709,7 +59892,7 @@ function reviewUi(ctx, input2) {
         "Keep one h1 (often in the shell) and use h2 for the sections."
       );
     }
-    if (isScreen && headings.length === 0 && !TITLE_PROP.test(source)) {
+    if (screen && headings.length === 0 && !TITLE_PROP.test(source)) {
       add(
         "headings",
         "info",
@@ -59732,7 +59915,7 @@ function reviewUi(ctx, input2) {
       );
       break;
     }
-    if (isScreen && LOADS_DATA.test(source)) {
+    if (screen && LOADS_DATA.test(source)) {
       for (const [state, line] of Object.entries(states)) {
         if (line != null || state === "empty" && !RENDERS_LIST.test(source)) continue;
         add(
@@ -59764,8 +59947,7 @@ function reviewUi(ctx, input2) {
 var CATEGORIES = ["consistency", "accessibility", "responsive", "copy", "hierarchy"];
 var WEIGHTS = { consistency: 0.25, accessibility: 0.25, responsive: 0.15, copy: 0.15, hierarchy: 0.2 };
 var PENALTY = { error: 15, warning: 6, info: 2 };
-var SCREEN = /(^|\/)page\.[jt]sx$/;
-var EXTENSIONS = [".tsx", ".ts", ".jsx", ".js"];
+var EXTENSIONS2 = [".tsx", ".ts", ".jsx", ".js"];
 function categoryOf(rule2) {
   if (rule2.startsWith("a11y-") || /contrast$/.test(rule2)) return "accessibility";
   if (rule2.startsWith("responsive-")) return "responsive";
@@ -59778,10 +59960,10 @@ function importsOf(ctx, abs2, depth = 2, seen = /* @__PURE__ */ new Set()) {
   const source = readSource(abs2) ?? "";
   for (const m of source.matchAll(/(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g)) {
     const spec = m[1];
-    const bases = spec.startsWith(".") ? [path13.resolve(path13.dirname(abs2), spec)] : spec.startsWith("@/") ? [path13.join(ctx.project.root, spec.slice(2)), path13.join(ctx.project.root, "src", spec.slice(2))] : [];
+    const bases = spec.startsWith(".") ? [path14.resolve(path14.dirname(abs2), spec)] : spec.startsWith("@/") ? [path14.join(ctx.project.root, spec.slice(2)), path14.join(ctx.project.root, "src", spec.slice(2))] : [];
     for (const b of bases) {
-      const hit = [b, ...EXTENSIONS.map((e4) => b + e4), ...EXTENSIONS.map((e4) => path13.join(b, "index" + e4))].find(
-        (p4) => fs8.existsSync(p4) && fs8.statSync(p4).isFile() && !p4.includes(`${path13.sep}node_modules${path13.sep}`)
+      const hit = [b, ...EXTENSIONS2.map((e4) => b + e4), ...EXTENSIONS2.map((e4) => path14.join(b, "index" + e4))].find(
+        (p4) => fs9.existsSync(p4) && fs9.statSync(p4).isFile() && !p4.includes(`${path14.sep}node_modules${path14.sep}`)
       );
       if (hit && !seen.has(hit) && hit.startsWith(ctx.project.root)) importsOf(ctx, hit, depth - 1, seen);
     }
@@ -59838,9 +60020,9 @@ function uxScore(ctx, input2) {
   let screens;
   if (input2) {
     const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
-    screens = (isDir ? walk(abs2) : [abs2]).filter((f3) => SCREEN.test(rel2(ctx.project, f3)));
+    screens = isDir ? walk(abs2).filter((f3) => isScreen(ctx, rel2(ctx.project, f3))) : [abs2];
   } else {
-    screens = listProjectFiles(ctx.project).filter((f3) => SCREEN.test(rel2(ctx.project, f3)) && !isInLab(ctx.project, rel2(ctx.project, f3)));
+    screens = [...projectScreens(ctx).keys()].map((r4) => path14.join(ctx.project.root, r4));
   }
   const scans = /* @__PURE__ */ new Map();
   const scanOf = (abs2) => {
@@ -59864,7 +60046,7 @@ function uxScore(ctx, input2) {
     const { score: score2, categories } = scoreOf(findings);
     const worst = [...findings].sort((a, b) => PENALTY[b.severity] - PENALTY[a.severity] || (a.file < b.file ? -1 : 1) || a.line - b.line).slice(0, 5).map((f3) => ({ rule: f3.rule, severity: f3.severity, at: `${f3.file}:${f3.line}`, message: f3.message }));
     const coverage3 = coverageOf(ctx, files, usagesOf, violationsOf);
-    return { screen, score: score2, categories, coverage: coverage3, files: files.map((f3) => rel2(ctx.project, f3)).sort(), worst };
+    return { screen, route: routeOf(ctx, screen), score: score2, categories, coverage: coverage3, files: files.map((f3) => rel2(ctx.project, f3)).sort(), worst };
   });
   const average = results.length ? Math.round(results.reduce((s, r4) => s + r4.score, 0) / results.length) : null;
   const allFiles = [...new Set(screens.flatMap((abs2) => [...importsOf(ctx, abs2)]))];
@@ -60261,8 +60443,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data: data2, path: path14, errorMaps, issueData } = params;
-  const fullPath = [...path14, ...issueData.path || []];
+  const { data: data2, path: path15, errorMaps, issueData } = params;
+  const fullPath = [...path15, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -60377,11 +60559,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path14, key) {
+  constructor(parent, value, path15, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path14;
+    this._path = path15;
     this._key = key;
   }
   get path() {
@@ -63932,11 +64114,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path14) {
-  if (path14.length === 0) {
+function getDotPath(path15) {
+  if (path15.length === 0) {
     return "object root";
   }
-  return path14.reduce((acc, seg, index2) => {
+  return path15.reduce((acc, seg, index2) => {
     if (index2 === 0) {
       return String(seg);
     }
@@ -68604,7 +68786,7 @@ function proposeSystem(input2) {
 }
 
 // src/reference.ts
-import fs9 from "node:fs";
+import fs10 from "node:fs";
 var COLORED = 0.06;
 var SYSTEM_FONTS = /^(system-ui|-apple-system|blinkmacsystemfont|segoe ui|roboto|helvetica( neue)?|arial|sans-serif|serif|monospace|ui-sans-serif|ui-serif|ui-monospace|georgia|times new roman|verdana|tahoma)$/i;
 var px = (v) => {
@@ -68619,7 +68801,7 @@ function read(ctx, input2) {
   if (isDir) throw new FachaError("INVALID_INPUT", `reference must be a file: ${input2}`, { field: "reference" });
   let raw2;
   try {
-    raw2 = JSON.parse(fs9.readFileSync(abs2, "utf8"));
+    raw2 = JSON.parse(fs10.readFileSync(abs2, "utf8"));
   } catch {
     throw new FachaError("INVALID_INPUT", `reference is not valid JSON: ${input2}`, { field: "reference" });
   }
@@ -68632,7 +68814,7 @@ function projectLoads(ctx, family) {
   const name = family.toLowerCase();
   const slug = name.replace(/\s+/g, "-");
   const pkgPath = `${ctx.project.root}/package.json`;
-  const pkg = fs9.existsSync(pkgPath) ? readSource(pkgPath) ?? "" : "";
+  const pkg = fs10.existsSync(pkgPath) ? readSource(pkgPath) ?? "" : "";
   if (new RegExp(`"@fontsource(-variable)?/${slug}"`).test(pkg)) return `package.json (@fontsource/${slug})`;
   const ident2 = family.replace(/\s+/g, "_");
   for (const f3 of listProjectFiles(ctx.project)) {
@@ -68919,7 +69101,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.32.0";
+var VERSION = "0.33.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
@@ -68944,9 +69126,9 @@ var DESCRIPTIONS = {
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
 **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
 **Returns:** JSON with \`files\` (per file: \`primaryActions\`, \`accents\`, \`fontSizesPx\`, \`headings\`, \`states\`), \`findings\` (heuristic, severity, evidence, why it matters, fix), \`summary\` and \`notes\`. Read-only.`,
-  ux_score: `Scores each screen from 0 to 100 with the deterministic signals facha-ui measures, split into five categories: consistency with the design system, accessibility, responsive, microcopy, and hierarchy and states. A screen counts its own file plus the project components it imports. Each category starts at 100 and loses points per finding (error 15, warning 6, info 2). Next to the score, not part of it, the design-system coverage: components used against native elements made by hand that have a component, and colors from tokens against literals.
+  ux_score: `Scores each screen from 0 to 100 with the deterministic signals facha-ui measures, split into five categories: consistency with the design system, accessibility, responsive, microcopy, and hierarchy and states. A screen is a Next.js page.tsx, or in Vite a component the router mounts or a file of src/pages, src/routes, src/views or src/screens (the config's \`screens\` globs replace this); a file passed explicitly is always scored. It counts its own file plus the project components it imports. Each category starts at 100 and loses points per finding (error 15, warning 6, info 2). Next to the score, not part of it, the design-system coverage: components used against native elements made by hand that have a component, and colors from tokens against literals.
 **When to use:** to answer "how good is this screen?" or "which screens need the most work?", to compare a screen before and after a change, and to explain where the points go. It is a trend, not an absolute grade: compare a screen with itself over time.
-**Returns:** JSON with \`average\`, \`screens\` (per screen: \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`,
+**Returns:** JSON with \`average\`, \`screens\` (per screen: its \`route\` when known, \`score\`, \`categories\` with score and counts, the \`files\` counted and the \`worst\` findings) and \`method\`. Read-only.`,
   review_flow: `Measures signals of a user journey across screens (for example create \u2192 confirm \u2192 done), given the screen files in order: the same action named differently across steps, destructive actions without a confirmation or undo, forms without a way out, submissions without visible feedback or an error state, and steps without a clear next step. Deterministic heuristics over the code; they never block.
 **When to use:** to review a flow rather than one screen ("review the sign-up flow"), before redesigning a step, and as the measurable half of /facha-ui:flow.
 **Returns:** JSON with \`steps\` (per step: title, actions, primary actions, form, destructive actions, confirmation, feedback, error state, exit) and \`findings\` (heuristic, severity, steps, evidence, why it matters, fix). Read-only.`
@@ -69009,9 +69191,9 @@ function createServer(opts) {
       },
       annotations: { title: "Check UI", ...READ_ONLY }
     },
-    async ({ path: path14, rules, minSeverity }) => {
+    async ({ path: path15, rules, minSeverity }) => {
       try {
-        const data2 = checkUi(context(), path14, { rules, minSeverity });
+        const data2 = checkUi(context(), path15, { rules, minSeverity });
         const s = data2.summary;
         return ok(`${data2.path}: ${s.error} error(s), ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data2);
       } catch (e4) {
@@ -69102,9 +69284,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).describe("File or directory, relative to the project root or the workspace root.") },
       annotations: { title: "Review UI", ...READ_ONLY }
     },
-    async ({ path: path14 }) => {
+    async ({ path: path15 }) => {
       try {
-        const data2 = reviewUi(context(), path14);
+        const data2 = reviewUi(context(), path15);
         const s = data2.summary;
         return ok(`${data2.path}: ${s.warning} warning(s), ${s.info} info in ${s.files} file(s).`, data2);
       } catch (e4) {
@@ -69120,9 +69302,9 @@ function createServer(opts) {
       inputSchema: { path: external_exports.string().min(1).optional().describe("A screen file or a directory; by default every screen outside the lab.") },
       annotations: { title: "UX score", ...READ_ONLY }
     },
-    async ({ path: path14 }) => {
+    async ({ path: path15 }) => {
       try {
-        const data2 = uxScore(context(), path14);
+        const data2 = uxScore(context(), path15);
         return ok(`${data2.screens.length} screen(s), average ${data2.average ?? "-"}/100.`, data2);
       } catch (e4) {
         return fail(e4);
@@ -69185,7 +69367,7 @@ function score(argv) {
   const result = uxScore(ctx, argValue(argv, "--path"));
   const baselineFile = argValue(argv, "--baseline");
   const min = argValue(argv, "--min");
-  const down = baselineFile && fs10.existsSync(baselineFile) ? regressions(result, JSON.parse(fs10.readFileSync(baselineFile, "utf8"))) : [];
+  const down = baselineFile && fs11.existsSync(baselineFile) ? regressions(result, JSON.parse(fs11.readFileSync(baselineFile, "utf8"))) : [];
   const low = min ? result.screens.filter((s) => s.score < Number(min)).map((s) => ({ screen: s.screen, score: s.score })) : [];
   process.stdout.write(JSON.stringify(result, null, 2) + "\n");
   for (const r4 of down) process.stderr.write(`UX score went down: ${r4.screen} ${r4.before} \u2192 ${r4.after}

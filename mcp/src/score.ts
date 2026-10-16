@@ -4,7 +4,8 @@ import { scanFiles } from "./check.js";
 import { componentUses, inventory } from "./components.js";
 import type { Usage } from "./sources/usage.js";
 import type { Context } from "./context.js";
-import { isInLab, listProjectFiles, readSource, rel, resolveUserPath, walk } from "./project.js";
+import { readSource, rel, resolveUserPath, walk } from "./project.js";
+import { isScreen, projectScreens, routeOf } from "./screens.js";
 import { reviewUi } from "./review.js";
 import type { Severity, Violation } from "./types.js";
 
@@ -20,7 +21,6 @@ export type Category = (typeof CATEGORIES)[number];
 
 const WEIGHTS: Record<Category, number> = { consistency: 0.25, accessibility: 0.25, responsive: 0.15, copy: 0.15, hierarchy: 0.2 };
 const PENALTY: Record<Severity, number> = { error: 15, warning: 6, info: 2 };
-const SCREEN = /(^|\/)page\.[jt]sx$/;
 const EXTENSIONS = [".tsx", ".ts", ".jsx", ".js"];
 
 export function categoryOf(rule: string): Category {
@@ -121,9 +121,10 @@ export function uxScore(ctx: Context, input?: string) {
   let screens: string[];
   if (input) {
     const { abs, isDir } = resolveUserPath(ctx.project, input);
-    screens = (isDir ? walk(abs) : [abs]).filter((f) => SCREEN.test(rel(ctx.project, f)));
+    // A file passed explicitly is always measured; in a directory, its screens.
+    screens = isDir ? walk(abs).filter((f) => isScreen(ctx, rel(ctx.project, f))) : [abs];
   } else {
-    screens = listProjectFiles(ctx.project).filter((f) => SCREEN.test(rel(ctx.project, f)) && !isInLab(ctx.project, rel(ctx.project, f)));
+    screens = [...projectScreens(ctx).keys()].map((r) => path.join(ctx.project.root, r));
   }
 
   const scans = new Map<string, ReturnType<typeof scanFiles>>();
@@ -152,7 +153,7 @@ export function uxScore(ctx: Context, input?: string) {
       .slice(0, 5)
       .map((f) => ({ rule: f.rule, severity: f.severity, at: `${f.file}:${f.line}`, message: f.message }));
     const coverage = coverageOf(ctx, files, usagesOf, violationsOf);
-    return { screen, score, categories, coverage, files: files.map((f) => rel(ctx.project, f)).sort(), worst };
+    return { screen, route: routeOf(ctx, screen), score, categories, coverage, files: files.map((f) => rel(ctx.project, f)).sort(), worst };
   });
 
   const average = results.length ? Math.round(results.reduce((s, r) => s + r.score, 0) / results.length) : null;

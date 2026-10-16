@@ -1,6 +1,6 @@
 ---
 name: center
-description: Opens the facha-ui center, one page in the lab to use facha-ui without remembering commands - how the project is doing, its screens from worst to best with a button to propose variants (with a goal and a reference capture dropped in), the variants in progress and the design system - and listens to what the developer asks there. It never creates or changes tokens or applies a variant: for that, the center shows the exact command for the developer to paste. Use when the developer asks to open facha-ui or its center, also in plain words - "abrí facha-ui", "abrí el centro", "quiero ver todo en una pantalla", "mostrame facha-ui".
+description: Opens the facha-ui center, one page in the lab to use facha-ui without remembering commands - how the project is doing, its screens from worst to best with a button to propose variants (with a goal and a reference capture dropped in), the variants in progress and the design system - and listens to what the developer asks there. It never creates or changes tokens or applies a variant - for that, the center shows the exact command for the developer to paste. Use when the developer asks to open facha-ui or its center, also in plain words - "abrí facha-ui", "abrí el centro", "quiero ver todo en una pantalla", "mostrame facha-ui".
 argument-hint: "[stop]"
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
@@ -66,9 +66,10 @@ Write `.facha-ui/live/center.json` with the Write tool, from C1 and nothing else
 }
 ```
 
-If `ux_score` returns no screens (a Vite app: it only knows `page.tsx`), list the screen files under
-`src/pages/` or `src/routes/` (or the components the router renders) with `score: null` and `worst` from
-`check_ui` on each file (its error first, else its warning, else its info).
+Each screen comes from `ux_score.screens`: `file` is its `screen`, `route` its `route`, `score` its
+`score` and `worst` its first `worst`, with the message in the developer's language. In Vite, those are
+the components the router mounts and the files of `src/pages/`, `src/routes/`, `src/views/` and
+`src/screens/`.
 
 Then the palette base for the Diseño tab of every variant's panel: `live.md` L1 step 5.
 

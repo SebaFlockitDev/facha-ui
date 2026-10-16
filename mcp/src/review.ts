@@ -2,6 +2,7 @@ import path from "node:path";
 import { extractFile, toPx, type Context } from "./context.js";
 import { parseScaleClass } from "./project-rules.js";
 import { readSource, rel, resolveUserPath, SOURCE_EXTENSIONS, walk } from "./project.js";
+import { isScreen } from "./screens.js";
 import type { ElementUsage, Usage } from "./sources/usage.js";
 import { FachaError, type Severity } from "./types.js";
 
@@ -24,7 +25,6 @@ export interface ReviewFinding {
 
 const MAX_ACCENTS = 2;
 const MAX_FONT_SIZES = 4;
-const SCREEN_FILE = /(^|\/)page\.[jt]sx$/;
 /** A shell or layout component that receives the screen's title (<AppShell title="…">). */
 const TITLE_PROP = /<[A-Z][\w.]*[^>]*\btitle=/;
 const RENDERS_LIST = /\.map\(/;
@@ -149,7 +149,7 @@ export function reviewUi(ctx: Context, input: string) {
       .filter((e) => /^h[1-6]$/.test(e.tag))
       .map((e) => ({ level: Number(e.tag[1]), text: e.text, line: e.line }));
 
-    const isScreen = SCREEN_FILE.test(file);
+    const screen = isScreen(ctx, file);
     const states = Object.fromEntries(
       (Object.keys(STATE_SIGNALS) as (keyof typeof STATE_SIGNALS)[]).map((k) => [k, lineOf(source, STATE_SIGNALS[k])]),
     ) as Record<keyof typeof STATE_SIGNALS, number | null>;
@@ -160,7 +160,7 @@ export function reviewUi(ctx: Context, input: string) {
       accents: [...accents].sort(),
       fontSizesPx: [...sizes].sort((a, b) => a - b),
       headings,
-      states: isScreen ? states : null,
+      states: screen ? states : null,
     });
 
     const add = (heuristic: ReviewFinding["heuristic"], severity: Severity, line: number, evidence: string, why: string, fix: string) =>
@@ -186,7 +186,7 @@ export function reviewUi(ctx: Context, input: string) {
         "Two main titles split the page's purpose for readers and screen readers.",
         "Keep one h1 (often in the shell) and use h2 for the sections.");
     }
-    if (isScreen && headings.length === 0 && !TITLE_PROP.test(source)) {
+    if (screen && headings.length === 0 && !TITLE_PROP.test(source)) {
       add("headings", "info", 1, "no heading in the screen",
         "Sections without headings are hard to scan and to navigate with a screen reader.",
         "Give each section a heading (h2) with the project's section-title class.");
@@ -200,7 +200,7 @@ export function reviewUi(ctx: Context, input: string) {
         "Check that the inner boundary groups something on its own (a callout, a selected item); if not, drop its border or shadow and separate with space or a subtle background.");
       break;
     }
-    if (isScreen && LOADS_DATA.test(source)) {
+    if (screen && LOADS_DATA.test(source)) {
       for (const [state, line] of Object.entries(states)) {
         if (line != null || (state === "empty" && !RENDERS_LIST.test(source))) continue;
         add("states", "info", 1, `no ${state} state found`,

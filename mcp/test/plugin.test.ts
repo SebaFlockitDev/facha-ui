@@ -56,6 +56,31 @@ describe("MCP-3 · committed bundle", () => {
   });
 });
 
+describe("frontmatter is valid YAML", () => {
+  // The CLI drops every field of a frontmatter that does not parse (B-042 shipped one): a plain
+  // value cannot hold ": " or " #", nor start with a YAML indicator; a quoted one must close.
+  const files = [
+    ...fs.readdirSync(path.join(REPO, "skills")).filter((d) => !d.startsWith("_")).map((d) => path.join(REPO, "skills", d, "SKILL.md")),
+    ...fs.readdirSync(path.join(REPO, "agents")).map((f) => path.join(REPO, "agents", f)),
+  ].filter((f) => fs.existsSync(f));
+
+  it.each(files.map((f) => [path.relative(REPO, f).split(path.sep).join("/"), f]))("%s", (_, file) => {
+    const text = fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+    const frontmatter = text.match(/^---\n([\s\S]*?)\n---/)?.[1];
+    expect(frontmatter, "frontmatter").toBeTruthy();
+    for (const line of frontmatter!.split("\n").filter((l) => /^[\w-]+:/.test(l))) {
+      const value = line.slice(line.indexOf(":") + 1).trim();
+      if (!value) continue;
+      if (value.startsWith('"')) expect(value, line).toMatch(/^"(?:[^"\\]|\\.)*"$/);
+      else if (value.startsWith("'")) expect(value, line).toMatch(/^'(?:[^']|'')*'$/);
+      else {
+        expect(value, line).not.toMatch(/: |\s#/);
+        expect(value, line).not.toMatch(/^[[\]{}&*!|>%@`,?-]\s?/);
+      }
+    }
+  });
+});
+
 describe("help skill", () => {
   it("is developer-only and pre-approves no tools", () => {
     const text = fs.readFileSync(path.join(REPO, "skills", "help", "SKILL.md"), "utf8");
