@@ -211,6 +211,11 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       ],
     },
   ],
+  "components": {
+    "components": [],
+    "dir": null,
+    "source": null,
+  },
   "configSource": "facha-ui.config.json",
   "contrast": {
     "bySurface": {
@@ -654,6 +659,11 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "id": "a11y-gradient-text",
       "severity": "warning",
       "summary": "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18).",
+    },
+    {
+      "id": "ds-component-reuse",
+      "severity": "warning",
+      "summary": "A native element (button, input, select, textarea, label, table…) made by hand where the project has it as a component in its UI folder (B-030, ux:nielsen-4). Not reported inside the UI folder or for input type=hidden.",
     },
     {
       "id": "a11y-motion",

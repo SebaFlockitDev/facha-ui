@@ -1,4 +1,5 @@
 import { checkA11y, removesFocusOutline } from "./a11y.js";
+import { componentFor, importLine } from "./components.js";
 import { checkCopy } from "./copy.js";
 import { checkLook } from "./look.js";
 import { checkResponsive, responsiveDecl } from "./responsive.js";
@@ -103,6 +104,7 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
   { id: "copy-term", severity: "warning", summary: "A word the team decided not to use (copy.terms in the config), with the product's word for it." },
   { id: "ux-gray-on-color", severity: "warning", summary: "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029)." },
   { id: "a11y-gradient-text", severity: "warning", summary: "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18)." },
+  { id: "ds-component-reuse", severity: "warning", summary: "A native element (button, input, select, textarea, label, table…) made by hand where the project has it as a component in its UI folder (B-030, ux:nielsen-4). Not reported inside the UI folder or for input type=hidden." },
   { id: "a11y-motion", severity: "warning", summary: "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3)." },
   { id: "copy-voice", severity: "warning", summary: "A form of address that breaks the product's voice (copy.voice: vos, tú or usted), e.g. \"puedes\" in a product that says \"podés\"." },
 ];
@@ -137,6 +139,7 @@ const MESSAGES: Record<RuleId, string> = {
   "ux-gray-on-color": "Gray text on a colored background.",
   "a11y-gradient-text": "Text that misses the minimum contrast on part of its gradient.",
   "a11y-motion": "Animation without a reduced-motion alternative.",
+  "ds-component-reuse": "Made by hand: the project has this as a component.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -401,6 +404,21 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
   checkA11y(usages, (rule, base, loc, found, message, fix) =>
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
   );
+
+  // A native element the system already has as a component (B-030).
+  for (const u of usages) {
+    if (u.kind !== "element") continue;
+    const c = componentFor(ctx, u);
+    if (!c) continue;
+    const line = importLine(ctx, c, u.file);
+    push("ds-component-reuse", "warning", u, `<${u.tag}>`, null, "jsx-element", {
+      match: "exact",
+      kind: "component",
+      value: `<${c.name}>`,
+      detail: `Use the project's ${c.name} (${c.file}:${c.line}): ${line} It keeps focus, states, sizes and variants the same as the rest of the UI.`,
+      source: `${c.file}:${c.line}`,
+    }, [], false, `<${u.tag}> made by hand: the project has ${c.name} (${line})`);
+  }
 
   return { violations, unresolved };
 }

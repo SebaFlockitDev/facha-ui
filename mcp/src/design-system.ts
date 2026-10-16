@@ -14,9 +14,10 @@ import { aliasOf, tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
 import { contrastMatrix, namedBackgrounds } from "./contrast.js";
+import { inventory } from "./components.js";
 
 export const SECTIONS = [
-  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile", "contrast",
+  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile", "contrast", "components",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -303,6 +304,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
     if (want.has("health")) out.health = health(ctx, scan.usages);
     if (want.has("contrast")) out.contrast = contrastMatrix(ctx, scan.usages);
   }
+  if (want.has("components")) out.components = inventory(ctx);
   if (want.has("rules")) out.rules = rulesInfo(ctx);
   if (want.has("guidelines")) {
     out.guidelines = ctx.project.config.guidelines.map((text, i) => ({ id: `g${i + 1}`, text }));
