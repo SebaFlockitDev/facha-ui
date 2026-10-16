@@ -64,7 +64,7 @@ interface Target {
 interface PaletteBase {
   anchor: string;
   themes: { name: string; selector: string }[];
-  tokens: { name: string; role?: string; values: Record<string, string> }[];
+  tokens: { name: string; role?: string; format?: "hsl-channels"; values: Record<string, string> }[];
   /** Hand-written colors of the project (design-system gaps), to warn about conflicts. */
   references: { where: string; values: string[] }[];
 }
@@ -218,7 +218,8 @@ function readPalette(root: string): PaletteBase | null {
     for (const [theme, value] of Object.entries(t.values as Record<string, unknown>)) {
       if (themeNames.has(theme) && typeof value === "string" && VALUE.test(value)) values[theme] = value;
     }
-    if (Object.keys(values).length) tokens.push({ name: t.name, role: oneLine(t.role, 40), values });
+    // shadcn/ui's bare HSL channels keep their mark, so the panel reads and writes them as such (B-038).
+    if (Object.keys(values).length) tokens.push({ name: t.name, role: oneLine(t.role, 40), ...(t.format === "hsl-channels" ? { format: "hsl-channels" } : {}), values });
   }
   if (!themes.length || !tokens.some((t) => t.name === raw.anchor)) return null;
   const references: PaletteBase["references"] = [];
