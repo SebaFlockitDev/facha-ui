@@ -1,6 +1,6 @@
 # B-004 · Regla `a11y-color-only`
 
-> **Estado:** en curso · **Rama:** `feat/color-only` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/color-only` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md` ·
 > **Última actualización:** 2026-10-16
 
@@ -69,28 +69,37 @@ o un ícono con nombre, junto al color. Fuente: WCAG 1.4.1, `ux:wcag-1.4.1`.
 
 ## Criterios de aceptación
 
-- [ ] Positivos y negativos en un fixture.
-- [ ] 0 falsos positivos en los fixtures existentes.
-- [ ] `ux-principles.md` pasa `ux:wcag-1.4.1` a "verificado por el guardián".
+- [x] Positivos y negativos en un fixture.
+- [x] 0 falsos positivos en los fixtures existentes.
+- [x] `ux-principles.md` pasa `ux:wcag-1.4.1` a "verificado por el guardián".
 
 ## Tareas
 
-- [ ] 1. Datos del JSX (`siblingText`, `graphic`, `classVars`)
-- [ ] 2. Regla `a11y-color-only`, fixture y tests
-- [ ] 3. Principios, SPEC, guía, CHANGELOG
-- [ ] 4. Prueba real
+- [x] 1. Datos del JSX (`siblingText`, `graphic`, `classVars`) · `2245d29`
+- [x] 2. Regla `a11y-color-only`, fixture y tests · `a677f36`
+- [x] 3. Principios, SPEC, guía, CHANGELOG · `b679840`
+- [x] 4. Prueba real
 - [ ] 5. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **La regla vive en su propio archivo (`color-only.ts`)**, como `look.ts`: necesita el contexto (los
+   roles de los tokens), que `a11y.ts` no recibe.
+2. **Un elemento con `{...props}` no avisa:** puede recibir un `aria-label` que no se ve.
 
 ## Registro
 
 - **2026-10-16:** relevado; prototipados los tres datos del JSX (sin commit); spec escrito y plan
   presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 3; 361 tests, typecheck y `claude plugin validate` en verde.
+- **2026-10-16, prueba real:** `audit_project` en las dos apps de prueba y en `next-visual`,
+  `shadcn-tw4`, `next-ux` y `vite-react`: los mismos totales que la 0.27.0 (la tabla de pedidos de la
+  app de Vite muestra el estado con texto en el chip, y no avisa). En el fixture, los tres positivos y
+  ninguno de los ocho negativos.
 
 ## Cómo retomar
 
-En curso en `feat/color-only`: seguir por la primera tarea sin marcar.
+Todo hecho y probado en `feat/color-only`; falta el release (tarea 5), solo cuando quien mantiene
+el repo lo pida: versión 0.28.0 con el flujo de `CLAUDE.md`; B-004 a **Hecho** y el primero de
+**Siguiente** a **Ahora**.
