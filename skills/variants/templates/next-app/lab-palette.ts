@@ -502,6 +502,8 @@ export interface Pair {
   ratio: number;
   min: number;
   kind: "text" | "brand" | "border" | "onBrand";
+  /** The text is lighter than its background: the way out is a lighter text, not a darker one. */
+  lighter: boolean;
 }
 
 /** The text drawn on the brand (buttons): --on-primary, --color-on-primary, --primary-foreground, or the only on-accent token. */
@@ -529,7 +531,7 @@ export function contrastPairs(raw: PaletteBase, written: TokenValues, level: "AA
   const pair = (theme: string, fgName: string, bgName: string, min: number, kind: Pair["kind"]) => {
     const fg = plainColor(valueOf(fgName, theme));
     const bg = plainColor(valueOf(bgName, theme));
-    if (fg && bg) out.push({ theme, fg: fgName, bg: bgName, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min, kind });
+    if (fg && bg) out.push({ theme, fg: fgName, bg: bgName, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min, kind, lighter: luminance(fg) > luminance(bg) });
   };
   for (const theme of base.themes.map((t) => t.name)) {
     for (const f of fgs) for (const s of surfaces) pair(theme, f.name, s, f.min, f.kind);
@@ -611,7 +613,12 @@ export function designConflicts(raw: PaletteBase, choice: DesignChoice | null, s
   for (const pairs of [...broken.values()].slice(0, 4)) {
     const p = pairs.reduce((low, x) => (x.ratio < low.ratio ? x : low));
     const more = pairs.length > 1 ? `; también sobre ${pairs.length - 1} ${pairs.length > 2 ? "superficies más" : "superficie más"}` : "";
-    out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1)${more}.`, fix: FIX[p.kind] });
+    // Text on the brand: darker text goes darker or lighter, by where it sits against the brand.
+    const fix =
+      p.kind === "onBrand"
+        ? `el texto de los botones necesita ${WCAG_MIN.AA}:1 sobre la marca (WCAG 1.4.3): ${p.lighter ? "un texto más claro (blanco) sobre ella, o un tono más oscuro de la marca" : "un texto más oscuro sobre ella, o un tono más claro de la marca"}.`
+        : FIX[p.kind];
+    out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1)${more}.`, fix });
   }
   return out;
 }

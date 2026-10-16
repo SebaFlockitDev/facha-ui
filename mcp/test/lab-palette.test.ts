@@ -279,7 +279,9 @@ describe("lab-palette · oklch() and HSL, the formats of shadcn/ui (B-038)", () 
     const onBrand = contrastPairs(tw4, v).filter((p) => p.kind === "onBrand");
     expect(onBrand.map((p) => p.theme)).toEqual(["light", "dark"]);
     // Dark: the brand was near white with near-black text on it; on indigo that text no longer reads.
-    expect(designConflicts(tw4, indigo, []).some((c) => c.text.includes("--primary-foreground sobre --primary"))).toBe(true);
+    const dark = designConflicts(tw4, indigo, []).find((c) => c.text.startsWith("En dark, --primary-foreground sobre --primary"));
+    // …and the way out is a lighter text: the dark text sits under the brand, not over it.
+    expect(dark?.fix).toContain("un texto más claro (blanco)");
     // Graphite keeps the brand gray: it is "the brand almost without color".
     expect(computeDesign(tw4, PRESETS.find((p) => p.id === "graphite")!)["--primary"]).toBeUndefined();
   });
