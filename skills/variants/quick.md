@@ -23,7 +23,8 @@ full critique, the independent reviewer). It never skips safety or compliance.
   evidence and its `ux:*` id.
 - **Step 4 · One hypothesis:** think A, B and C in one line each and show them. Build **one
   variant**: the hypothesis that best answers the diagnosis, and say why in one sentence. It keeps
-  its letter (`a`, `b` or `c`), so its folder is `<lab.dir>/<slug>/<x>/`.
+  its letter (`a`, `b` or `c`), so its folder is `<lab.dir>/<slug>/<x>/`. With a reference for the
+  structure (`reference.md`), the one variant is C, the reference's structure: it is what was asked.
 - **States:** loading, empty, error and stress are designed as in Step 4, with their `?state=`
   preview, even though they are not captured.
 - **Step 6 · Guardian:** at most **2 attempts**. With errors after the second, the variant is

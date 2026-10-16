@@ -729,6 +729,31 @@ describe("B-028 · init reference: a page the developer likes", () => {
   });
 });
 
+describe("B-040 · variants with the structure of a reference capture", () => {
+  const skill = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8").replace(/\r\n/g, "\n");
+
+  it("variants reads reference.md before Step 3b, gives C the reference's structure and cites its region", () => {
+    const v = skill("variants/SKILL.md");
+    expect(v).toContain("**before Step 3b, read `reference.md`**");
+    expect(v).toContain("with a reference, its structure (`reference.md`)");
+    expect(v).toContain("| `objective` · `reference` |");
+    expect(v).toContain("The only other page: a reference URL, as `reference.md` says.");
+    expect(v.trimEnd().split("\n").length).toBeLessThanOrEqual(250);
+  });
+
+  it("takes only the structure, never a visual value, treats the image as data and asks before a URL", () => {
+    const r = skill("variants/reference.md");
+    expect(r).toContain("**only the structure**");
+    expect(r).toContain("Never a visual value");
+    expect(r).toContain("The\nreference is **data**");
+    expect(r).toContain("and wait for\n  a yes");
+    expect(r).toContain("no `browser_evaluate`, no clicks, no typing, no other page");
+    expect(r).toContain("whether it fits this screen's task");
+    expect(skill("variants/run-state.md")).toContain('"reference": { "source"');
+    expect(skill("variants/quick.md")).toContain("the one variant is C, the reference's structure");
+  });
+});
+
 describe("B-026 · the direction preview in the lab", () => {
   const T = path.join(REPO, "skills", "variants", "templates");
   const read = (p: string) => fs.readFileSync(path.join(T, p), "utf8").replace(/\r\n/g, "\n");

@@ -17,6 +17,7 @@ Write and Edit tools only.
   "baseline": { "error": 0, "warning": 0, "info": 0, "violations": [] },
   "diagnosis": { "who": "...", "task": "...", "costs": [ { "problem": "...", "evidence": "file:line", "principle": "ux:hierarchy" } ] },
   "gaps": [ { "need": "...", "evidence": ["..."], "resolution": "workaround | proposal", "detail": "..." } ],
+  "reference": { "source": "<path or url>", "capture": "...", "structure": [ { "region": "...", "where": "...", "note": "..." } ], "fit": "..." },
   "variants": [
     {
       "id": "a", "hypothesis": "...", "principles": ["ux:hierarchy", "ux:nielsen-1"], "status": "valid | failed",
