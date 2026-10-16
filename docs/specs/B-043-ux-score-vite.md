@@ -1,6 +1,6 @@
 # B-043 · `ux_score` con pantallas de Vite
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/ux-score-vite` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.33.0) · **Rama:** `feat/ux-score-vite` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** prueba real de B-042 (el centro de una app Vite salía sin pantallas) · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -73,7 +73,7 @@ Vite es uno de los dos frameworks de laboratorio soportados (SPEC §2.b.4).
 - [x] 2. `ux_score` y `review_ui` con la noción nueva; fixture `vite-router`; tests
 - [x] 3. El centro (C3) y las docs
 - [x] 4. Prueba real (el centro de la app Vite de prueba, con puntajes)
-- [ ] 5. Release
+- [x] 5. Release 0.33.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -100,6 +100,9 @@ Vite es uno de los dos frameworks de laboratorio soportados (SPEC §2.b.4).
 - **2026-10-16 · prueba real:** `ux_score` sobre las tres apps Vite de prueba: `src/pages/Orders.tsx` en `/orders`
   con 98, 98 y 95 (antes, `screens: []`). El centro abierto en la primera mostró el 98 sin recargar.
 
+- **2026-10-16 · release 0.33.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.43; B-043 a Hecho.
+
 ## Cómo retomar
 
-En `feat/ux-score-vite`, tareas 1 a 4 hechas. Falta la 5 (release 0.33.0, que lleva también el arreglo de `center`), solo cuando el desarrollador lo pida.
+Terminado en 0.33.0. Sin ideas nuevas.

@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-043 · `ux_score` con pantallas de Vite
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** `ux_score` y `review_ui` solo reconocen pantallas `page.tsx` (Next): en Vite el centro sale sin puntajes, el puntaje de CI no protege nada y `review_ui` no pide título ni estados a las pantallas (`ux:states`).
-- **Qué:** reconocer las pantallas de Vite por lo que monta el router y por carpetas de convención (`src/pages/`, `src/routes/`, `src/views/`, `src/screens/`), con la opción `screens` de la config para reemplazarlas; un archivo pasado explícitamente siempre se mide.
-- **Criterios de aceptación:** `ux_score` mide las pantallas de una app Vite con su ruta; el modo `score` de CI falla si una baja; `review_ui` aplica sus controles de pantalla en Vite; Next no cambia.
-- **Spec:** [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md)
-- **Referencias:** `mcp/src/score.ts` (`SCREEN`), `mcp/src/review.ts` (`SCREEN_FILE`)
-
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -165,6 +156,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.33.0:** B-043, `ux_score` y `review_ui` con pantallas de Vite (lo que monta el router, con su ruta, y las carpetas por convención; la opción `screens` de la config), y el arreglo del frontmatter de `center`; spec en [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md).
 - **0.32.0:** B-042, el centro facha-ui (`/facha-ui:center`): el proyecto y sus pantallas en una página, variantes con un objetivo y una captura subida, y el comando exacto para `init`; spec en [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md).
 - **0.31.0:** B-040, `variants` con una captura de referencia para la estructura (la variante C la adapta y cita sus regiones); spec en [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md).
 - **0.30.0:** B-028, `/facha-ui:init reference <url|image>`: un design system a partir de una página que te gusta, con el informe de lo que no pasaba el contraste; spec en [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).

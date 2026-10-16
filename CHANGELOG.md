@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-16
+
 ### Added
 
 - **El puntaje de UX en apps Vite:** `ux_score` (y el centro, y el modo `score` de CI) reconoce las pantallas de Vite: las que monta el router, con su ruta, y las de `src/pages/`, `src/routes/`, `src/views/` y `src/screens/`. Si no acierta, la opción `screens` de la config dice cuáles son. Antes, en Vite no medía ninguna.
@@ -381,7 +383,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.32.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.33.0...HEAD
+[0.33.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.30.0...v0.31.0
 [0.30.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.29.0...v0.30.0
