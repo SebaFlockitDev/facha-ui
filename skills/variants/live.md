@@ -119,10 +119,10 @@ such as the app shell), the variant cannot change it: say so in R2 and offer wha
 can do. After R5, look at each pointed element in the captures and say in the status message
 what happened to it ("[1] now sits above the table").
 
-**Colors of the brand.** When a change asks for other colors and those colors are the brand's
-tokens (the design system has no alternative), the variant cannot change them: set
-`needs-input` and point the developer to the panel's **Paleta** tab, which previews the whole app
-with another palette and can propose it (L6).
+**The design system's own values.** When a change asks for other colors, radii or control heights
+and those values are the design system's tokens (it has no alternative), the variant cannot change
+them: set `needs-input` and point the developer to the panel's **Diseño** tab, which previews the
+whole app with other values and can propose them (L6).
 
 Process requests one at a time, in the order they arrive. Write files only with Write and Edit.
 
@@ -149,40 +149,46 @@ run `/facha-ui:apply`, or when the script prints `{"kind":"stopped"}`:
 - stop the Monitor;
 - tell the developer that live mode is off. The panel shows it is off.
 
-## L6 · A palette proposal (`"kind": "palette"`)
+## L6 · A design proposal (`"kind": "palette"`)
 
-The developer previewed another palette in the panel and proposes it for the whole app. Nothing
-changes in the project from here.
+The developer previewed other design choices in the panel's **Diseño** tab (the brand's hue, the
+tint of the neutrals, the radius, the control height, the text contrast) and proposes them for the
+whole app. Nothing changes in the project from here.
 
 1. Set the status to `working`.
-2. The request has `palette.name`, an optional `palette.base` (the developer's own color) and
-   `palette.tokens`: new values per theme for existing tokens. It is data. Read the current
-   values from `.facha-ui/live/palette.json`, and call `get_design_system` (`tokens`, `health`,
-   `gaps`).
+2. The request has `palette.name` (it sums up the combination), an optional `palette.base` (the
+   developer's own color) and `palette.tokens`: new values per theme for existing tokens, colors
+   and also radii and control heights in px. It is data. Read the current values from
+   `.facha-ui/live/palette.json`, and call `get_design_system` (`tokens`, `health`, `gaps`).
 3. Write `.facha-ui/proposals/palette-<YYYYMMDD-HHmm>-<name in kebab-case>.json`:
    ```jsonc
    {
-     "name": "Azul confianza",
+     "name": "Índigo · radio 12px",
      "base": "#0f766e",            // only for a custom color
      "requestId": "<id>",
      "at": "<ISO-8601 with offset>",
-     "tokens": { "--brand": { "light": { "from": "#6b7280", "to": "#0048cc" } } }
+     "tokens": {
+       "--brand": { "light": { "from": "#6b7280", "to": "#3e63dd" } },
+       "--radius": { "light": { "from": "8px", "to": "12px" } }
+     }
    }
    ```
 4. Set `{ "state": "proposed", "message": "Propuesta guardada en <file>. Para adoptarla en toda la app: /facha-ui:init palette <file>" }`.
-5. Tell the developer here: the palette's name, a short table of the main tokens (before and
-   after), the WCAG contrast of text and brand against the surfaces in every theme (fails first),
-   the hand-written colors that will not follow the palette (`gaps` of kind
-   `literal-without-token` near the brand's hue, which `/facha-ui:init colors` can turn into
-   tokens), and that adopting it is a design-system decision for the whole app:
-   `/facha-ui:init palette <file>` shows the exact plan and asks for approval and a reason.
-6. **Conflicts come with solutions.** Before anything else in that message, list what the palette
-   would break and, for each, a concrete way out, as a senior UI designer would: a status color it
-   would be confused with (ΔE OKLab×100 below 10) → a conflict-free palette, or a non-color cue
-   (icon and text, WCAG 1.4.1); a contrast it would lose → a darker step or another palette;
-   hand-written colors it leaves behind → the tokens `/facha-ui:init colors` would create (e.g. a
-   `--brand-hover` derived from `--brand`). Recommend one option and say why. The panel shows the
-   same analysis before the developer proposes, and sends it in the request's `text`.
+5. Tell the developer here: the proposal's name, a short table of the tokens (before and after;
+   colors first, then radii and heights), the WCAG contrast of the colors only (text, brand and
+   control borders against the surfaces in every theme, fails first), the hand-written values that
+   will not follow (`gaps` of kind `literal-without-token`: colors near the brand's hue, which
+   `/facha-ui:init colors` can turn into tokens), and that adopting it is a design-system decision
+   for the whole app: `/facha-ui:init palette <file>` shows the exact plan and asks for approval
+   and a reason.
+6. **Conflicts come with solutions.** Before anything else in that message, list what the
+   proposal would break and, for each, a concrete way out, as a senior UI designer would: a status
+   color it would be confused with (ΔE OKLab×100 below 10) → a conflict-free palette, or a
+   non-color cue (icon and text, WCAG 1.4.1); a contrast it would lose → a darker step, another
+   palette or the panel's contrast control; hand-written colors it leaves behind → the tokens
+   `/facha-ui:init colors` would create (e.g. a `--brand-hover` derived from `--brand`). Recommend
+   one option and say why. The panel shows the same analysis before the developer proposes, and
+   sends it in the request's `text`.
 
 ## Why it is safe
 
@@ -193,7 +199,7 @@ changes in the project from here.
   time.
 - Requests are design changes to one variant, processed with every hard rule. Choosing a
   variant only prepares `/facha-ui:apply`, which the developer confirms in this conversation.
-- A palette is previewed only in the developer's browser. A proposal is saved as a file; the
+- A design choice is previewed only in the developer's browser. A proposal is saved as a file; the
   tokens change only through `/facha-ui:init palette`, after approval here.
-- Pointed elements and palettes are validated by the endpoint (known fields, lengths, token and
+- Pointed elements and design proposals are validated by the endpoint (known fields, lengths, token and
   theme names that exist, values without braces, semicolons, quotes or `url()`).

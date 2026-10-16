@@ -697,6 +697,15 @@ describe("B-031 · the panel's design logic travels with the panel", () => {
   it("apply removes lab-palette.ts with the rest of the scaffold, in both labs", () => {
     expect(skill("apply/SKILL.md").match(/`lab-palette\.ts`/g)).toHaveLength(2);
   });
+
+  it("init's palette mode lives in palette.md and takes radii and control heights, with contrast only for colors", () => {
+    expect(skill("init/SKILL.md")).toContain("`palette <file>` (`palette.md`)");
+    const palette = skill("init/palette.md");
+    for (const step of ["## P1 ·", "## P2 ·", "## P3 ·", "## P4 ·", "## P5 ·"]) expect(palette, step).toContain(step);
+    expect(palette).toContain("computed only for the color tokens");
+    expect(palette).toContain("WCAG 2.5.8");
+    expect(skill("variants/live.md")).toContain("the WCAG contrast of the colors only");
+  });
 });
 
 describe("B-026 · the direction preview in the lab", () => {
