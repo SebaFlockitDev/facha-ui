@@ -27,6 +27,15 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
+### B-040 · Variantes con la estructura de una captura de referencia
+- **Estado:** en spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** B-028 toma el estilo de una referencia para el design system; la otra mitad de "quiero algo como esta página" es la estructura, que hoy `variants` solo recibe en palabras.
+- **Qué:** `variants` acepta una captura (o una URL, con permiso) como referencia: lee solo su estructura (regiones, orden, jerarquía, patrones), la variante C la adapta a la pantalla, y cada decisión cita la región de la captura. Ningún valor visual sale de la imagen.
+- **Criterios de aceptación:** una corrida con captura da una C con su estructura y citas a la captura; `check_ui` en 0 errores; si la estructura no sirve para la tarea, se dice y se adapta.
+- **Spec:** [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md)
+- **Referencias:** [spec de B-028](docs/specs/B-028-de-referencias-a-tokens.md), `skills/variants/SKILL.md`
+
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
