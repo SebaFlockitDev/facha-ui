@@ -1,6 +1,6 @@
 # B-004 · Regla `a11y-color-only`
 
-> **Estado:** en spec · **Rama:** `feat/color-only` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/color-only` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md` ·
 > **Última actualización:** 2026-10-16
 
@@ -20,7 +20,7 @@ revisión (`ux-principles.md`: "Not yet a guardian rule").
   al lado (`<span class="dot" /> Pagado`), ni un ícono adentro, ni qué variable interpola su clase
   (`dot-${order.status}`).
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Lo que la regla necesita del JSX
 
@@ -57,7 +57,7 @@ o un ícono con nombre, junto al color. Fuente: WCAG 1.4.1, `ux:wcag-1.4.1`.
   `aria-label`, con `aria-hidden`, un botón).
 - 0 falsos positivos en los fixtures existentes y en las apps de prueba.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las tres recomendadas)
 
 1. **Un elemento con `aria-hidden="true"` no avisa** (recomendado): quien lo marca dice que es
    decorativo, y en la práctica va al lado del texto que dice el estado. La alternativa es avisar
@@ -89,9 +89,8 @@ o un ícono con nombre, junto al color. Fuente: WCAG 1.4.1, `ux:wcag-1.4.1`.
 
 - **2026-10-16:** relevado; prototipados los tres datos del JSX (sin commit); spec escrito y plan
   presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las tres decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/color-only` (el
-prototipo del JSX está sin commit en esa rama).
+En curso en `feat/color-only`: seguir por la primera tarea sin marcar.

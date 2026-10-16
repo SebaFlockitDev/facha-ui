@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-004 · Regla `a11y-color-only`
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** un estado que se distingue solo por color falla WCAG 1.4.1 (`ux:wcag-1.4.1`); hoy solo lo ve la revisión.
 - **Qué:** el guardián marca chips, puntos o filas de estado cuyo único diferenciador es una clase o token de color, sin texto ni ícono en el mismo elemento.
