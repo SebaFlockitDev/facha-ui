@@ -58829,6 +58829,140 @@ var STYLES = {
 var STYLE_ORDER = ["standard", "sober", "soft"];
 var STATUS_MIN_DELTA_E = 10;
 
+// src/contrast.ts
+var KIND_ORDER = ["paired", "status", "text", "used", "non-text"];
+var TEXT_VARIANT = /(^|-)(text|fg|foreground)$/;
+var NOT_PLAIN = /(^|-)(bg|background|subtle|soft|surface|muted|border|outline|ring|stroke|hover|active|pressed|strong|weak|text|fg|foreground|solid|emphasis)(-|$)/;
+var CONTROL_BORDER = /(^|-)(strong|input|control|field)(-|$)/;
+var FOCUS_RING = /(^|-)(ring|focus)(-|$)/;
+function namedBackgrounds(name) {
+  const out = [];
+  const fg = name.match(/^(--.+)-(foreground|fg)$/);
+  if (fg) out.push(fg[1]);
+  if (/^--(.+-)?on-.+/.test(name)) out.push(name.replace("-on-", "-"));
+  const text = name.match(/^(--.+)-text$/);
+  if (text) for (const s of ["bg", "background", "subtle", "soft", "surface"]) out.push(`${text[1]}-${s}`);
+  return out;
+}
+function contrastMatrix(ctx, usages) {
+  const cfg = ctx.project.config.contrast;
+  const min = cfg?.minRatio ?? 4.5;
+  const large = min >= 7 ? 4.5 : 3;
+  const nonText = cfg?.nonTextMinRatio ?? 3;
+  const themes = ctx.tokens.themes.map((t) => t.name);
+  const canon = (name) => {
+    let n = name;
+    for (let i = 0; i < 5; i++) n = aliasOf(ctx.tokens, n) ?? n;
+    return n;
+  };
+  const allColors = ctx.tokens.tokens.filter((t) => t.type === "color");
+  const colors = allColors.filter((t) => canon(t.name) === t.name);
+  const isColor = new Set(colors.map((t) => t.name));
+  const surfaces2 = [
+    ...new Set(cfg?.surfaces?.length ? cfg.surfaces.map(canon).filter((s) => isColor.has(s)) : colors.filter((t) => t.role.startsWith("surface.")).map((t) => t.name))
+  ];
+  const wanted = /* @__PURE__ */ new Map();
+  const want = (fg, bg, kind) => {
+    if (fg === bg || !isColor.has(fg) || !isColor.has(bg)) return;
+    const key = `${fg}|${bg}`;
+    const prev = wanted.get(key);
+    if (!prev || KIND_ORDER.indexOf(kind) < KIND_ORDER.indexOf(prev.kind)) wanted.set(key, { fg, bg, kind });
+  };
+  for (const t of allColors) for (const bg of namedBackgrounds(t.name)) if (ctx.tokens.byName.has(bg)) want(canon(t.name), canon(bg), "paired");
+  const states = /* @__PURE__ */ new Map();
+  for (const t of colors) if (t.role.startsWith("status.")) states.set(t.role, [...states.get(t.role) ?? [], t.name]);
+  for (const names of states.values()) {
+    const bare = (n) => n.replace(/^--/, "").replace(/^color-/, "");
+    const texts = names.filter((n) => TEXT_VARIANT.test(bare(n)));
+    const readers = texts.length ? texts : names.filter((n) => !NOT_PLAIN.test(bare(n)));
+    for (const fg of readers) for (const s of surfaces2) want(fg, s, "status");
+  }
+  for (const t of colors) if (t.role.startsWith("text.")) for (const s of surfaces2) want(t.name, s, "text");
+  const used = /* @__PURE__ */ new Map();
+  const nonTextUsed = /* @__PURE__ */ new Set();
+  const tokenIn = (v) => {
+    const name = v?.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
+    return name ? canon(name) : void 0;
+  };
+  for (const u of usages) {
+    if (u.kind !== "decl") continue;
+    const fg = tokenIn(u.value);
+    if (!fg) continue;
+    if (u.property === "color") {
+      const bg = tokenIn(u.siblingBackground);
+      if (!bg) continue;
+      want(fg, bg, "used");
+      const rec = used.get(`${fg}|${bg}`) ?? { count: 0, where: [] };
+      rec.count++;
+      if (rec.where.length < 3) rec.where.push(`${u.file}:${u.line}`);
+      used.set(`${fg}|${bg}`, rec);
+    } else if (isNonTextTarget(u.property, u.selector, u.context)) nonTextUsed.add(fg);
+  }
+  for (const t of colors) {
+    const bare = t.name.replace(/^--/, "");
+    const control = t.role.startsWith("border.") && CONTROL_BORDER.test(bare) || FOCUS_RING.test(bare) || nonTextUsed.has(t.name);
+    if (control && !t.role.startsWith("text.") && !t.role.startsWith("surface.")) for (const s of surfaces2) want(t.name, s, "non-text");
+  }
+  const pairs = [];
+  for (const { fg, bg, kind } of wanted.values()) {
+    const ratio = {};
+    const level = {};
+    let passes = true;
+    let largeOk = true;
+    for (const th of themes) {
+      const f3 = tokenColor(ctx.tokens, fg, th);
+      const b = tokenColor(ctx.tokens, bg, th);
+      if (!f3 || !b) continue;
+      const base4 = surfaces2[0] ? tokenColor(ctx.tokens, surfaces2[0], th) : void 0;
+      const r4 = contrast2(f3, b, base4);
+      ratio[th] = shownRatio(r4);
+      if (kind === "non-text") {
+        level[th] = r4 >= nonText ? "pass" : "fail";
+        if (r4 < nonText) passes = largeOk = false;
+      } else {
+        level[th] = r4 >= 7 ? "AAA" : r4 >= 4.5 ? "AA" : r4 >= 3 ? "large-only" : "fail";
+        if (r4 < min) passes = false;
+        if (r4 < large) largeOk = false;
+      }
+    }
+    if (!Object.keys(ratio).length) continue;
+    const pair = { fg, bg, kind, ratio, level, passes, largeOnly: !passes && largeOk && kind !== "non-text" };
+    const u = used.get(`${fg}|${bg}`);
+    if (u) pair.used = u;
+    pairs.push(pair);
+  }
+  const rank = (p4) => p4.passes ? 2 : p4.largeOnly ? 1 : 0;
+  pairs.sort((a, b) => rank(a) - rank(b) || KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) || (a.fg < b.fg ? -1 : a.fg > b.fg ? 1 : a.bg < b.bg ? -1 : 1));
+  const bySurface = {};
+  for (const p4 of pairs) {
+    if (p4.kind === "non-text") continue;
+    const row = bySurface[p4.bg] ??= { pass: [], largeOnly: [], fail: [] };
+    (p4.passes ? row.pass : p4.largeOnly ? row.largeOnly : row.fail).push(p4.fg);
+  }
+  for (const row of Object.values(bySurface)) for (const list3 of [row.pass, row.largeOnly, row.fail]) list3.sort();
+  const byKind = {};
+  for (const p4 of pairs) {
+    const k4 = byKind[p4.kind] ??= { pairs: 0, failing: 0 };
+    k4.pairs++;
+    if (!p4.passes) k4.failing++;
+  }
+  return {
+    standard: "WCAG 2.2",
+    minimums: { text: min, largeText: large, enhanced: 7, nonText },
+    largeText: "24px or more, or 18.66px (14pt) bold (WCAG 2.2, large-scale text)",
+    themes,
+    summary: {
+      pairs: pairs.length,
+      passing: pairs.filter((p4) => p4.passes).length,
+      largeOnly: pairs.filter((p4) => p4.largeOnly).length,
+      failing: pairs.filter((p4) => !p4.passes && !p4.largeOnly).length,
+      byKind
+    },
+    bySurface,
+    pairs
+  };
+}
+
 // src/design-system.ts
 var SECTIONS2 = [
   "project",
@@ -58842,7 +58976,8 @@ var SECTIONS2 = [
   "guidelines",
   "decisions",
   "brief",
-  "profile"
+  "profile",
+  "contrast"
 ];
 var REQUIRED_ROLES = ["surface.base", "surface.raised", "text.primary", "text.secondary", "border.default", "accent.primary"];
 var RECOMMENDED = [
@@ -59112,9 +59247,10 @@ function getDesignSystem(ctx, sections = SECTIONS2) {
   if (want.has("componentClasses")) out.componentClasses = ctx.componentClasses.map(({ decls, ...c2 }) => c2);
   if (want.has("coverage")) out.coverage = { present: cov.present, missing: cov.missing, requiredMissing: cov.requiredMissing };
   if (want.has("gaps")) out.gaps = gaps(ctx);
-  if (want.has("health")) {
+  if (want.has("health") || want.has("contrast")) {
     const scan = scanFiles(ctx, listProjectFiles(ctx.project));
-    out.health = health(ctx, scan.usages);
+    if (want.has("health")) out.health = health(ctx, scan.usages);
+    if (want.has("contrast")) out.contrast = contrastMatrix(ctx, scan.usages);
   }
   if (want.has("rules")) out.rules = rulesInfo(ctx);
   if (want.has("guidelines")) {

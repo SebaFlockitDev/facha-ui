@@ -189,6 +189,180 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
     },
   ],
   "configSource": "facha-ui.config.json",
+  "contrast": {
+    "bySurface": {
+      "--color-canvas": {
+        "fail": [],
+        "largeOnly": [],
+        "pass": [
+          "--color-danger",
+          "--color-ink",
+          "--color-ink-muted",
+        ],
+      },
+      "--color-card": {
+        "fail": [],
+        "largeOnly": [],
+        "pass": [
+          "--color-danger",
+          "--color-ink",
+          "--color-ink-muted",
+        ],
+      },
+      "--color-primary": {
+        "fail": [],
+        "largeOnly": [
+          "--color-on-primary",
+        ],
+        "pass": [],
+      },
+    },
+    "largeText": "24px or more, or 18.66px (14pt) bold (WCAG 2.2, large-scale text)",
+    "minimums": {
+      "enhanced": 7,
+      "largeText": 3,
+      "nonText": 3,
+      "text": 4.5,
+    },
+    "pairs": [
+      {
+        "bg": "--color-primary",
+        "fg": "--color-on-primary",
+        "kind": "paired",
+        "largeOnly": true,
+        "level": {
+          "dark": "large-only",
+          "light": "AA",
+        },
+        "passes": false,
+        "ratio": {
+          "dark": 3.67,
+          "light": 5.16,
+        },
+      },
+      {
+        "bg": "--color-canvas",
+        "fg": "--color-danger",
+        "kind": "status",
+        "largeOnly": false,
+        "level": {
+          "dark": "AAA",
+          "light": "AA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 7.11,
+          "light": 4.62,
+        },
+      },
+      {
+        "bg": "--color-card",
+        "fg": "--color-danger",
+        "kind": "status",
+        "largeOnly": false,
+        "level": {
+          "dark": "AA",
+          "light": "AA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 6.4,
+          "light": 4.82,
+        },
+      },
+      {
+        "bg": "--color-canvas",
+        "fg": "--color-ink",
+        "kind": "text",
+        "largeOnly": false,
+        "level": {
+          "dark": "AAA",
+          "light": "AAA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 17.89,
+          "light": 16.99,
+        },
+        "used": {
+          "count": 1,
+          "where": [
+            "app/globals.css:27",
+          ],
+        },
+      },
+      {
+        "bg": "--color-card",
+        "fg": "--color-ink",
+        "kind": "text",
+        "largeOnly": false,
+        "level": {
+          "dark": "AAA",
+          "light": "AAA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 16.11,
+          "light": 17.73,
+        },
+      },
+      {
+        "bg": "--color-canvas",
+        "fg": "--color-ink-muted",
+        "kind": "text",
+        "largeOnly": false,
+        "level": {
+          "dark": "AAA",
+          "light": "AAA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 7.67,
+          "light": 7.24,
+        },
+      },
+      {
+        "bg": "--color-card",
+        "fg": "--color-ink-muted",
+        "kind": "text",
+        "largeOnly": false,
+        "level": {
+          "dark": "AA",
+          "light": "AAA",
+        },
+        "passes": true,
+        "ratio": {
+          "dark": 6.91,
+          "light": 7.55,
+        },
+      },
+    ],
+    "standard": "WCAG 2.2",
+    "summary": {
+      "byKind": {
+        "paired": {
+          "failing": 1,
+          "pairs": 1,
+        },
+        "status": {
+          "failing": 0,
+          "pairs": 2,
+        },
+        "text": {
+          "failing": 0,
+          "pairs": 4,
+        },
+      },
+      "failing": 0,
+      "largeOnly": 1,
+      "pairs": 7,
+      "passing": 6,
+    },
+    "themes": [
+      "light",
+      "dark",
+    ],
+  },
   "copy": null,
   "coverage": {
     "missing": [

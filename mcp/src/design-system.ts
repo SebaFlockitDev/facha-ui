@@ -13,9 +13,10 @@ import { suggestColor } from "./suggest.js";
 import { aliasOf, tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
+import { contrastMatrix } from "./contrast.js";
 
 export const SECTIONS = [
-  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile",
+  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile", "contrast",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -295,9 +296,10 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
   if (want.has("componentClasses")) out.componentClasses = ctx.componentClasses.map(({ decls, ...c }) => c);
   if (want.has("coverage")) out.coverage = { present: cov.present, missing: cov.missing, requiredMissing: cov.requiredMissing };
   if (want.has("gaps")) out.gaps = gaps(ctx);
-  if (want.has("health")) {
+  if (want.has("health") || want.has("contrast")) {
     const scan = scanFiles(ctx, listProjectFiles(ctx.project));
-    out.health = health(ctx, scan.usages);
+    if (want.has("health")) out.health = health(ctx, scan.usages);
+    if (want.has("contrast")) out.contrast = contrastMatrix(ctx, scan.usages);
   }
   if (want.has("rules")) out.rules = rulesInfo(ctx);
   if (want.has("guidelines")) {
