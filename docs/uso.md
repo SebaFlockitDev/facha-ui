@@ -218,6 +218,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | `theme-contrast` | error si el fondo es conocido, warning si no | Un texto que no llega a 4.5:1 contra su fondo en algún tema. Sugiere un token legible en todos los temas |
 | `class-contrast` | igual que la anterior | Una clase del CSS cuyo color de texto falla, marcada en cada componente que la usa |
 | `non-text-contrast` | warning | Bordes de campos y botones, anillos de foco e íconos por debajo de 3:1 (WCAG 1.4.11) |
+| `a11y-color-only` | warning | Un estado que se muestra solo con color: un punto verde o rojo sin texto, ni ícono, ni nombre accesible (WCAG 1.4.1). Se arregla con un texto visible o `sr-only`, o un ícono con nombre, al lado |
 | `ux-gray-on-color` | warning | Texto gris sobre un fondo de color: usá el texto de esa misma familia o, sobre un color sólido, blanco u oscuro (como diseña Radix sus escalas) |
 | `a11y-gradient-text` | warning | Texto sobre un degradado que no llega al contraste mínimo en alguna parte (se mide contra cada parada) |
 | `a11y-motion` | warning | Animaciones sin alternativa para quien pide menos movimiento (`prefers-reduced-motion`, `motion-safe:` en Tailwind) |

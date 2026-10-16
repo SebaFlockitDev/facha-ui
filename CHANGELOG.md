@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- Regla `a11y-color-only` (aviso): un estado que se muestra solo con color, como un punto verde o rojo sin texto, ícono ni nombre accesible (WCAG 1.4.1). Lee el estado del nombre de la clase (`dot-paid`), de un color con token de estado (`bg-success`) o de un `className` que depende de un estado (`dot-${order.status}`).
+
 ## [0.27.0] - 2026-10-16
 
 ### Added
