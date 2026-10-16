@@ -101,7 +101,20 @@ export function proposeDesignSystem(ctx: Context, args: ProposeArgs) {
           const proof = first?.proof.find((x) => x.mode === "light" && x.fg === fg && x.bg === bg);
           return { ...p, replacedBy: { fg, bg, light: [valueIn(fg)?.light, valueIn(bg)?.light], ratio: proof?.ratio ?? null } };
         }),
-        notes: ref.notes,
+        notes: [
+          ...ref.notes,
+          ...(ref.brandColor
+            ? []
+            : [
+                `${ref.host} has no colored button, link or background: its brand reads as neutral. ${
+                  brandColor && brandFrom !== fromRef("") ? `The brand color stays ${brandColor} (${brandFrom}).` : "The directions take Radix's accents."
+                }${
+                  ref.neutralButton && brandColor !== ref.neutralButton
+                    ? ` For a monochrome system like the reference, pass brandColor ${ref.neutralButton} (its primary button); in the dark theme it stays near black (the generator does not invert a monochrome brand yet).`
+                    : ""
+                }`,
+              ]),
+        ],
       }
     : null;
   const cov = coverage(ctx);

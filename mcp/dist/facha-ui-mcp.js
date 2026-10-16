@@ -68661,8 +68661,8 @@ function fromReference(ctx, input2, level) {
   const brand = colored(buttonBg) ? { c: buttonBg, from: `the primary button's background (${s.button?.from ?? "button"})` } : colored(linkColor) ? { c: linkColor, from: `the links' color (${s.link?.from ?? "a"})` } : usedBg ? { c: usedBg.c, from: "the most used colored background" } : tint ? { c: { ...tint, alpha: 1 }, from: "a translucent colored background (the brand used as a tint), without its alpha" } : null;
   const brandColor = brand ? { value: toHex(brand.c), from: brand.from } : null;
   if (brandColor) notes.push(`${brandColor.value} is the brand color of ${host}: the system takes it as its seed. If the product should not look like ${host}, pass another brandColor or move its hue.`);
-  else notes.push(`${host} has no colored button, link or background: its brand reads as neutral, so the directions come from Radix's accents.`);
-  const radii = [px(s.button?.["border-top-left-radius"]), px(s.card?.["border-top-left-radius"]), px(s.input?.["border-top-left-radius"])].filter(
+  const inputRadius = (px(s.input?.["border-top-width"]) ?? 0) > 0 ? px(s.input?.["border-top-left-radius"]) : null;
+  const radii = [px(s.button?.["border-top-left-radius"]), px(s.card?.["border-top-left-radius"]), inputRadius].filter(
     (v) => v !== null && v < 999
   );
   const median = radii.length ? radii.sort((a, b) => a - b)[Math.floor(radii.length / 2)] : null;
@@ -68699,7 +68699,8 @@ function fromReference(ctx, input2, level) {
   for (const h of s.headings ?? []) measure(`${h.from ?? "heading"} on the background`, h.color, ground, h, isLarge(h) ? large : min);
   if (s.button) measure("the button's text on the button", s.button.color, colorOf2(s.button["background-color"]), s.button, isLarge(s.button) ? large : min);
   if (s.link) measure("links on the background", s.link.color, ground, s.link, min);
-  return { url: r4.url, host, file: input2, brandColor, style, radius, density, fontFamily, pairs, notes };
+  const neutralButton = !brandColor && opaque(buttonBg) ? toHex(buttonBg) : null;
+  return { url: r4.url, host, file: input2, brandColor, neutralButton, style, radius, density, fontFamily, pairs, notes };
 }
 var REPLACEMENT = {
   "text on the background": ["--color-foreground", "--color-background"],
@@ -68766,7 +68767,12 @@ function proposeDesignSystem(ctx, args) {
       const proof = first2?.proof.find((x) => x.mode === "light" && x.fg === fg && x.bg === bg);
       return { ...p4, replacedBy: { fg, bg, light: [valueIn(fg)?.light, valueIn(bg)?.light], ratio: proof?.ratio ?? null } };
     }),
-    notes: ref.notes
+    notes: [
+      ...ref.notes,
+      ...ref.brandColor ? [] : [
+        `${ref.host} has no colored button, link or background: its brand reads as neutral. ${brandColor && brandFrom !== fromRef("") ? `The brand color stays ${brandColor} (${brandFrom}).` : "The directions take Radix's accents."}${ref.neutralButton && brandColor !== ref.neutralButton ? ` For a monochrome system like the reference, pass brandColor ${ref.neutralButton} (its primary button); in the dark theme it stays near black (the generator does not invert a monochrome brand yet).` : ""}`
+      ]
+    ]
   } : null;
   const cov = coverage(ctx);
   return {

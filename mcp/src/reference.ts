@@ -92,6 +92,8 @@ export interface FromReference {
   host: string;
   file: string;
   brandColor: { value: string; from: string } | null;
+  /** With no colored brand: the primary button's own (neutral) color. */
+  neutralButton: string | null;
   style: { value: StyleId; from: string };
   radius: { value: number; from: string } | null;
   density: { value: Density; from: string };
@@ -136,10 +138,11 @@ export function fromReference(ctx: Context, input: string, level: "AA" | "AAA"):
           : null;
   const brandColor = brand ? { value: toHex(brand.c!), from: brand.from } : null;
   if (brandColor) notes.push(`${brandColor.value} is the brand color of ${host}: the system takes it as its seed. If the product should not look like ${host}, pass another brandColor or move its hue.`);
-  else notes.push(`${host} has no colored button, link or background: its brand reads as neutral, so the directions come from Radix's accents.`);
 
   // Radius: the median of the button's and the card's, to Material 3's nearest corner step.
-  const radii = [px(s.button?.["border-top-left-radius"]), px(s.card?.["border-top-left-radius"]), px(s.input?.["border-top-left-radius"])].filter(
+  // An input without a border (a bare search field) says nothing about the corners.
+  const inputRadius = (px(s.input?.["border-top-width"]) ?? 0) > 0 ? px(s.input?.["border-top-left-radius"]) : null;
+  const radii = [px(s.button?.["border-top-left-radius"]), px(s.card?.["border-top-left-radius"]), inputRadius].filter(
     (v): v is number => v !== null && v < 999,
   );
   const median = radii.length ? radii.sort((a, b) => a - b)[Math.floor(radii.length / 2)]! : null;
@@ -197,7 +200,9 @@ export function fromReference(ctx: Context, input: string, level: "AA" | "AAA"):
   if (s.button) measure("the button's text on the button", s.button.color, colorOf(s.button["background-color"]), s.button, isLarge(s.button) ? large : min);
   if (s.link) measure("links on the background", s.link.color, ground, s.link, min);
 
-  return { url: r.url, host, file: input, brandColor, style, radius, density, fontFamily, pairs, notes };
+  // A monochrome reference: its button color, for a system that looks like it (the skill offers it).
+  const neutralButton = !brandColor && opaque(buttonBg) ? toHex(buttonBg) : null;
+  return { url: r.url, host, file: input, brandColor, neutralButton, style, radius, density, fontFamily, pairs, notes };
 }
 
 /** What replaces each failing pair of the reference in a generated direction. */
