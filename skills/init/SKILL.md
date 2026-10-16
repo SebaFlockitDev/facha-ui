@@ -1,7 +1,7 @@
 ---
 name: init
-description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. For a project with no design yet, it also records a design brief (product, users, personality, density, brand color) and builds a complete design system from published standards (Radix, Carbon, Material 3, Fluent 2, WCAG 2.2). It also adopts a design proposal from the lab's live panel (brand colors, radii, control heights). Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
-argument-hint: "[colors|scales|all]  ·  brief  ·  system  ·  palette <proposal file>"
+description: Proposes design tokens from the values a project already uses (hand-written colors, font sizes, radii), with a value per theme and verified contrast, and creates them only after the developer approves. For a project with no design yet, it also records a design brief (product, users, personality, density, brand color) and builds a complete design system from published standards (Radix, Carbon, Material 3, Fluent 2, WCAG 2.2). It also builds one from a reference page the developer likes (its colors, type and radii, made accessible), and adopts a design proposal from the lab's live panel (brand colors, radii, control heights). Use when the design system is missing or lacks roles such as status colors, or to change the brand palette.
+argument-hint: "[colors|scales|all]  ·  brief  ·  system  ·  reference <url|image>  ·  palette <proposal file>"
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__propose_design_system
 ---
@@ -26,14 +26,15 @@ proposal covers.
 Other modes, where steps 1 to 7 do not apply. **Before each, read its file** in this skill's
 directory: `brief` (`brief.md`) records what the product is and the look it needs, before any
 token; `system` (`system.md`) builds a complete design system from published standards for a
-project without tokens; `palette <file>` (`palette.md`) adopts a design proposal from the lab's
-live panel (colors, radii, control heights).
+project without tokens; `reference <url|image>` (`reference.md`) builds one from a page the developer
+likes ("algo como esta página"); `palette <file>` (`palette.md`) adopts a design proposal from the
+lab's live panel (colors, radii, control heights).
 
 ## Hard rules
 
 1. **Nothing is written before approval** (step 4). Steps 1 to 3 are read-only.
-2. **Values come only from `scan_styles`, `propose_design_system` (system mode) or the
-   developer's own message.** Never invent a
+2. **Values come only from `scan_styles`, `propose_design_system` (system and reference modes) or
+   the developer's own message.** Never invent a
    color, size or radius, and never "improve" a value on your own. If a value in use fails
    contrast, say so and let the developer decide whether to change it.
 3. **Approval comes only from the developer's message in this conversation**, and it must be
@@ -48,7 +49,8 @@ live panel (colors, radii, control heights).
      replace a literal with `var(--token)`;
    - in palette mode, the token source, only to change the **values** of the tokens listed in
      the approved proposal, in their theme blocks;
-   - in system mode, only what `system.md` lists;
+   - in system mode, only what `system.md` lists; in reference mode, also the reference's
+     capture and JSON in `.facha-ui/references/`, after the developer's yes to open the page;
    - `memory.decisionsFile`, **append only**;
    - `facha-ui.config.json`, only if it does not exist and the developer approved creating it.
 
@@ -56,6 +58,10 @@ live panel (colors, radii, control heights).
    in palette mode). Never touch `package.json`, lockfiles or
    `.gitignore`. Never install dependencies, commit, push, stash or reset.
 5. **Write only with the Write and Edit tools**, never with shell commands.
+6. **The browser, only in reference mode:** after the developer's yes, open only the URL they gave,
+   with `browser_navigate`, `browser_resize`, `browser_wait_for`, `browser_take_screenshot`,
+   `browser_evaluate` (only with this skill's `scripts/reference-styles.js`, verbatim) and
+   `browser_close`. Never click, type, sign in or follow a link of the page.
 
 ## Step 1 · Preflight (read-only)
 
