@@ -31,7 +31,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** ajustar el diseño con controles directos y ver el efecto en el momento ya es lo esperable (Claude Design, Realtime Colors, tweakcn); hoy el panel solo prueba paletas armadas.
-- **Qué:** en el panel, controles de tono, tinte de los neutros, radio, densidad y nivel de contraste (como el `contrastLevel` de Material), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`.
+- **Qué:** en el panel, controles de tono, tinte de los neutros, radio, alto de controles y nivel de contraste (AA o AAA de WCAG), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`. Incluye B-036 (presets con fuente).
 - **Criterios de aceptación:** cada cambio muestra los pares que dejan de pasar WCAG y una solución; la combinación elegida queda como propuesta en `.facha-ui/proposals/`; fuera del laboratorio no cambia ningún archivo.
 - **Depende de:** B-025
 - **Spec:** [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md)
@@ -191,7 +191,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
 - **B-037 · `near-duplicate-tokens` según el rol:** visto en la prueba de B-025: la regla de paleta inflada compara tokens de cualquier rol, y en un sistema generado marca pares que se parecen por diseño (fondo y panel, que son los pasos 1 y 2 de Radix; el blanco del texto sobre acento y el casi blanco del fondo). Su propia nota dice que se ignoren "si son roles distintos": que la regla los deje afuera y siga marcando los del mismo rol.
-- **B-036 · Paletas del panel sin fuente:** las paletas predefinidas del panel en vivo traen afirmaciones sin fuente ("El más usado en bancos y fintech: transmite seguridad", `skills/variants/templates/next-app/lab-panel.tsx:196`), contra la regla de que toda decisión de UI tiene una fuente. Reemplazarlas por las semillas del generador (B-025), con su fuente, o sacar las afirmaciones.
+- **B-038 · Colores `oklch()` en el panel en vivo:** visto en B-031: `palette-base.mjs` y `lab-palette.ts` solo leen colores hex y `rgb()`, así que un proyecto con los tokens en `oklch()` (shadcn/ui con Tailwind 4, como el fixture `shadcn-tw4`) no tiene base y el panel no muestra la pestaña Diseño. Leerlos, y escribir los valores nuevos en `oklch()`, el formato del proyecto.
 - **B-035 · `scan_styles` en un proyecto sin temas:** visto en la prueba de B-024, sobre una app sin ningún bloque de tema: las propuestas salen con `values: {}` (falta el valor del tema por defecto), un gris de texto secundario (`#475569`, usado en "Cancelado", `.muted` y encabezados) se propone como `--status-danger-fg`, y el color de marca se parte en dos propuestas, una como `status.info`. Con un brief, su color de marca debería proponerse como `accent.primary`.
 
 ## Hecho
