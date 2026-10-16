@@ -102,6 +102,8 @@ const SELECTOR = /^[\w\s.#:[\]="'(),*>+~-]{1,120}$/;
 /** Color, gradient or shadow values: no braces, semicolons, quotes or url(). */
 const VALUE = /^(?!.*url\()[#\w\s(),.%/-]{1,300}$/;
 const HEX = /^#[0-9a-fA-F]{6}$/;
+/** Tokens kept from the palette base: colors, radii and control heights (B-031). */
+const MAX_BASE_TOKENS = 120;
 const TEXT_FIELDS: [keyof Target, number][] = [
   ["selector", 300],
   ["text", 160],
@@ -210,7 +212,7 @@ function readPalette(root: string): PaletteBase | null {
     .map((t) => ({ name: t.name, selector: t.selector }));
   const themeNames = new Set(themes.map((t) => t.name));
   const tokens: PaletteBase["tokens"] = [];
-  for (const t of Array.isArray(raw.tokens) ? raw.tokens.slice(0, 80) : []) {
+  for (const t of Array.isArray(raw.tokens) ? raw.tokens.slice(0, MAX_BASE_TOKENS) : []) {
     if (!t || typeof t.name !== "string" || !TOKEN.test(t.name) || !t.values || typeof t.values !== "object") continue;
     const values: Record<string, string> = {};
     for (const [theme, value] of Object.entries(t.values as Record<string, unknown>)) {

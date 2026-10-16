@@ -2,10 +2,11 @@
 // facha-ui · palette base for the lab's live panel, run by /facha-ui:variants.
 // Usage: node palette-base.mjs <project root> [--anchor <token>]
 //
-// Prints the JSON of `.facha-ui/live/palette.json`: the project's themes (name and selector) and
-// its color tokens with their value per theme, as get_design_system reports them. The panel uses
-// it to preview other palettes in the browser. It only reads: Claude Code writes the output with
-// its Write tool. Status colors, fonts, radii and other non-color tokens are left out.
+// Prints the JSON of `.facha-ui/live/palette.json`: the project's themes (name and selector), its
+// color tokens, and its radius and control-height tokens written in px or rem, with their value per
+// theme as get_design_system reports them. The panel uses it to preview other design choices in the
+// browser (lab-palette.ts). It only reads: Claude Code writes the output with its Write tool. Status
+// colors, fonts, spacing and other tokens are left out.
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -59,9 +60,14 @@ if (!ds?.project) {
 
 const COLOR = /#[0-9a-fA-F]{3,8}\b|rgba?\(/;
 const SKIP_ROLE = /^(status|font|radius|space|size|z|motion)/;
-const tokens = (ds.tokens ?? [])
-  .filter((t) => !SKIP_ROLE.test(t.role ?? "") && Object.values(t.values ?? {}).some((v) => COLOR.test(String(v))))
-  .map((t) => ({ name: t.name, role: t.role, values: t.values }));
+// Radii and control heights the panel can change: plain lengths only (a calc() or var() radius
+// follows its base in the browser). The names are lab-palette.ts's CONTROL_NAME.
+const LENGTH = /^\d+(?:\.\d+)?(?:px|rem)$/;
+const CONTROL = /^--(size-control|control-height|size-row|row-height)$/;
+const isColor = (t) => !SKIP_ROLE.test(t.role ?? "") && Object.values(t.values ?? {}).some((v) => COLOR.test(String(v)));
+const isShape = (t) =>
+  (t.role === "radius" || CONTROL.test(t.name)) && Object.values(t.values ?? {}).length > 0 && Object.values(t.values).every((v) => LENGTH.test(String(v).trim()));
+const tokens = (ds.tokens ?? []).filter((t) => isColor(t) || isShape(t)).map((t) => ({ name: t.name, role: t.role, values: t.values }));
 
 const anchor =
   anchorArg ??
