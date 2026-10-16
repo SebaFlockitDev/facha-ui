@@ -1,6 +1,6 @@
 # B-030 · Componente reimplementado y cobertura del design system
 
-> **Estado:** en curso · **Rama:** `feat/component-reuse` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/component-reuse` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -84,30 +84,47 @@ Junto al puntaje de cada pantalla y del proyecto, un bloque `coverage`:
 
 ## Criterios de aceptación
 
-- [ ] Positivo y negativo en el fixture de shadcn.
-- [ ] La cobertura sale en `ux_score` (test).
-- [ ] El aviso trae el import exacto del componente.
-- [ ] 0 avisos nuevos en los fixtures sin carpeta de UI.
+- [x] Positivo y negativo en el fixture de shadcn.
+- [x] La cobertura sale en `ux_score` (test).
+- [x] El aviso trae el import exacto del componente (con el alias de `components.json`, o relativo).
+- [x] 0 avisos nuevos en los fixtures sin carpeta de UI.
 
 ## Tareas
 
-- [ ] 1. Inventario (`components.ts`, sección `components`), tests
-- [ ] 2. Regla `ds-component-reuse`, fixture y tests
-- [ ] 3. Cobertura en `ux_score`, tests
-- [ ] 4. Skills y docs
-- [ ] 5. Prueba real
-- [ ] 6. Release
+- [x] 1. Inventario (`components.ts`, sección `components`), tests · `79c16d4`
+- [x] 2. Regla `ds-component-reuse`, fixture y tests · `79c16d4`
+- [x] 3. Cobertura en `ux_score`, tests · `75f11d3`
+- [x] 4. Skills y docs · `eb983cf`
+- [x] 5. Prueba real
+- [ ] 6. Release (cuando lo pida quien mantiene el repo)
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **El inventario y la regla van en un mismo commit:** el fixture que los prueba es el mismo.
+2. **Qué reemplaza cada componente sale de los nombres de shadcn/ui** (`Button`, `Input`, `Checkbox`…),
+   no de lo que dibuja: el `Select` de shadcn dibuja Radix y no un `<select>`, pero es el select del
+   sistema. Un componente con otro nombre (`Card`) queda en el inventario sin reemplazar nada.
+3. **Sin alias, el import es relativo** al archivo que avisa (`../components/ui/button`).
+4. **La cobertura cuenta los usos de un componente cuando está importado de la carpeta de UI**, para no
+   contar un `Button` ajeno con el mismo nombre.
 
 ## Registro
 
 - **2026-10-16:** relevado lo que existe (tokens y clases, sin componentes React); spec escrito y plan
   presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 4; 358 tests, typecheck y `claude plugin validate` en verde.
+- **2026-10-16, prueba real:**
+  - `audit_project` en las dos apps de prueba y en `next-visual` (sin carpeta de UI): los mismos totales
+    que la 0.26.0;
+  - una copia de la app de Vite con `src/components/ui/button.tsx` y sin `components.json`: el
+    inventario la toma por convención y un `<button>` a mano en otra pantalla da el aviso con
+    `import { Button } from "../components/ui/button";`; el propio `button.tsx` no avisa;
+  - en `shadcn-tw4`, la cobertura da 0 para la pantalla con el botón a mano y 1 para la que usa
+    `Button` e `Input`.
 
 ## Cómo retomar
 
-En curso en `feat/component-reuse`: seguir por la primera tarea sin marcar.
+Todo hecho y probado en `feat/component-reuse`; falta el release (tarea 6), solo cuando quien
+mantiene el repo lo pida: versión 0.27.0 con el flujo de `CLAUDE.md`; B-030 a **Hecho** y el primero
+de **Siguiente** a **Ahora**.
