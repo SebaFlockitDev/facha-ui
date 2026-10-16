@@ -364,13 +364,19 @@ export function customChoice(base: PaletteBase, hex: string, from: DesignChoice 
   return { ...from, id: "custom", name: `Tu color ${hex}`, hue: lch.h, brand: ratio, base: hex.toLowerCase() };
 }
 
-/** The preview: one rule per theme, scoped to the theme's own selector. */
+/**
+ * The preview: one rule per theme, scoped to the theme's own selector. A token that changes in one
+ * theme is written in every theme (its own value where it does not change): an !important value on
+ * :root alone would beat the project's own dark-theme declaration and leak into it.
+ */
 export function paletteCss(base: PaletteBase, values: TokenValues): string {
+  const own = (name: string, theme: string) => base.tokens.find((t) => t.name === name)?.values[theme];
   return base.themes
     .map((theme) => {
       const decls = Object.entries(values)
-        .filter(([, perTheme]) => perTheme[theme.name])
-        .map(([name, perTheme]) => `${name}: ${perTheme[theme.name]} !important;`)
+        .map(([name, perTheme]) => [name, perTheme[theme.name] ?? own(name, theme.name)] as const)
+        .filter(([, value]) => value)
+        .map(([name, value]) => `${name}: ${value} !important;`)
         .join(" ");
       return decls ? `${theme.selector} { ${decls} }` : "";
     })
@@ -386,10 +392,20 @@ export interface Pair {
   bg: string;
   ratio: number;
   min: number;
-  kind: "text" | "brand" | "border";
+  kind: "text" | "brand" | "border" | "onBrand";
 }
 
-/** Every text, brand-as-text and control-border pair against every surface, per theme. */
+/** The text drawn on the brand (buttons): --on-primary, --color-on-primary, --primary-foreground, or the only on-accent token. */
+function onBrandTokens(base: PaletteBase): string[] {
+  const all = base.tokens.filter((t) => t.role === "on-accent").map((t) => t.name);
+  const named = all.filter((n) => n.replace("-on-", "-") === base.anchor || n.replace(/-foreground$/, "") === base.anchor);
+  return named.length ? named : all.length === 1 ? all : [];
+}
+
+/**
+ * Every text, brand-as-text and control-border pair against every surface, and the text on the
+ * brand against the brand, per theme.
+ */
 export function contrastPairs(base: PaletteBase, values: TokenValues, level: "AA" | "AAA" = "AA"): Pair[] {
   const valueOf = (name: string, theme: string) => values[name]?.[theme] ?? base.tokens.find((t) => t.name === name)?.values[theme];
   const surfaces = base.tokens.filter((t) => t.role?.startsWith("surface")).map((t) => t.name);
@@ -399,15 +415,15 @@ export function contrastPairs(base: PaletteBase, values: TokenValues, level: "AA
     ...base.tokens.filter((t) => t.role?.startsWith("border") && /strong|control|input/.test(t.name)).map((t) => ({ name: t.name, kind: "border" as const, min: WCAG_MIN.nonText })),
   ];
   const out: Pair[] = [];
-  for (const theme of base.themes.map((t) => t.name))
-    for (const f of fgs) {
-      const fg = plainColor(valueOf(f.name, theme));
-      if (!fg) continue;
-      for (const s of surfaces) {
-        const bg = plainColor(valueOf(s, theme));
-        if (bg) out.push({ theme, fg: f.name, bg: s, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min: f.min, kind: f.kind });
-      }
-    }
+  const pair = (theme: string, fgName: string, bgName: string, min: number, kind: Pair["kind"]) => {
+    const fg = plainColor(valueOf(fgName, theme));
+    const bg = plainColor(valueOf(bgName, theme));
+    if (fg && bg) out.push({ theme, fg: fgName, bg: bgName, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min, kind });
+  };
+  for (const theme of base.themes.map((t) => t.name)) {
+    for (const f of fgs) for (const s of surfaces) pair(theme, f.name, s, f.min, f.kind);
+    for (const name of onBrandTokens(base)) pair(theme, name, base.anchor, WCAG_MIN.AA, "onBrand");
+  }
   return out;
 }
 
@@ -421,6 +437,7 @@ const FIX: Record<Pair["kind"], string> = {
   text: "subí el contraste a Estándar o Alto: oscurece (o aclara en oscuro) solo los textos que no llegan.",
   brand: "un tono más oscuro de la marca para el texto, o enlaces con el color de texto y subrayado.",
   border: "el borde de los controles necesita 3:1 (WCAG 1.4.11): un gris un paso más oscuro, o dejar el tinte como estaba.",
+  onBrand: "el texto de los botones necesita 4.5:1 sobre la marca (WCAG 1.4.3): un tono más oscuro de la marca, o un texto oscuro sobre ella.",
 };
 
 /**
@@ -469,16 +486,20 @@ export function designConflicts(base: PaletteBase, choice: DesignChoice | null, 
       fix: "convertirlos en tokens con /facha-ui:init colors (por ejemplo, un --brand-hover derivado de --brand), así siguen cualquier paleta.",
     });
   }
-  // Pairs that pass today and would not with the choice (measured at the level it asks for).
+  // Pairs that pass today and would not with the choice (measured at the level it asks for), one
+  // line per token and theme: its lowest surface, and how many more it fails on.
   const level = choice.contrast ?? "AA";
   const key = (p: Pair) => `${p.theme}|${p.fg}|${p.bg}`;
   const was = new Map(contrastPairs(base, {}, level).map((p) => [key(p), p]));
+  const broken = new Map<string, Pair[]>();
   for (const p of contrastPairs(base, values, level)) {
     const prev = was.get(key(p));
-    if (p.ratio < p.min && (!prev || prev.ratio >= p.min)) {
-      out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1).`, fix: FIX[p.kind] });
-      if (out.filter((c) => c.kind === "contrast").length >= 4) break;
-    }
+    if (p.ratio < p.min && (!prev || prev.ratio >= p.min)) broken.set(`${p.theme}|${p.fg}`, [...(broken.get(`${p.theme}|${p.fg}`) ?? []), p]);
+  }
+  for (const pairs of [...broken.values()].slice(0, 4)) {
+    const p = pairs.reduce((low, x) => (x.ratio < low.ratio ? x : low));
+    const more = pairs.length > 1 ? `; también sobre ${pairs.length - 1} ${pairs.length > 2 ? "superficies más" : "superficie más"}` : "";
+    out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1)${more}.`, fix: FIX[p.kind] });
   }
   return out;
 }

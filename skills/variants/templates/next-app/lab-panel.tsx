@@ -645,7 +645,8 @@ function Control(props: { id: string; label: string; value: string; options: { v
   );
 }
 
-const KIND_LABEL: Record<Pair["kind"], string> = { text: "texto", brand: "marca como texto", border: "bordes de controles" };
+const KIND_LABEL: Record<Pair["kind"], string> = { text: "texto", brand: "marca como texto", onBrand: "texto sobre la marca", border: "bordes de controles" };
+const KINDS = ["text", "brand", "onBrand", "border"] as const;
 
 export function LabPanel() {
   const [root, setRoot] = useState<ShadowRoot | null>(null);
@@ -697,7 +698,9 @@ export function LabPanel() {
       setDeviceFix(fix);
       setViewport(size);
     }
-    setChoice(loadChoice());
+    const saved = loadChoice();
+    setChoice(saved);
+    if (saved.base) setCustomHex(saved.base);
     const host = document.createElement("div");
     host.setAttribute("data-facha-ui", "lab-panel");
     document.body.appendChild(host);
@@ -1232,7 +1235,7 @@ export function LabPanel() {
   const report = (paletteBase?.themes ?? []).map((t) => {
     const lowest = (kind: Pair["kind"]) =>
       pairs.filter((p) => p.theme === t.name && p.kind === kind).reduce<Pair | null>((low, p) => (!low || p.ratio < low.ratio ? p : low), null);
-    return { theme: t.name, pairs: (["text", "brand", "border"] as const).map(lowest).filter((p): p is Pair => !!p) };
+    return { theme: t.name, pairs: KINDS.map(lowest).filter((p): p is Pair => !!p) };
   });
   // With a contrast level on: the texts it had to move, so the change is never silent.
   const withoutContrast = paletteBase && choice.contrast ? computeDesign(paletteBase, { ...choice, contrast: null }) : null;
@@ -1431,7 +1434,11 @@ export function LabPanel() {
         </div>
       </div>
       <p className="muted">
-        Contraste más bajo (WCAG 2.2: texto {WCAG_MIN[level]}:1, marca como texto {WCAG_MIN.AA}:1, bordes de controles {WCAG_MIN.nonText}:1):{" "}
+        Contraste más bajo (WCAG 2.2:{" "}
+        {KINDS.flatMap((k) => pairs.find((p) => p.kind === k) ?? [])
+          .map((p) => `${KIND_LABEL[p.kind]} ${p.min}:1`)
+          .join(", ")}
+        ):{" "}
         {report.map((r, i) => (
           <span key={r.theme}>
             {i > 0 ? " · " : ""}

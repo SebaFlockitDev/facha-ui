@@ -33,7 +33,7 @@ interface Pair {
   bg: string;
   ratio: number;
   min: number;
-  kind: "text" | "brand" | "border";
+  kind: "text" | "brand" | "border" | "onBrand";
 }
 interface Conflict {
   kind: "status" | "literal" | "contrast";
@@ -58,14 +58,16 @@ interface LabPalette {
   describeChoice: (choice: DesignChoice) => string;
   contrastPairs: (base: PaletteBase, values: TokenValues, level?: "AA" | "AAA") => Pair[];
   designConflicts: (base: PaletteBase, choice: DesignChoice | null, safe: string[]) => Conflict[];
+  customChoice: (base: PaletteBase, hex: string, from?: DesignChoice) => DesignChoice | null;
+  paletteCss: (base: PaletteBase, values: TokenValues) => string;
 }
 let CONTROL_STEPS: LabPalette["CONTROL_STEPS"], ORIGINAL: DesignChoice, PRESETS: LabPalette["PRESETS"], RADIUS_STEPS: number[], RADIX_GRAYS: LabPalette["RADIX_GRAYS"];
 let STATUS_MIN_DELTA_E: number, WCAG_MIN: LabPalette["WCAG_MIN"];
 let capabilities: LabPalette["capabilities"], computeDesign: LabPalette["computeDesign"], contrastPairs: LabPalette["contrastPairs"];
-let describeChoice: LabPalette["describeChoice"], designConflicts: LabPalette["designConflicts"];
+let describeChoice: LabPalette["describeChoice"], designConflicts: LabPalette["designConflicts"], customChoice: LabPalette["customChoice"], paletteCss: LabPalette["paletteCss"];
 beforeAll(async () => {
   const lp = (await import(pathToFileURL(TEMPLATE).href)) as LabPalette;
-  ({ CONTROL_STEPS, ORIGINAL, PRESETS, RADIUS_STEPS, RADIX_GRAYS, STATUS_MIN_DELTA_E, WCAG_MIN, capabilities, computeDesign, contrastPairs, describeChoice, designConflicts } = lp);
+  ({ CONTROL_STEPS, ORIGINAL, PRESETS, RADIUS_STEPS, RADIX_GRAYS, STATUS_MIN_DELTA_E, WCAG_MIN, capabilities, computeDesign, contrastPairs, describeChoice, designConflicts, customChoice, paletteCss } = lp);
 });
 
 const oklch = converter("oklch");
@@ -147,6 +149,12 @@ describe("lab-palette · controls", () => {
     expect(r["--radius-full"]).toBeUndefined();
   });
 
+  it("the preview writes a changed token in every theme, so a light-only change never leaks into dark", () => {
+    // Found in the browser: :root { --text: <light> !important } beat the project's .dark { --text }.
+    const css = paletteCss(BASE, { "--text": { light: "#101820" } });
+    expect(css.split("\n")).toEqual([":root { --text: #101820 !important; }", ".dark { --text: #eeeef0 !important; }"]);
+  });
+
   it("control height sets --size-control", () => {
     expect(computeDesign(BASE, choice({ control: 48 }))["--size-control"]).toEqual({ light: "48px" });
   });
@@ -217,5 +225,22 @@ describe("lab-palette · what a choice would break", () => {
     expect(contrastPairs(faint, {}).find((p) => p.fg === "--text-faint")!.ratio).toBeLessThan(4.5);
     expect(designConflicts(faint, teal, []).filter((c) => c.text.includes("--text-faint"))).toEqual([]);
     expect(designConflicts(BASE, ORIGINAL, [])).toEqual([]);
+  });
+
+  it("checks the text on the brand (buttons) and groups a token that fails on several surfaces into one line", () => {
+    const withOn: PaletteBase = { ...BASE, tokens: [...BASE.tokens, { name: "--on-primary", role: "on-accent", values: { light: "#ffffff", dark: "#ffffff" } }] };
+    expect(contrastPairs(withOn, {}).filter((p) => p.kind === "onBrand").map((p) => [p.theme, p.bg])).toEqual([
+      ["light", "--primary"],
+      ["dark", "--primary"],
+    ]);
+    // White text on a light cyan brand: the buttons stop passing 4.5:1.
+    const cyan = customChoice(withOn, "#22d3ee")!;
+    const conflicts = designConflicts(withOn, cyan, []);
+    const onBrand = conflicts.find((c) => c.text.includes("--on-primary sobre --primary"));
+    expect(onBrand?.fix).toContain("WCAG 1.4.3");
+    // The brand as text fails on the three surfaces of light: one line, with the worst one.
+    const brandLight = conflicts.filter((c) => c.text.startsWith("En light, --primary sobre"));
+    expect(brandLight).toHaveLength(1);
+    expect(brandLight[0]!.text).toContain("también sobre 1 superficie más");
   });
 });
