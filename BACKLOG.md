@@ -27,16 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-032 · Matriz completa de contraste
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** hoy se controla el contraste de los pares que aparecen en el código; un sistema accesible garantiza cada texto sobre cada fondo donde puede aparecer. Además, `theme-contrast` puede sugerir para un texto rojo de error un gris secundario, y el aviso pasa a parecer información común (absorbe B-008).
-- **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.
-- **Criterios de aceptación:** la matriz sale en `get_design_system` o en `audit_project`; un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris (criterio de B-008).
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §6, https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
-
-## Siguiente
-
 ### B-030 · Componente reimplementado y cobertura del design system
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -44,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** un aviso cuando se arma a mano un elemento que el proyecto ya tiene como componente (un `<button>` con clases, existiendo `components/ui/button`), con el import sugerido. `ux_score` suma la cobertura: cuánto de la UI usa componentes y tokens del sistema.
 - **Criterios de aceptación:** positivo y negativo en el fixture de shadcn; la cobertura sale en `ux_score` (test).
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://docs.lovable.dev/features/design-systems
+
+## Siguiente
 
 ### B-004 · Regla `a11y-color-only`
 - **Estado:** listo para spec
@@ -188,6 +180,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.26.0:** B-032 (absorbe B-008), matriz completa de contraste en `get_design_system`, contraste sin redondear y sugerencias que conservan el significado; spec en [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md).
 - **0.25.0:** B-031 (incluye B-036), controles de diseño en el panel en vivo: tono, grises, radio, alto de controles y contraste del texto, con presets de Radix y el contraste y los conflictos recalculados en cada cambio; spec en [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).
 - **0.24.0:** B-029, reglas del guardián para las partes del look genérico de IA que rompen una regla publicada (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`) y la señal `nested-surfaces`; spec en [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
 - **0.23.0:** B-027, perfiles por tipo de producto (escala, controles, tokens y pautas con fuente, desde el brief); spec en [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseBrief } from "./brief.js";
 import { PROFILES, SOURCES, type SourceId } from "./standards.js";
-import { contrast, round, toHex } from "./color.js";
+import { contrast, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { toPx } from "./context.js";
 import { listProjectFiles } from "./project.js";
@@ -13,9 +13,10 @@ import { suggestColor } from "./suggest.js";
 import { aliasOf, tokenColor, tokenValue } from "./tokens.js";
 import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
+import { contrastMatrix, namedBackgrounds } from "./contrast.js";
 
 export const SECTIONS = [
-  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile",
+  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile", "contrast",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -71,7 +72,9 @@ export function health(ctx: Context, usages: Usage[]) {
   );
   const out: any[] = [];
   for (const t of candidates) {
-    if (t.role === "on-accent") continue; // measured against accents, not surfaces (roadmap)
+    // Text on color (the text of a button) is measured on the background it is named for (B-032).
+    const grounds = t.role === "on-accent" ? namedBackgrounds(t.name).filter((n) => ctx.tokens.byName.get(n)?.type === "color") : surfaces;
+    if (grounds.length === 0) continue;
     const ratios: Record<string, number> = {};
     const against: Record<string, string> = {};
     for (const th of themes) {
@@ -79,7 +82,7 @@ export function health(ctx: Context, usages: Usage[]) {
       if (!fg) continue;
       let worst = Number.POSITIVE_INFINITY;
       let worstName = "";
-      for (const s of surfaces) {
+      for (const s of grounds) {
         const bg = tokenColor(ctx.tokens, s, th);
         if (!bg) continue;
         const base = tokenColor(ctx.tokens, surfaces[0]!, th);
@@ -96,6 +99,7 @@ export function health(ctx: Context, usages: Usage[]) {
     }
     const breaksIn = themes.filter((th) => ratios[th] !== undefined && ratios[th]! < minRatio);
     if (breaksIn.length === 0) continue;
+    for (const th of Object.keys(ratios)) ratios[th] = shownRatio(ratios[th]!);
     out.push({
       kind: "token-contrast",
       token: t.name,
@@ -294,9 +298,10 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
   if (want.has("componentClasses")) out.componentClasses = ctx.componentClasses.map(({ decls, ...c }) => c);
   if (want.has("coverage")) out.coverage = { present: cov.present, missing: cov.missing, requiredMissing: cov.requiredMissing };
   if (want.has("gaps")) out.gaps = gaps(ctx);
-  if (want.has("health")) {
+  if (want.has("health") || want.has("contrast")) {
     const scan = scanFiles(ctx, listProjectFiles(ctx.project));
-    out.health = health(ctx, scan.usages);
+    if (want.has("health")) out.health = health(ctx, scan.usages);
+    if (want.has("contrast")) out.contrast = contrastMatrix(ctx, scan.usages);
   }
   if (want.has("rules")) out.rules = rulesInfo(ctx);
   if (want.has("guidelines")) {

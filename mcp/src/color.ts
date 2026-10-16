@@ -84,11 +84,32 @@ export function compositeOver(fg: Color, bg: Color): Color {
   };
 }
 
-/** WCAG contrast ratio, rounded to 2 decimals. Translucent colors are composited first. */
+/**
+ * WCAG contrast ratio, not rounded: pass or fail is decided on this value ("4.499:1 would not meet
+ * the 4.5:1 threshold", Understanding 1.4.3). Translucent colors are composited first.
+ */
 export function contrast(fg: Color, bg: Color, base?: Color): number {
   const solidBg = alphaOf(bg) < 1 && base ? compositeOver(bg, base) : bg;
   const solidFg = alphaOf(fg) < 1 ? compositeOver(fg, solidBg) : fg;
-  return Math.round(wcagContrast(solidFg, solidBg) * 100) / 100;
+  return wcagContrast(solidFg, solidBg);
+}
+
+const toOklch = converter("oklch");
+
+/** OKLCH chroma and hue of a color (hue 0 for grays). */
+export function chromaHue(c: Color): { c: number; h: number } {
+  const o = toOklch(c);
+  return { c: o?.c ?? 0, h: o?.h ?? 0 };
+}
+
+/** Degrees between two hues, 0 to 180. */
+export function hueDistance(a: number, b: number): number {
+  return Math.abs(((a - b + 540) % 360) - 180);
+}
+
+/** A ratio to show: truncated to 2 decimals, so a failing 4.497 reads 4.49 and never 4.5. */
+export function shownRatio(ratio: number): number {
+  return Math.floor(ratio * 100 + 1e-9) / 100;
 }
 
 export function toHex(c: Color): string {

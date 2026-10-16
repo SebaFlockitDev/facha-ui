@@ -1,0 +1,48 @@
+/* B-032 · contrast matrix fixture: every kind of pair, light and dark. */
+:root {
+  --bg: #ffffff;
+  --panel: #f1f5f9;
+  --text: #0f172a;
+  --text-teal: #168484; /* 4.4989:1 on --bg: fails 4.5:1 unless it is rounded */
+  --text-faint: #94a3b8;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --primary: #4f46e5;
+  --on-primary: #ffffff;
+  --danger: #f87171;
+  --danger-bg: #fef2f2;
+  --danger-text: #b91c1c;
+  --on-danger: #450a0a;
+  --success: #15803d;
+  --warning: #f59e0b;
+  --border: #e2e8f0;
+  --border-input: #cbd5e1;
+  --ring: #4f46e5;
+}
+.dark {
+  --bg: #0b1120;
+  --panel: #1e293b;
+  --text: #f8fafc;
+  --text-teal: #5eead4;
+  --text-faint: #475569;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --primary: #818cf8;
+  --on-primary: #0f172a;
+  --danger: #f87171;
+  --danger-bg: #450a0a;
+  --danger-text: #fca5a5;
+  --on-danger: #450a0a;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --border: #334155;
+  --border-input: #64748b;
+  --ring: #818cf8;
+}
+.notice { background: var(--panel); color: var(--danger-text); }
+.msg { color: #ef4444; }
+.alert-error { color: var(--danger); }
+.note { color: #6b7280; }
+.alert-warning { color: var(--warning); }
+.tag { color: #0891b2; }
+.field input { border: 1px solid var(--border-input); }

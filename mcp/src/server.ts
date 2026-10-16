@@ -11,7 +11,7 @@ import { reviewFlow } from "./flow.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.25.0";
+export const VERSION = "0.26.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -22,7 +22,7 @@ export const INSTRUCTIONS = `facha-ui exposes this project's design system and a
 
 /** Tool descriptions, literal from SPEC §2.a.3. */
 export const DESCRIPTIONS = {
-  get_design_system: `Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one, with the profile of its product type (defaults and guidelines from published systems, each with its source).
+  get_design_system: `Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one, with the profile of its product type (defaults and guidelines from published systems, each with its source), and the contrast matrix: every text on every background where it can appear, per theme, with its WCAG 2.2 level and, for each background, the text that can go on it.
 **When to use:** before writing or modifying any UI, and to answer questions such as "which color/size/component should I use for X?". If no token covers the need, the correct answer is that there is no token: report the gap — never invent a value.
 **Returns:** JSON with \`status\` (ok | partial | missing), \`project\`, \`tokens\`, \`scales\`, \`componentClasses\`, \`coverage\`, \`gaps\`, \`health\`, \`rules\`, \`guidelines\`, \`decisions\`, \`brief\`, \`profile\`. Read-only: it never modifies files or accesses the network.`,
   check_ui: `Validates UI source files against the project's design system using deterministic rules (no AI). Input: a file or directory path, relative to the project root or to the workspace root.

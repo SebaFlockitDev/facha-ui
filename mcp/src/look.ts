@@ -1,6 +1,6 @@
 import { converter } from "culori";
 import type { Color } from "culori";
-import { contrast, findColorLiterals, parseColor, round, toHex } from "./color.js";
+import { contrast, findColorLiterals, parseColor, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { parsePaletteClass } from "./project-rules.js";
 import type { DeclUsage, ElementUsage, Usage } from "./sources/usage.js";
@@ -61,7 +61,7 @@ function gradientFailure(ctx: Context, fg: (theme: string) => Color | undefined,
     const s = stops(th);
     if (!f || s.length < 2) continue;
     const worst = s.map((x) => ({ ...x, ratio: contrast(f, x.color) })).sort((a, b) => a.ratio - b.ratio)[0]!;
-    if (worst.ratio < min) return { theme: th, stop: worst.text, ratio: round(worst.ratio, 2), min, fg: toHex(f) };
+    if (worst.ratio < min) return { theme: th, stop: worst.text, ratio: shownRatio(worst.ratio), min, fg: toHex(f) };
   }
   return null;
 }
