@@ -12,6 +12,15 @@ export const THEMES: Record<string, { attribute: string; value: string }> = {
 
 /** Applies ?theme=<name> to <html> so each variant can be captured in every theme. */
 export function LabTheme() {
+  // ?direction=<id>: the direction of /facha-ui:init system to show (its tokens are scoped to
+  // html[data-facha-direction="<id>"] in <lab.dir>/system/directions.css).
+  useEffect(() => {
+    const direction = new URLSearchParams(window.location.search).get("direction");
+    if (!direction || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(direction)) return;
+    const html = document.documentElement;
+    html.setAttribute("data-facha-direction", direction);
+    return () => html.removeAttribute("data-facha-direction");
+  }, []);
   useEffect(() => {
     const name = new URLSearchParams(window.location.search).get("theme");
     const theme = name ? THEMES[name] : undefined;

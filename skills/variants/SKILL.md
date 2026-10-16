@@ -20,7 +20,7 @@ principles. Talk in the developer's language; the `.md` files below are relative
 
 1. **New run:** `<screen> "<goal>"`. `<screen>` is a route (`/orders`), a file, a component or words
    ("la pantalla de pedidos": find it and say which file); resolve it to `{ file, route, slug }`
-   (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`). `<goal>` is free text
+   (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`; never `system`, reserved by `init`). `<goal>` is free text
    ("make overdue orders stand out"). Follow Steps 1 to 9.
 2. **Refine a variant:** `<slug> <a|b|c> "<change>"`, or a change to one variant asked in the
    conversation ("in B, move the filters above the table"). **Before step R1, read `refine.md`**

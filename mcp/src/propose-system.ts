@@ -3,6 +3,7 @@ import { parseColor, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { coverage, getDesignSystem } from "./design-system.js";
 import { proposeSystem, type Density, type Format, type Level } from "./generate.js";
+import type { StyleId } from "./standards.js";
 import { FachaError } from "./types.js";
 
 /**
@@ -17,6 +18,7 @@ export interface ProposeArgs {
   fontFamily?: string;
   radius?: number;
   seeds?: number;
+  style?: StyleId;
 }
 
 type From = { value: unknown; from: string };
@@ -51,10 +53,11 @@ export function proposeDesignSystem(ctx: Context, args: ProposeArgs) {
     level: { value: level, from: levelFrom },
     format: { value: format, from: format === "tailwind4" ? "package.json: tailwindcss 4 (default theme in @theme)" : "plain CSS custom properties in :root" },
     fontFamily: { value: args.fontFamily ?? null, from: args.fontFamily ? "argument" : "none: the system font stack" },
-    radius: { value: args.radius ?? null, from: args.radius !== undefined ? "argument" : "default: 8px (Material 3 small)" },
+    radius: { value: args.radius ?? null, from: args.radius !== undefined ? "argument" : "each direction's style (Material 3 corner scale)" },
+    style: { value: args.style ?? null, from: args.style ? "argument" : "none: directions take the standard, sober and soft styles" },
   };
 
-  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds });
+  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds, style: args.style });
   const cov = coverage(ctx);
   return {
     designSystemStatus: cov.status,

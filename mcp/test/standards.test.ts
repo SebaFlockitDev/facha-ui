@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { converter, differenceEuclidean, wcagContrast } from "culori";
 import { describe, expect, it } from "vitest";
-import { ACCENT_SEEDS, BRIGHT_SOLID, HOVER_DELTA_E, RADIX, SOURCES, STATUS_SEEDS, fluentShadow } from "../src/standards.js";
+import { ACCENT_SEEDS, BRIGHT_SOLID, HOVER_DELTA_E, PURE_GRAY_L1, RADIX, SOURCES, STATUS_SEEDS, fluentShadow } from "../src/standards.js";
 
 // The constants of the design-system generator come from published sources (B-025, SPEC §2.h):
 // the ones measured from Radix Colors are measured again here from the published scales.
@@ -49,6 +49,13 @@ describe("standards · measured from Radix Colors 3.0.0", () => {
     const l9 = (n: string) => r3(oklch(radix.accents[n]!.light[8]!)!.l);
     expect(Math.min(...BRIGHT.map(l9))).toBe(BRIGHT_SOLID.brightMinL);
     expect(Math.max(...Object.keys(radix.accents).filter((n) => !BRIGHT.includes(n)).map(l9))).toBe(BRIGHT_SOLID.otherMaxL);
+  });
+
+  it("the untinted gray has no chroma, and its step 1 is the pure neutral's background", () => {
+    for (const mode of ["light", "dark"] as const) {
+      expect(Math.max(...radix.grays.gray![mode].map((h) => oklch(h)!.c ?? 0))).toBeLessThan(0.0001);
+      expect(r3(oklch(radix.grays.gray![mode][0]!)!.l)).toBe(PURE_GRAY_L1[mode]);
+    }
   });
 
   it("the state and seed colors are step 9 of their Radix scale, the same in light and dark", () => {

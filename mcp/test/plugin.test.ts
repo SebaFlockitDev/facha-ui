@@ -683,6 +683,71 @@ describe("lab scaffold: every file the scaffold copies finds what it imports", (
   }
 });
 
+describe("B-026 · the direction preview in the lab", () => {
+  const T = path.join(REPO, "skills", "variants", "templates");
+  const read = (p: string) => fs.readFileSync(path.join(T, p), "utf8").replace(/\r\n/g, "\n");
+
+  it("lab-theme sets ?direction= on <html> as data-facha-direction", () => {
+    const theme = read("next-app/lab-theme.tsx");
+    expect(theme).toContain('get("direction")');
+    expect(theme).toContain('html.setAttribute("data-facha-direction", direction)');
+  });
+
+  it("Next: system/ has a layout that loads directions.css, and the specimen and compare pages", () => {
+    expect(read("next-app/system/layout.tsx")).toContain('import "./directions.css";');
+    expect(read("next-app/system/specimen/page.tsx")).toContain('import { LabSpecimen } from "../lab-specimen";');
+    const compare = read("next-app/system/compare/page.tsx");
+    expect(compare).toContain('import { LabDirections } from "../lab-directions";');
+    expect(compare).toContain('const LAB_BASE = "/lab"; /*__LAB_BASE__*/');
+    expect(compare).toContain("/system/${page}?direction=${direction}");
+  });
+
+  it("Vite: main.tsx routes ?system= and loads system/ through globs, which do not fail when it is gone", () => {
+    const main = read("vite-react/main.tsx");
+    expect(main).toContain('import.meta.glob("./system/directions.css", { eager: true });');
+    expect(main).toContain('import.meta.glob<Record<string, ComponentType<any>>>("./system/lab-{specimen,directions}.tsx")');
+    expect(main).toContain("if (NAME.test(system)) return <SystemPreview page={system} />;");
+    expect(main).toContain('screen === "system") continue;');
+    expect(main).not.toMatch(/^import .*\.\/system\//m);
+  });
+
+  it("init system shows the directions on the real screen before writing, and cleans system/ up", () => {
+    const system = fs.readFileSync(path.join(REPO, "skills", "init", "system.md"), "utf8").replace(/\s+/g, " ");
+    expect(system).toContain("## S2b · Show the directions on the real screen");
+    expect(system).toContain("**Before this step, read `../variants/lab.md`**");
+    expect(system).toContain("It is today's screen dressed in each direction, not a redesign");
+    expect(system).toContain("a **mix** (the color of one with the style of another)");
+    expect(system).toContain("Remove `<lab.dir>/system/`");
+    expect(system).toContain("within hard rule 6 of `/facha-ui:variants`");
+  });
+
+  it("lab.md explains every system/ template; apply and variants keep system/ apart from runs", () => {
+    const lab = fs.readFileSync(path.join(REPO, "skills", "variants", "lab.md"), "utf8").replace(/\r\n/g, "\n");
+    const section = lab.split("## Direction preview (`/facha-ui:init system`)")[1] ?? "";
+    expect(section).toContain("`system` is a reserved slug");
+    const walk = (dir: string, base = ""): string[] =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name), `${base}${e.name}/`) : [`${base}${e.name}`]));
+    for (const f of walk(path.join(T, "next-app", "system"))) expect(section, f).toContain(`\`${f}\``);
+    expect(fs.readFileSync(path.join(REPO, "skills", "apply", "SKILL.md"), "utf8").replace(/\s+/g, " ")).toContain("(`<lab.dir>/system/`, an open `init system` preview, counts as one)");
+    expect(fs.readFileSync(path.join(REPO, "skills", "variants", "SKILL.md"), "utf8")).toContain("never `system`, reserved by `init`");
+  });
+
+  it("the live panel never reads system/ as a run", () => {
+    expect(read("next-app/lab-panel.tsx")).toContain('slug === "system"');
+  });
+
+  it("every import of the system/ files is in system/ or in the scaffold", () => {
+    const files = ["system/layout.tsx", "system/specimen/page.tsx", "system/compare/page.tsx", "system/lab-specimen.tsx", "system/lab-directions.tsx"];
+    const available = new Set([...files, "system/lab-specimen.module.css", "system/directions.css", "lab-theme.tsx"]);
+    for (const file of files) {
+      for (const m of read(`next-app/${file}`).matchAll(/^import .*"(\.{1,2}\/[^"]+)";$/gm)) {
+        const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), m[1]!));
+        expect([target, `${target}.tsx`].some((t) => available.has(t)), `${file} imports ${m[1]}`).toBe(true);
+      }
+    }
+  });
+});
+
 describe("skills with a Vite lab", () => {
   const skill = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8");
 

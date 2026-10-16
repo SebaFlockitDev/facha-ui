@@ -24,6 +24,8 @@ export const SOURCES = {
   wcag258: "WCAG 2.2 SC 2.5.8 Target Size (Minimum): 24 by 24 CSS pixels · https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
   statusDeltaE: "facha-ui status-confusable: two states closer than ΔE OKLab×100 10, also under deuteranopia and protanopia (mcp/src/visual.ts)",
   systemFont: "facha-ui init never installs dependencies (skills/init/SKILL.md, hard rule 4): the system font stack needs none",
+  radixGray: "Radix Colors 3.0.0 gray: the untinted gray scale (chroma 0 in all 12 steps) · https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
+  carbonLayering: "Carbon layering model (@carbon/themes 11.83: layer-01/02/03 alternate #f4f4f4 and #ffffff on a #ffffff background; shadow is a separate token for floating elements) · https://carbondesignsystem.com/elements/color/overview/",
 } as const;
 
 export type SourceId = keyof typeof SOURCES;
@@ -134,6 +136,24 @@ export function fluentShadow(depth: number, mode: "light" | "dark"): string {
   const y = depth === 2 ? 1 : depth / 2;
   return `0 0 ${ambientBlur}px rgba(0, 0, 0, ${ambient}), 0 ${y}px ${depth}px rgba(0, 0, 0, ${key})`;
 }
+
+/** OKLCH lightness of step 1 of Radix's untinted gray (#fcfcfc light, #111111 dark). */
+export const PURE_GRAY_L1 = { light: 0.991, dark: 0.178, source: "radixGray" as SourceId };
+
+/**
+ * Styles (B-026): each direction is a seed (or the brand) plus a style, whose parameters come
+ * from published systems: the default radius (Material 3 corner scale), the neutral (Radix's
+ * untinted gray or a gray tinted with the seed's hue) and how cards stand out (Carbon's layers
+ * with a border, or a Fluent 2 shadow of the given depth).
+ */
+export const STYLES = {
+  standard: { label: "Estándar", radius: 8, neutral: "tinted", card: 2, sources: ["material3Shape", "radix", "fluentShadow"] as SourceId[] },
+  sober: { label: "Sobrio", radius: 4, neutral: "pure", card: "layer", sources: ["material3Shape", "radixGray", "carbonLayering"] as SourceId[] },
+  soft: { label: "Suave", radius: 16, neutral: "tinted", card: 8, sources: ["material3Shape", "radix", "fluentShadow"] as SourceId[] },
+} as const;
+export type StyleId = keyof typeof STYLES;
+/** The order directions take styles in when there are several. */
+export const STYLE_ORDER: StyleId[] = ["standard", "sober", "soft"];
 
 /** Above this ΔE (OKLab×100) two states are told apart (facha-ui's status-confusable default). */
 export const STATUS_MIN_DELTA_E = 10;

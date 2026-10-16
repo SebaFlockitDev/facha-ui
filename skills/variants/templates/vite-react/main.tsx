@@ -18,12 +18,19 @@ import { LabProviders } from "./providers";
 const PAGES = import.meta.glob<{ default: ComponentType }>("./*/*/Page.{tsx,jsx}");
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+// The direction preview of /facha-ui:init system (B-026) lives in ./system/ only while it runs: a
+// glob, unlike an import, does not fail when the files are not there.
+import.meta.glob("./system/directions.css", { eager: true });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SYSTEM = import.meta.glob<Record<string, ComponentType<any>>>("./system/lab-{specimen,directions}.tsx");
+
 /** Screens and their variants, from the files in the lab. */
 export function labIndex(): Map<string, string[]> {
   const out = new Map<string, string[]>();
   for (const key of Object.keys(PAGES).sort()) {
     const [, screen, variant] = key.split("/");
-    if (!screen || !variant || screen.startsWith("_")) continue;
+    // `system` is /facha-ui:init system's direction preview, never a screen with variants.
+    if (!screen || !variant || screen.startsWith("_") || screen === "system") continue;
     out.set(screen, [...(out.get(screen) ?? []), variant]);
   }
   return out;
@@ -81,6 +88,49 @@ function Variant({ screen, variant }: { screen: string; variant: string }) {
   );
 }
 
+/**
+ * /facha-ui:init system's direction preview: ?system=specimen (every token and state), ?system=compare
+ * (the directions side by side) or ?system=<slug> (the copy of a real screen), with &direction=<id>.
+ */
+function SystemPreview({ page }: { page: string }) {
+  const Page = useMemo(() => {
+    if (page === "specimen" || page === "compare") {
+      const load = SYSTEM[page === "compare" ? "./system/lab-directions.tsx" : "./system/lab-specimen.tsx"];
+      if (!load) return null;
+      return lazy(async () => {
+        const m = await load();
+        if (page === "specimen") return { default: m.LabSpecimen! };
+        const Directions = m.LabDirections!;
+        const url = (p: string, d: string, t: string) => `?system=${p}&direction=${d}${t ? `&theme=${t}` : ""}`;
+        return { default: () => <Directions url={url} /> };
+      });
+    }
+    const key = Object.keys(PAGES).find((k) => k.startsWith(`./system/${page}/Page.`));
+    return key ? lazy(PAGES[key]!) : null;
+  }, [page]);
+  if (!Page) return <p style={{ font: "14px system-ui", padding: 16 }}>No hay vista de direcciones en el laboratorio: la arma /facha-ui:init system.</p>;
+  const content = (
+    <Suspense fallback={null}>
+      <Page />
+    </Suspense>
+  );
+  if (page === "specimen" || page === "compare")
+    return (
+      <>
+        <LabTheme />
+        {content}
+      </>
+    );
+  return (
+    <VariantBoundary screen={page}>
+      <LabProviders screen={page}>
+        <LabTheme />
+        {content}
+      </LabProviders>
+    </VariantBoundary>
+  );
+}
+
 function LabHome() {
   const index = labIndex();
   return (
@@ -107,6 +157,8 @@ function Lab() {
   const screen = q.get("screen") ?? "";
   const variant = q.get("v") ?? "";
   const compare = q.get("compare") ?? "";
+  const system = q.get("system") ?? "";
+  if (NAME.test(system)) return <SystemPreview page={system} />;
   if (NAME.test(compare)) return <CompareVariants slug={compare} variants={labIndex().get(compare) ?? []} />;
   if (NAME.test(screen) && /^[a-z][0-9]?$/.test(variant)) return <Variant screen={screen} variant={variant} />;
   return <LabHome />;

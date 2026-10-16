@@ -11,7 +11,7 @@ import { reviewFlow } from "./flow.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.21.0";
+export const VERSION = "0.22.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
@@ -34,7 +34,7 @@ export const DESCRIPTIONS = {
   scan_styles: `Inventories the style literals the project already uses (colors written by hand, and font sizes and radii when the design system has no scale for them) and turns them into token proposals derived from that usage. Default-theme values are the literals in use; other themes reuse a value the project already declares or are derived deterministically to keep the minimum contrast, and each value says how it was obtained. Literals that match an existing token are listed separately, to migrate instead of creating new tokens.
 **When to use:** when the design system is missing or lacks roles (for example status colors), to prepare a proposal the team can review — this is the read-only half of \`/facha-ui:init\`. Never present the proposals as existing tokens: they are a proposal until the developer approves them.
 **Returns:** JSON with \`status\`, \`missingRoles\`, \`summary\`, \`existing\` (literals to replace with existing tokens), \`proposals\` (name, role, value per theme with origin and method, contrast, evidence, locations), \`scales\`, \`migrationPlan\` (replacements per file, most impact first) and \`notes\`. Read-only: it never modifies files.`,
-  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+  propose_design_system: `Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Each direction is a seed plus a style (standard, sober or soft: default radius from the Material 3 corner scale, a tinted or untinted neutral, and cards raised by a Fluent 2 shadow or by Carbon's layers); with a brand color, the brand in the three styles; without one, 3 to 5 Radix accent seeds, each with a style; with brandColor and style, one direction (to mix two). Inputs come from the arguments, then the design brief, then a default. Deterministic: the same input gives the same output.
 **When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve — this is the read-only half of \`/facha-ui:init system\`. Never present it as existing tokens.
 **Returns:** JSON with \`designSystemStatus\`, \`brief\`, \`inputs\` (value and origin of each), \`typography\`, \`spacing\`, \`radius\`, \`directions\` (per direction: \`seed\`, \`scales\`, \`tokens\` with name, role, light and dark value and sources, \`proof\` with every contrast pair, \`adjustments\`, \`conflicts\` with their solution, \`notes\` and the \`css\` blocks to write), \`sources\` and \`notes\`. Read-only: it never modifies files or accesses the network.`,
   review_ui: `Measures signals of visual hierarchy and state coverage in UI files, for a design critique: primary actions that compete, accent tokens in use, font sizes in use, the heading outline, and whether each screen handles loading, empty and error states. Deterministic heuristics (no AI); they never block.
@@ -191,6 +191,7 @@ export function createServer(opts: ServerOptions): McpServer {
         fontFamily: z.string().max(200).optional(),
         radius: z.number().int().min(0).max(32).optional(),
         seeds: z.number().int().min(3).max(5).optional(),
+        style: z.enum(["standard", "sober", "soft"]).optional(),
       },
       annotations: { title: "Propose design system", ...READ_ONLY },
     },

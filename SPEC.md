@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.21.0** (§7.10–§7.31). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.22.0** (§7.10–§7.32). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -373,11 +373,11 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 ##### `propose_design_system` (B-025, §2.h)
 
 **Descripción (literal):**
-> Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Inputs come from the arguments, then the design brief, then a default; without a brand color it builds 3 to 5 directions from Radix accents. Deterministic: the same input gives the same output.
+> Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Each direction is a seed plus a style (standard, sober or soft: default radius from the Material 3 corner scale, a tinted or untinted neutral, and cards raised by a Fluent 2 shadow or by Carbon's layers); with a brand color, the brand in the three styles; without one, 3 to 5 Radix accent seeds, each with a style; with brandColor and style, one direction (to mix two). Inputs come from the arguments, then the design brief, then a default. Deterministic: the same input gives the same output.
 > **When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve — this is the read-only half of `/facha-ui:init system`. Never present it as existing tokens.
 > **Returns:** JSON with `designSystemStatus`, `brief`, `inputs` (value and origin of each), `typography`, `spacing`, `radius`, `directions` (per direction: `seed`, `scales`, `tokens` with name, role, light and dark value and sources, `proof` with every contrast pair, `adjustments`, `conflicts` with their solution, `notes` and the `css` blocks to write), `sources` and `notes`. Read-only: it never modifies files or accesses the network.
 
-**Entrada:** `{ brandColor?, density?: "compact" | "balanced" | "airy", level?: "AA" | "AAA", fontFamily?, radius?: 0–32, seeds?: 3–5 }`. Lo que falta sale del brief (§2.g) y, si no, de un valor por defecto; `inputs` dice el origen de cada uno. Un `brandColor` que no es un color CSS da `INVALID_INPUT`. El generador (`mcp/src/generate.ts`) es una función pura: solo importa culori y sus constantes (`mcp/src/standards.ts`), y un test lo controla.
+**Entrada:** `{ brandColor?, density?: "compact" | "balanced" | "airy", level?: "AA" | "AAA", fontFamily?, radius?: 0–32, seeds?: 3–5, style?: "standard" | "sober" | "soft" }` (`style` desde B-026). Lo que falta sale del brief (§2.g) y, si no, de un valor por defecto; `inputs` dice el origen de cada uno. Un `brandColor` que no es un color CSS da `INVALID_INPUT`. El generador (`mcp/src/generate.ts`) es una función pura: solo importa culori y sus constantes (`mcp/src/standards.ts`), y un test lo controla.
 
 ##### `ux_score` (desde 0.12.0, §7.20)
 
@@ -713,7 +713,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -853,12 +853,15 @@ Para un proyecto sin tokens, después del brief (§2.g). En lugar de ordenar los
 - **Hover:** el paso 10 se aleja del 9 al menos lo que lo aleja Radix (ΔE 2.961 en claro y 4.074 en oscuro, medidos), para que se note (`ux:nielsen-1`).
 - **Alias:** cuando info sigue a la marca, sus tokens son `var()` de los de la marca, declarados en `:root` y otra vez en `.dark` (un `var()` en `:root` se resuelve con el valor claro). El bloque `.dark` repite todos los colores.
 - **Prueba:** cada par texto/fondo y cada borde de control, en claro y oscuro, con su razón y su regla, sobre los hex finales (AA: 4.5 y 3; AAA: 7 y 3).
-- **Sin color de marca:** de 3 a 5 direcciones con semillas de los acentos de Radix que no se confunden con éxito, advertencia ni peligro, separadas al menos 45° en tono (hoy: índigo, ciruela y cyan).
+- **Direcciones = semilla + estilo** (B-026). Los estilos fijan parámetros publicados: `standard` (radio 8, Material 3 *small*; gris teñido; tarjetas con la sombra 2 de Fluent), `sober` (radio 4, Material 3 *extra-small*; el gris sin tinte de Radix; tarjetas por capas con borde y sin sombra, el modelo de Carbon) y `soft` (radio 16, Material 3 *large*; gris teñido; sombra 8 de Fluent). Tokens del estilo: `--radius` y `--shadow-card`.
+- **Con color de marca:** la marca en los tres estilos. **Sin color de marca:** de 3 a 5 semillas de los acentos de Radix que no se confunden con éxito, advertencia ni peligro, separadas al menos 45° en tono (hoy índigo, ciruela y cyan), cada una con el estilo que sigue. Cada par de direcciones difiere en al menos dos de: tono, tinte del neutro, radio y elevación. Con `brandColor` y `style` sale una sola dirección: así se mezclan dos.
 - **Nombres** con los espacios de Tailwind 4 (`--color-*`, `--text-*`, `--radius-*`, `--shadow-*`, `--font-sans`), que facha-ui lee por rol: en CSS van en `:root`; en Tailwind 4, en `@theme`. El oscuro, en `.dark`. Un test escribe el sistema en un proyecto, lo lee con facha-ui y exige los roles esperados, `status: ok` y ningún hallazgo de contraste ni de estados confundibles.
 
 **Tool:** `propose_design_system` (§2.a.3) toma la entrada de sus argumentos, después del brief y si no de un valor por defecto, y dice el origen de cada una.
 
-**Skill** (`skills/init/system.md`): solo con `status: missing`; recomienda el brief si no hay. Muestra las entradas, los colores por rol, los ajustes y conflictos, la prueba de contraste y las demás escalas con su fuente, y exactamente qué escribe. Con la aprobación y el motivo escribe los bloques al principio del CSS global que carga la app, la propuesta en `.facha-ui/proposals/system-<fecha>.json` y la decisión `dec-<fecha>-system`. El modo oscuro se escribe si el brief lo pide; si no, queda en la propuesta. Las pantallas no se tocan: el siguiente paso es `/facha-ui:variants`.
+**Vista de direcciones en el laboratorio** (B-026, `lab.md` → Direction preview): `<lab.dir>/system/`, propia de `init system` y nunca un run (`system` es un slug reservado; el índice del laboratorio y el panel lo saltean, y `apply` lo cuenta como una pantalla para no borrar el andamiaje). Tiene `directions.css` (el `css.lab` de cada dirección, acotado a `html[data-facha-direction="<id>"]`, que `lab-theme.tsx` pone desde `?direction=`), una **página de muestra** hecha solo con tokens (tipografía, color, botones y campos en sus estados, estados, tabla, vacío, error, radios y sombras), una **copia conservadora de la pantalla real** de la tarea principal del brief (misma estructura, datos y providers; cada valor escrito a mano pasa al token de su rol) y una vista **lado a lado** de las direcciones (`lab-directions.tsx`, propia de facha-ui, separada de la comparación de variantes). En Next son rutas bajo `<LAB_BASE>/system/`; en Vite, `?system=` en el `main.tsx` del laboratorio, que carga `system/` con globs para no fallar cuando no existe.
+
+**Skill** (`skills/init/system.md`): solo con `status: missing`; recomienda el brief si no hay. Genera las tres direcciones, arma el laboratorio si no existe, escribe `system/`, controla la copia con `check_ui` (solo se admiten los `unknown-token` de nombres que el sistema va a crear) y captura la muestra y la pantalla de cada dirección. El dev elige una o mezcla, y recién entonces sigue el plan de escritura. Muestra las entradas, los colores por rol, los ajustes y conflictos, la prueba de contraste y las demás escalas con su fuente, y exactamente qué escribe. Con la aprobación y el motivo escribe los bloques al principio del CSS global que carga la app, la propuesta en `.facha-ui/proposals/system-<fecha>.json` y la decisión `dec-<fecha>-system`. El modo oscuro se escribe si el brief lo pide; si no, queda en la propuesta. Con los tokens ya escritos, la copia y la muestra dan 0 errores en `check_ui`; después borra `system/` (y el andamiaje si lo creó y ningún run lo usa) y deja las capturas. Las pantallas no se tocan: el siguiente paso es `/facha-ui:variants`.
 
 ---
 
@@ -1469,6 +1472,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Lo que encontraron las pruebas:** el rojo y el verde de Radix se confunden con deuteranopía (ΔE 3.9), y todo azul o violeta se confunde con el azul de info; la revisión a ojo encontró peligro con texto oscuro, éxito casi negro y texto de acento más claro que la marca. Cada caso quedó resuelto con una regla medida (ver §2.h y las decisiones del spec).
 - **APCA** pasa a B-032; **shadcn** no se nombra: un proyecto shadcn siempre tiene tokens.
 - **Tests:** las constantes se vuelven a medir desde las escalas de Radix; 10 marcas (fría, cálida, clara, oscura, saturada, apagada, verde, casi negra) pasan cada par en AA y en AAA; determinismo; marca conservada o ajuste informado; conflictos; semillas; ida y vuelta por facha-ui (roles, `status: ok`, sin hallazgos de salud), también en Tailwind 4; la tool por el MCP (entradas del brief, argumentos, Tailwind 4, color inválido); S2 de los imports; contratos de la skill.
+
+### 7.32 Versión 0.22.0: tres direcciones sobre la pantalla real
+
+Ítem B-026 del backlog, el tercero del bloque "diseño desde cero". Spec, decisiones y registro: [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).
+
+- **Qué cambia:** las direcciones son semilla + estilo (§2.h), y `/facha-ui:init system` las muestra en el laboratorio, sobre la pantalla real con sus datos y sobre una página de muestra, antes de escribir nada fuera del laboratorio.
+- **Criterio cambiado:** las direcciones difieren en al menos dos de tono, tinte, radio y **elevación** (antes "densidad": la densidad sale del brief y no varía entre direcciones).
+- **Lo que encontró la prueba real** (Vite, sin design system): la vista funciona con los datos reales; con la marca fija, sobre una tabla las tres direcciones se parecen (cambian radio, gris y elevación), así que la skill lo dice y remite a la muestra; `check_ui` se aplica a la copia y a la muestra y no a `directions.css`, que guarda los valores; la muestra tenía un enlace sin destino claro y usaba `100vh`.
+- **Tests:** estilos (radio, gris, elevación, fuentes), diferencias entre cada par de direcciones con y sin marca, mezcla con `style`, `css.lab`, la muestra con 0 errores de `check_ui` contra un sistema generado en Vite y en Next con cada estilo, contratos de los templates y de las skills.
 
 ---
 

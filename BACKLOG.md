@@ -27,17 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-026 · Tres direcciones de diseño sobre la pantalla real
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** L
-- **Por qué:** elegir una paleta en abstracto es elegir a ciegas. Stitch muestra varias direcciones, pero sobre maquetas; facha-ui puede mostrarlas sobre la pantalla real, con datos reales.
-- **Qué:** `init` genera 3 direcciones con B-025 y el laboratorio muestra la misma pantalla con cada una, más una página de muestra con todos los tokens y estados (hover, foco, deshabilitado, error, vacío). El dev elige una, o pide mezclar, y recién entonces `init` escribe los tokens.
-- **Criterios de aceptación:** las 3 direcciones difieren en al menos dos de: tono, tinte de los neutros, radio y densidad; la página de muestra pasa `check_ui` con 0 errores; hay capturas de las 3; fuera del laboratorio no se escribe nada sin aprobación.
-- **Depende de:** B-025
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §2.b (laboratorio), `skills/init/SKILL.md` (modo paleta)
-
-## Siguiente
-
 ### B-027 · Perfiles por tipo de producto, con fuentes
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -46,6 +35,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Criterios de aceptación:** cada valor de un perfil cita su fuente, verificada en la documentación primaria antes de fijarla; un test controla que ningún perfil tenga valores sin fuente.
 - **Depende de:** B-025
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://carbondesignsystem.com/elements/typography/type-sets/ , https://polaris.shopify.com/ , https://baymard.com/ , https://utopia.fyi/
+
+## Siguiente
 
 ### B-029 · Reglas contra el "look genérico de IA"
 - **Estado:** listo para spec
@@ -223,6 +214,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.22.0:** B-026, tres direcciones (semilla + estilo) sobre la pantalla real y una página de muestra, en el laboratorio, antes de escribir; spec en [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).
 - **0.21.0:** B-025, design system desde estándares (`propose_design_system`, `/facha-ui:init system`); spec en [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
 - **0.20.0:** B-024, brief de diseño para un proyecto sin diseño (`/facha-ui:init brief`, sección `brief` de `get_design_system`); spec en [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).
 - **0.19.1:** B-023, el "Connection closed" del MCP en sesiones abiertas en el repo de facha-ui (los servidores pasan a `plugin.json`).
