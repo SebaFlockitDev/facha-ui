@@ -12,13 +12,15 @@ Approval never happens in the browser.
 
 1. Preflight as in R1 of `refine.md`: the run exists and its `status` is `generated`.
 2. Make sure the live scaffold exists (with the Write tool, never shell copies). Do not touch
-   `lab-theme.tsx`.
+   `lab-theme.tsx`. A `lab-panel.tsx` that does not import `./lab-palette` is from an older
+   version: update it to the template's version (it is facha-ui's own UI, never edited by hand)
+   and set `LAB_BASE` again. The panel always goes with `lab-palette.ts`: copy it when missing.
    - **Next.js:** if `<lab.dir>/lab-panel.tsx` or `<lab.dir>/facha-live/route.ts` is missing (a
      lab created by an older version), copy them from `templates/next-app/` (with
-     `facha-live/live-core.ts`), set `LAB_BASE`, and update `<lab.dir>/layout.tsx` to the
+     `facha-live/live-core.ts` and `lab-palette.ts`), set `LAB_BASE`, and update `<lab.dir>/layout.tsx` to the
      template's version, which renders `<LabPanel />`.
    - **Vite:** if `<lab.dir>/lab-panel.tsx`, `<lab.dir>/facha-live/live-core.ts` or
-     `<lab.dir>/facha-live-plugin.ts` is missing, copy `lab-panel.tsx` and
+     `<lab.dir>/facha-live-plugin.ts` is missing, copy `lab-panel.tsx`, `lab-palette.ts` and
      `facha-live/live-core.ts` from `templates/next-app/` and `facha-live-plugin.ts` from
      `templates/vite-react/`, and update `main.tsx` and `compare.tsx` to the template's versions
      (keep the `/*__GLOBAL_CSS__*/` imports you wrote). Set `LAB_BASE` in `lab-panel.tsx`,
@@ -46,12 +48,12 @@ Approval never happens in the browser.
    `{ "slug": "<slug>", "runId": "<runId>", "active": true, "startedAt": "<ISO>", "expiresAt": "<ISO, 2 hours later>" }`.
    Do not write a token: the endpoint creates it. If `.facha-ui/live/status.json` does not
    exist, write `{ "requests": {} }`.
-5. Palette base, for the panel's **Paleta** tab. Run
+5. Palette base, for the panel's **Diseño** tab (its colors, radii and control heights). Run
    `node "<this skill's directory>/scripts/palette-base.mjs" "<project root>" --anchor <token>`,
    where `<token>` is the token of the brand's primary color (from roles and comments in
    `get_design_system`, e.g. the one used for primary actions). It prints JSON; write it,
    unchanged, to `.facha-ui/live/palette.json` with the Write tool. If it fails (no color
-   tokens), skip it: the panel then shows no Paleta tab.
+   tokens), skip it: the panel then shows no Diseño tab.
 6. Start listening (L2), then tell the developer: open any variant
    (`preview.baseUrl` + `project.lab.urlPattern`), use the **facha-ui** panel at the bottom
    right, and keep this Claude Code session open. Live mode lasts 2 hours or until they stop it.

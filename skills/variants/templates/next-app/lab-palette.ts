@@ -179,6 +179,9 @@ function luminance(rgb: Rgb): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+/** A ratio for people: truncated, so 4.49 reads 4.4 and never "4.5:1, under 4.5:1". */
+export const formatRatio = (ratio: number) => (Math.floor(ratio * 10) / 10).toFixed(1);
+
 export function contrastRatio(a: Rgb, b: Rgb): number {
   const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p) as [number, number];
   return (x + 0.05) / (y + 0.05);
@@ -223,15 +226,16 @@ function baseRadius(base: PaletteBase): number | null {
   return all.length ? all[Math.floor(all.length / 2)]! : null;
 }
 
-/** Which controls this project's tokens can take, and why not when they cannot. */
+/** Which controls this project's tokens can take, why not when they cannot, and today's value in px. */
 export function capabilities(base: PaletteBase) {
   const neutrals = base.tokens.some((t) => isNeutralRole(t.role));
-  const radius = baseRadius(base) !== null;
-  const control = base.tokens.some(isControl);
+  const radius = baseRadius(base);
+  const controlToken = base.tokens.find(isControl);
+  const control = controlToken ? px(Object.values(controlToken.values)[0] ?? "") : null;
   return {
     tint: { ok: neutrals, why: neutrals ? "" : "Tu sistema no tiene tokens de superficie, texto o borde." },
-    radius: { ok: radius, why: radius ? "" : "Tu sistema no tiene tokens de radio (o todos son 0)." },
-    control: { ok: control, why: control ? "" : "Tu sistema no tiene un token de alto de controles (--size-control)." },
+    radius: { ok: radius !== null, why: radius !== null ? "" : "Tu sistema no tiene tokens de radio (o todos son 0).", now: radius },
+    control: { ok: !!controlToken, why: controlToken ? "" : "Tu sistema no tiene un token de alto de controles (--size-control).", now: control },
   };
 }
 
@@ -472,7 +476,7 @@ export function designConflicts(base: PaletteBase, choice: DesignChoice | null, 
   for (const p of contrastPairs(base, values, level)) {
     const prev = was.get(key(p));
     if (p.ratio < p.min && (!prev || prev.ratio >= p.min)) {
-      out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${p.ratio.toFixed(1)}:1 (mínimo ${p.min}:1).`, fix: FIX[p.kind] });
+      out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1).`, fix: FIX[p.kind] });
       if (out.filter((c) => c.kind === "contrast").length >= 4) break;
     }
   }

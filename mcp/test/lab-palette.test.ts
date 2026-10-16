@@ -43,6 +43,7 @@ interface Conflict {
 interface Ok {
   ok: boolean;
   why: string;
+  now?: number | null;
 }
 interface LabPalette {
   RADIX_GRAYS: Record<"light" | "dark", { L: number[]; C: number[] }>;
@@ -181,7 +182,8 @@ describe("lab-palette · controls", () => {
     expect(c.radius.ok).toBe(false);
     expect(c.radius.why).toContain("radio");
     expect(c.control.ok).toBe(false);
-    expect(capabilities(BASE).control.ok).toBe(true);
+    expect(capabilities(BASE).control).toMatchObject({ ok: true, now: 40 });
+    expect(capabilities(BASE).radius).toMatchObject({ ok: true, now: 8 });
   });
 });
 
@@ -207,7 +209,8 @@ describe("lab-palette · what a choice would break", () => {
     const conflicts = designConflicts(amber(), teal, []);
     expect(conflicts).toHaveLength(1);
     expect(conflicts[0]).toMatchObject({ kind: "contrast" });
-    expect(conflicts[0]!.text).toContain("--primary sobre --bg");
+    // 4.49 reads 4.4, never "4.5:1 (mínimo 4.5:1)".
+    expect(conflicts[0]!.text).toContain("--primary sobre --bg baja a 4.4:1");
     expect(conflicts[0]!.fix).toContain("tono más oscuro");
     // A text that already failed (3.0:1) is the project's problem, not the choice's: not listed.
     const faint = amber([{ name: "--text-faint", role: "text.tertiary", values: { light: "#949494" } }]);

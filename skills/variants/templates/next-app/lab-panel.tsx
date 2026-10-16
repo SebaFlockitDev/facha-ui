@@ -3,6 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { THEMES } from "./lab-theme";
+import {
+  CONTROL_STEPS,
+  ORIGINAL,
+  PRESETS,
+  RADIUS_STEPS,
+  WCAG_MIN,
+  anchorLch,
+  capabilities,
+  computeDesign,
+  contrastPairs,
+  customChoice,
+  describeChoice,
+  designConflicts,
+  formatRatio,
+  paletteCss,
+  type DesignChoice,
+  type PaletteBase,
+  type Pair,
+} from "./lab-palette";
 
 /**
  * Floating panel of the facha-ui lab. With live mode on (/facha-ui:variants <slug> live in Claude
@@ -14,11 +33,12 @@ import { THEMES } from "./lab-theme";
  * the change, so Claude Code knows exactly what the change is about (tag, text, classes, a CSS
  * path, its position and the React component that renders it).
  *
- * "Paleta" previews the whole app with another palette: it recomputes the brand family and the
- * tinted neutrals of the project's own color tokens (OKLCH, keeping each token's lightness so the
- * contrast structure holds) and overrides them in this browser only. A palette the developer
- * likes can be proposed to Claude Code, which reviews it and changes the tokens only after the
- * developer approves it there (/facha-ui:init palette).
+ * "Diseño" previews the whole app with other design decisions (B-031): the brand's hue (a preset,
+ * a slider or the developer's own color), the tint of the neutrals, the radius, the control height
+ * and the text contrast. lab-palette.ts computes them from the project's own tokens (OKLCH, keeping
+ * each color's lightness so the contrast structure holds) and the panel overrides them in this
+ * browser only. A combination the developer likes can be proposed to Claude Code, which reviews it
+ * and changes the tokens only after the developer approves it there (/facha-ui:init palette).
  *
  * It renders in a Shadow DOM with its own styles, so it neither uses nor affects the project's
  * design system. It hides itself in automated browsers (Playwright captures). It can be dragged
@@ -121,27 +141,6 @@ interface Target {
   rect?: { x: number; y: number; width: number; height: number };
 }
 
-interface PaletteBase {
-  anchor: string;
-  themes: { name: string; selector: string }[];
-  tokens: { name: string; role?: string; values: Record<string, string> }[];
-  /** Hand-written colors of the project (design-system gaps), to warn about conflicts. */
-  references?: { where: string; values: string[] }[];
-}
-
-/** A palette to preview: a target hue and how much chroma the brand family and neutrals keep. */
-interface PaletteChoice {
-  id: string;
-  name: string;
-  hue: number;
-  brand: number;
-  neutral: number;
-  /** The developer's own color, for a custom palette. */
-  base?: string;
-}
-
-type TokenValues = Record<string, Record<string, string>>;
-
 interface LiveRequest {
   id: string;
   at: string;
@@ -187,18 +186,6 @@ const LABEL: Record<Status["state"], string> = {
   chosen: "Elegida",
   proposed: "Propuesta lista",
 };
-
-/**
- * Palettes common in admin and payment apps. Hues are OKLCH degrees; each token keeps its own
- * lightness, so these change the color family, not the contrast structure of the design.
- */
-const PRESETS: (PaletteChoice & { note: string })[] = [
-  { id: "azul", name: "Azul confianza", hue: 262, brand: 1, neutral: 1, note: "El más usado en bancos y fintech: transmite seguridad." },
-  { id: "indigo", name: "Índigo", hue: 280, brand: 1, neutral: 1, note: "Azul con un toque violeta: moderno y cercano a una marca violeta." },
-  { id: "turquesa", name: "Turquesa", hue: 195, brand: 1, neutral: 1, note: "Fresco y calmo; común en pagos y salud." },
-  { id: "verde", name: "Verde", hue: 150, brand: 1, neutral: 1, note: "Asociado al dinero. Ojo: puede confundirse con el verde de «pagado»." },
-  { id: "grafito", name: "Grafito neutro", hue: 262, brand: 0.12, neutral: 0.25, note: "Sobrio: el color queda para los estados y las alertas." },
-];
 
 /** Next.js components that wrap every page: the list of components stops there. */
 const FRAMEWORK =
@@ -257,7 +244,7 @@ details .item { margin-bottom: 6px; }
 .ok { color: #4fd17f; }
 .warn { color: #ff8a4c; }
 code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; background: #0e1119; padding: 1px 5px; border-radius: 5px; }
-.presets { display: grid; gap: 6px; }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .preset { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; text-align: left; border: 1px solid #272d3d; border-radius: 10px; background: #0e1119; color: #e8eaf2; padding: 7px 9px; font: inherit; cursor: pointer; }
 .preset[aria-pressed="true"] { border-color: #ff8a4c; }
 .preset .note { grid-column: 2; color: #9ba2b8; font-size: 11.5px; }
@@ -265,6 +252,13 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .swatches i { width: 14px; height: 28px; display: block; }
 .swatches i:first-child { border-radius: 6px 0 0 6px; }
 .swatches i:last-child { border-radius: 0 6px 6px 0; }
+.controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.control { display: grid; gap: 3px; align-content: start; }
+.control select { width: 100%; }
+.control .why { font-size: 11.5px; }
+input.hue { flex: 1; min-width: 120px; accent-color: #e8eaf2; }
+.hue-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #3a4256; display: inline-block; }
+.num { font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
 .conflicts { display: grid; gap: 8px; border: 1px solid #272d3d; border-radius: 10px; padding: 8px 10px; font-size: 12px; }
 .conflicts.has { border-color: #ff8a4c; }
 .conflicts p { margin: 0; }
@@ -352,6 +346,12 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
+/** The design choice kept between reloads; one saved by an older panel (a palette only) starts over. */
+function loadChoice(): DesignChoice {
+  const saved = load<Partial<DesignChoice> | null>(PALETTE_KEY, null);
+  return saved && typeof saved === "object" && "tint" in saved ? { ...ORIGINAL, ...saved } : ORIGINAL;
+}
+
 function save(key: string, value: unknown) {
   try {
     if (value === null) window.localStorage.removeItem(key);
@@ -368,272 +368,6 @@ function clamp(x: number, y: number, width: number, height: number) {
     x: Math.min(Math.max(margin, x), Math.max(margin, window.innerWidth - width - margin)),
     y: Math.min(Math.max(margin, y), Math.max(margin, window.innerHeight - height - margin)),
   };
-}
-
-// ---- Palette preview (OKLCH) ----------------------------------------------------------------
-
-type Rgb = [number, number, number];
-interface Parsed {
-  rgb: Rgb;
-  alpha: number;
-  kind: "hex" | "hex8" | "rgb";
-}
-interface Lch {
-  L: number;
-  C: number;
-  h: number;
-}
-
-const COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|rgba?\([^)]*\)/g;
-
-function parseColor(text: string): Parsed | null {
-  if (text.startsWith("#")) {
-    let hex = text.slice(1);
-    if (hex.length <= 4) hex = [...hex].map((c) => c + c).join("");
-    const n = (i: number) => parseInt(hex.slice(i, i + 2), 16) / 255;
-    return { rgb: [n(0), n(2), n(4)], alpha: hex.length === 8 ? n(6) : 1, kind: hex.length === 8 ? "hex8" : "hex" };
-  }
-  const nums = text.slice(text.indexOf("(") + 1, -1).split(/[\s,/]+/).filter(Boolean);
-  if (nums.length < 3) return null;
-  const channel = (v: string) => (v.endsWith("%") ? parseFloat(v) / 100 : parseFloat(v) / 255);
-  const alpha = nums[3] === undefined ? 1 : nums[3].endsWith("%") ? parseFloat(nums[3]) / 100 : parseFloat(nums[3]);
-  const rgb = nums.slice(0, 3).map(channel) as Rgb;
-  return rgb.some(Number.isNaN) ? null : { rgb, alpha: Number.isNaN(alpha) ? 1 : alpha, kind: "rgb" };
-}
-
-const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-const fromLinear = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055);
-
-function toLch([r, g, b]: Rgb): Lch {
-  const [lr, lg, lb] = [toLinear(r), toLinear(g), toLinear(b)];
-  const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
-  const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
-  const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
-  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
-  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
-  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
-  return { L, C: Math.hypot(A, B), h: ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360 };
-}
-
-/** Linear sRGB of an OKLCH color (may be out of gamut). */
-function lchToLinear({ L, C, h }: Lch): Rgb {
-  const a = C * Math.cos((h * Math.PI) / 180);
-  const b = C * Math.sin((h * Math.PI) / 180);
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  return [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ];
-}
-
-/** Back to sRGB, lowering chroma until the color fits the sRGB gamut. */
-function fromLch(color: Lch): Rgb {
-  const fits = (c: number) => lchToLinear({ ...color, C: c }).every((v) => v >= -1e-4 && v <= 1 + 1e-4);
-  let C = color.C;
-  if (!fits(C)) {
-    let lo = 0;
-    let hi = C;
-    for (let i = 0; i < 20; i++) {
-      const mid = (lo + hi) / 2;
-      if (fits(mid)) lo = mid;
-      else hi = mid;
-    }
-    C = lo;
-  }
-  return lchToLinear({ ...color, C }).map((v) => fromLinear(Math.min(1, Math.max(0, v)))) as Rgb;
-}
-
-function formatColor({ rgb, alpha, kind }: Parsed): string {
-  const bytes = rgb.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255));
-  if (kind === "rgb") return alpha < 1 ? `rgba(${bytes.join(", ")}, ${+alpha.toFixed(3)})` : `rgb(${bytes.join(", ")})`;
-  const hex = bytes.map((v) => v.toString(16).padStart(2, "0")).join("");
-  return kind === "hex8" ? `#${hex}${Math.round(alpha * 255).toString(16).padStart(2, "0")}` : `#${hex}`;
-}
-
-const hueDistance = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180);
-
-function firstColor(value: string): Parsed | null {
-  const match = value.match(COLOR_RE);
-  return match ? parseColor(match[0]) : null;
-}
-
-function anchorLch(base: PaletteBase): Lch | null {
-  const token = base.tokens.find((t) => t.name === base.anchor);
-  const value = token?.values[base.themes[0]?.name] ?? (token ? Object.values(token.values)[0] : undefined);
-  const color = value ? firstColor(value) : null;
-  return color ? toLch(color.rgb) : null;
-}
-
-/**
- * New values for the brand family (colors near the brand hue) and the neutrals tinted with it.
- * Other hues (a secondary accent, status colors), greys, white and black are kept.
- */
-function computePalette(base: PaletteBase, choice: PaletteChoice): TokenValues {
-  const anchor = anchorLch(base);
-  if (!anchor) return {};
-  const shift = choice.hue - anchor.h;
-  const out: TokenValues = {};
-  const defaultTheme = base.themes[0]?.name;
-  for (const token of base.tokens) {
-    if (token.role?.startsWith("status")) continue;
-    for (const [theme, value] of Object.entries(token.values)) {
-      let next = value.replace(COLOR_RE, (match) => {
-        const color = parseColor(match);
-        if (!color) return match;
-        const lch = toLch(color.rgb);
-        if (lch.C < 0.005 || hueDistance(lch.h, anchor.h) > 40) return match;
-        const k = lch.C >= 0.04 ? choice.brand : choice.neutral;
-        return formatColor({ ...color, rgb: fromLch({ L: lch.L, C: lch.C * k, h: (lch.h + shift + 360) % 360 }) });
-      });
-      if (choice.base && token.name === base.anchor && theme === defaultTheme) next = choice.base;
-      if (next !== value) (out[token.name] ??= {})[theme] = next;
-    }
-  }
-  return out;
-}
-
-function customChoice(base: PaletteBase, hex: string): PaletteChoice | null {
-  const color = parseColor(hex);
-  const anchor = anchorLch(base);
-  if (!color || !anchor) return null;
-  const lch = toLch(color.rgb);
-  const ratio = anchor.C > 0 ? Math.min(1.5, Math.max(0.05, lch.C / anchor.C)) : 1;
-  return { id: "custom", name: `Tu color ${hex}`, hue: lch.h, brand: ratio, neutral: Math.min(1, ratio), base: hex.toLowerCase() };
-}
-
-function paletteCss(base: PaletteBase, values: TokenValues): string {
-  return base.themes
-    .map((theme) => {
-      const decls = Object.entries(values)
-        .filter(([, perTheme]) => perTheme[theme.name])
-        .map(([name, perTheme]) => `${name}: ${perTheme[theme.name]} !important;`)
-        .join(" ");
-      return decls ? `${theme.selector} { ${decls} }` : "";
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
-function luminance(rgb: Rgb): number {
-  const [r, g, b] = rgb.map(toLinear);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-/** Lowest WCAG contrast of text and of the brand color against the surfaces, per theme. */
-function contrastReport(base: PaletteBase, values: TokenValues) {
-  const valueOf = (name: string, theme: string) => values[name]?.[theme] ?? base.tokens.find((t) => t.name === name)?.values[theme];
-  /** Only a plain opaque color counts: gradients and translucent values depend on what is behind. */
-  const opaque = (value: string | undefined) => {
-    const v = value?.trim();
-    const c = v ? firstColor(v) : null;
-    return c && c.alpha === 1 && v?.match(COLOR_RE)?.[0] === v ? c.rgb : null;
-  };
-  const ratio = (a: Rgb, b: Rgb) => {
-    const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
-    return (x + 0.05) / (y + 0.05);
-  };
-  const byRole = (prefix: string) => base.tokens.filter((t) => t.role?.startsWith(prefix)).map((t) => t.name);
-  const surfaces = [...byRole("surface.base"), ...byRole("surface.raised")];
-  const texts = byRole("text.primary");
-  return base.themes.map((theme) => {
-    const grounds = surfaces.map((s) => opaque(valueOf(s, theme.name))).filter((c): c is Rgb => !!c);
-    const min = (names: string[]) => {
-      let low = Infinity;
-      for (const name of names) {
-        const fg = opaque(valueOf(name, theme.name));
-        if (fg) for (const bg of grounds) low = Math.min(low, ratio(fg, bg));
-      }
-      return Number.isFinite(low) ? low : null;
-    };
-    return { theme: theme.name, text: min(texts), brand: min([base.anchor]) };
-  });
-}
-
-/** Perceptual distance (OKLab × 100), the same scale as the guardian's status-confusable. */
-function deltaE(a: Rgb, b: Rgb): number {
-  const [p, q] = [toLch(a), toLch(b)];
-  const ab = (c: Lch) => [c.C * Math.cos((c.h * Math.PI) / 180), c.C * Math.sin((c.h * Math.PI) / 180)];
-  const [[a1, b1], [a2, b2]] = [ab(p), ab(q)];
-  return Math.hypot(p.L - q.L, a1 - a2, b1 - b2) * 100;
-}
-
-/** A plain opaque color, or null for gradients, shadows and translucent values. */
-function plainColor(value: string | undefined): Rgb | null {
-  const v = value?.trim();
-  const c = v ? firstColor(v) : null;
-  return c && c.alpha === 1 && v?.match(COLOR_RE)?.[0] === v ? c.rgb : null;
-}
-
-interface Conflict {
-  kind: "status" | "literal" | "contrast";
-  text: string;
-  fix: string;
-}
-
-const STATUS_MIN_DELTA_E = 10;
-
-/**
- * What a palette would break, each with a way out: hand-written colors (often status chips) it
- * would be confused with, hand-written brand colors it would leave behind, and contrast it would
- * lose. Only problems the palette introduces are listed, not the ones the project already has.
- */
-function paletteConflicts(base: PaletteBase, choice: PaletteChoice | null, safe: string[]): Conflict[] {
-  if (!choice) return [];
-  const values = computePalette(base, choice);
-  const anchor = anchorLch(base);
-  const out: Conflict[] = [];
-  const brandColors = (vals: TokenValues) =>
-    base.tokens
-      .filter((t) => t.role?.startsWith("accent"))
-      .flatMap((t) => Object.entries(t.values).map(([theme, v]) => ({ token: t.name, rgb: plainColor(vals[t.name]?.[theme] ?? v) })))
-      .filter((c): c is { token: string; rgb: Rgb } => !!c.rgb);
-  const before = brandColors({});
-  const after = brandColors(values);
-  const others = safe.filter((name) => name !== choice.name);
-  const elsewhere = others.length ? `otra familia sin conflictos (${others.join(", ")})` : "otra familia";
-  const behind: string[] = [];
-  for (const ref of base.references ?? []) {
-    for (const value of ref.values) {
-      const rgb = plainColor(value);
-      if (!rgb) continue;
-      const lch = toLch(rgb);
-      if (anchor && lch.C >= 0.01 && hueDistance(lch.h, anchor.h) <= 40) behind.push(`${ref.where} (${value})`);
-      const close = after.map((c) => ({ ...c, d: deltaE(rgb, c.rgb) })).sort((x, y) => x.d - y.d)[0];
-      const wasClose = before.some((c) => deltaE(rgb, c.rgb) < STATUS_MIN_DELTA_E);
-      if (close && close.d < STATUS_MIN_DELTA_E && !wasClose) {
-        out.push({
-          kind: "status",
-          text: `${ref.where} (${value}) se confunde con ${close.token} (ΔE ${close.d.toFixed(1)}; mínimo ${STATUS_MIN_DELTA_E}).`,
-          fix: `elegí ${elsewhere}, o si preferís esta, que ese estado no dependa solo del color: ícono y texto (WCAG 1.4.1).`,
-        });
-        break;
-      }
-    }
-  }
-  if (behind.length) {
-    out.push({
-      kind: "literal",
-      text: `${behind.length} colores escritos a mano no siguen la paleta y quedan con el color anterior: ${behind.slice(0, 3).join(", ")}${behind.length > 3 ? ` y ${behind.length - 3} más` : ""}.`,
-      fix: "convertirlos en tokens con /facha-ui:init colors (por ejemplo, un --brand-hover derivado de --brand), así siguen cualquier paleta.",
-    });
-  }
-  const [was, now] = [contrastReport(base, {}), contrastReport(base, values)];
-  now.forEach((r, i) => {
-    if (r.text !== null && r.text < 4.5 && (was[i].text ?? 99) >= 4.5) {
-      out.push({ kind: "contrast", text: `En ${r.theme}, el texto baja a ${r.text.toFixed(1)}:1 (mínimo 4.5:1).`, fix: `elegí ${elsewhere}, o probá tu color en un tono más oscuro.` });
-    }
-    if (r.brand !== null && r.brand < 4.5 && (was[i].brand ?? 99) >= 4.5) {
-      out.push({
-        kind: "contrast",
-        text: `En ${r.theme}, la marca como texto (enlaces) baja a ${r.brand.toFixed(1)}:1.`,
-        fix: "un tono más oscuro de la marca para el texto, o enlaces con el color de texto y subrayado.",
-      });
-    }
-  });
-  return out;
 }
 
 // ---- Pointing at elements -------------------------------------------------------------------
@@ -754,7 +488,7 @@ function RequestItem({ r }: { r: LiveRequest }) {
     r.kind === "choose"
       ? "Elegir esta variante"
       : r.kind === "palette"
-        ? `Paleta propuesta: ${r.palette?.name ?? ""}`
+        ? `Diseño propuesto: ${r.palette?.name ?? ""}`
         : r.kind === "vote"
           ? `Voto de ${r.voter ?? "alguien"}: ${r.text}`
           : r.text;
@@ -887,6 +621,32 @@ function Swatches({ colors }: { colors: (string | undefined)[] }) {
   );
 }
 
+/** One design control: a labeled select, or the reason it is off for this project's tokens. */
+function Control(props: { id: string; label: string; value: string; options: { value: string; label: string }[]; off: string; onChange: (value: string) => void }) {
+  const { id, label, value, options, off, onChange } = props;
+  return (
+    <div className="control">
+      <label className="muted" htmlFor={id}>
+        {label}
+      </label>
+      <select id={id} value={off ? "" : value} disabled={!!off} aria-describedby={off ? `${id}-why` : undefined} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {off && (
+        <span className="muted why" id={`${id}-why`}>
+          {off}
+        </span>
+      )}
+    </div>
+  );
+}
+
+const KIND_LABEL: Record<Pair["kind"], string> = { text: "texto", brand: "marca como texto", border: "bordes de controles" };
+
 export function LabPanel() {
   const [root, setRoot] = useState<ShadowRoot | null>(null);
   const [here, setHere] = useState<{ slug: string; variant: string } | null>(null);
@@ -905,7 +665,7 @@ export function LabPanel() {
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
   const [picking, setPicking] = useState(false);
   const [targets, setTargets] = useState<Picked[]>([]);
-  const [choice, setChoice] = useState<PaletteChoice | null>(null);
+  const [choice, setChoice] = useState<DesignChoice>(ORIGINAL);
   const [customHex, setCustomHex] = useState("#2563eb");
   const [viewport, setViewport] = useState<(typeof VIEWPORTS)[number] | null>(null);
   const [ownAnswer, setOwnAnswer] = useState("");
@@ -937,7 +697,7 @@ export function LabPanel() {
       setDeviceFix(fix);
       setViewport(size);
     }
-    setChoice(load<PaletteChoice | null>(PALETTE_KEY, null));
+    setChoice(loadChoice());
     const host = document.createElement("div");
     host.setAttribute("data-facha-ui", "lab-panel");
     document.body.appendChild(host);
@@ -1032,10 +792,11 @@ export function LabPanel() {
     return () => window.clearInterval(id);
   }, [here, open, pending, refresh]);
 
-  // Palette preview: override the tokens in this browser only.
+  // Design preview: override the tokens in this browser only.
   const paletteBase = live.palette ?? null;
-  const previewValues = paletteBase && choice ? computePalette(paletteBase, choice) : null;
-  const previewCss = paletteBase && previewValues ? paletteCss(paletteBase, previewValues) : "";
+  const previewValues = paletteBase ? computeDesign(paletteBase, choice) : {};
+  const changed = Object.keys(previewValues).length > 0;
+  const previewCss = paletteBase && changed ? paletteCss(paletteBase, previewValues) : "";
   useEffect(() => {
     if (!root) return;
     let style = document.querySelector<HTMLStyleElement>('style[data-facha-ui="palette"]');
@@ -1051,11 +812,21 @@ export function LabPanel() {
     if (style.textContent !== previewCss) style.textContent = previewCss;
   }, [root, previewCss]);
 
-  const pickPalette = (next: PaletteChoice | null) => {
+  const pickDesign = (next: DesignChoice) => {
     setChoice(next);
-    save(PALETTE_KEY, next);
+    save(PALETTE_KEY, next.id === ORIGINAL.id && describeChoice(next) === ORIGINAL.name ? null : next);
     setNotice(null);
   };
+  /** A color option (the original, a preset, the slider, the developer's color) keeps the other controls. */
+  const withColor = (c: Pick<DesignChoice, "id" | "name" | "hue" | "brand" | "tint">): DesignChoice => ({
+    ...choice,
+    id: c.id,
+    name: c.name,
+    hue: c.hue,
+    brand: c.brand,
+    base: undefined,
+    tint: c.tint ?? choice.tint,
+  });
 
   const addTarget = useCallback((el: Element) => {
     setTargets((current) =>
@@ -1275,10 +1046,14 @@ export function LabPanel() {
   };
 
   const proposePalette = async () => {
-    if (!choice || !previewValues) return;
+    if (!changed) return;
     const note = conflicts.length ? `Conflictos vistos en el panel: ${conflicts.map((c) => c.text).join(" ")}` : "";
-    const ok = await post({ kind: "palette", text: note.slice(0, 2000), palette: { name: choice.name, ...(choice.base ? { base: choice.base } : {}), tokens: previewValues } });
-    if (ok) setNotice("Enviada. Claude Code la revisa (contraste incluido) y te la muestra ahí; nada cambia hasta que la apruebes.");
+    const ok = await post({
+      kind: "palette",
+      text: note.slice(0, 2000),
+      palette: { name: describeChoice(choice), ...(choice.base ? { base: choice.base } : {}), tokens: previewValues },
+    });
+    if (ok) setNotice("Enviado. Claude Code lo revisa (contraste incluido) y te lo muestra ahí; nada cambia hasta que lo apruebes.");
   };
 
   // Drag by the title. The position is kept inside the window and remembered.
@@ -1441,9 +1216,9 @@ export function LabPanel() {
     </>
   );
 
-  const swatchesOf = (c: PaletteChoice | null) => {
+  const swatchesOf = (c: DesignChoice) => {
     if (!paletteBase) return [];
-    const values = c ? computePalette(paletteBase, c) : {};
+    const values = computeDesign(paletteBase, c);
     const [light, dark] = [paletteBase.themes[0]?.name, paletteBase.themes[1]?.name];
     const valueOf = (name: string | undefined, theme: string | undefined) =>
       name && theme ? values[name]?.[theme] ?? paletteBase.tokens.find((t) => t.name === name)?.values[theme] : undefined;
@@ -1451,13 +1226,27 @@ export function LabPanel() {
     const surface = paletteBase.tokens.find((t) => t.role?.startsWith("surface.base") && t.name !== paletteBase.tokens[0]?.name)?.name;
     return [valueOf(paletteBase.anchor, light), valueOf(paletteBase.anchor, dark), valueOf(text, light), valueOf(surface, light)];
   };
-  const report = paletteBase ? contrastReport(paletteBase, previewValues ?? {}) : [];
+  // The lowest pair of each kind, per theme, measured at the contrast level the choice asks for.
+  const level = choice.contrast ?? "AA";
+  const pairs = paletteBase ? contrastPairs(paletteBase, previewValues, level) : [];
+  const report = (paletteBase?.themes ?? []).map((t) => {
+    const lowest = (kind: Pair["kind"]) =>
+      pairs.filter((p) => p.theme === t.name && p.kind === kind).reduce<Pair | null>((low, p) => (!low || p.ratio < low.ratio ? p : low), null);
+    return { theme: t.name, pairs: (["text", "brand", "border"] as const).map(lowest).filter((p): p is Pair => !!p) };
+  });
+  // With a contrast level on: the texts it had to move, so the change is never silent.
+  const withoutContrast = paletteBase && choice.contrast ? computeDesign(paletteBase, { ...choice, contrast: null }) : null;
+  const raised = withoutContrast ? Object.keys(previewValues).filter((name) => JSON.stringify(previewValues[name]) !== JSON.stringify(withoutContrast[name])) : [];
   // Presets that introduce no status or contrast conflict, offered as the way out of one.
-  const safePresets = paletteBase
-    ? PRESETS.filter((p) => paletteConflicts(paletteBase, p, []).every((c) => c.kind === "literal")).map((p) => p.name)
-    : [];
-  const conflicts = paletteBase ? paletteConflicts(paletteBase, choice, safePresets) : [];
+  const safePresets = paletteBase ? PRESETS.filter((p) => designConflicts(paletteBase, withColor(p), []).every((c) => c.kind === "literal")).map((p) => p.name) : [];
+  const conflicts = paletteBase ? designConflicts(paletteBase, choice, safePresets) : [];
   const blocking = conflicts.some((c) => c.kind !== "literal");
+  const caps = paletteBase ? capabilities(paletteBase) : null;
+  const firstTheme = paletteBase?.themes[0]?.name ?? "";
+  const brandNow = paletteBase ? previewValues[paletteBase.anchor]?.[firstTheme] ?? paletteBase.tokens.find((t) => t.name === paletteBase.anchor)?.values[firstTheme] : undefined;
+  const hue = Math.round(choice.hue ?? (paletteBase ? anchorLch(paletteBase)?.h : undefined) ?? 0);
+  const asIs = (now: number | null | undefined) => `Como está${now ? ` (${now}px)` : ""}`;
+  const setControl = (key: "tint" | "radius" | "control", value: string) => pickDesign({ ...choice, [key]: value === "" ? null : Number(value) });
 
   const changesTab = !live.active ? (
     <p className="muted">
@@ -1534,58 +1323,143 @@ export function LabPanel() {
     </>
   );
 
-  const paletteTab = paletteBase && (
+  const paletteTab = paletteBase && caps && (
     <>
       <p className="muted">
-        Probá otra paleta sobre toda la app. Es una vista previa en este navegador: no cambia ningún archivo. Se recalculan los
-        tokens de la marca y los grises teñidos; el acento y los colores de estado no cambian.
+        Probá decisiones de diseño sobre toda la app. Es una vista previa en este navegador: no cambia ningún archivo. Se
+        recalculan los tokens del proyecto; los colores de estado no cambian.
       </p>
-      <div className="presets">
-        <button className="preset" type="button" aria-pressed={choice === null} onClick={() => pickPalette(null)}>
-          <Swatches colors={swatchesOf(null)} />
-          <b>Original</b>
-          <span className="note">La paleta actual del proyecto.</span>
-        </button>
-        {PRESETS.map((p) => (
-          <button key={p.id} className="preset" type="button" aria-pressed={choice?.id === p.id} onClick={() => pickPalette(p)}>
-            <Swatches colors={swatchesOf(p)} />
-            <b>{p.name}</b>
-            <span className="note">{p.note}</span>
+      <div className="section">
+        <span className="label">Color de la marca</span>
+        <div className="presets">
+          <button className="preset" type="button" aria-pressed={choice.hue === null} onClick={() => pickDesign(withColor(ORIGINAL))}>
+            <Swatches colors={swatchesOf(ORIGINAL)} />
+            <b>Original</b>
+            <span className="note">El color actual del proyecto.</span>
           </button>
-        ))}
+          {PRESETS.map((p) => (
+            <button key={p.id} className="preset" type="button" aria-pressed={choice.id === p.id} onClick={() => pickDesign(withColor(p))}>
+              <Swatches colors={swatchesOf(p)} />
+              <b>{p.name}</b>
+              <span className="note">{p.note}</span>
+            </button>
+          ))}
+        </div>
+        <div className="row">
+          <label className="muted" htmlFor="facha-hue">
+            Tono
+          </label>
+          <input
+            id="facha-hue"
+            className="hue"
+            type="range"
+            min={0}
+            max={359}
+            value={hue}
+            aria-valuetext={`${hue} grados`}
+            onChange={(e) => {
+              const h = Number(e.target.value);
+              pickDesign(withColor({ id: "hue", name: `Tono ${h}°`, hue: h, brand: 1, tint: null }));
+            }}
+          />
+          <i className="hue-dot" style={{ background: brandNow ?? "transparent" }} aria-hidden="true" />
+          <span className="muted num">{hue}°</span>
+        </div>
+        <div className="row">
+          <input type="color" aria-label="Elegí tu color" value={/^#[0-9a-f]{6}$/i.test(customHex) ? customHex : "#000000"} onChange={(e) => setCustomHex(e.target.value)} />
+          <input className="hex" aria-label="Color en hexadecimal" value={customHex} maxLength={7} onChange={(e) => setCustomHex(e.target.value.trim())} />
+          <button
+            className="act"
+            type="button"
+            aria-pressed={choice.id === "custom"}
+            disabled={!/^#[0-9a-f]{6}$/i.test(customHex)}
+            onClick={() => {
+              const next = customChoice(paletteBase, customHex, choice);
+              if (next) pickDesign(next);
+            }}
+          >
+            Probar mi color
+          </button>
+        </div>
       </div>
-      <div className="row">
-        <input type="color" aria-label="Elegí tu color" value={/^#[0-9a-f]{6}$/i.test(customHex) ? customHex : "#000000"} onChange={(e) => setCustomHex(e.target.value)} />
-        <input className="hex" aria-label="Color en hexadecimal" value={customHex} maxLength={7} onChange={(e) => setCustomHex(e.target.value.trim())} />
-        <button
-          className="act"
-          type="button"
-          aria-pressed={choice?.id === "custom"}
-          disabled={!/^#[0-9a-f]{6}$/i.test(customHex)}
-          onClick={() => pickPalette(customChoice(paletteBase, customHex))}
-        >
-          Probar mi color
-        </button>
+      <div className="section">
+        <span className="label">Forma y lectura</span>
+        <div className="controls">
+          <Control
+            id="facha-tint"
+            label="Grises"
+            value={choice.tint === null ? "" : String(choice.tint)}
+            off={caps.tint.why}
+            options={[
+              { value: "", label: "Como están" },
+              { value: "0", label: "Gris puro" },
+              { value: "1", label: "Teñidos con la marca" },
+            ]}
+            onChange={(v) => setControl("tint", v)}
+          />
+          <Control
+            id="facha-radius"
+            label="Radio"
+            value={choice.radius === null ? "" : String(choice.radius)}
+            off={caps.radius.why}
+            options={[{ value: "", label: asIs(caps.radius.now) }, ...RADIUS_STEPS.map((r) => ({ value: String(r), label: r === 0 ? "0px · recto" : `${r}px` }))]}
+            onChange={(v) => setControl("radius", v)}
+          />
+          <Control
+            id="facha-control"
+            label="Alto de controles"
+            value={choice.control === null ? "" : String(choice.control)}
+            off={caps.control.why}
+            options={[
+              { value: "", label: asIs(caps.control.now) },
+              ...CONTROL_STEPS.map((h, i) => ({ value: String(h), label: `${h}px · ${["chico", "mediano", "grande"][i] ?? ""}` })),
+            ]}
+            onChange={(v) => setControl("control", v)}
+          />
+          <Control
+            id="facha-contrast"
+            label="Contraste del texto"
+            value={choice.contrast ?? ""}
+            off=""
+            options={[
+              { value: "", label: "Como está" },
+              { value: "AA", label: `Estándar · ${WCAG_MIN.AA}:1 (AA)` },
+              { value: "AAA", label: `Alto · ${WCAG_MIN.AAA}:1 (AAA)` },
+            ]}
+            onChange={(v) => pickDesign({ ...choice, contrast: v === "AA" || v === "AAA" ? v : null })}
+          />
+        </div>
       </div>
       <p className="muted">
-        Contraste mínimo (WCAG, texto normal 4.5:1):{" "}
+        Contraste más bajo (WCAG 2.2: texto {WCAG_MIN[level]}:1, marca como texto {WCAG_MIN.AA}:1, bordes de controles {WCAG_MIN.nonText}:1):{" "}
         {report.map((r, i) => (
           <span key={r.theme}>
             {i > 0 ? " · " : ""}
-            {r.theme}: texto{" "}
-            <span className={r.text !== null && r.text < 4.5 ? "warn" : "ok"}>{r.text?.toFixed(1) ?? "–"}:1</span>, marca{" "}
-            <span className={r.brand !== null && r.brand < 4.5 ? "warn" : "ok"}>{r.brand?.toFixed(1) ?? "–"}:1</span>
+            {r.theme}:{" "}
+            {r.pairs.map((p, j) => (
+              <span key={p.kind} title={`${p.fg} sobre ${p.bg}`}>
+                {j > 0 ? ", " : ""}
+                {KIND_LABEL[p.kind]} <span className={p.ratio < p.min ? "warn" : "ok"}>{formatRatio(p.ratio)}:1</span>
+              </span>
+            ))}
           </span>
         ))}
       </p>
-      {choice && (
+      {raised.length > 0 && (
+        <p className="muted">
+          Para llegar a {WCAG_MIN[level]}:1 se ajustaron: <code>{raised.join(", ")}</code>.
+        </p>
+      )}
+      {changed && (
         <div className={`conflicts${blocking ? " has" : ""}`} aria-live="polite">
           {conflicts.length === 0 ? (
             <p className="ok">✓ Sin conflictos con los estados ni con el contraste.</p>
           ) : (
             conflicts.map((c, i) => (
               <p key={i}>
-                <span className={c.kind === "literal" ? "muted" : "warn"}>{c.kind === "literal" ? "•" : "⚠"} {c.text}</span>
+                <span className={c.kind === "literal" ? "muted" : "warn"}>
+                  {c.kind === "literal" ? "•" : "⚠"} {c.text}
+                </span>
                 <br />
                 <span className="muted">Solución: {c.fix}</span>
               </p>
@@ -1594,11 +1468,20 @@ export function LabPanel() {
         </div>
       )}
       <div className="row">
-        <button className="act primary" type="button" disabled={!choice || !liveHere || sending} onClick={() => void proposePalette()}>
-          Proponer esta paleta
+        <button className="act primary" type="button" disabled={!changed || !liveHere || sending} onClick={() => void proposePalette()}>
+          Proponer este diseño
         </button>
+        {changed && (
+          <button className="act" type="button" onClick={() => pickDesign(ORIGINAL)}>
+            Volver al original
+          </button>
+        )}
       </div>
-      {!liveHere && choice && <p className="muted">Para proponerla, activá el modo en vivo: <code>/facha-ui:variants {here.slug} live</code></p>}
+      {!liveHere && changed && (
+        <p className="muted">
+          Para proponerlo, activá el modo en vivo: <code>/facha-ui:variants {here.slug} live</code>
+        </p>
+      )}
       {notice && <p className="muted">{notice}</p>}
       {error && <p className="error">{error}</p>}
       <p className="muted">
@@ -1628,7 +1511,7 @@ export function LabPanel() {
             <button className="pill" type="button" onClick={() => setOpen(true)} aria-expanded="false" title="Abrir el panel">
               <span className={`dot ${live.active ? "on" : ""}`} />
               facha-ui · variante {letter}
-              {choice ? ` · ${choice.name}` : ""}
+              {changed ? ` · ${describeChoice(choice)}` : ""}
             </button>
             <button className="pill-x" type="button" onClick={hide} aria-label="Ocultar el panel" title="Ocultar (vuelve al recargar o con Alt+Shift+F)">
               ×
@@ -1688,7 +1571,7 @@ export function LabPanel() {
                     setTab("palette");
                   }}
                 >
-                  Paleta
+                  Diseño
                 </button>
               )}
             </div>
@@ -1866,7 +1749,7 @@ export function LabPanel() {
                   {!liveHere && <LiveOff slug={here.slug} />}
                 </>
               )}
-              {choice && <p className="muted">La vista previa no aplica la paleta de prueba.</p>}
+              {changed && <p className="muted">La vista previa no aplica el diseño de prueba.</p>}
             </aside>
           </div>
         </div>
