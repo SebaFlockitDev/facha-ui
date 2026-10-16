@@ -77,34 +77,50 @@ filas de 32px y cifras tabulares; `get_design_system` devuelve el perfil.
 
 ## Criterios de aceptación
 
-- [ ] Cada valor de un perfil cita su fuente, verificada en la documentación primaria (tabla de
+- [x] Cada valor de un perfil cita su fuente, verificada en la documentación primaria (tabla de
   arriba); un test controla que ninguno quede sin fuente.
-- [ ] El generador usa el perfil del brief (test por tipo de producto), y la densidad del brief
+- [x] El generador usa el perfil del brief (test por tipo de producto), y la densidad del brief
   manda sobre la del perfil.
-- [ ] Las pautas se citan con ids `ux:*` existentes.
+- [x] Las pautas se citan con ids `ux:*` existentes (test).
 
 ## Tareas
 
 - [x] 0. Fuentes verificadas (tabla de arriba)
-- [ ] 1. Perfiles en `standards.ts`, `productType` en `generate.ts` y en la tool, sección `profile`,
-  tests, bundle
-- [ ] 2. Principios nuevos en `ux-principles.md`
-- [ ] 3. Skills: `system.md`, `brief.md`, `variants`; contratos
-- [ ] 4. Docs: SPEC, `docs/uso.md`, `CHANGELOG.md`
-- [ ] 5. Prueba real
+- [x] 1. Perfiles en `standards.ts`, `productType` en `generate.ts` y en la tool, sección `profile`,
+  tests, bundle · `8bf2fb7`
+- [x] 2. Principios nuevos en `ux-principles.md` · `8bf2fb7`
+- [x] 3. Skills: `system.md`, `brief.md`, `variants`; contratos · `313cd38`
+- [x] 4. Docs: SPEC, `docs/uso.md`, `CHANGELOG.md` · `fbf25e4`
+- [x] 5. Prueba real
 - [ ] 6. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Solo se fija lo que tiene fuente para ese tipo de producto.** Fintech no fija densidad ni
+  controles; la app de consumo no fija escala (ninguna fuente verificada dice qué tamaño de texto
+  corresponde): ahí decide la densidad, como antes.
+- **La escala sale del perfil** cuando lo tiene (Carbon productiva para producto, Material 3 para
+  lo editorial), aun con otra densidad: fintech queda en 14px con densidad equilibrada. La salida
+  dice de dónde salió (`typography.scaleFrom`).
+- **Las pautas van en inglés** en el MCP, como el resto de sus mensajes (B-010 los traduce); las
+  skills las dicen en el idioma del dev.
+- **`--numerals: tabular-nums`** como token propio (no `font-*`, que facha-ui leería como
+  familia), y `--measure: 75ch`, el tope de Baymard dentro del máximo de WCAG 1.4.8.
 
 ## Registro
 
 - **2026-10-16:** fuentes verificadas en la documentación primaria; spec escrito y plan presentado,
   pendiente de aprobación. Polaris y Material 3 no se pudieron leer sin un navegador (sus páginas se
   arman con JavaScript); no se usan.
+- **2026-10-16:** plan aprobado. Tareas 1 a 4 (`8bf2fb7`, `313cd38`, `fbf25e4`); 309 tests. Prueba
+  real en `facha-ui-pruebas/vite-sin-diseno` (brief `internal-tool`, densidad compacta) por el
+  bundle y stdio: `get_design_system` → `profile` con 2 pautas y 6 fuentes; `propose_design_system`
+  toma el tipo del brief, escala productiva de Carbon (`scaleFrom: profile internal-tool`),
+  `--size-row: 32px`, `--numerals: tabular-nums`, controles de 32px; 62/62 pares en las tres
+  direcciones.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan. Con el OK: "Plan (propuesto…)" pasa a "Plan aprobado (fecha)", el
-estado a `en curso`, y se arranca por la tarea 1 en `feat/product-profiles`.
+**Estado al 2026-10-16:** tareas 0 a 5 hechas en `feat/product-profiles`, sin push. Falta el release
+(tarea 6), con el OK de quien mantiene el repo: versión menor (0.23.0), con el flujo de `CLAUDE.md`;
+B-027 pasa a Hecho y el primero de Siguiente sube a Ahora.
