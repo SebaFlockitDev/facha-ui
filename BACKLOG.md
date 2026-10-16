@@ -27,6 +27,15 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
+### B-043 · `ux_score` con pantallas de Vite
+- **Estado:** en spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** `ux_score` y `review_ui` solo reconocen pantallas `page.tsx` (Next): en Vite el centro sale sin puntajes, el puntaje de CI no protege nada y `review_ui` no pide título ni estados a las pantallas (`ux:states`).
+- **Qué:** reconocer las pantallas de Vite por lo que monta el router y por carpetas de convención (`src/pages/`, `src/routes/`, `src/views/`, `src/screens/`), con la opción `screens` de la config para reemplazarlas; un archivo pasado explícitamente siempre se mide.
+- **Criterios de aceptación:** `ux_score` mide las pantallas de una app Vite con su ruta; el modo `score` de CI falla si una baja; `review_ui` aplica sus controles de pantalla en Vite; Next no cambia.
+- **Spec:** [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md)
+- **Referencias:** `mcp/src/score.ts` (`SCREEN`), `mcp/src/review.ts` (`SCREEN_FILE`)
+
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -142,7 +151,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Descartado**.
 
-- **B-043 · `ux_score` con pantallas de Vite:** visto en la prueba de B-042: `ux_score` solo reconoce pantallas `page.tsx` (Next), así que en una app Vite devuelve `screens: []` aun pasándole el archivo; el centro y el puntaje de CI (`score`) quedan sin pantallas. Que tome como pantallas los archivos de `src/pages/` o `src/routes/`, y el archivo que se le pase.
 - **B-041 · `responsive-table-scroll` con CSS modules:** visto en B-040: una tabla dentro de un contenedor con `overflow-x: auto` definido en un CSS module (`styles.scroll`) recibe el aviso igual, porque la regla no resuelve la clase del módulo. Que lea el CSS module importado por el archivo.
 - **B-039 · Marca monocroma en el tema oscuro:** visto en B-028 con una referencia monocroma (shadcn/ui): con una marca casi negra, el generador la deja igual en oscuro y el botón queda casi negro sobre casi negro. shadcn la invierte (blanco en oscuro). Que el generador invierta una marca sin croma en el tema oscuro, con su texto, y lo pruebe como siempre.
 - **B-017 · Más frameworks de laboratorio:** Remix/React Router como framework, Astro, Expo.
