@@ -1,5 +1,6 @@
 import { checkA11y, removesFocusOutline } from "./a11y.js";
 import { componentFor, importLine } from "./components.js";
+import { checkColorOnly } from "./color-only.js";
 import { checkCopy } from "./copy.js";
 import { checkLook } from "./look.js";
 import { checkResponsive, responsiveDecl } from "./responsive.js";
@@ -105,6 +106,7 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
   { id: "ux-gray-on-color", severity: "warning", summary: "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029)." },
   { id: "a11y-gradient-text", severity: "warning", summary: "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18)." },
   { id: "ds-component-reuse", severity: "warning", summary: "A native element (button, input, select, textarea, label, table…) made by hand where the project has it as a component in its UI folder (B-030, ux:nielsen-4). Not reported inside the UI folder or for input type=hidden." },
+  { id: "a11y-color-only", severity: "warning", summary: "A state shown only by color: a non-interactive element with a state class, a status-token color or a className that depends on a state, and no text (its own or next to it), accessible name or icon (WCAG 1.4.1, B-004). aria-hidden elements are left alone." },
   { id: "a11y-motion", severity: "warning", summary: "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3)." },
   { id: "copy-voice", severity: "warning", summary: "A form of address that breaks the product's voice (copy.voice: vos, tú or usted), e.g. \"puedes\" in a product that says \"podés\"." },
 ];
@@ -140,6 +142,7 @@ const MESSAGES: Record<RuleId, string> = {
   "a11y-gradient-text": "Text that misses the minimum contrast on part of its gradient.",
   "a11y-motion": "Animation without a reduced-motion alternative.",
   "ds-component-reuse": "Made by hand: the project has this as a component.",
+  "a11y-color-only": "A state shown only by color.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -405,6 +408,10 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
   );
 
+  // A state told by color alone (B-004, WCAG 1.4.1).
+  checkColorOnly(ctx, usages, (rule, base, loc, found, message, fix) =>
+    push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
+  );
   // A native element the system already has as a component (B-030).
   for (const u of usages) {
     if (u.kind !== "element") continue;

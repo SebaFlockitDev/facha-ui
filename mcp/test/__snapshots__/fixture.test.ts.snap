@@ -666,6 +666,11 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "summary": "A native element (button, input, select, textarea, label, table…) made by hand where the project has it as a component in its UI folder (B-030, ux:nielsen-4). Not reported inside the UI folder or for input type=hidden.",
     },
     {
+      "id": "a11y-color-only",
+      "severity": "warning",
+      "summary": "A state shown only by color: a non-interactive element with a state class, a status-token color or a className that depends on a state, and no text (its own or next to it), accessible name or icon (WCAG 1.4.1, B-004). aria-hidden elements are left alone.",
+    },
+    {
       "id": "a11y-motion",
       "severity": "warning",
       "summary": "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3).",

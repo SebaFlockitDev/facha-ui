@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.27.0** (§7.10–§7.37). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.28.0** (§7.10–§7.38). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -433,6 +433,7 @@ Señales de un recorrido entre pantallas, dadas en orden: la misma acción con n
 | `ux-gray-on-color` | warning (B-029) | Texto de un gris medio (croma OKLCH < 0.045, que incluye todos los grises de Tailwind; luminosidad 0.3–0.85) sobre un fondo de color (croma ≥ 0.06), en la misma regla CSS o el mismo elemento: Radix diseña el texto de cada escala para su propio fondo, y blanco u oscuro sobre los sólidos | `.promo { background: var(--color-primary); color: #6b7280 }` |
 | `a11y-gradient-text` | warning (B-029) | Texto sobre un degradado que no llega al mínimo contra alguna de sus paradas (WCAG 1.4.3, técnica G18). Desde B-029, `theme-contrast` ya no mide un degradado como si fuera su primer color | `background: linear-gradient(#4f46e5, #f5f3ff); color: #fff` |
 | `ds-component-reuse` | warning (B-030) | Un elemento nativo hecho a mano que el proyecto tiene como componente en su carpeta de UI, con el import exacto (`ux:nielsen-4`). No avisa dentro de la carpeta de UI ni por `input type="hidden"`; vale también en el laboratorio | `<button className="bg-primary …">` con `components/ui/button.tsx` |
+| `a11y-color-only` | warning (B-004) | Un estado que se muestra solo con color (WCAG 1.4.1): un elemento no interactivo con una clase de estado, un color con token de estado o un `className` que depende de un estado, sin texto propio ni al lado, sin nombre accesible y sin ícono. Un elemento `aria-hidden` no avisa (es decorativo, al lado del texto) | `<span className="dot dot-paid" />` solo en la celda |
 | `a11y-motion` | warning (B-029) | Una animación sin alternativa de movimiento reducido: `animation` en CSS cuando ningún CSS del proyecto tiene `@media (prefers-reduced-motion: reduce)` (técnica C39), o `animate-*` sin `motion-safe:` ni `motion-reduce:` (WCAG 2.3.3) | `.fade-up { animation: fade-up 300ms }` |
 
 **Look genérico de IA (B-029).** Las tres reglas anteriores son las partes de ese look que rompen una regla publicada. Del resto, la señal de "tarjetas dentro de tarjetas" no tiene una fuente que diga que se eviten y queda como señal de `review_ui` (`nested-surfaces`, info); los grises puros con color de marca quedan afuera (Radix: el gris puro va bien con cualquier color; Carbon lo usa); el mismo radio y sombra en todo no tiene fuente; y una sola tipografía sin escala ya la cubren `tailwind-default-scale`, los tokens de tamaño y `review_ui`. El detalle, con las fuentes: [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
@@ -723,7 +724,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1557,6 +1558,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** `get_design_system` suma la sección `components` (§2.a), con los componentes de la carpeta de UI del proyecto. La regla `ds-component-reuse` (aviso) marca un elemento nativo hecho a mano que el sistema ya tiene como componente, con el import exacto. `ux_score` informa la cobertura del design system al lado del puntaje.
 - **Decisiones:** avisa sobre todo elemento hecho a mano que tenga componente, con clases o sin ellas; es un aviso, porque hay usos legítimos (un `select` nativo en móvil); la cobertura no cambia la fórmula del puntaje, así los baselines de CI siguen comparables; el inventario viene en las secciones de siempre.
 - **Tests:** `shadcn-tw4` suma `components/ui` (botón, input y tarjeta) y una pantalla que los usa: el `<button>` a mano de la pantalla de siempre da el aviso con su import, y la nueva no; negativos para el propio componente, `input type="hidden"`, un `label` sin `Label` y un proyecto sin carpeta de UI; la cobertura por pantalla y del proyecto.
+
+### 7.38 Versión 0.28.0: regla `a11y-color-only`
+
+Ítem B-004 del backlog. Spec, decisiones y registro: [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md).
+
+- **Qué cambia:** la regla `a11y-color-only` (aviso, §2.a) marca un estado que se muestra solo con color. El lector de JSX suma tres datos por elemento: si tiene texto al lado, si contiene un ícono (`svg` o `img`) y qué nombres interpola su `className`. `ux:wcag-1.4.1` pasa a "verificado por el guardián".
+- **Decisiones:** un elemento `aria-hidden` no avisa; es un aviso, porque el estado se infiere del nombre de una clase o variable; las filas o fondos de color con texto adentro quedan afuera.
+- **Tests:** fixture `color-only` con tres positivos (la clase de estado, la clase interpolada con el estado, el color con token de estado) y ocho negativos (texto al lado, `aria-label`, `aria-hidden`, ícono, texto propio, texto `sr-only`, un botón); los mismos totales que la 0.27.0 en las apps de prueba y en los fixtures.
 
 ---
 

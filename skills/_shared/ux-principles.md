@@ -88,7 +88,8 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 ### ux:wcag-1.4.1 · Use of color
 - **What:** color is never the only way to tell something: status, errors, links.
 - **Violated:** a status shown only as a green or red dot; a required field marked only in red.
-- **Verify:** lab: `health` entries `status-confusable`; review. Not yet a guardian rule (SPEC §6).
+- **Verify:** guardian: `a11y-color-only` (a state dot, chip or class with no text, name or icon);
+  lab: `health` entries `status-confusable`; review.
 
 ### ux:wcag-1.4.3 · Contrast (minimum)
 - **What:** text reaches 4.5:1 (3:1 for large text) against its background, in every theme.
@@ -251,8 +252,8 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 
 | Verified by | Ids |
 |---|---|
-| guardian (`check_ui`) | `ux:text-on-color`, `ux:wcag-2.3.3`, `ux:wcag-1.1.1`, `ux:wcag-1.3.1`, `ux:wcag-1.4.3`, `ux:wcag-1.4.10`, `ux:wcag-1.4.11`, `ux:wcag-2.1.1`, `ux:wcag-2.4.3`, `ux:wcag-2.4.7`, `ux:wcag-2.5.8`, `ux:wcag-3.3.2`, `ux:wcag-4.1.2`, `ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-2`, `ux:nielsen-4`, `ux:nielsen-9` (partly) |
-| lab and tools | `ux:nielsen-1`, `ux:nielsen-3`, `ux:nielsen-5`, `ux:nielsen-8`, `ux:wcag-1.4.1`, `ux:wcag-1.4.10`, `ux:wcag-2.5.8`, `ux:hierarchy`, `ux:hick`, `ux:state-loading`, `ux:state-empty`, `ux:state-error` |
+| guardian (`check_ui`) | `ux:wcag-1.4.1`, `ux:text-on-color`, `ux:wcag-2.3.3`, `ux:wcag-1.1.1`, `ux:wcag-1.3.1`, `ux:wcag-1.4.3`, `ux:wcag-1.4.10`, `ux:wcag-1.4.11`, `ux:wcag-2.1.1`, `ux:wcag-2.4.3`, `ux:wcag-2.4.7`, `ux:wcag-2.5.8`, `ux:wcag-3.3.2`, `ux:wcag-4.1.2`, `ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-2`, `ux:nielsen-4`, `ux:nielsen-9` (partly) |
+| lab and tools | `ux:nielsen-1`, `ux:nielsen-3`, `ux:nielsen-5`, `ux:nielsen-8`, `ux:wcag-1.4.10`, `ux:wcag-2.5.8`, `ux:hierarchy`, `ux:hick`, `ux:state-loading`, `ux:state-empty`, `ux:state-error` |
 | review only | `ux:wcag-2.5.5`, `ux:line-length`, `ux:numeric-alignment`, `ux:nielsen-6` (beyond a name), `ux:nielsen-7`, `ux:nielsen-10`, `ux:wcag-1.3.2`, `ux:gestalt-proximity`, `ux:gestalt-similarity`, `ux:gestalt-common-region`, `ux:fitts` (beyond size), `ux:jakob` |
 
 What the guardian checks is proven; what only review judges needs evidence: the capture and the

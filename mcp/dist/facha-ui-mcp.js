@@ -40494,7 +40494,8 @@ var RULE_IDS = [
   "ux-gray-on-color",
   "a11y-gradient-text",
   "a11y-motion",
-  "ds-component-reuse"
+  "ds-component-reuse",
+  "a11y-color-only"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -55792,10 +55793,26 @@ function extractJsx(file2, code2, ext, classHelpers) {
       else if (child && typeof child === "object") collectStrings(child, out);
     }
   };
+  const collectNames = (n, out) => {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "Identifier") out.push(String(n.name));
+    else if (n.type === "MemberExpression" || n.type === "OptionalMemberExpression") {
+      collectNames(n.object, out);
+      if (n.property?.type === "Identifier" && !n.computed) out.push(String(n.property.name));
+      else collectNames(n.property, out);
+    } else
+      for (const key of Object.keys(n)) {
+        if (key === "loc" || key === "start" || key === "end" || key === "extra" || key === "comments") continue;
+        const child = n[key];
+        if (Array.isArray(child)) child.forEach((c2) => collectNames(c2, out));
+        else if (child && typeof child === "object") collectNames(child, out);
+      }
+  };
   const attrsOf = (opening) => {
     const attrs = {};
     const dynamic = [];
     const classes = [];
+    const classVars = [];
     let spread = false;
     for (const a of opening.attributes) {
       if (a.type === "JSXSpreadAttribute") {
@@ -55817,12 +55834,16 @@ function extractJsx(file2, code2, ext, classHelpers) {
           dynamic.push(key);
         }
       }
-      if (key === "className" || key === "class") collectStrings(v, classes);
+      if (key === "className" || key === "class") {
+        collectStrings(v, classes);
+        if (v?.type === "JSXExpressionContainer") collectNames(v.expression, classVars);
+      }
     }
-    return { attrs, dynamic, classes, spread };
+    return { attrs, dynamic, classes, spread, classVars };
   };
   const textOf = (children) => {
     let name = "none";
+    let graphic = false;
     const parts = [];
     const unknown2 = () => {
       if (name !== "text") name = "unknown";
@@ -55850,6 +55871,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
             unknown2();
             continue;
           }
+          if (nm.tag === "svg" || nm.tag === "img") graphic = true;
           const a = attrsOf(c2.openingElement);
           if (a.attrs["aria-hidden"] === "true") continue;
           if (a.attrs["aria-label"] || a.attrs.title || nm.tag === "img" && a.attrs.alt) {
@@ -55865,10 +55887,14 @@ function extractJsx(file2, code2, ext, classHelpers) {
       }
     };
     walkChildren(children);
-    return { name, text: parts.join(" ").slice(0, 80) };
+    return { name, text: parts.join(" ").slice(0, 80), graphic };
   };
   const ancestors = [];
   const ancestorClassStack = [];
+  const childTextStack = [];
+  const hasDirectText = (children) => children.some(
+    (c2) => c2.type === "JSXText" && String(c2.value).trim() !== "" || c2.type === "JSXExpressionContainer" && c2.expression?.type !== "JSXEmptyExpression"
+  );
   const visit2 = (n) => {
     if (!n || typeof n !== "object") return;
     if (Array.isArray(n)) {
@@ -55887,6 +55913,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
           ...attrs,
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
+          siblingText: childTextStack[childTextStack.length - 1] ?? false,
           ancestorClasses: ancestorClassStack.flat(),
           ancestorClassLists: ancestorClassStack.map((a) => [...a]),
           file: file2,
@@ -55896,6 +55923,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
       }
       ancestors.push(nm.intrinsic ? nm.tag : "");
       ancestorClassStack.push(attrs?.classes ?? []);
+      childTextStack.push(hasDirectText(n.children));
       pushed = true;
       const tag = nm.tag || "?";
       for (const c2 of n.children) {
@@ -55954,6 +55982,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
     if (pushed) {
       ancestors.pop();
       ancestorClassStack.pop();
+      childTextStack.pop();
     }
   };
   visit2(ast);
@@ -56468,6 +56497,340 @@ function componentUses(ctx, code2) {
   let n = 0;
   for (const name of imported) n += [...code2.matchAll(new RegExp(`<${name}[\\s/>]`, "g"))].length;
   return n;
+}
+
+// src/visual.ts
+var COLORED_CHROMA = 0.06;
+var STATUS_KINDS = [
+  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
+  ["warning", /warn|pending|review|caution|attention/],
+  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
+  ["info", /info|sent|notice|hint/],
+  ["neutral", /inactive|neutral|archiv/]
+];
+function withoutPseudo(selector) {
+  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
+}
+function statusKindOf(selector) {
+  const t = withoutPseudo(selector).toLowerCase();
+  for (const [kind, re] of STATUS_KINDS) if (re.test(t)) return kind;
+  return null;
+}
+var indexes = /* @__PURE__ */ new WeakMap();
+var oklabDistance2 = differenceEuclidean("oklab");
+var deuteranopia = filterDeficiencyDeuter(1);
+var protanopia = filterDeficiencyProt(1);
+function minRatioOf(ctx) {
+  return ctx.project.config.contrast?.minRatio ?? 4.5;
+}
+function surfaces(ctx) {
+  const configured = ctx.project.config.contrast?.surfaces;
+  if (configured?.length) return { names: configured, configured: true };
+  return { names: ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name), configured: false };
+}
+function colorOf(ctx, raw2, theme) {
+  if (!raw2) return void 0;
+  const v = raw2.trim();
+  const only = v.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*([^()]+))?\)$/);
+  if (only) return tokenColor(ctx.tokens, only[1], theme) ?? (only[2] ? parseColor(only[2]) : void 0);
+  const direct = parseColor(v);
+  if (direct) return direct;
+  for (const m of v.matchAll(/var\(\s*(--[\w-]+)/g)) {
+    const c2 = tokenColor(ctx.tokens, m[1], theme);
+    if (c2) return c2;
+  }
+  const lit = findColorLiterals(v)[0];
+  return lit ? parseColor(lit.text) : void 0;
+}
+function themeScope(ctx, selector) {
+  if (!selector) return { theme: null, base: null };
+  for (const th of ctx.tokens.themes.slice(1)) {
+    const prefix2 = th.selector.trim() + " ";
+    if (selector.startsWith(prefix2)) return { theme: th.name, base: selector.slice(prefix2.length).trim() };
+  }
+  return { theme: null, base: selector };
+}
+var BACKGROUND_PROPS = /* @__PURE__ */ new Set(["background", "background-color"]);
+function index(ctx) {
+  const cached2 = indexes.get(ctx);
+  if (cached2) return cached2;
+  const idx = { overrides: /* @__PURE__ */ new Set(), classFindings: /* @__PURE__ */ new Map() };
+  indexes.set(ctx, idx);
+  const rules = [];
+  for (const [file2, root2] of [...ctx.cssRoots.entries()].sort(([a], [b]) => a < b ? -1 : 1)) {
+    root2.walkRules((rule2) => {
+      const selector = selectorContext(rule2);
+      if (themeForSelector(selector, ctx.project.config.tokens.themes) !== null) return;
+      rules.push({ rule: rule2, selector, file: file2 });
+      const { theme, base: base4 } = themeScope(ctx, selector);
+      if (!theme || !base4) return;
+      for (const n of rule2.nodes ?? []) {
+        if (n.type !== "decl") continue;
+        if (n.prop === "color") idx.overrides.add(`${theme}|${base4}|color`);
+        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base4}|background`);
+      }
+    });
+  }
+  const minRatio = minRatioOf(ctx);
+  for (const { rule: rule2, selector, file: file2 } of rules) {
+    if (selector.includes(":") || selector.startsWith("@")) continue;
+    const decls = (rule2.nodes ?? []).filter((n) => n.type === "decl");
+    const color = decls.find((d) => d.prop === "color");
+    if (!color) continue;
+    const bg = decls.find((d) => BACKGROUND_PROPS.has(d.prop))?.value ?? null;
+    const result = textContrast(ctx, color.value, bg, selector, minRatio);
+    if (!result || result.failing.length === 0) continue;
+    for (const part of selector.split(",")) {
+      const last = part.trim().split(/[\s>+~]+/).pop() ?? "";
+      for (const m of last.matchAll(/\.([\w-]+)/g)) {
+        const name = m[1];
+        if (!idx.classFindings.has(name)) {
+          idx.classFindings.set(name, { result, selector, value: color.value, background: bg, source: `${file2}:${color.source?.start?.line ?? 0}` });
+        }
+      }
+    }
+  }
+  return idx;
+}
+function textContrast(ctx, value, background, selector, minRatio, opts = { text: true }) {
+  const { theme: scoped, base: base4 } = themeScope(ctx, selector);
+  const idx = index(ctx);
+  const themes = ctx.tokens.themes.map((t) => t.name).filter((t) => !scoped || t === scoped);
+  const surf = surfaces(ctx);
+  const ratios = {};
+  const against = {};
+  for (const th of themes) {
+    if (!scoped && base4 && th !== ctx.tokens.themes[0]?.name) {
+      if (idx.overrides.has(`${th}|${base4}|color`)) continue;
+      if (background && idx.overrides.has(`${th}|${base4}|background`)) continue;
+    }
+    const fg = colorOf(ctx, value, th);
+    if (!fg) return null;
+    const baseSurface = surf.names[0] ? tokenColor(ctx.tokens, surf.names[0], th) : void 0;
+    if (background) {
+      if (/(?:linear|radial|conic)-gradient\(/.test(background)) return null;
+      const bg = colorOf(ctx, background, th);
+      if (!bg || (bg.alpha ?? 1) < 1) return null;
+      ratios[th] = contrast2(fg, bg, baseSurface);
+      against[th] = background.trim();
+      continue;
+    }
+    let worst = Number.POSITIVE_INFINITY;
+    let worstName = "";
+    for (const s of surf.names) {
+      const bg = tokenColor(ctx.tokens, s, th);
+      if (!bg) continue;
+      const r4 = contrast2(fg, bg, baseSurface);
+      if (r4 < worst) {
+        worst = r4;
+        worstName = s;
+      }
+    }
+    if (!Number.isFinite(worst)) continue;
+    ratios[th] = worst;
+    against[th] = worstName;
+  }
+  const measured = Object.keys(ratios);
+  if (measured.length === 0) return null;
+  const defaultTheme2 = ctx.tokens.themes[0]?.name;
+  if (opts.text !== false && !background && defaultTheme2 && ratios[defaultTheme2] !== void 0 && ratios[defaultTheme2] < 1.5) return null;
+  return {
+    failing: measured.filter((th) => ratios[th] < minRatio),
+    ratios: Object.fromEntries(measured.map((th) => [th, shownRatio(ratios[th])])),
+    against,
+    minRatio,
+    certain: !!background || surf.configured
+  };
+}
+function describeContrast(r4) {
+  return r4.failing.map((th) => `${r4.ratios[th]}:1 on ${r4.against[th]} in ${th}`).join("; ") + ` (needs ${r4.minRatio}:1)`;
+}
+function suggestReadable(ctx, value, background, selector, r4) {
+  const defaultTheme2 = ctx.tokens.themes[0]?.name ?? "light";
+  const current = colorOf(ctx, value, defaultTheme2);
+  const readable = (role2) => /^(text\.|on-accent|accent|status\.)/.test(role2);
+  const familyOf = (role2) => role2.startsWith("status.") ? role2 : role2.split(".")[0];
+  const own2 = value.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
+  const twin = !own2 && current ? ctx.tokens.tokens.find((t) => {
+    const c2 = t.type === "color" ? tokenColor(ctx.tokens, t.name, defaultTheme2) : void 0;
+    return c2 && readable(t.role) && oklabDistance2(current, c2) * 100 < 2;
+  }) : void 0;
+  const statusKind = selector ? statusKindOf(selector) : null;
+  const colored = !own2 && !twin && !statusKind && current && chromaHue(current).c >= COLORED_CHROMA ? chromaHue(current) : null;
+  const kin = colored ? ctx.tokens.tokens.filter((t) => t.type === "color" && /^(accent|status\.)/.test(t.role)).map((t) => ({ t, ch: tokenColor(ctx.tokens, t.name, defaultTheme2) })).filter((x) => !!x.ch && chromaHue(x.ch).c >= COLORED_CHROMA).map((x) => ({ role: x.t.role, d: hueDistance(chromaHue(x.ch).h, colored.h) })).filter((x) => x.d <= 40).sort((a, b) => a.d - b.d)[0] : void 0;
+  const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null) ?? kin?.role ?? (colored ? "colored" : null);
+  const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r4.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
+    const c2 = tokenColor(ctx.tokens, x.t.name, defaultTheme2);
+    return { ...x, d: current && c2 ? oklabDistance2(current, c2) : Number.POSITIVE_INFINITY };
+  }).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
+  const sameFamily = role && readable(role) ? passing.filter((x) => familyOf(x.t.role) === familyOf(role)) : [];
+  const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
+  const textLike = !role || role !== "colored" && !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
+  const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
+  const why = describeContrast(r4);
+  if (candidates.length === 0) {
+    return {
+      match: "none",
+      kind: "none",
+      value: null,
+      detail: role === "colored" ? `${why}. It is a color, and the system has no token of its hue: a gray would change what it means. It is a gap (/facha-ui:init colors can propose a token for it).` : `${why}. No ${role?.startsWith("status.") ? `${role.slice("status.".length)} status` : role?.startsWith("accent") ? "brand" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") || role?.startsWith("accent") ? " (/facha-ui:init can propose one; a gray or another state would change what it means)" : ""}.`,
+      source: null
+    };
+  }
+  const best = candidates[0];
+  const reached = Object.entries(best.res.ratios).map(([th, v]) => `${v}:1 in ${th}`).join(", ");
+  return {
+    match: "nearest",
+    kind: "token",
+    value: `var(${best.t.name})`,
+    detail: `${why}. ${best.t.name} reaches it in every theme (${reached}).`,
+    source: best.t.source
+  };
+}
+function classContrast(ctx, className) {
+  return index(ctx).classFindings.get(className) ?? null;
+}
+var INTERACTIVE = /(^|[\s>+~,(])(input|select|textarea|button)\b|:focus|\.(btn|button|field|input|select|checkbox|radio|switch|toggle|tab)\b|\[role=/i;
+function isNonTextTarget(property2, selector, context) {
+  const p4 = property2.toLowerCase();
+  if (context === "svg-attribute") return p4 === "fill" || p4 === "stroke";
+  if (!selector || !INTERACTIVE.test(selector)) return false;
+  if (/^(border|outline)(-[a-z]+)*$/.test(p4)) return !/(radius|width|style|offset|collapse|spacing|image)/.test(p4);
+  return p4 === "box-shadow" && /:focus/.test(selector);
+}
+function nonTextContrast(ctx, value, background, selector) {
+  const min = ctx.project.config.contrast?.nonTextMinRatio ?? 3;
+  return textContrast(ctx, value, background, selector, min, { text: false });
+}
+function statusConfusable(ctx) {
+  const threshold = ctx.project.config.contrast?.statusMinDeltaE ?? 10;
+  const themes = ctx.tokens.themes.map((t) => t.name);
+  const items = [];
+  const byKind = /* @__PURE__ */ new Map();
+  for (const t of ctx.tokens.tokens) {
+    if (t.type !== "color" || !t.role.startsWith("status.")) continue;
+    const kind = t.role.slice("status.".length).replace("other", "neutral");
+    const part = /(bg|background|soft|tint|surface|subtle)/.test(t.name) ? "bg" : "fg";
+    const item = byKind.get(kind) ?? { label: `status ${kind} tokens`, kind, source: t.source, parts: { fg: {}, bg: {} } };
+    for (const th of themes) {
+      const c2 = tokenColor(ctx.tokens, t.name, th);
+      if (c2 && !item.parts[part][th]) item.parts[part][th] = c2;
+    }
+    byKind.set(kind, item);
+  }
+  items.push(...byKind.values());
+  for (const cc of ctx.componentClasses) {
+    if (themeScope(ctx, cc.selector).theme || cc.selector.includes(":")) continue;
+    const kind = statusKindOf(cc.selector);
+    if (!kind) continue;
+    const item = { label: cc.selector, kind, source: cc.source, parts: { fg: {}, bg: {} } };
+    for (const d of cc.decls) {
+      const part = d.prop === "color" ? "fg" : BACKGROUND_PROPS.has(d.prop) ? "bg" : null;
+      if (!part) continue;
+      for (const th of themes) {
+        const c2 = colorOf(ctx, d.value, th);
+        if (c2) item.parts[part][th] = c2;
+      }
+    }
+    if (Object.keys(item.parts.fg).length || Object.keys(item.parts.bg).length) items.push(item);
+  }
+  const visions = [
+    ["normal", (c2) => c2],
+    ["deuteranopia", (c2) => deuteranopia(c2)],
+    ["protanopia", (c2) => protanopia(c2)]
+  ];
+  const worstByPair = /* @__PURE__ */ new Map();
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i];
+      const b = items[j];
+      if (a.kind === b.kind) continue;
+      for (const th of themes) {
+        const deltaE2 = {};
+        let shared = false;
+        for (const [name, sim] of visions) {
+          let best = 0;
+          for (const part of ["fg", "bg"]) {
+            const ca = a.parts[part][th];
+            const cb = b.parts[part][th];
+            if (!ca || !cb) continue;
+            shared = true;
+            best = Math.max(best, oklabDistance2(sim(ca), sim(cb)) * 100);
+          }
+          deltaE2[name] = round2(best, 1);
+        }
+        if (!shared) continue;
+        const min = Math.min(...Object.values(deltaE2));
+        if (min >= threshold) continue;
+        const key = [a.kind, b.kind].sort().join("|");
+        const prev = worstByPair.get(key);
+        if (prev) {
+          if (!prev.themes.includes(th)) prev.themes.push(th);
+          if (Math.min(...Object.values(prev.deltaE)) <= min) continue;
+        }
+        const [first2, second] = a.kind < b.kind ? [a, b] : [b, a];
+        worstByPair.set(key, {
+          themes: prev?.themes ?? [th],
+          kind: "status-confusable",
+          token: `${first2.label} ~ ${second.label}`,
+          states: [first2.kind, second.kind],
+          items: [
+            { label: first2.label, source: first2.source, colors: partsHex(first2, th) },
+            { label: second.label, source: second.source, colors: partsHex(second, th) }
+          ],
+          measuredIn: th,
+          deltaE: deltaE2,
+          minDeltaE: threshold,
+          hardFor: Object.entries(deltaE2).filter(([, v]) => v < threshold).map(([k4]) => k4),
+          note: "These states are hard to tell apart by color alone for the listed vision types: keep a text label or an icon, or separate them more in lightness."
+        });
+      }
+    }
+  }
+  return [...worstByPair.values()].map(({ themes: ths, ...rest }) => ({ ...rest, themes: [...ths].sort((p4, q) => themes.indexOf(p4) - themes.indexOf(q)) })).sort((x, y) => x.token < y.token ? -1 : x.token > y.token ? 1 : 0);
+}
+function partsHex(item, theme) {
+  const out = {};
+  if (item.parts.fg[theme]) out.text = toHex(item.parts.fg[theme]);
+  if (item.parts.bg[theme]) out.background = toHex(item.parts.bg[theme]);
+  return out;
+}
+
+// src/color-only.ts
+var NON_INTERACTIVE2 = /* @__PURE__ */ new Set(["span", "div", "i", "b", "small", "td", "li", "mark", "em", "strong"]);
+var COLOR_UTILITY = /^(?:[\w-]+:)*(?:bg|text|border|ring|fill|stroke|outline|decoration)-(.+?)(?:\/\d+)?$/;
+var STATE_VAR = /(^|[a-z])(status|state|severity)$|^(health|result)$/i;
+function stateOf(ctx, e4) {
+  for (const c2 of e4.classes) {
+    if (statusKindOf(`.${c2}`)) return `the class ${c2}`;
+    const color = c2.match(COLOR_UTILITY)?.[1]?.replace(/^\[var\((--[\w-]+)\)\]$/, "$1");
+    if (!color) continue;
+    for (const name of color.startsWith("--") ? [color] : [`--color-${color}`, `--${color}`]) {
+      const t = ctx.tokens.byName.get(name);
+      if (t?.type === "color" && t.role.startsWith("status.")) return `the status color ${c2}`;
+    }
+  }
+  const v = (e4.classVars ?? []).find((n) => STATE_VAR.test(n));
+  return v ? `a className that depends on ${v}` : null;
+}
+function checkColorOnly(ctx, usages, report) {
+  for (const u of usages) {
+    if (u.kind !== "element" || !NON_INTERACTIVE2.has(u.tag)) continue;
+    if (u.name !== "none" || u.siblingText || u.graphic) continue;
+    if (u.attrs["aria-hidden"] === "true") continue;
+    if (["aria-label", "aria-labelledby", "title"].some((a) => u.attrs[a] !== void 0 || u.dynamic.includes(a))) continue;
+    if (u.spread) continue;
+    const state = stateOf(ctx, u);
+    if (!state) continue;
+    report(
+      "a11y-color-only",
+      "warning",
+      u,
+      `<${u.tag} className="${u.classes.join(" ")}">`,
+      `A state shown only by color (${state}): nothing else says it (WCAG 1.4.1).`,
+      "Say the state besides the color: visible text, or text for screen readers (sr-only), or an icon with a name, next to it."
+    );
+  }
 }
 
 // src/copy.ts
@@ -57576,303 +57939,6 @@ function sprawl(ctx, usages) {
   return out;
 }
 
-// src/visual.ts
-var COLORED_CHROMA = 0.06;
-var STATUS_KINDS = [
-  ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
-  ["warning", /warn|pending|review|caution|attention/],
-  ["success", /success|paid|(^|[^a-z])ok([^a-z]|$)|done|complete|approved|positive/],
-  ["info", /info|sent|notice|hint/],
-  ["neutral", /inactive|neutral|archiv/]
-];
-function withoutPseudo(selector) {
-  return selector.replace(/::?[\w-]+(\((?:[^()]|\([^()]*\))*\))?/g, "");
-}
-function statusKindOf(selector) {
-  const t = withoutPseudo(selector).toLowerCase();
-  for (const [kind, re] of STATUS_KINDS) if (re.test(t)) return kind;
-  return null;
-}
-var indexes = /* @__PURE__ */ new WeakMap();
-var oklabDistance2 = differenceEuclidean("oklab");
-var deuteranopia = filterDeficiencyDeuter(1);
-var protanopia = filterDeficiencyProt(1);
-function minRatioOf(ctx) {
-  return ctx.project.config.contrast?.minRatio ?? 4.5;
-}
-function surfaces(ctx) {
-  const configured = ctx.project.config.contrast?.surfaces;
-  if (configured?.length) return { names: configured, configured: true };
-  return { names: ctx.tokens.tokens.filter((t) => t.role.startsWith("surface.")).map((t) => t.name), configured: false };
-}
-function colorOf(ctx, raw2, theme) {
-  if (!raw2) return void 0;
-  const v = raw2.trim();
-  const only = v.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*([^()]+))?\)$/);
-  if (only) return tokenColor(ctx.tokens, only[1], theme) ?? (only[2] ? parseColor(only[2]) : void 0);
-  const direct = parseColor(v);
-  if (direct) return direct;
-  for (const m of v.matchAll(/var\(\s*(--[\w-]+)/g)) {
-    const c2 = tokenColor(ctx.tokens, m[1], theme);
-    if (c2) return c2;
-  }
-  const lit = findColorLiterals(v)[0];
-  return lit ? parseColor(lit.text) : void 0;
-}
-function themeScope(ctx, selector) {
-  if (!selector) return { theme: null, base: null };
-  for (const th of ctx.tokens.themes.slice(1)) {
-    const prefix2 = th.selector.trim() + " ";
-    if (selector.startsWith(prefix2)) return { theme: th.name, base: selector.slice(prefix2.length).trim() };
-  }
-  return { theme: null, base: selector };
-}
-var BACKGROUND_PROPS = /* @__PURE__ */ new Set(["background", "background-color"]);
-function index(ctx) {
-  const cached2 = indexes.get(ctx);
-  if (cached2) return cached2;
-  const idx = { overrides: /* @__PURE__ */ new Set(), classFindings: /* @__PURE__ */ new Map() };
-  indexes.set(ctx, idx);
-  const rules = [];
-  for (const [file2, root2] of [...ctx.cssRoots.entries()].sort(([a], [b]) => a < b ? -1 : 1)) {
-    root2.walkRules((rule2) => {
-      const selector = selectorContext(rule2);
-      if (themeForSelector(selector, ctx.project.config.tokens.themes) !== null) return;
-      rules.push({ rule: rule2, selector, file: file2 });
-      const { theme, base: base4 } = themeScope(ctx, selector);
-      if (!theme || !base4) return;
-      for (const n of rule2.nodes ?? []) {
-        if (n.type !== "decl") continue;
-        if (n.prop === "color") idx.overrides.add(`${theme}|${base4}|color`);
-        if (BACKGROUND_PROPS.has(n.prop)) idx.overrides.add(`${theme}|${base4}|background`);
-      }
-    });
-  }
-  const minRatio = minRatioOf(ctx);
-  for (const { rule: rule2, selector, file: file2 } of rules) {
-    if (selector.includes(":") || selector.startsWith("@")) continue;
-    const decls = (rule2.nodes ?? []).filter((n) => n.type === "decl");
-    const color = decls.find((d) => d.prop === "color");
-    if (!color) continue;
-    const bg = decls.find((d) => BACKGROUND_PROPS.has(d.prop))?.value ?? null;
-    const result = textContrast(ctx, color.value, bg, selector, minRatio);
-    if (!result || result.failing.length === 0) continue;
-    for (const part of selector.split(",")) {
-      const last = part.trim().split(/[\s>+~]+/).pop() ?? "";
-      for (const m of last.matchAll(/\.([\w-]+)/g)) {
-        const name = m[1];
-        if (!idx.classFindings.has(name)) {
-          idx.classFindings.set(name, { result, selector, value: color.value, background: bg, source: `${file2}:${color.source?.start?.line ?? 0}` });
-        }
-      }
-    }
-  }
-  return idx;
-}
-function textContrast(ctx, value, background, selector, minRatio, opts = { text: true }) {
-  const { theme: scoped, base: base4 } = themeScope(ctx, selector);
-  const idx = index(ctx);
-  const themes = ctx.tokens.themes.map((t) => t.name).filter((t) => !scoped || t === scoped);
-  const surf = surfaces(ctx);
-  const ratios = {};
-  const against = {};
-  for (const th of themes) {
-    if (!scoped && base4 && th !== ctx.tokens.themes[0]?.name) {
-      if (idx.overrides.has(`${th}|${base4}|color`)) continue;
-      if (background && idx.overrides.has(`${th}|${base4}|background`)) continue;
-    }
-    const fg = colorOf(ctx, value, th);
-    if (!fg) return null;
-    const baseSurface = surf.names[0] ? tokenColor(ctx.tokens, surf.names[0], th) : void 0;
-    if (background) {
-      if (/(?:linear|radial|conic)-gradient\(/.test(background)) return null;
-      const bg = colorOf(ctx, background, th);
-      if (!bg || (bg.alpha ?? 1) < 1) return null;
-      ratios[th] = contrast2(fg, bg, baseSurface);
-      against[th] = background.trim();
-      continue;
-    }
-    let worst = Number.POSITIVE_INFINITY;
-    let worstName = "";
-    for (const s of surf.names) {
-      const bg = tokenColor(ctx.tokens, s, th);
-      if (!bg) continue;
-      const r4 = contrast2(fg, bg, baseSurface);
-      if (r4 < worst) {
-        worst = r4;
-        worstName = s;
-      }
-    }
-    if (!Number.isFinite(worst)) continue;
-    ratios[th] = worst;
-    against[th] = worstName;
-  }
-  const measured = Object.keys(ratios);
-  if (measured.length === 0) return null;
-  const defaultTheme2 = ctx.tokens.themes[0]?.name;
-  if (opts.text !== false && !background && defaultTheme2 && ratios[defaultTheme2] !== void 0 && ratios[defaultTheme2] < 1.5) return null;
-  return {
-    failing: measured.filter((th) => ratios[th] < minRatio),
-    ratios: Object.fromEntries(measured.map((th) => [th, shownRatio(ratios[th])])),
-    against,
-    minRatio,
-    certain: !!background || surf.configured
-  };
-}
-function describeContrast(r4) {
-  return r4.failing.map((th) => `${r4.ratios[th]}:1 on ${r4.against[th]} in ${th}`).join("; ") + ` (needs ${r4.minRatio}:1)`;
-}
-function suggestReadable(ctx, value, background, selector, r4) {
-  const defaultTheme2 = ctx.tokens.themes[0]?.name ?? "light";
-  const current = colorOf(ctx, value, defaultTheme2);
-  const readable = (role2) => /^(text\.|on-accent|accent|status\.)/.test(role2);
-  const familyOf = (role2) => role2.startsWith("status.") ? role2 : role2.split(".")[0];
-  const own2 = value.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
-  const twin = !own2 && current ? ctx.tokens.tokens.find((t) => {
-    const c2 = t.type === "color" ? tokenColor(ctx.tokens, t.name, defaultTheme2) : void 0;
-    return c2 && readable(t.role) && oklabDistance2(current, c2) * 100 < 2;
-  }) : void 0;
-  const statusKind = selector ? statusKindOf(selector) : null;
-  const colored = !own2 && !twin && !statusKind && current && chromaHue(current).c >= COLORED_CHROMA ? chromaHue(current) : null;
-  const kin = colored ? ctx.tokens.tokens.filter((t) => t.type === "color" && /^(accent|status\.)/.test(t.role)).map((t) => ({ t, ch: tokenColor(ctx.tokens, t.name, defaultTheme2) })).filter((x) => !!x.ch && chromaHue(x.ch).c >= COLORED_CHROMA).map((x) => ({ role: x.t.role, d: hueDistance(chromaHue(x.ch).h, colored.h) })).filter((x) => x.d <= 40).sort((a, b) => a.d - b.d)[0] : void 0;
-  const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null) ?? kin?.role ?? (colored ? "colored" : null);
-  const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r4.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
-    const c2 = tokenColor(ctx.tokens, x.t.name, defaultTheme2);
-    return { ...x, d: current && c2 ? oklabDistance2(current, c2) : Number.POSITIVE_INFINITY };
-  }).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
-  const sameFamily = role && readable(role) ? passing.filter((x) => familyOf(x.t.role) === familyOf(role)) : [];
-  const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
-  const textLike = !role || role !== "colored" && !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
-  const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
-  const why = describeContrast(r4);
-  if (candidates.length === 0) {
-    return {
-      match: "none",
-      kind: "none",
-      value: null,
-      detail: role === "colored" ? `${why}. It is a color, and the system has no token of its hue: a gray would change what it means. It is a gap (/facha-ui:init colors can propose a token for it).` : `${why}. No ${role?.startsWith("status.") ? `${role.slice("status.".length)} status` : role?.startsWith("accent") ? "brand" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") || role?.startsWith("accent") ? " (/facha-ui:init can propose one; a gray or another state would change what it means)" : ""}.`,
-      source: null
-    };
-  }
-  const best = candidates[0];
-  const reached = Object.entries(best.res.ratios).map(([th, v]) => `${v}:1 in ${th}`).join(", ");
-  return {
-    match: "nearest",
-    kind: "token",
-    value: `var(${best.t.name})`,
-    detail: `${why}. ${best.t.name} reaches it in every theme (${reached}).`,
-    source: best.t.source
-  };
-}
-function classContrast(ctx, className) {
-  return index(ctx).classFindings.get(className) ?? null;
-}
-var INTERACTIVE = /(^|[\s>+~,(])(input|select|textarea|button)\b|:focus|\.(btn|button|field|input|select|checkbox|radio|switch|toggle|tab)\b|\[role=/i;
-function isNonTextTarget(property2, selector, context) {
-  const p4 = property2.toLowerCase();
-  if (context === "svg-attribute") return p4 === "fill" || p4 === "stroke";
-  if (!selector || !INTERACTIVE.test(selector)) return false;
-  if (/^(border|outline)(-[a-z]+)*$/.test(p4)) return !/(radius|width|style|offset|collapse|spacing|image)/.test(p4);
-  return p4 === "box-shadow" && /:focus/.test(selector);
-}
-function nonTextContrast(ctx, value, background, selector) {
-  const min = ctx.project.config.contrast?.nonTextMinRatio ?? 3;
-  return textContrast(ctx, value, background, selector, min, { text: false });
-}
-function statusConfusable(ctx) {
-  const threshold = ctx.project.config.contrast?.statusMinDeltaE ?? 10;
-  const themes = ctx.tokens.themes.map((t) => t.name);
-  const items = [];
-  const byKind = /* @__PURE__ */ new Map();
-  for (const t of ctx.tokens.tokens) {
-    if (t.type !== "color" || !t.role.startsWith("status.")) continue;
-    const kind = t.role.slice("status.".length).replace("other", "neutral");
-    const part = /(bg|background|soft|tint|surface|subtle)/.test(t.name) ? "bg" : "fg";
-    const item = byKind.get(kind) ?? { label: `status ${kind} tokens`, kind, source: t.source, parts: { fg: {}, bg: {} } };
-    for (const th of themes) {
-      const c2 = tokenColor(ctx.tokens, t.name, th);
-      if (c2 && !item.parts[part][th]) item.parts[part][th] = c2;
-    }
-    byKind.set(kind, item);
-  }
-  items.push(...byKind.values());
-  for (const cc of ctx.componentClasses) {
-    if (themeScope(ctx, cc.selector).theme || cc.selector.includes(":")) continue;
-    const kind = statusKindOf(cc.selector);
-    if (!kind) continue;
-    const item = { label: cc.selector, kind, source: cc.source, parts: { fg: {}, bg: {} } };
-    for (const d of cc.decls) {
-      const part = d.prop === "color" ? "fg" : BACKGROUND_PROPS.has(d.prop) ? "bg" : null;
-      if (!part) continue;
-      for (const th of themes) {
-        const c2 = colorOf(ctx, d.value, th);
-        if (c2) item.parts[part][th] = c2;
-      }
-    }
-    if (Object.keys(item.parts.fg).length || Object.keys(item.parts.bg).length) items.push(item);
-  }
-  const visions = [
-    ["normal", (c2) => c2],
-    ["deuteranopia", (c2) => deuteranopia(c2)],
-    ["protanopia", (c2) => protanopia(c2)]
-  ];
-  const worstByPair = /* @__PURE__ */ new Map();
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      const a = items[i];
-      const b = items[j];
-      if (a.kind === b.kind) continue;
-      for (const th of themes) {
-        const deltaE2 = {};
-        let shared = false;
-        for (const [name, sim] of visions) {
-          let best = 0;
-          for (const part of ["fg", "bg"]) {
-            const ca = a.parts[part][th];
-            const cb = b.parts[part][th];
-            if (!ca || !cb) continue;
-            shared = true;
-            best = Math.max(best, oklabDistance2(sim(ca), sim(cb)) * 100);
-          }
-          deltaE2[name] = round2(best, 1);
-        }
-        if (!shared) continue;
-        const min = Math.min(...Object.values(deltaE2));
-        if (min >= threshold) continue;
-        const key = [a.kind, b.kind].sort().join("|");
-        const prev = worstByPair.get(key);
-        if (prev) {
-          if (!prev.themes.includes(th)) prev.themes.push(th);
-          if (Math.min(...Object.values(prev.deltaE)) <= min) continue;
-        }
-        const [first2, second] = a.kind < b.kind ? [a, b] : [b, a];
-        worstByPair.set(key, {
-          themes: prev?.themes ?? [th],
-          kind: "status-confusable",
-          token: `${first2.label} ~ ${second.label}`,
-          states: [first2.kind, second.kind],
-          items: [
-            { label: first2.label, source: first2.source, colors: partsHex(first2, th) },
-            { label: second.label, source: second.source, colors: partsHex(second, th) }
-          ],
-          measuredIn: th,
-          deltaE: deltaE2,
-          minDeltaE: threshold,
-          hardFor: Object.entries(deltaE2).filter(([, v]) => v < threshold).map(([k4]) => k4),
-          note: "These states are hard to tell apart by color alone for the listed vision types: keep a text label or an icon, or separate them more in lightness."
-        });
-      }
-    }
-  }
-  return [...worstByPair.values()].map(({ themes: ths, ...rest }) => ({ ...rest, themes: [...ths].sort((p4, q) => themes.indexOf(p4) - themes.indexOf(q)) })).sort((x, y) => x.token < y.token ? -1 : x.token > y.token ? 1 : 0);
-}
-function partsHex(item, theme) {
-  const out = {};
-  if (item.parts.fg[theme]) out.text = toHex(item.parts.fg[theme]);
-  if (item.parts.bg[theme]) out.background = toHex(item.parts.bg[theme]);
-  return out;
-}
-
 // src/look.ts
 var toOklch2 = converter_default("oklch");
 var chroma = (c2) => toOklch2(c2)?.c ?? 0;
@@ -58253,6 +58319,7 @@ var RULES = [
   { id: "ux-gray-on-color", severity: "warning", summary: "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029)." },
   { id: "a11y-gradient-text", severity: "warning", summary: "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18)." },
   { id: "ds-component-reuse", severity: "warning", summary: "A native element (button, input, select, textarea, label, table\u2026) made by hand where the project has it as a component in its UI folder (B-030, ux:nielsen-4). Not reported inside the UI folder or for input type=hidden." },
+  { id: "a11y-color-only", severity: "warning", summary: "A state shown only by color: a non-interactive element with a state class, a status-token color or a className that depends on a state, and no text (its own or next to it), accessible name or icon (WCAG 1.4.1, B-004). aria-hidden elements are left alone." },
   { id: "a11y-motion", severity: "warning", summary: "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3)." },
   { id: "copy-voice", severity: "warning", summary: `A form of address that breaks the product's voice (copy.voice: vos, t\xFA or usted), e.g. "puedes" in a product that says "pod\xE9s".` }
 ];
@@ -58286,7 +58353,8 @@ var MESSAGES = {
   "ux-gray-on-color": "Gray text on a colored background.",
   "a11y-gradient-text": "Text that misses the minimum contrast on part of its gradient.",
   "a11y-motion": "Animation without a reduced-motion alternative.",
-  "ds-component-reuse": "Made by hand: the project has this as a component."
+  "ds-component-reuse": "Made by hand: the project has this as a component.",
+  "a11y-color-only": "A state shown only by color."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
 function effectiveSeverity(ctx, rule2, base4, soft = false) {
@@ -58536,6 +58604,11 @@ function checkUsages(ctx, usages) {
     (rule2, base4, loc3, found, message, fix, context) => push(rule2, base4, loc3, found, null, context, { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   checkA11y(
+    usages,
+    (rule2, base4, loc3, found, message, fix) => push(rule2, base4, loc3, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+  );
+  checkColorOnly(
+    ctx,
     usages,
     (rule2, base4, loc3, found, message, fix) => push(rule2, base4, loc3, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
@@ -59729,7 +59802,7 @@ function scoreOf(findings) {
   return { score: score2, categories };
 }
 var COLOR_PROPERTY = /^(color|background|background-color|border(-(top|right|bottom|left))?(-color)?|outline(-color)?|fill|stroke|caret-color|accent-color|text-decoration-color)$/;
-var COLOR_UTILITY = /^(?:[\w-]+:)*(?:bg|text|border(?:-[trblxy])?|ring|outline|fill|stroke|divide|placeholder|accent|caret|decoration|from|via|to)-(.+?)(?:\/\d+)?$/;
+var COLOR_UTILITY2 = /^(?:[\w-]+:)*(?:bg|text|border(?:-[trblxy])?|ring|outline|fill|stroke|divide|placeholder|accent|caret|decoration|from|via|to)-(.+?)(?:\/\d+)?$/;
 var LITERAL_RULES = /* @__PURE__ */ new Set(["color-literal", "tailwind-palette-color"]);
 function coverageOf(ctx, files, usagesOf, violationsOf) {
   const ui = inventory(ctx).dir;
@@ -59750,7 +59823,7 @@ function coverageOf(ctx, files, usagesOf, violationsOf) {
         const names = [...u.value.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => m[1]);
         if (names.some(isColorToken)) viaToken++;
       } else if (u.kind === "class") {
-        const color = u.raw.match(COLOR_UTILITY)?.[1];
+        const color = u.raw.match(COLOR_UTILITY2)?.[1];
         if (color && (isColorToken(`--color-${color}`) || isColorToken(`--${color}`))) viaToken++;
       }
     }
@@ -68708,7 +68781,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.27.0";
+var VERSION = "0.28.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.
