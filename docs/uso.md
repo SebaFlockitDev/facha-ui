@@ -243,6 +243,7 @@ Con el brief listo y sin tokens, facha-ui arma un sistema completo en el que **c
 
 - **Color:** escalas de 12 pasos como las de Radix Colors, para tu color de marca, un gris apenas teñido con su tono y los estados (éxito, advertencia, peligro, información). Cada paso tiene el contraste que corresponde a su uso, en claro y en oscuro, calculados por separado.
 - **Tipografía, espaciado, alto de controles, radios y sombras:** de Carbon, Material 3 y Fluent 2, según la densidad del brief.
+- **Perfil de tu tipo de producto:** un panel o una herramienta interna arranca con la escala productiva de Carbon, filas de 32px y cifras tabulares; un e-commerce o una app de consumo, con controles de 48px para el tacto; un sitio de contenido, con líneas de 75 caracteres como máximo. Cada valor cita su fuente, y `variants` usa sus pautas al diseñar.
 - **Prueba de accesibilidad:** cada texto sobre cada fondo y cada borde de control, contra WCAG 2.2 AA (o AAA si el brief lo pide).
 
 **Antes de escribir, te muestra 3 direcciones en el laboratorio:** tu color de marca (o 3 semillas si no tenés) en tres estilos con fuente (estándar, sobrio y suave: radio, gris y elevación de Material 3, Radix, Carbon y Fluent 2), sobre una copia de tu pantalla real con tus datos y sobre una página de muestra con todos los estados (hover, foco, deshabilitado, error, vacío), lado a lado y con capturas. Elegís una, o mezclás el color de una con el estilo de otra.

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseBrief } from "./brief.js";
+import { PROFILES, SOURCES, type SourceId } from "./standards.js";
 import { contrast, round, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { toPx } from "./context.js";
@@ -14,7 +15,7 @@ import { statusConfusable } from "./visual.js";
 import { customRulesInfo, sprawl } from "./project-rules.js";
 
 export const SECTIONS = [
-  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief",
+  "project", "tokens", "scales", "componentClasses", "coverage", "gaps", "health", "rules", "guidelines", "decisions", "brief", "profile",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -226,6 +227,20 @@ export function parseDecisions(ctx: Context) {
   return out;
 }
 
+/**
+ * The product profile of the brief's product type (B-027, standards.ts): what that kind of product
+ * sets by default and its guidelines, each with its sources spelled out, so a skill can cite them.
+ */
+export function profileOf(ctx: Context) {
+  const brief = parseBrief(ctx);
+  const type = brief?.product?.type;
+  const profile = type ? PROFILES[type] : undefined;
+  if (!type || !profile) return null;
+  const ids = new Set<SourceId>();
+  for (const v of [profile.density, profile.typeSet, profile.control, ...profile.tokens, ...profile.guidelines]) for (const s of v?.sources ?? []) ids.add(s);
+  return { type, from: `${brief!.id} (${brief!.at.product})`, ...profile, sources: Object.fromEntries([...ids].sort().map((s) => [s, SOURCES[s]])) };
+}
+
 export function rulesInfo(ctx: Context) {
   return [
     ...RULES.map((r) => ({ id: r.id as string, severity: effectiveSeverity(ctx, r.id, r.severity), summary: r.summary })),
@@ -290,6 +305,7 @@ export function getDesignSystem(ctx: Context, sections: readonly Section[] = SEC
   }
   if (want.has("decisions")) out.decisions = parseDecisions(ctx);
   if (want.has("brief")) out.brief = parseBrief(ctx);
+  if (want.has("profile")) out.profile = profileOf(ctx);
   return out;
 }
 

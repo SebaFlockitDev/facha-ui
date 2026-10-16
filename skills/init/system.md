@@ -93,12 +93,16 @@ For the chosen direction, one message:
    `ux:wcag-1.4.1`) and `notes`.
 3. **Accessibility proof:** how many pairs pass (all of them, or say which do not), and the three
    with the smallest margin over their minimum, with ratio and rule.
-4. **Type, space, radius and shadow:** the scale with its source (`typography.scaleSource`),
-   line heights, the control height, the radii and the shadows, each with its source.
-5. **Dark mode**, from the brief: "sí" → the `.dark` block is written, and the developer's theme
+4. **Type, space, radius and shadow:** the scale with its source (`typography.scaleSource`, and
+   `typography.scaleFrom`: the product's profile or the density), line heights, the control height,
+   the radii and the shadows, each with its source.
+5. **The product's profile** (`profile`, from the brief's product type), when there is one: what
+   it set (scale, control floor, and tokens such as `--numerals`, `--size-row` or `--measure`) and
+   its guidelines, each with its source and `ux:*` id. Say that `/facha-ui:variants` will cite them.
+6. **Dark mode**, from the brief: "sí" → the `.dark` block is written, and the developer's theme
    toggle must put `class="dark"` on `<html>`; "más adelante" or "no" → only the default theme is
    written and the dark values stay in the proposal file for later.
-6. **Exactly what will be written:** the target file and the blocks (`css.light.text`, and
+7. **Exactly what will be written:** the target file and the blocks (`css.light.text`, and
    `css.dark.text` when dark is written) as they will appear; in Tailwind 4 the default theme goes
    in `@theme`, right after `@import "tailwindcss";`; the proposal file; the decision entry (S6).
    Say that the screens keep their hand-written colors and the guardian will flag them: that is

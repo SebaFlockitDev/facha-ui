@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.22.0** (§7.10–§7.32). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.23.0** (§7.10–§7.33). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -237,9 +237,9 @@ Las descripciones se escriben en inglés porque son la interfaz del producto ope
 ##### `get_design_system`
 
 **Descripción (literal):**
-> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one.
+> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one, with the profile of its product type (defaults and guidelines from published systems, each with its source).
 > **When to use:** before writing or modifying any UI, and to answer questions such as "which color/size/component should I use for X?". If no token covers the need, the correct answer is that there is no token: report the gap — never invent a value.
-> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`, `brief`. Read-only: it never modifies files or accesses the network.
+> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`, `brief`, `profile`. Read-only: it never modifies files or accesses the network.
 
 **Entrada:** `{ sections?: ("project"|"tokens"|"scales"|"componentClasses"|"coverage"|"gaps"|"health"|"rules"|"guidelines"|"decisions")[] }`. Por defecto, todas.
 
@@ -713,7 +713,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -857,7 +857,19 @@ Para un proyecto sin tokens, después del brief (§2.g). En lugar de ordenar los
 - **Con color de marca:** la marca en los tres estilos. **Sin color de marca:** de 3 a 5 semillas de los acentos de Radix que no se confunden con éxito, advertencia ni peligro, separadas al menos 45° en tono (hoy índigo, ciruela y cyan), cada una con el estilo que sigue. Cada par de direcciones difiere en al menos dos de: tono, tinte del neutro, radio y elevación. Con `brandColor` y `style` sale una sola dirección: así se mezclan dos.
 - **Nombres** con los espacios de Tailwind 4 (`--color-*`, `--text-*`, `--radius-*`, `--shadow-*`, `--font-sans`), que facha-ui lee por rol: en CSS van en `:root`; en Tailwind 4, en `@theme`. El oscuro, en `.dark`. Un test escribe el sistema en un proyecto, lo lee con facha-ui y exige los roles esperados, `status: ok` y ningún hallazgo de contraste ni de estados confundibles.
 
-**Tool:** `propose_design_system` (§2.a.3) toma la entrada de sus argumentos, después del brief y si no de un valor por defecto, y dice el origen de cada una.
+**Perfiles por tipo de producto** (B-027, `PROFILES` en `standards.ts`): el tipo de producto del brief elige un perfil, y cada valor que fija cita su fuente, verificada en la documentación primaria (un test falla si alguno no la tiene). La densidad del brief manda; el perfil la completa cuando falta. El alto de controles es el mayor entre el de la densidad y el del perfil.
+
+| Tipo | Densidad | Escala | Controles | Tokens | Pautas (`ux:*`) | Fuentes |
+|---|---|---|---|---|---|---|
+| `saas-dashboard`, `internal-tool` | compacta | Carbon productiva | 32px | `--size-row: 32px`, `--numerals: tabular-nums` | `ux:numeric-alignment`; filas de 32px | Carbon (style strategies, data table), GOV.UK, MDN |
+| `fintech` | — | Carbon productiva | — | `--numerals` | `ux:numeric-alignment` | Carbon, GOV.UK, MDN |
+| `ecommerce` | — | Material 3 | 48px | `--measure: 75ch` | `ux:wcag-2.5.5`, `ux:line-length` | WCAG 2.5.5, Carbon, Baymard, WCAG 1.4.8 |
+| `consumer-app` | — | — | 48px | — | `ux:wcag-2.5.5` | WCAG 2.5.5, Carbon |
+| `content`, `marketing` | aireada | Material 3 | — | `--measure: 75ch` | `ux:line-length`; párrafos 1.5× (contenido) | Carbon, Baymard, WCAG 1.4.8 |
+
+Lo que ninguna fuente sostiene no se fija (el "croma moderado" de fintech que nombraba el backlog quedó afuera). `get_design_system` → `profile` devuelve el perfil del brief con sus fuentes completas; `variants` cita sus pautas en el diagnóstico e `init system` lo muestra en el plan.
+
+**Tool:** `propose_design_system` (§2.a.3) toma la entrada de sus argumentos, después del brief (también el tipo de producto, que elige el perfil) y si no de un valor por defecto, y dice el origen de cada una.
 
 **Vista de direcciones en el laboratorio** (B-026, `lab.md` → Direction preview): `<lab.dir>/system/`, propia de `init system` y nunca un run (`system` es un slug reservado; el índice del laboratorio y el panel lo saltean, y `apply` lo cuenta como una pantalla para no borrar el andamiaje). Tiene `directions.css` (el `css.lab` de cada dirección, acotado a `html[data-facha-direction="<id>"]`, que `lab-theme.tsx` pone desde `?direction=`), una **página de muestra** hecha solo con tokens (tipografía, color, botones y campos en sus estados, estados, tabla, vacío, error, radios y sombras), una **copia conservadora de la pantalla real** de la tarea principal del brief (misma estructura, datos y providers; cada valor escrito a mano pasa al token de su rol) y una vista **lado a lado** de las direcciones (`lab-directions.tsx`, propia de facha-ui, separada de la comparación de variantes). En Next son rutas bajo `<LAB_BASE>/system/`; en Vite, `?system=` en el `main.tsx` del laboratorio, que carga `system/` con globs para no fallar cuando no existe.
 
@@ -1481,6 +1493,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Criterio cambiado:** las direcciones difieren en al menos dos de tono, tinte, radio y **elevación** (antes "densidad": la densidad sale del brief y no varía entre direcciones).
 - **Lo que encontró la prueba real** (Vite, sin design system): la vista funciona con los datos reales; con la marca fija, sobre una tabla las tres direcciones se parecen (cambian radio, gris y elevación), así que la skill lo dice y remite a la muestra; `check_ui` se aplica a la copia y a la muestra y no a `directions.css`, que guarda los valores; la muestra tenía un enlace sin destino claro y usaba `100vh`.
 - **Tests:** estilos (radio, gris, elevación, fuentes), diferencias entre cada par de direcciones con y sin marca, mezcla con `style`, `css.lab`, la muestra con 0 errores de `check_ui` contra un sistema generado en Vite y en Next con cada estilo, contratos de los templates y de las skills.
+
+### 7.33 Versión 0.23.0: perfiles por tipo de producto
+
+Ítem B-027 del backlog. Spec, fuentes y registro: [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).
+
+- **Qué cambia:** el tipo de producto del brief elige un perfil (§2.h) que fija la escala tipográfica, un piso para el alto de controles, tokens (`--numerals`, `--size-row`, `--measure`) y pautas citables; `get_design_system` suma la sección `profile`.
+- **Principios nuevos** en `ux-principles.md`: `ux:line-length`, `ux:numeric-alignment` y `ux:wcag-2.5.5`.
+- **Fuentes** verificadas el 2026-10-16: Carbon (style strategies, data table), WCAG 2.5.5 y 1.4.8, Baymard (largo de línea), GOV.UK (números en tablas) y MDN (`tabular-nums`). Polaris y Material 3 no se pudieron leer sin navegador y no se usan.
+- **Tests:** cada valor de cada perfil cita una fuente con URL; las pautas citan principios que existen; el generador aplica cada perfil, la densidad del brief manda y sin perfil nada cambia; todo sistema con perfil pasa cada par de contraste; `profile` por el brief y la tool por el MCP.
 
 ---
 

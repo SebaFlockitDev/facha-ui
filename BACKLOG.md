@@ -27,17 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-027 · Perfiles por tipo de producto, con fuentes
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** "profesional" depende del producto: un panel de datos y una tienda no tienen la misma densidad ni el mismo tamaño base. Los design systems de referencia ya lo resuelven, y citarlos evita decidir por gusto.
-- **Qué:** perfiles que fijan tamaño base, densidad, razón de la escala tipográfica, nivel de croma y radio: SaaS o panel (Carbon productive), e-commerce (Baymard, Polaris), fintech (croma moderado, cifras tabulares, estados marcados) y contenido (Carbon expressive, tipografía fluida de Utopia). El brief elige el perfil y el generador lo usa.
-- **Criterios de aceptación:** cada valor de un perfil cita su fuente, verificada en la documentación primaria antes de fijarla; un test controla que ningún perfil tenga valores sin fuente.
-- **Depende de:** B-025
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://carbondesignsystem.com/elements/typography/type-sets/ , https://polaris.shopify.com/ , https://baymard.com/ , https://utopia.fyi/
-
-## Siguiente
-
 ### B-029 · Reglas contra el "look genérico de IA"
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -45,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** reglas del guardián, cada una con su principio `ux:`: texto gris sobre fondo de color, neutros grises puros cuando hay color de marca, tarjetas dentro de tarjetas, el mismo radio y sombra en todos los bloques, degradados de fondo decorativos, animación de entrada en cada sección y una sola tipografía sin escala.
 - **Criterios de aceptación:** positivos y negativos en un fixture; severidad de aviso; 0 falsos positivos en los fixtures existentes; cada regla figura en `ux-principles.md` como "verificado por el guardián".
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://claude.com/resources/articles/improving-frontend-design-through-skills , `skills/_shared/ux-principles.md`
+
+## Siguiente
 
 ### B-031 · Controles de diseño en el panel en vivo
 - **Estado:** listo para spec
@@ -214,6 +205,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.23.0:** B-027, perfiles por tipo de producto (escala, controles, tokens y pautas con fuente, desde el brief); spec en [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).
 - **0.22.0:** B-026, tres direcciones (semilla + estilo) sobre la pantalla real y una página de muestra, en el laboratorio, antes de escribir; spec en [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).
 - **0.21.0:** B-025, design system desde estándares (`propose_design_system`, `/facha-ui:init system`); spec en [`docs/specs/B-025-generador-de-design-system.md`](docs/specs/B-025-generador-de-design-system.md).
 - **0.20.0:** B-024, brief de diseño para un proyecto sin diseño (`/facha-ui:init brief`, sección `brief` de `get_design_system`); spec en [`docs/specs/B-024-brief-de-diseno.md`](docs/specs/B-024-brief-de-diseno.md).

@@ -263,6 +263,7 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       },
     },
   ],
+  "profile": null,
   "project": {
     "decisionsFile": "design-system/decisions.md",
     "framework": "next-app",

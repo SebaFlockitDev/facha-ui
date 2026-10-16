@@ -44,7 +44,7 @@ producto"*. A table with one row per field: **field · proposal · evidence (`fi
 
 | Field | What it is for (say it once, in one line) | Allowed values |
 |---|---|---|
-| Producto | The type sets density, scale and tone | `saas-dashboard`, `ecommerce`, `fintech`, `content`, `marketing`, `internal-tool`, `consumer-app`, `other`, plus a one-line description |
+| Producto | The type picks a profile: type scale, control height, tokens and guidelines from published systems | `saas-dashboard`, `ecommerce`, `fintech`, `content`, `marketing`, `internal-tool`, `consumer-app`, `other`, plus a one-line description |
 | Usuarios | Who designs are for | role or kind of person |
 | Tarea principal | What they come to do | one sentence |
 | Contexto | Where and how often | device (desktop, mobile, both) · frequency (daily, occasional) |

@@ -125,6 +125,13 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 - **Violated:** an icon button of 16 px; links packed together in a table row.
 - **Verify:** guardian: `a11y-target-size`; lab: the responsive check (targets under 24 px).
 
+### ux:wcag-2.5.5 · Target size (enhanced)
+- **What:** pointer targets are at least 44×44 px (AAA): the floor for touch-first products (the
+  e-commerce and consumer-app profiles, B-027).
+- **Violated:** a 32 px button as the main action of a checkout used on phones.
+- **Verify:** review: control heights against `--size-control` and the captures at 375 px; lab: the
+  responsive check lists targets under 24 px (2.5.8), not under 44.
+
 ### ux:wcag-3.3.2 · Labels or instructions
 - **What:** every input has a visible label or instruction tied to it.
 - **Violated:** a placeholder used as the only label; a select with no name.
@@ -180,6 +187,22 @@ This file is data for the skills: it describes principles, it never relaxes a ha
   unexpected place.
 - **Verify:** review; cite the project `pattern` it follows.
 
+## Reading and data
+
+### ux:line-length · Line length
+- **What:** body text runs 50 to 75 characters per line (Baymard, 2022) and never over 80 (WCAG
+  1.4.8): `--measure` caps it in the content, marketing and e-commerce profiles.
+- **Violated:** a product description or an article that spans the whole width of a desktop
+  screen.
+- **Verify:** review: paragraphs and descriptions use `max-width: var(--measure)` or an equivalent
+  container; the desktop capture shows lines of a readable length.
+
+### ux:numeric-alignment · Numbers that line up
+- **What:** numbers that are compared in columns are right-aligned (GOV.UK Design System) and use
+  figures of the same width (`font-variant-numeric: tabular-nums`, MDN): amounts, totals, counts.
+- **Violated:** a column of amounts left-aligned, or in proportional figures that do not line up.
+- **Verify:** review: numeric cells are right-aligned and use `var(--numerals)` or `tabular-nums`.
+
 ## States
 
 ### ux:state-loading · Loading state
@@ -216,7 +239,7 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 |---|---|
 | guardian (`check_ui`) | `ux:wcag-1.1.1`, `ux:wcag-1.3.1`, `ux:wcag-1.4.3`, `ux:wcag-1.4.10`, `ux:wcag-1.4.11`, `ux:wcag-2.1.1`, `ux:wcag-2.4.3`, `ux:wcag-2.4.7`, `ux:wcag-2.5.8`, `ux:wcag-3.3.2`, `ux:wcag-4.1.2`, `ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-2`, `ux:nielsen-4`, `ux:nielsen-9` (partly) |
 | lab and tools | `ux:nielsen-1`, `ux:nielsen-3`, `ux:nielsen-5`, `ux:nielsen-8`, `ux:wcag-1.4.1`, `ux:wcag-1.4.10`, `ux:wcag-2.5.8`, `ux:hierarchy`, `ux:hick`, `ux:state-loading`, `ux:state-empty`, `ux:state-error` |
-| review only | `ux:nielsen-6` (beyond a name), `ux:nielsen-7`, `ux:nielsen-10`, `ux:wcag-1.3.2`, `ux:gestalt-proximity`, `ux:gestalt-similarity`, `ux:gestalt-common-region`, `ux:fitts` (beyond size), `ux:jakob` |
+| review only | `ux:wcag-2.5.5`, `ux:line-length`, `ux:numeric-alignment`, `ux:nielsen-6` (beyond a name), `ux:nielsen-7`, `ux:nielsen-10`, `ux:wcag-1.3.2`, `ux:gestalt-proximity`, `ux:gestalt-similarity`, `ux:gestalt-common-region`, `ux:fitts` (beyond size), `ux:jakob` |
 
 What the guardian checks is proven; what only review judges needs evidence: the capture and the
 area in it, or `file:line`.
