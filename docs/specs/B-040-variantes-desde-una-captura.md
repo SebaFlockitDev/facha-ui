@@ -1,6 +1,6 @@
 # B-040 · Variantes con la estructura de una captura de referencia
 
-> **Estado:** en spec · **Rama:** `feat/variants-layout-reference` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/variants-layout-reference` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** pedido del desarrollador después de B-028 ("¿ya se le puede pasar capturas de páginas que
 > quiero?") · **Última actualización:** 2026-10-16
 
@@ -21,7 +21,7 @@ describir con palabras una pantalla que uno tiene delante es lento y pierde deta
   captura bajo `preview.baseUrl`.
 - `SKILL.md` tiene 250 líneas, el máximo.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. La entrada
 
@@ -72,7 +72,7 @@ y no se sigue.
 - Prueba real: una corrida en modo rápido sobre la pantalla de pedidos de la app de Vite, con la captura
   de un tablero público como referencia, con su lectura, la variante y la crítica.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las tres recomendadas)
 
 1. **Imágenes y también URLs** (recomendado): con una URL, la skill pide permiso y solo toma una
    captura (`browser_navigate`, `browser_take_screenshot` y `browser_close`; sin `browser_evaluate` ni
@@ -109,9 +109,8 @@ y no se sigue.
 
 - **2026-10-16:** pedido del desarrollador; agregado al backlog (B-040) con su OK; relevado; spec escrito
   y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las tres decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en
-`feat/variants-layout-reference`.
+En curso en `feat/variants-layout-reference`: seguir por la primera tarea sin marcar.
