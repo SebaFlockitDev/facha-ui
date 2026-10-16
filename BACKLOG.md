@@ -28,11 +28,12 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-032 · Matriz completa de contraste
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** hoy se controla el contraste de los pares que aparecen en el código; un sistema accesible garantiza cada texto sobre cada fondo donde puede aparecer. Además, `theme-contrast` puede sugerir para un texto rojo de error un gris secundario, y el aviso pasa a parecer información común (absorbe B-008).
 - **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.
 - **Criterios de aceptación:** la matriz sale en `get_design_system` o en `audit_project`; un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris (criterio de B-008).
+- **Spec:** [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md)
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §6, https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
 
 ## Siguiente
