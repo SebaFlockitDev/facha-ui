@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.28.0** (§7.10–§7.38). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.29.0** (§7.10–§7.39). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -724,7 +724,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1566,6 +1566,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** la regla `a11y-color-only` (aviso, §2.a) marca un estado que se muestra solo con color. El lector de JSX suma tres datos por elemento: si tiene texto al lado, si contiene un ícono (`svg` o `img`) y qué nombres interpola su `className`. `ux:wcag-1.4.1` pasa a "verificado por el guardián".
 - **Decisiones:** un elemento `aria-hidden` no avisa; es un aviso, porque el estado se infiere del nombre de una clase o variable; las filas o fondos de color con texto adentro quedan afuera.
 - **Tests:** fixture `color-only` con tres positivos (la clase de estado, la clase interpolada con el estado, el color con token de estado) y ocho negativos (texto al lado, `aria-label`, `aria-hidden`, ícono, texto propio, texto `sr-only`, un botón); los mismos totales que la 0.27.0 en las apps de prueba y en los fixtures.
+
+### 7.39 Versión 0.29.0: `oklch()` y HSL en el panel en vivo
+
+Ítem B-038 del backlog (salió de B-031). Spec, decisiones y registro: [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md).
+
+- **Qué cambia:** la pestaña Diseño (§7.35) funciona en proyectos shadcn/ui: `lab-palette.ts` lee `oklch()`, `hsl()` y los canales HSL sueltos (los tokens con `format: "hsl-channels"`, que `palette-base.mjs` y el endpoint conservan), y escribe cada valor nuevo en el formato del token. Con la marca gris (shadcn por defecto), un preset o el deslizador la pintan con el color del preset (el paso 9 de Radix) en los dos temas; Grafito la deja gris.
+- **Encontrado en la prueba real:** la solución para el texto sobre la marca pedía "texto oscuro" sobre índigo en el tema oscuro, donde se lee el blanco (5.2:1 contra 4.0:1). Ahora la dirección sale del fondo: blanco si su luminancia está bajo 0.179 (el cruce de la fórmula de WCAG), y lo mismo para la marca como texto.
+- **Tests:** ida y vuelta de `oklch()` y de canales sin cambiar el formato, la marca gris pintada y medida, la base de `shadcn-tw3` y `shadcn-tw4`, y el endpoint con canales.
 
 ---
 

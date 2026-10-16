@@ -241,6 +241,25 @@ describe("live endpoint · palette", () => {
     expect(line.palette).toEqual(palette);
   });
 
+  it("keeps the hsl-channels mark of a token and accepts channel and oklch values (B-038)", async () => {
+    const root = project();
+    const shadcn = {
+      ...base,
+      tokens: [
+        { name: "--brand", role: "accent.primary", format: "hsl-channels", values: { light: "221.2 83.2% 53.3%" } },
+        { name: "--surface", role: "surface.base", format: "something-else", values: { light: "oklch(1 0 0)" } },
+      ],
+    };
+    fs.writeFileSync(path.join(root, ".facha-ui", "live", "palette.json"), JSON.stringify(shadcn));
+    const body = (await core.handleGet(get(), { root, production: false }).json()) as any;
+    expect(body.palette.tokens[0]).toMatchObject({ format: "hsl-channels" });
+    expect(body.palette.tokens[1].format).toBeUndefined();
+    const token = await tokenOf(root);
+    const palette = { name: "Teal", tokens: { "--brand": { light: "174.3 80.4% 40%" }, "--surface": { light: "oklch(0.985 0.003 182)" } } };
+    const res = await core.handlePost(post({ token, kind: "palette", slug: "orders", variant: "a", palette }), { root, production: false });
+    expect(res.status).toBe(202);
+  });
+
   it("refuses unknown tokens or themes, CSS injection and proposals without a base", async () => {
     const root = withPalette();
     const token = await tokenOf(root);
@@ -273,6 +292,22 @@ describe("palette base script", () => {
     expect(base.tokens.some((t: any) => t.name === "--primary")).toBe(true);
     expect(base.tokens.every((t: any) => !String(t.role ?? "").startsWith("status"))).toBe(true);
     expect(Array.isArray(base.references)).toBe(true);
+  }, 20000);
+
+  it("reads oklch() and shadcn's bare HSL channels, marking the channels (B-038)", async () => {
+    const script = path.join(REPO, "skills", "variants", "scripts", "palette-base.mjs");
+    const run = (fixture: string) =>
+      new Promise<any>((resolve, reject) => {
+        const child = spawn(process.execPath, [script, path.join(REPO, "mcp", "test", "fixtures", fixture)], { stdio: ["ignore", "pipe", "ignore"] });
+        let text = "";
+        child.stdout.on("data", (d) => (text += d));
+        child.on("exit", (code) => (code === 0 ? resolve(JSON.parse(text)) : reject(new Error(`exit ${code}`))));
+      });
+    const tw4 = await run("shadcn-tw4");
+    expect(tw4.anchor).toBe("--primary");
+    expect(tw4.tokens.find((t: any) => t.name === "--primary").values.light).toMatch(/^oklch\(/);
+    const tw3 = await run("shadcn-tw3");
+    expect(tw3.tokens.find((t: any) => t.name === "--primary")).toMatchObject({ format: "hsl-channels" });
   }, 20000);
 
   it("adds the radius tokens written in px or rem, and leaves var() and calc() radii to follow in the browser", async () => {

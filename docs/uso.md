@@ -397,6 +397,7 @@ En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la a
 - **⌖ Señalar:** en lugar de describir "el botón de abajo", hacé clic en él. Queda como `[1]` (hasta 3) y lo nombrás en el texto: *"mové [1] arriba de la tabla"*. Mientras señalás, la página no reacciona a los clics; ↑ elige el contenedor que lo envuelve, ↓ vuelve, Esc cancela. Claude recibe qué elemento es y qué componente lo dibuja.
 - **Diseño:** probá decisiones de diseño sobre toda la app, solo en tu navegador:
   - **Color de la marca:** un preset (los acentos de Radix: Índigo, Azul, Cyan, Teal, Ciruela y Violeta, o Grafito, casi sin color), el deslizador de **Tono** o tu propio color.
+    Lee los colores en hex, `rgb()`, `oklch()` y `hsl()`, y los canales HSL de shadcn/ui con Tailwind 3 (`222.2 47.4% 11.2%`); los valores nuevos se escriben en el mismo formato que tenía cada token. Si la marca es gris (como la de shadcn/ui por defecto), un preset la pinta con su color en los dos temas.
   - **Grises:** puros, o teñidos con el tono de la marca (como los grises de Radix).
   - **Radio:** 0, 4, 8, 12 o 16px (la escala de Material 3); todos los radios del sistema se escalan en proporción.
   - **Alto de controles:** 32, 40 o 48px (los tamaños de Carbon), si tu sistema tiene `--size-control`. Si no lo tiene, el control aparece desactivado y te dice por qué.

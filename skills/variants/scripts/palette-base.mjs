@@ -58,16 +58,19 @@ if (!ds?.project) {
   process.exit(1);
 }
 
-const COLOR = /#[0-9a-fA-F]{3,8}\b|rgba?\(/;
+// Hex, rgb(), oklch() and hsl() (shadcn/ui with Tailwind 4 writes oklch, B-038); bare HSL channels
+// (shadcn/ui with Tailwind 3) come with format "hsl-channels" from get_design_system.
+const COLOR = /#[0-9a-fA-F]{3,8}\b|rgba?\(|oklch\(|hsla?\(/;
+const CHANNELS = "hsl-channels";
 const SKIP_ROLE = /^(status|font|radius|space|size|z|motion)/;
 // Radii and control heights the panel can change: plain lengths only (a calc() or var() radius
 // follows its base in the browser). The names are lab-palette.ts's CONTROL_NAME.
 const LENGTH = /^\d+(?:\.\d+)?(?:px|rem)$/;
 const CONTROL = /^--(size-control|control-height|size-row|row-height)$/;
-const isColor = (t) => !SKIP_ROLE.test(t.role ?? "") && Object.values(t.values ?? {}).some((v) => COLOR.test(String(v)));
+const isColor = (t) => !SKIP_ROLE.test(t.role ?? "") && (t.format === CHANNELS || Object.values(t.values ?? {}).some((v) => COLOR.test(String(v))));
 const isShape = (t) =>
   (t.role === "radius" || CONTROL.test(t.name)) && Object.values(t.values ?? {}).length > 0 && Object.values(t.values).every((v) => LENGTH.test(String(v).trim()));
-const tokens = (ds.tokens ?? []).filter((t) => isColor(t) || isShape(t)).map((t) => ({ name: t.name, role: t.role, values: t.values }));
+const tokens = (ds.tokens ?? []).filter((t) => isColor(t) || isShape(t)).map((t) => ({ name: t.name, role: t.role, ...(t.format === CHANNELS ? { format: CHANNELS } : {}), values: t.values }));
 
 const anchor =
   anchorArg ??

@@ -12,7 +12,7 @@ const TEMPLATE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 interface PaletteBase {
   anchor: string;
   themes: { name: string; selector: string }[];
-  tokens: { name: string; role?: string; values: Record<string, string> }[];
+  tokens: { name: string; role?: string; format?: string; values: Record<string, string> }[];
   references?: { where: string; values: string[] }[];
 }
 interface DesignChoice {
@@ -25,6 +25,7 @@ interface DesignChoice {
   control: number | null;
   contrast: "AA" | "AAA" | null;
   base?: string;
+  seed?: string;
 }
 type TokenValues = Record<string, Record<string, string>>;
 interface Pair {
@@ -242,5 +243,70 @@ describe("lab-palette · what a choice would break", () => {
     const brandLight = conflicts.filter((c) => c.text.startsWith("En light, --primary sobre"));
     expect(brandLight).toHaveLength(1);
     expect(brandLight[0]!.text).toContain("también sobre 1 superficie más");
+  });
+});
+
+describe("lab-palette · oklch() and HSL, the formats of shadcn/ui (B-038)", () => {
+  const themes = [
+    { name: "light", selector: ":root" },
+    { name: "dark", selector: ".dark" },
+  ];
+  const tw4: PaletteBase = {
+    anchor: "--primary",
+    themes,
+    tokens: [
+      { name: "--background", role: "surface.base", values: { light: "oklch(1 0 0)", dark: "oklch(0.145 0 0)" } },
+      { name: "--foreground", role: "text.primary", values: { light: "oklch(0.145 0 0)", dark: "oklch(0.985 0 0)" } },
+      { name: "--primary", role: "accent.primary", values: { light: "oklch(0.205 0 0)", dark: "oklch(0.922 0 0)" } },
+      { name: "--primary-foreground", role: "on-accent", values: { light: "oklch(0.985 0 0)", dark: "oklch(0.205 0 0)" } },
+    ],
+  };
+
+  it("reads oklch() and writes the new values in oklch(), leaving the rest as written", () => {
+    const v = computeDesign(tw4, choice({ tint: 1, hue: 267 }));
+    for (const perTheme of Object.values(v)) for (const value of Object.values(perTheme)) expect(value).toMatch(/^oklch\(/);
+    expect(contrastPairs(tw4, {}).find((p) => p.fg === "--foreground")!.ratio).toBeGreaterThan(15);
+  });
+
+  it("a gray brand (the shadcn default) takes the preset's own color in both themes, and its text is measured", () => {
+    const indigo = PRESETS.find((p) => p.id === "indigo")!;
+    const v = computeDesign(tw4, indigo);
+    for (const theme of ["light", "dark"]) {
+      const c = oklch(v["--primary"]![theme]!)!;
+      expect(c.c, theme).toBeGreaterThan(0.1);
+      expect(Math.abs(c.h! - oklch("#3e63dd")!.h!), theme).toBeLessThan(3);
+    }
+    const onBrand = contrastPairs(tw4, v).filter((p) => p.kind === "onBrand");
+    expect(onBrand.map((p) => p.theme)).toEqual(["light", "dark"]);
+    // Dark: the brand was near white with near-black text on it; on indigo that text no longer reads.
+    const dark = designConflicts(tw4, indigo, []).find((c) => c.text.startsWith("En dark, --primary-foreground sobre --primary"));
+    // …and the way out is white text: on indigo-9 white reaches 5.2:1 and black only 4.0:1.
+    expect(dark?.fix).toContain("un texto claro (blanco)");
+    // The brand as text on a dark surface needs a lighter tone, not a darker one.
+    const brandDark = designConflicts(tw4, indigo, []).find((c) => c.text.startsWith("En dark, --primary sobre --background"));
+    expect(brandDark?.fix).toContain("un tono más claro de la marca");
+    // On a light brand (cyan-9, the custom color of the earlier test) the way out is dark text.
+    const cyanOn: PaletteBase = { ...BASE, tokens: [...BASE.tokens, { name: "--on-primary", role: "on-accent", values: { light: "#ffffff", dark: "#ffffff" } }] };
+    const light = designConflicts(cyanOn, customChoice(cyanOn, "#22d3ee")!, []).find((c) => c.text.includes("--on-primary sobre --primary"));
+    expect(light?.fix).toContain("un texto oscuro");
+    // Graphite keeps the brand gray: it is "the brand almost without color".
+    expect(computeDesign(tw4, PRESETS.find((p) => p.id === "graphite")!)["--primary"]).toBeUndefined();
+  });
+
+  it("reads the bare HSL channels of shadcn with Tailwind 3 and writes them back as channels", () => {
+    const tw3: PaletteBase = {
+      anchor: "--primary",
+      themes,
+      tokens: [
+        { name: "--background", role: "surface.base", format: "hsl-channels", values: { light: "0 0% 100%", dark: "222.2 84% 4.9%" } },
+        { name: "--foreground", role: "text.primary", format: "hsl-channels", values: { light: "222.2 84% 4.9%", dark: "210 40% 98%" } },
+        { name: "--primary", role: "accent.primary", format: "hsl-channels", values: { light: "221.2 83.2% 53.3%", dark: "217.2 91.2% 59.8%" } },
+      ],
+    };
+    const v = computeDesign(tw3, PRESETS.find((p) => p.id === "teal")!);
+    expect(v["--primary"]!.light).toMatch(/^[\d.]+ [\d.]+% [\d.]+%$/);
+    expect(Math.abs(oklch(`hsl(${v["--primary"]!.light})`)!.h! - 182)).toBeLessThan(6);
+    expect(paletteCss(tw3, v)).toContain("--primary: " + v["--primary"]!.light + " !important;");
+    expect(contrastPairs(tw3, {}).find((p) => p.fg === "--foreground" && p.theme === "light")!.ratio).toBeGreaterThan(15);
   });
 });
