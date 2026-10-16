@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-16
+
 ### Added
 
 - Matriz de contraste en `get_design_system` (sección `contrast`): cada texto sobre cada fondo donde puede aparecer, en cada tema, con su nivel de WCAG 2.2 (AAA, AA, solo texto grande o no pasa). Incluye el texto de los botones sobre su color, cada estado sobre su fondo, los pares que tu CSS declara juntos y los bordes de inputs y el anillo de foco. Para cada fondo dice qué textos se pueden usar.
@@ -321,7 +323,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.22.0...v0.23.0

@@ -66,7 +66,7 @@ Principio: **la IA sigue las reglas del proyecto, no las suyas.** Especificació
 
 **Guía paso a paso** (instalación, preparación del proyecto, variantes, apply y problemas frecuentes): [`docs/uso.md`](docs/uso.md). Incluye capturas de una demo de punta a punta.
 
-> **Versión 0.25.0** · React con Next.js App Router o Vite, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Qué sigue](BACKLOG.md)
+> **Versión 0.26.0** · React con Next.js App Router o Vite, con tokens como CSS custom properties, con o sin Tailwind · shadcn/ui (Tailwind 3 y 4). En Tailwind 3, el mapeo de `tailwind.config` se lee de forma estática: sin plugins ni presets · [Cambios](CHANGELOG.md) · [Qué sigue](BACKLOG.md)
 
 ## Requisitos
 

@@ -1,6 +1,6 @@
 # B-032 · Matriz completa de contraste
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/contrast-matrix` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.26.0) · **Rama:** `feat/contrast-matrix` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md); absorbe B-008 ·
 > **Última actualización:** 2026-10-16
 
@@ -152,7 +152,7 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
 - [x] 4. `health` mide `on-accent` · `a4cd3a2`
 - [x] 5. `variants`, SPEC, guía, `help`, CHANGELOG · `639ef21`
 - [x] 6. Prueba real
-- [ ] 7. Release (cuando lo pida quien mantiene el repo)
+- [x] 7. Release 0.26.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -187,9 +187,9 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
   - `audit_project` en las dos apps de prueba, `next-visual` y `shadcn-tw4`: los mismos totales que la
     0.25.0;
   - 353 tests, typecheck y `claude plugin validate` en verde.
+- **2026-10-16 · release 0.26.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; B-032 a Hecho (con B-008) y B-030 a Ahora.
 
 ## Cómo retomar
 
-Todo hecho y probado en `feat/contrast-matrix`; falta el release (tarea 7), solo cuando quien mantiene
-el repo lo pida: versión 0.26.0 con el flujo de `CLAUDE.md`; B-032 a **Hecho** (absorbe B-008) y el
-primero de **Siguiente** a **Ahora**.
+Terminado en 0.26.0.
