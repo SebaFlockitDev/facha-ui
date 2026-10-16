@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-16
+
 ### Added
 
 - Panel en vivo: la pestaña **Diseño** (antes Paleta) prueba sobre toda la app el tono de la marca (presets, un deslizador o tu color), los grises (puros o teñidos), el radio (escala de Material 3), el alto de controles (32, 40 o 48px, de Carbon) y el contraste del texto (AA o AAA). El contraste y los conflictos se recalculan con cada cambio, cada uno con su solución, y un control que tu sistema no puede usar dice por qué. *Proponer este diseño* guarda la combinación para `/facha-ui:init palette`.
@@ -309,7 +311,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.21.0...v0.22.0

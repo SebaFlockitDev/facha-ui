@@ -27,18 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-031 · Controles de diseño en el panel en vivo
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** ajustar el diseño con controles directos y ver el efecto en el momento ya es lo esperable (Claude Design, Realtime Colors, tweakcn); hoy el panel solo prueba paletas armadas.
-- **Qué:** en el panel, controles de tono, tinte de los neutros, radio, alto de controles y nivel de contraste (AA o AAA de WCAG), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`. Incluye B-036 (presets con fuente).
-- **Criterios de aceptación:** cada cambio muestra los pares que dejan de pasar WCAG y una solución; la combinación elegida queda como propuesta en `.facha-ui/proposals/`; fuera del laboratorio no cambia ningún archivo.
-- **Depende de:** B-025
-- **Spec:** [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md)
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), `skills/variants/live.md`, https://www.realtimecolors.com/docs/how-it-works
-
-## Siguiente
-
 ### B-032 · Matriz completa de contraste
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -46,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.
 - **Criterios de aceptación:** la matriz sale en `get_design_system` o en `audit_project`; un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris (criterio de B-008).
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §6, https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
+
+## Siguiente
 
 ### B-030 · Componente reimplementado y cobertura del design system
 - **Estado:** listo para spec
@@ -198,6 +188,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.25.0:** B-031 (incluye B-036), controles de diseño en el panel en vivo: tono, grises, radio, alto de controles y contraste del texto, con presets de Radix y el contraste y los conflictos recalculados en cada cambio; spec en [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).
 - **0.24.0:** B-029, reglas del guardián para las partes del look genérico de IA que rompen una regla publicada (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`) y la señal `nested-surfaces`; spec en [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
 - **0.23.0:** B-027, perfiles por tipo de producto (escala, controles, tokens y pautas con fuente, desde el brief); spec en [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).
 - **0.22.0:** B-026, tres direcciones (semilla + estilo) sobre la pantalla real y una página de muestra, en el laboratorio, antes de escribir; spec en [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).

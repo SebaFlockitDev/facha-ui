@@ -1,6 +1,6 @@
 # B-031 · Controles de diseño en el panel en vivo
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/panel-design-controls` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.25.0) · **Rama:** `feat/panel-design-controls` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -95,7 +95,7 @@ los estados ya se calculan en el momento.
 - [x] 4. Skills: `lab.md` (andamiaje), `live.md` (L1, L6), `init` (modo paleta en `palette.md`), `apply`; contratos
 - [x] 5. Docs (SPEC §2.b y §7.35, `docs/uso.md` 5.1 y 6.6, `help`, CHANGELOG)
 - [x] 6. Prueba real
-- [ ] 7. Release (cuando lo pida quien mantiene el repo)
+- [x] 7. Release 0.25.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -148,10 +148,10 @@ los estados ya se calculan en el momento.
   - la elección sobrevive a la recarga; *Volver al original* deja todo como estaba; la app no cambió
     fuera del laboratorio.
 - **2026-10-16:** docs (SPEC §2.b y §7.35, guía, `help`, CHANGELOG). 336 tests en verde.
+- **2026-10-16 · release 0.25.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; B-031 a Hecho (con B-036) y B-032 a Ahora.
 
 ## Cómo retomar
 
-Todo está hecho y probado en `feat/panel-design-controls`; falta el release (tarea 7), solo cuando
-quien mantiene el repo lo pida: versión 0.25.0 en `plugin.json`, `mcp/package.json`, el lockfile y
-`server.ts`; CHANGELOG de Unreleased a 0.25.0 con fecha y enlaces del pie; B-031 a **Hecho**
-(incluye B-036); merge `--no-ff` a `main`, tag, push y actualizar el plugin.
+Terminado en 0.25.0. Idea que salió de este ítem: B-038 (colores `oklch()` en el panel, para
+proyectos shadcn/ui con Tailwind 4).
