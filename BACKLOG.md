@@ -28,12 +28,13 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-031 · Controles de diseño en el panel en vivo
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** ajustar el diseño con controles directos y ver el efecto en el momento ya es lo esperable (Claude Design, Realtime Colors, tweakcn); hoy el panel solo prueba paletas armadas.
 - **Qué:** en el panel, controles de tono, tinte de los neutros, radio, densidad y nivel de contraste (como el `contrastLevel` de Material), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`.
 - **Criterios de aceptación:** cada cambio muestra los pares que dejan de pasar WCAG y una solución; la combinación elegida queda como propuesta en `.facha-ui/proposals/`; fuera del laboratorio no cambia ningún archivo.
 - **Depende de:** B-025
+- **Spec:** [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md)
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), `skills/variants/live.md`, https://www.realtimecolors.com/docs/how-it-works
 
 ## Siguiente
