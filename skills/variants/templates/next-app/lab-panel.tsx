@@ -13,6 +13,7 @@ import {
   capabilities,
   computeDesign,
   contrastPairs,
+  cssColorOf,
   customChoice,
   describeChoice,
   designConflicts,
@@ -1224,7 +1225,7 @@ export function LabPanel() {
     const values = computeDesign(paletteBase, c);
     const [light, dark] = [paletteBase.themes[0]?.name, paletteBase.themes[1]?.name];
     const valueOf = (name: string | undefined, theme: string | undefined) =>
-      name && theme ? values[name]?.[theme] ?? paletteBase.tokens.find((t) => t.name === name)?.values[theme] : undefined;
+      name && theme ? cssColorOf(paletteBase, name, values[name]?.[theme] ?? paletteBase.tokens.find((t) => t.name === name)?.values[theme]) : undefined;
     const text = paletteBase.tokens.find((t) => t.role?.startsWith("text.primary"))?.name;
     const surface = paletteBase.tokens.find((t) => t.role?.startsWith("surface.base") && t.name !== paletteBase.tokens[0]?.name)?.name;
     return [valueOf(paletteBase.anchor, light), valueOf(paletteBase.anchor, dark), valueOf(text, light), valueOf(surface, light)];
@@ -1246,7 +1247,9 @@ export function LabPanel() {
   const blocking = conflicts.some((c) => c.kind !== "literal");
   const caps = paletteBase ? capabilities(paletteBase) : null;
   const firstTheme = paletteBase?.themes[0]?.name ?? "";
-  const brandNow = paletteBase ? previewValues[paletteBase.anchor]?.[firstTheme] ?? paletteBase.tokens.find((t) => t.name === paletteBase.anchor)?.values[firstTheme] : undefined;
+  const brandNow = paletteBase
+    ? cssColorOf(paletteBase, paletteBase.anchor, previewValues[paletteBase.anchor]?.[firstTheme] ?? paletteBase.tokens.find((t) => t.name === paletteBase.anchor)?.values[firstTheme])
+    : undefined;
   const hue = Math.round(choice.hue ?? (paletteBase ? anchorLch(paletteBase)?.h : undefined) ?? 0);
   const asIs = (now: number | null | undefined) => `Como está${now ? ` (${now}px)` : ""}`;
   const setControl = (key: "tint" | "radius" | "control", value: string) => pickDesign({ ...choice, [key]: value === "" ? null : Number(value) });

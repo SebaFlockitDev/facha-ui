@@ -11,7 +11,8 @@
 export interface PaletteBase {
   anchor: string;
   themes: { name: string; selector: string }[];
-  tokens: { name: string; role?: string; values: Record<string, string> }[];
+  /** `format: "hsl-channels"`: shadcn/ui's bare HSL channels (`222.2 47.4% 11.2%`), as get_design_system reports them. */
+  tokens: { name: string; role?: string; format?: string; values: Record<string, string> }[];
   /** Hand-written colors of the project (design-system gaps), to warn about conflicts. */
   references?: { where: string; values: string[] }[];
 }
@@ -34,6 +35,8 @@ export interface DesignChoice {
   contrast: "AA" | "AAA" | null;
   /** The developer's own color, for a custom palette. */
   base?: string;
+  /** The preset's own color (Radix step 9): it paints a brand that has no color (B-038). */
+  seed?: string;
 }
 
 export type TokenValues = Record<string, Record<string, string>>;
@@ -65,12 +68,12 @@ export const STATUS_MIN_DELTA_E = 10;
  * suits the product is the developer's call. Conflicts with the states are measured live.
  */
 export const PRESETS: (DesignChoice & { note: string })[] = [
-  { id: "indigo", name: "Índigo", hue: 267, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix indigo-9 (#3e63dd)" },
-  { id: "blue", name: "Azul", hue: 251.8, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix blue-9 (#0090ff)" },
-  { id: "cyan", name: "Cyan", hue: 221.7, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix cyan-9 (#00a2c7)" },
-  { id: "teal", name: "Teal", hue: 182, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix teal-9 (#12a594)" },
-  { id: "plum", name: "Ciruela", hue: 322.1, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix plum-9 (#ab4aba)" },
-  { id: "violet", name: "Violeta", hue: 288, brand: 1, tint: null, radius: null, control: null, contrast: null, note: "Radix violet-9 (#6e56cf)" },
+  { id: "indigo", name: "Índigo", hue: 267, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#3e63dd", note: "Radix indigo-9 (#3e63dd)" },
+  { id: "blue", name: "Azul", hue: 251.8, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#0090ff", note: "Radix blue-9 (#0090ff)" },
+  { id: "cyan", name: "Cyan", hue: 221.7, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#00a2c7", note: "Radix cyan-9 (#00a2c7)" },
+  { id: "teal", name: "Teal", hue: 182, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#12a594", note: "Radix teal-9 (#12a594)" },
+  { id: "plum", name: "Ciruela", hue: 322.1, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#ab4aba", note: "Radix plum-9 (#ab4aba)" },
+  { id: "violet", name: "Violeta", hue: 288, brand: 1, tint: null, radius: null, control: null, contrast: null, seed: "#6e56cf", note: "Radix violet-9 (#6e56cf)" },
   { id: "graphite", name: "Grafito", hue: 267, brand: 0.12, tint: 0, radius: null, control: null, contrast: null, note: "Radix gray: la marca casi sin color" },
 ];
 
@@ -83,7 +86,8 @@ type Rgb = [number, number, number];
 interface Parsed {
   rgb: Rgb;
   alpha: number;
-  kind: "hex" | "hex8" | "rgb";
+  /** How it is written, so a new value keeps the project's format (B-038). */
+  kind: "hex" | "hex8" | "rgb" | "oklch" | "hsl";
 }
 interface Lch {
   L: number;
@@ -91,9 +95,53 @@ interface Lch {
   h: number;
 }
 
-const COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|rgba?\([^)]*\)/g;
+const COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|rgba?\([^)]*\)|oklch\([^)]*\)|hsla?\([^)]*\)/g;
+
+/** The numbers inside a color function, and its alpha (after "/" or as a 4th value). */
+function argsOf(text: string): { nums: string[]; alpha: number } {
+  const nums = text.slice(text.indexOf("(") + 1, -1).split(/[\s,/]+/).filter(Boolean);
+  const a = nums[3];
+  const alpha = a === undefined ? 1 : a.endsWith("%") ? parseFloat(a) / 100 : parseFloat(a);
+  return { nums, alpha: Number.isNaN(alpha) ? 1 : alpha };
+}
+
+function hslToRgb(h: number, s: number, l: number): Rgb {
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [f(0), f(8), f(4)];
+}
+
+function rgbToHsl([r, g, b]: Rgb): { h: number; s: number; l: number } {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d === 0) return { h: 0, s: 0, l };
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: h * 60, s, l };
+}
 
 function parseColor(text: string): Parsed | null {
+  if (text.startsWith("oklch(")) {
+    const { nums, alpha } = argsOf(text);
+    if (nums.length < 3) return null;
+    const L = nums[0]!.endsWith("%") ? parseFloat(nums[0]!) / 100 : parseFloat(nums[0]!);
+    const C = nums[1]!.endsWith("%") ? (parseFloat(nums[1]!) / 100) * 0.4 : parseFloat(nums[1]!);
+    const h = nums[2] === "none" ? 0 : parseFloat(nums[2]!);
+    if ([L, C, h].some(Number.isNaN)) return null;
+    return { rgb: fromLch({ L, C, h }), alpha, kind: "oklch" };
+  }
+  if (text.startsWith("hsl")) {
+    const { nums, alpha } = argsOf(text);
+    if (nums.length < 3) return null;
+    const h = parseFloat(nums[0]!);
+    const s = parseFloat(nums[1]!) / 100;
+    const l = parseFloat(nums[2]!) / 100;
+    if ([h, s, l].some(Number.isNaN)) return null;
+    return { rgb: hslToRgb(((h % 360) + 360) % 360, s, l), alpha, kind: "hsl" };
+  }
   if (text.startsWith("#")) {
     let hex = text.slice(1);
     if (hex.length <= 4) hex = [...hex].map((c) => c + c).join("");
@@ -154,6 +202,16 @@ function fromLch(color: Lch): Rgb {
 }
 
 function formatColor({ rgb, alpha, kind }: Parsed): string {
+  const slash = alpha < 1 ? ` / ${+alpha.toFixed(3)}` : "";
+  if (kind === "oklch") {
+    const { L, C, h } = toLch(rgb.map((v) => Math.min(1, Math.max(0, v))) as Rgb);
+    const hue = C < 0.0005 ? 0 : +h.toFixed(1);
+    return `oklch(${+L.toFixed(3)} ${+C.toFixed(3)} ${hue}${slash})`;
+  }
+  if (kind === "hsl") {
+    const { h, s, l } = rgbToHsl(rgb.map((v) => Math.min(1, Math.max(0, v))) as Rgb);
+    return `hsl(${+h.toFixed(1)} ${+(s * 100).toFixed(1)}% ${+(l * 100).toFixed(1)}%${slash})`;
+  }
   const bytes = rgb.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255));
   if (kind === "rgb") return alpha < 1 ? `rgba(${bytes.join(", ")}, ${+alpha.toFixed(3)})` : `rgb(${bytes.join(", ")})`;
   const hex = bytes.map((v) => v.toString(16).padStart(2, "0")).join("");
@@ -195,7 +253,8 @@ function deltaE(a: Rgb, b: Rgb): number {
   return Math.hypot(p.L - q.L, a1 - a2, b1 - b2) * 100;
 }
 
-export function anchorLch(base: PaletteBase): Lch | null {
+export function anchorLch(raw: PaletteBase): Lch | null {
+  const base = asFunctions(raw);
   const token = base.tokens.find((t) => t.name === base.anchor);
   const first = base.themes[0]?.name;
   const value = token ? ((first && token.values[first]) || Object.values(token.values)[0]) : undefined;
@@ -262,6 +321,43 @@ function grayChroma(L: number): number {
  * status colors), white and black are kept. Only the values that change are returned.
  */
 export function computeDesign(base: PaletteBase, choice: DesignChoice): TokenValues {
+  return asWritten(base, computeOn(asFunctions(base), choice));
+}
+
+// ---- shadcn/ui's bare HSL channels (B-038) ------------------------------------------------------
+// "222.2 47.4% 11.2%" is read as hsl(222.2 47.4% 11.2%) and written back as channels, since the
+// project uses it as hsl(var(--x)).
+
+const CHANNELS = "hsl-channels";
+const channelTokens = (base: PaletteBase) => new Set(base.tokens.filter((t) => t.format === CHANNELS).map((t) => t.name));
+const wrap = (v: string) => (/^hsla?\(/.test(v.trim()) ? v.trim() : `hsl(${v.trim()})`);
+const unwrap = (v: string) => v.trim().replace(/^hsla?\((.*)\)$/, "$1");
+
+function mapValues(values: TokenValues, names: Set<string>, fn: (v: string) => string): TokenValues {
+  const out: TokenValues = {};
+  for (const [name, perTheme] of Object.entries(values))
+    out[name] = names.has(name) ? Object.fromEntries(Object.entries(perTheme).map(([th, v]) => [th, fn(v)])) : perTheme;
+  return out;
+}
+
+/** The base with channel tokens as hsl() values, so every color reads the same way. */
+function asFunctions(base: PaletteBase): PaletteBase {
+  const names = channelTokens(base);
+  if (!names.size) return base;
+  return { ...base, tokens: base.tokens.map((t) => (names.has(t.name) ? { ...t, values: Object.fromEntries(Object.entries(t.values).map(([th, v]) => [th, wrap(v)])) } : t)) };
+}
+const asWritten = (base: PaletteBase, values: TokenValues) => mapValues(values, channelTokens(base), unwrap);
+
+/** A token's value as a CSS color, for a swatch: bare channels become hsl(). */
+export function cssColorOf(base: PaletteBase, name: string, value: string | undefined): string | undefined {
+  return value !== undefined && channelTokens(base).has(name) ? wrap(value) : value;
+}
+const asRead = (base: PaletteBase, values: TokenValues) => mapValues(values, channelTokens(base), wrap);
+
+/** Indigo step 9 of Radix, the lightness and chroma a gray brand takes with the hue slider. */
+let indigo9: Lch | null = null;
+
+function computeOn(base: PaletteBase, choice: DesignChoice): TokenValues {
   const anchor = anchorLch(base);
   const out: TokenValues = {};
   const original = (name: string, theme: string) => base.tokens.find((t) => t.name === name)?.values[theme];
@@ -295,6 +391,19 @@ export function computeDesign(base: PaletteBase, choice: DesignChoice): TokenVal
     }
   }
 
+  // A brand with no color (shadcn/ui's default) has no hue to move: a color choice paints it, in
+  // every theme, with the preset's own color (Radix step 9) or the developer's (B-038).
+  const anchorToken = base.tokens.find((t) => t.name === base.anchor);
+  if (choice.hue !== null && anchor && anchor.C < 0.04 && choice.brand >= 0.5 && anchorToken) {
+    const own = parseColor(choice.base ?? choice.seed ?? "");
+    indigo9 ??= toLch(parseColor("#3e63dd")!.rgb);
+    const paint = own ? toLch(own.rgb) : { ...indigo9, h: choice.hue };
+    for (const theme of Object.keys(anchorToken.values)) {
+      const kind = firstColor(original(anchorToken.name, theme) ?? "")?.kind ?? "hex";
+      set(anchorToken.name, theme, formatColor({ rgb: fromLch(paint), alpha: 1, kind }));
+    }
+  }
+
   const from = baseRadius(base);
   if (choice.radius !== null && from) {
     for (const t of base.tokens.filter(isRadius))
@@ -320,7 +429,7 @@ export function computeDesign(base: PaletteBase, choice: DesignChoice): TokenVal
         const worst = (rgb: Rgb) => Math.min(...grounds.map((g) => contrastRatio(rgb, g)));
         if (worst(fg) >= target) continue;
         const lch = toLch(fg);
-        const kind = value.trim().startsWith("#") ? "hex" : "rgb";
+        const kind = firstColor(value)?.kind ?? "hex";
         // The value as it will be written (8 bits per channel), so the check is on what ships.
         const written = (L: number) => formatColor({ rgb: fromLch({ ...lch, L }), alpha: 1, kind });
         const passes = (L: number) => worst(plainColor(written(L))!) >= target;
@@ -406,7 +515,9 @@ function onBrandTokens(base: PaletteBase): string[] {
  * Every text, brand-as-text and control-border pair against every surface, and the text on the
  * brand against the brand, per theme.
  */
-export function contrastPairs(base: PaletteBase, values: TokenValues, level: "AA" | "AAA" = "AA"): Pair[] {
+export function contrastPairs(raw: PaletteBase, written: TokenValues, level: "AA" | "AAA" = "AA"): Pair[] {
+  const base = asFunctions(raw);
+  const values = asRead(raw, written);
   const valueOf = (name: string, theme: string) => values[name]?.[theme] ?? base.tokens.find((t) => t.name === name)?.values[theme];
   const surfaces = base.tokens.filter((t) => t.role?.startsWith("surface")).map((t) => t.name);
   const fgs: { name: string; kind: Pair["kind"]; min: number }[] = [
@@ -445,9 +556,10 @@ const FIX: Record<Pair["kind"], string> = {
  * would be confused with, hand-written brand colors it would leave behind, and contrast pairs
  * that stop passing. Only problems the choice introduces are listed.
  */
-export function designConflicts(base: PaletteBase, choice: DesignChoice | null, safe: string[]): Conflict[] {
+export function designConflicts(raw: PaletteBase, choice: DesignChoice | null, safe: string[]): Conflict[] {
   if (!choice) return [];
-  const values = computeDesign(base, choice);
+  const base = asFunctions(raw);
+  const values = asRead(raw, computeDesign(raw, choice));
   const anchor = anchorLch(base);
   const out: Conflict[] = [];
   const brandColors = (vals: TokenValues) =>
