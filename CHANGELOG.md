@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-16
+
+### Added
+
+- `variants` acepta una captura de referencia para la estructura (una imagen en el chat, `--ref <archivo>` o una URL, con permiso): lee sus regiones, su orden y sus patrones, la variante C la adapta a tu pantalla, y cada decisión cita de qué parte de la captura sale. Colores, tamaños y tipografía siguen saliendo de tus tokens.
+
 ## [0.30.0] - 2026-10-16
 
 ### Added
@@ -355,7 +361,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.30.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...HEAD
+[0.31.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.30.0...v0.31.0
 [0.30.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.27.0...v0.28.0

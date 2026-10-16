@@ -1,6 +1,6 @@
 ---
 name: variants
-description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant, also in plain words - "mejorá la pantalla de pedidos", "dame alternativas para /orders", "hacelo rápido" or "una sola variante" (quick mode), "en la B mové los filtros arriba" (refine), "probá colores más cálidos" (palettes in live mode).
+description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant, also in plain words - "hacé la pantalla de pedidos con una estructura como esta captura" (a reference), "mejorá la pantalla de pedidos", "dame alternativas para /orders", "hacelo rápido" or "una sola variante" (quick mode), "en la B mové los filtros arriba" (refine), "probá colores más cálidos" (palettes in live mode).
 argument-hint: "<screen|route|file> \"<goal>\" [--rapido]  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
 allowed-tools: Read, Glob, Grep, Agent, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
@@ -21,7 +21,7 @@ principles. Talk in the developer's language; the `.md` files below are relative
 1. **New run:** `<screen> "<goal>"`. `<screen>` is a route (`/orders`), a file, a component or words
    ("la pantalla de pedidos": find it and say which file); resolve it to `{ file, route, slug }`
    (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`; never `system`, reserved by `init`). `<goal>` is free text
-   ("make overdue orders stand out"). Follow Steps 1 to 9.
+   ("make overdue orders stand out"). Follow Steps 1 to 9. With a reference for the structure (an image, `--ref <file|url>`): **before Step 3b, read `reference.md`**.
 2. **Refine a variant:** `<slug> <a|b|c> "<change>"`, or a change to one variant asked in the
    conversation ("in B, move the filters above the table"). **Before step R1, read `refine.md`**
    and follow R1 to R7.
@@ -68,7 +68,7 @@ pantalla de pedidos") takes the main costs of the diagnosis (Step 3b) as its goa
    `browser_navigate`, `browser_resize`, `browser_wait_for`, `browser_snapshot`,
    `browser_take_screenshot` and `browser_close` (never `browser_evaluate`,
    `browser_run_code_unsafe`, forms, clicks or typing); never type credentials; stop after 2
-   failed attempts to open it.
+   failed attempts to open it. The only other page: a reference URL, as `reference.md` says.
 7. **Never apply.** Applying is `/facha-ui:apply`, and only the developer starts it, in this
    conversation. If they ask in words ("aplicá la B"), answer with the exact command to run,
    `/facha-ui:apply <slug> b`. A choice, a vote or an answer from the lab never applies anything.
@@ -127,8 +127,8 @@ One sentence each, plus the principles that support it ("B puts the overdue rows
 `ux:hierarchy`, `ux:nielsen-1`"). Genuinely different, not three tweaks:
 - **A · Conservative:** same structure; meets the goal with minimal change and fixes the baseline.
 - **B · Hierarchy:** reorganises the information around the goal (order, grouping, emphasis).
-- **C · Alternative pattern:** a different pattern built only from existing pieces (cards
-  instead of a table, a work queue, sections), following known patterns (`ux:jakob`).
+- **C · Alternative pattern:** a different pattern built only from existing pieces (cards instead of a table, a
+  work queue, sections), following known patterns (`ux:jakob`); with a reference, its structure (`reference.md`).
 
 **Every hypothesis designs every state**: **loading** (`ux:state-loading`) keeps the layout;
 **empty** (`ux:state-empty`) says what is missing and the next step; **error** (`ux:state-error`)
@@ -226,7 +226,7 @@ agent is not available, say so and present without it.
 | `pattern` | A pattern observed in the project | `file:line` of the example |
 | `decision` | A previous approved decision | Decision id |
 | `health` · `contrast` | Text for a background: `contrast.bySurface` (pass in every theme; `largeOnly` only at 24px or 18.66px bold) | Pair + ratios |
-| `objective` | A structural choice (order, grouping, layout) derived from the goal | — |
+| `objective` · `reference` | A structural choice derived from the goal, or from a reference capture | — · its region |
 | `request` | A structural choice the developer asked for in a refinement | `r<n>` + the request |
 | `ux-principle` | A structural or interaction choice justified by a UX principle | The principle's id (e.g. `ux:hick`) |
 

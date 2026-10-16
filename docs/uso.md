@@ -329,6 +329,14 @@ Ejemplo:
 /facha-ui:variants /orders "que se vean primero los pedidos pendientes de revisión"
 ```
 
+**Con una captura de referencia para la estructura** ("quiero esta pantalla con una estructura como esta"): adjuntá la imagen en el chat o pasá su ruta, o una URL (con tu permiso, solo saca una captura):
+
+```text
+/facha-ui:variants /orders "que se vean primero los pendientes" --ref captura.png
+```
+
+La skill lee **solo la estructura** de la captura (las regiones y su orden, qué se ve primero, los patrones y la densidad, cada cosa con dónde se ve en la imagen) y te dice si sirve para la tarea de tu pantalla. La variante C toma esa estructura adaptada a tus datos, y A y B quedan para comparar; en modo rápido, la única variante es C. De la captura no toma colores, tamaños, tipografía, textos ni logos: todo sale de tus tokens. Para el estilo de una referencia está `/facha-ui:init reference` (5.0c).
+
 ### 6.3 Qué hace la skill
 
 1. **Preflight:** lee el design system. Si no hay tokens, si el framework no es Next o si ya hay un run sin aplicar de esa pantalla, frena y te pregunta.
