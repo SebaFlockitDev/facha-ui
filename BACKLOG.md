@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-028 · De referencias a tokens
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P2 · **Tamaño:** L
 - **Por qué:** "quiero algo como esta página" es la forma más natural de pedir un estilo, y ya es estándar (Stitch, Visily, Uizard, Banani).
 - **Qué:** extraer colores y tipografías de una captura o de una página de referencia y normalizarlos en escalas accesibles con B-025, informando qué valor de la referencia no pasaba contraste y cuál lo reemplaza.

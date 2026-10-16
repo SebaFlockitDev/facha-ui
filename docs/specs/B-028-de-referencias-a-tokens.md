@@ -1,6 +1,6 @@
 # B-028 · De referencias a tokens
 
-> **Estado:** en spec · **Rama:** `feat/reference-to-tokens` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/reference-to-tokens` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -23,7 +23,7 @@ delante.
 - **El bundle del MCP** solo carga `fs`, `path`, `url`, `process` y `module` de Node (test MCP-3): no
   puede decodificar un PNG sin sumar una dependencia.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Un modo nuevo: `/facha-ui:init reference <url>`
 
@@ -84,7 +84,7 @@ acepta (regla dura 2). Sin tipografía: una imagen no la dice.
 - Prueba real: una página pública de referencia, con su captura, la dirección sobre la app sin diseño
   y el informe.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las tres recomendadas)
 
 1. **Leer la página con un script fijo de solo lectura** (recomendado). Da valores medidos, con el
    elemento del que salen y la tipografía. Es una excepción acotada a `init reference`, con permiso. La
@@ -124,8 +124,8 @@ acepta (regla dura 2). Sin tipografía: una imagen no la dice.
 
 - **2026-10-16:** relevado (el generador ya tiene las entradas; S2 y el bundle no decodifican
   imágenes); spec escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las tres decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/reference-to-tokens`.
+En curso en `feat/reference-to-tokens`: seguir por la primera tarea sin marcar.
