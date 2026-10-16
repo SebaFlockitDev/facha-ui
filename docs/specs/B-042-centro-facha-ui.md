@@ -1,6 +1,6 @@
 # B-042 · Centro facha-ui (etapa 1)
 
-> **Estado:** en curso · **Rama:** `feat/center` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.32.0) · **Rama:** `feat/center` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** pedido del desarrollador ("manejar todo esto de manera sencilla, sin memorizar comandos,
 > desde una pantalla, con subida de imágenes") · **Última actualización:** 2026-10-16
 
@@ -118,7 +118,7 @@ navegable.
 - [x] 3. La skill `center`; contratos
 - [x] 4. Docs (`docs/uso.md`, SPEC, `help`, `start`, CHANGELOG)
 - [x] 5. Prueba real
-- [ ] 6. Release
+- [x] 6. Release 0.32.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -146,6 +146,9 @@ navegable.
   subió la captura y mostró `/facha-ui:init reference <ruta>`; a 375 px, sin scroll horizontal. Se
   corrigieron cinco detalles de la página (`3943665`) y la falta de pantallas en Vite (`f0067a2`).
 
+- **2026-10-16 · release 0.32.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.42; B-042 a Hecho.
+
 ## Cómo retomar
 
-En `feat/center`, tareas 1 a 5 hechas. Falta la 6 (release 0.32.0), solo cuando el desarrollador lo pida.
+Terminado en 0.32.0. Idea que salió de este ítem: B-043.

@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-042 · Centro facha-ui
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** L
-- **Por qué:** facha-ui ya se usa con palabras, pero hay que saber qué pedir: no se ve qué pantallas hay, cuáles están peor ni qué variantes quedaron abiertas. Una pantalla deja reconocer en lugar de recordar (`ux:nielsen-6`).
-- **Qué:** con "abrí facha-ui", una página en el laboratorio con el estado del proyecto, las pantallas de peor a mejor con "Proponer variantes" (objetivo y una captura arrastrada), las variantes en curso y el design system; Claude escucha detrás. `init` y `apply` siguen siendo del desarrollador: el centro muestra el comando.
-- **Criterios de aceptación:** el centro muestra el estado y las pantallas; desde ahí se piden variantes con captura; la subida solo acepta imágenes reales y acotadas, en desarrollo; `init` y `apply` nunca se disparan desde el centro.
-- **Spec:** [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md)
-- **Referencias:** `skills/variants/live.md`, `skills/variants/templates/vite-react/main.tsx` (`LabHome`)
-
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -166,6 +157,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.32.0:** B-042, el centro facha-ui (`/facha-ui:center`): el proyecto y sus pantallas en una página, variantes con un objetivo y una captura subida, y el comando exacto para `init`; spec en [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md).
 - **0.31.0:** B-040, `variants` con una captura de referencia para la estructura (la variante C la adapta y cita sus regiones); spec en [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md).
 - **0.30.0:** B-028, `/facha-ui:init reference <url|image>`: un design system a partir de una página que te gusta, con el informe de lo que no pasaba el contraste; spec en [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).
 - **0.29.0:** B-038, el panel en vivo lee y escribe `oklch()`, `hsl()` y los canales HSL de shadcn/ui, y pinta la marca gris; spec en [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md).
