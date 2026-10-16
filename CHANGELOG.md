@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- `variants` acepta una captura de referencia para la estructura (una imagen en el chat, `--ref <archivo>` o una URL, con permiso): lee sus regiones, su orden y sus patrones, la variante C la adapta a tu pantalla, y cada decisión cita de qué parte de la captura sale. Colores, tamaños y tipografía siguen saliendo de tus tokens.
+
 ## [0.30.0] - 2026-10-16
 
 ### Added

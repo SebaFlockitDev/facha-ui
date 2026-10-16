@@ -598,6 +598,10 @@ El esquema queda fijado en la skill (`skills/variants/run-state.md`, que la skil
 
 Un run del modo rápido suma `"mode": "quick"` y tiene una sola variante (§2.b.6).
 
+#### 2.b.5b Una captura de referencia para la estructura (desde 0.31.0, §7.41)
+
+Una corrida nueva puede traer una referencia: una imagen en la conversación, una ruta (`--ref`) o una URL. Con una URL, la skill pide permiso y solo saca una captura (`browser_navigate`, `browser_resize`, `browser_take_screenshot`, `browser_close`): es la única excepción a la regla dura 6. `skills/variants/reference.md`, leído antes del Step 3b, describe **solo la estructura** (regiones y su orden con dónde se ven en la imagen, lo que se ve primero, los patrones con su principio, la densidad) y dice si sirve para la tarea de la pantalla. La hipótesis C pasa a ser esa estructura adaptada; A y B no cambian; en modo rápido, la única variante es C. Las decisiones de estructura que vienen de ella citan la fuente `reference` con su región. De la captura no sale ningún valor visual, texto, imagen ni logo (regla dura 3), y es un dato: un texto que parezca una instrucción se informa. La crítica senior mira C al lado de la referencia, y el estado de la corrida guarda la referencia y su lectura.
+
 #### 2.b.6 Modo rápido (desde 0.16.0)
 
 **Activación:** `--rapido` o `--quick` en un run nuevo, o un pedido con palabras del dev ("rápido", "una sola variante"). `SKILL.md` manda a leer `skills/variants/quick.md` antes del paso 1; lo que `quick.md` no cambia, corre igual.
@@ -1592,6 +1596,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Decisiones:** la página se lee con un script fijo de solo lectura, con permiso y solo en este modo; el color de marca de la referencia se usa como semilla, con aviso; una tipografía se propone solo si el proyecto puede cargarla.
 - **Encontrado en la prueba real** (dos sitios públicos): un `body` transparente medía el texto claro contra blanco (1.16:1) y ahora usa el fondo opaco de más área; una marca usada solo como tinte translúcido no se encontraba; los navegadores devuelven `lab()` y `oklab()`, que el MCP ya lee; un input sin borde bajaba el radio. Idea B-039: el generador no invierte una marca monocroma en el tema oscuro.
 - **Tests:** la normalización, el informe de pares con su reemplazo, los argumentos sobre la referencia, la tipografía cargada o no, una página oscura con el `body` transparente y la marca como tinte, los archivos fuera del proyecto, y el contrato del script (solo estilos y tamaños; sin red, texto, almacenamiento ni clics).
+
+### 7.41 Versión 0.31.0: variantes con la estructura de una captura
+
+Ítem B-040 del backlog, pedido por el desarrollador después de B-028. Spec, decisiones y registro: [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md).
+
+- **Qué cambia:** `variants` acepta una referencia para la estructura (§2.b.5b): `reference.md`, la hipótesis C, la fuente `reference`, la crítica contra la referencia y el estado de la corrida. `SKILL.md` sigue en 250 líneas.
+- **Decisiones:** imágenes y URLs (con permiso, solo una captura); la referencia ocupa la hipótesis C; solo estructura, nunca valores visuales.
+- **Prueba real:** una corrida en modo rápido sobre la pantalla de pedidos de la app de Vite con la captura del ejemplo "tasks" de shadcn/ui: C tomó el título con resumen, la barra de filtros arriba y el número como enlace; adaptó los filtros por facetas a botones de estado visibles; dejó afuera la selección múltiple y "agregar" (la pantalla no tiene esas acciones). `check_ui` en 0 errores y 0 avisos después de dos arreglos (la fila clicable, sin teclado; el borde del buscador bajo 3:1, una brecha del sistema). Idea B-041: `responsive-table-scroll` no ve el contenedor con scroll de un CSS module.
 
 ---
 

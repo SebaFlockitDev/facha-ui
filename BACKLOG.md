@@ -151,6 +151,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Descartado**.
 
+- **B-041 · `responsive-table-scroll` con CSS modules:** visto en B-040: una tabla dentro de un contenedor con `overflow-x: auto` definido en un CSS module (`styles.scroll`) recibe el aviso igual, porque la regla no resuelve la clase del módulo. Que lea el CSS module importado por el archivo.
 - **B-039 · Marca monocroma en el tema oscuro:** visto en B-028 con una referencia monocroma (shadcn/ui): con una marca casi negra, el generador la deja igual en oscuro y el botón queda casi negro sobre casi negro. shadcn la invierte (blanco en oscuro). Que el generador invierta una marca sin croma en el tema oscuro, con su texto, y lo pruebe como siempre.
 - **B-017 · Más frameworks de laboratorio:** Remix/React Router como framework, Astro, Expo.
 - **B-018 · Otros lenguajes de UI:** Vue, Svelte, Angular (adapters de fuente).
