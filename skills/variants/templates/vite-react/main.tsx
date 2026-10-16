@@ -3,6 +3,7 @@ import { Component, StrictMode, Suspense, lazy, useMemo, type ComponentType, typ
 import { createRoot } from "react-dom/client";
 /*__GLOBAL_CSS__*/
 import { CompareVariants } from "./compare";
+import { LabCenter } from "./lab-center";
 import { LabPanel } from "./lab-panel";
 import { LabResponsive } from "./lab-responsive";
 import { LabTheme } from "./lab-theme";
@@ -131,25 +132,9 @@ function SystemPreview({ page }: { page: string }) {
   );
 }
 
+/** The lab's home is the facha-ui center (B-042): the project's state, its screens and what to do next. */
 function LabHome() {
-  const index = labIndex();
-  return (
-    <main style={{ font: "14px/1.5 system-ui, sans-serif", padding: 24 }}>
-      <h1 style={{ fontSize: 20 }}>Laboratorio de facha-ui</h1>
-      {index.size === 0 && <p>Todavía no hay variantes. Pedíselas a Claude Code: «mejorá la pantalla de pedidos».</p>}
-      {[...index].map(([screen, variants]) => (
-        <p key={screen}>
-          <b>{screen}</b>:{" "}
-          {variants.map((v) => (
-            <a key={v} href={`?screen=${screen}&v=${v}`} style={{ marginRight: 8 }}>
-              {v.toUpperCase()}
-            </a>
-          ))}
-          <a href={`?compare=${screen}`}>Comparar</a>
-        </p>
-      ))}
-    </main>
-  );
+  return <LabCenter routes="query" />;
 }
 
 function Lab() {

@@ -622,7 +622,7 @@ describe("Vite lab template", () => {
       expect(code, f).not.toMatch(/from "next\//);
       for (const m of code.matchAll(/\bfetch\(\s*([^,)]+)/g)) expect(m[1], f).toMatch(/^`\$\{LAB_BASE\}\/facha-live/);
     }
-    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx", "lab-panel.tsx", "lab-palette.ts", "facha-live/live-core.ts"]) {
+    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx", "lab-panel.tsx", "lab-palette.ts", "lab-center.tsx", "facha-live/live-core.ts"]) {
       expect(fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", shared), "utf8"), shared).not.toMatch(/from "next\//);
     }
   });
@@ -696,6 +696,7 @@ describe("B-031 · the panel's design logic travels with the panel", () => {
 
   it("apply removes lab-palette.ts with the rest of the scaffold, in both labs", () => {
     expect(skill("apply/SKILL.md").match(/`lab-palette\.ts`/g)).toHaveLength(2);
+    expect(skill("apply/SKILL.md").match(/`lab-center\.tsx`/g)).toHaveLength(2);
   });
 
   it("init's palette mode lives in palette.md and takes radii and control heights, with contrast only for colors", () => {
