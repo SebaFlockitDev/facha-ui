@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { scanFiles } from "./check.js";
+import { componentUses, inventory } from "./components.js";
+import type { Usage } from "./sources/usage.js";
 import type { Context } from "./context.js";
 import { isInLab, listProjectFiles, readSource, rel, resolveUserPath, walk } from "./project.js";
 import { reviewUi } from "./review.js";
@@ -73,6 +75,48 @@ export function scoreOf(findings: Finding[]) {
   return { score, categories };
 }
 
+/** Color properties whose value says which color a thing is. */
+const COLOR_PROPERTY = /^(color|background|background-color|border(-(top|right|bottom|left))?(-color)?|outline(-color)?|fill|stroke|caret-color|accent-color|text-decoration-color)$/;
+/** Tailwind color utilities: the part after the prefix is a color name. */
+const COLOR_UTILITY = /^(?:[\w-]+:)*(?:bg|text|border(?:-[trblxy])?|ring|outline|fill|stroke|divide|placeholder|accent|caret|decoration|from|via|to)-(.+?)(?:\/\d+)?$/;
+const LITERAL_RULES = new Set(["color-literal", "tailwind-palette-color"]);
+
+/**
+ * How much of a screen uses the design system (B-030), next to the score and not part of it:
+ * components (of the native elements the system has as components, how many use them) and tokens
+ * (of the color values written, how many come from a token).
+ */
+function coverageOf(ctx: Context, files: string[], usagesOf: (abs: string) => Usage[], violationsOf: (abs: string) => Violation[]) {
+  const ui = inventory(ctx).dir;
+  const own = files.filter((f) => !(ui && rel(ctx.project, f).startsWith(ui + "/")));
+  const isColorToken = (name: string) => ctx.tokens.byName.get(name)?.type === "color";
+  let used = 0;
+  let handmade = 0;
+  let viaToken = 0;
+  let literal = 0;
+  for (const f of own) {
+    used += componentUses(ctx, readSource(f) ?? "");
+    for (const v of violationsOf(f)) {
+      if (v.rule === "ds-component-reuse") handmade++;
+      if (LITERAL_RULES.has(v.rule)) literal++;
+    }
+    for (const u of usagesOf(f)) {
+      if (u.kind === "decl" && COLOR_PROPERTY.test(u.property) && /var\(\s*--[\w-]+/.test(u.value)) {
+        const names = [...u.value.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => m[1]!);
+        if (names.some(isColorToken)) viaToken++;
+      } else if (u.kind === "class") {
+        const color = u.raw.match(COLOR_UTILITY)?.[1];
+        if (color && (isColorToken(`--color-${color}`) || isColorToken(`--${color}`))) viaToken++;
+      }
+    }
+  }
+  const ratio = (a: number, b: number) => (a + b ? Math.round((a / (a + b)) * 100) / 100 : null);
+  return {
+    components: { used, handmade, ratio: ratio(used, handmade) },
+    tokens: { viaToken, literal, ratio: ratio(viaToken, literal) },
+  };
+}
+
 export function uxScore(ctx: Context, input?: string) {
   let screens: string[];
   if (input) {
@@ -82,11 +126,13 @@ export function uxScore(ctx: Context, input?: string) {
     screens = listProjectFiles(ctx.project).filter((f) => SCREEN.test(rel(ctx.project, f)) && !isInLab(ctx.project, rel(ctx.project, f)));
   }
 
-  const violationsByFile = new Map<string, Violation[]>();
-  const violationsOf = (abs: string) => {
-    if (!violationsByFile.has(abs)) violationsByFile.set(abs, scanFiles(ctx, [abs]).violations);
-    return violationsByFile.get(abs)!;
+  const scans = new Map<string, ReturnType<typeof scanFiles>>();
+  const scanOf = (abs: string) => {
+    if (!scans.has(abs)) scans.set(abs, scanFiles(ctx, [abs]));
+    return scans.get(abs)!;
   };
+  const violationsOf = (abs: string) => scanOf(abs).violations;
+  const usagesOf = (abs: string) => scanOf(abs).usages;
 
   const results = screens.sort().map((abs) => {
     const screen = rel(ctx.project, abs);
@@ -105,18 +151,24 @@ export function uxScore(ctx: Context, input?: string) {
       .sort((a, b) => PENALTY[b.severity] - PENALTY[a.severity] || (a.file < b.file ? -1 : 1) || a.line - b.line)
       .slice(0, 5)
       .map((f) => ({ rule: f.rule, severity: f.severity, at: `${f.file}:${f.line}`, message: f.message }));
-    return { screen, score, categories, files: files.map((f) => rel(ctx.project, f)).sort(), worst };
+    const coverage = coverageOf(ctx, files, usagesOf, violationsOf);
+    return { screen, score, categories, coverage, files: files.map((f) => rel(ctx.project, f)).sort(), worst };
   });
 
   const average = results.length ? Math.round(results.reduce((s, r) => s + r.score, 0) / results.length) : null;
+  // The project's coverage: every file of every screen, once.
+  const allFiles = [...new Set(screens.flatMap((abs) => [...importsOf(ctx, abs)]))];
+  const coverage = coverageOf(ctx, allFiles, usagesOf, violationsOf);
   return {
     configSource: ctx.project.configSource,
     average,
+    coverage,
     screens: results,
     method: {
       weights: WEIGHTS,
       penalty: PENALTY,
       note: "Each category starts at 100 and loses 15 per error, 6 per warning and 2 per info found in the screen, its imported components and review_ui. Deterministic: use it to compare a screen with itself over time, not as an absolute grade.",
+      coverage: "Not part of the score: components = uses of the system's components / (uses + native elements made by hand that have a component); tokens = color values from a token / (from a token + literals and default-palette colors). null when there is nothing to count.",
     },
   };
 }

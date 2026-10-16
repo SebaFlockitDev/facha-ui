@@ -134,7 +134,7 @@ describe("shadcn-tw4 · oklch with @theme inline", () => {
     expect(r.ds.scales.radius.values).toEqual(["6px (--radius-sm)", "8px (--radius-md)", expect.stringMatching(/^10px \(--radius(-lg)?\)$/), "14px (--radius-xl)"]);
   });
 
-  it("check_ui marks only the hand-written color: rounded-md is mapped in @theme inline", () => {
-    expect(r.check.violations.map((v: any) => `${v.rule} ${v.found}`)).toEqual(["color-literal text-[#1e293b]"]);
+  it("check_ui marks only the hand-written color (rounded-md is mapped in @theme inline) and the hand-made button (B-030)", () => {
+    expect(r.check.violations.map((v: any) => `${v.rule} ${v.found}`)).toEqual(["ds-component-reuse <button>", "color-literal text-[#1e293b]"]);
   });
 });

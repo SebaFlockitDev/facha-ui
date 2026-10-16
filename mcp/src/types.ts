@@ -31,6 +31,7 @@ export const RULE_IDS = [
   "ux-gray-on-color",
   "a11y-gradient-text",
   "a11y-motion",
+  "ds-component-reuse",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 
@@ -79,7 +80,7 @@ export interface Loc {
 
 export interface Suggestion {
   match: "exact" | "nearest" | "none";
-  kind: "token" | "class" | "scale-value" | "none";
+  kind: "token" | "class" | "scale-value" | "component" | "none";
   value: string | null;
   detail: string;
   source: string | null;

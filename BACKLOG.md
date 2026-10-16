@@ -27,16 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-030 · Componente reimplementado y cobertura del design system
-- **Estado:** listo para spec
-- **Prioridad:** P2 · **Tamaño:** M
-- **Por qué:** la IA suele rehacer a mano lo que el proyecto ya tiene como componente; Lovable y v0 ya controlan que se use el sistema.
-- **Qué:** un aviso cuando se arma a mano un elemento que el proyecto ya tiene como componente (un `<button>` con clases, existiendo `components/ui/button`), con el import sugerido. `ux_score` suma la cobertura: cuánto de la UI usa componentes y tokens del sistema.
-- **Criterios de aceptación:** positivo y negativo en el fixture de shadcn; la cobertura sale en `ux_score` (test).
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://docs.lovable.dev/features/design-systems
-
-## Siguiente
-
 ### B-004 · Regla `a11y-color-only`
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -44,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** el guardián marca chips, puntos o filas de estado cuyo único diferenciador es una clase o token de color, sin texto ni ícono en el mismo elemento.
 - **Criterios de aceptación:** positivos y negativos en un fixture; 0 falsos positivos en los fixtures existentes; `ux-principles.md` la pasa a "verificado por el guardián".
 - **Referencias:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md`
+
+## Siguiente
 
 ### B-028 · De referencias a tokens
 - **Estado:** listo para spec
@@ -180,6 +172,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.27.0:** B-030, componentes del proyecto en `get_design_system`, la regla `ds-component-reuse` con el import exacto y la cobertura del design system en `ux_score`; spec en [`docs/specs/B-030-componente-reimplementado.md`](docs/specs/B-030-componente-reimplementado.md).
 - **0.26.0:** B-032 (absorbe B-008), matriz completa de contraste en `get_design_system`, contraste sin redondear y sugerencias que conservan el significado; spec en [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md).
 - **0.25.0:** B-031 (incluye B-036), controles de diseño en el panel en vivo: tono, grises, radio, alto de controles y contraste del texto, con presets de Radix y el contraste y los conflictos recalculados en cada cambio; spec en [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).
 - **0.24.0:** B-029, reglas del guardián para las partes del look genérico de IA que rompen una regla publicada (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`) y la señal `nested-surfaces`; spec en [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
