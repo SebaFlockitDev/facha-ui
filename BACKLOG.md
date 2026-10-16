@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-040 · Variantes con la estructura de una captura de referencia
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** B-028 toma el estilo de una referencia para el design system; la otra mitad de "quiero algo como esta página" es la estructura, que hoy `variants` solo recibe en palabras.
-- **Qué:** `variants` acepta una captura (o una URL, con permiso) como referencia: lee solo su estructura (regiones, orden, jerarquía, patrones), la variante C la adapta a la pantalla, y cada decisión cita la región de la captura. Ningún valor visual sale de la imagen.
-- **Criterios de aceptación:** una corrida con captura da una C con su estructura y citas a la captura; `check_ui` en 0 errores; si la estructura no sirve para la tarea, se dice y se adapta.
-- **Spec:** [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md)
-- **Referencias:** [spec de B-028](docs/specs/B-028-de-referencias-a-tokens.md), `skills/variants/SKILL.md`
-
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -165,6 +156,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.31.0:** B-040, `variants` con una captura de referencia para la estructura (la variante C la adapta y cita sus regiones); spec en [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md).
 - **0.30.0:** B-028, `/facha-ui:init reference <url|image>`: un design system a partir de una página que te gusta, con el informe de lo que no pasaba el contraste; spec en [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).
 - **0.29.0:** B-038, el panel en vivo lee y escribe `oklch()`, `hsl()` y los canales HSL de shadcn/ui, y pinta la marca gris; spec en [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md).
 - **0.28.0:** B-004, la regla `a11y-color-only` (un estado que se muestra solo con color, WCAG 1.4.1); spec en [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md).

@@ -1,6 +1,6 @@
 # B-040 · Variantes con la estructura de una captura de referencia
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/variants-layout-reference` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.31.0) · **Rama:** `feat/variants-layout-reference` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** pedido del desarrollador después de B-028 ("¿ya se le puede pasar capturas de páginas que
 > quiero?") · **Última actualización:** 2026-10-16
 
@@ -99,7 +99,7 @@ y no se sigue.
 - [x] 2. `run-state.md` y la crítica (Step 7b) · `1a77722`
 - [x] 3. Docs · `5153b65`
 - [x] 4. Prueba real
-- [ ] 5. Release
+- [x] 5. Release 0.31.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -131,7 +131,9 @@ y no se sigue.
   - la crítica: a 800px la búsqueda y los filtros quedan en dos filas, y un conteo en cada filtro, como
     en la referencia, ayudaría: una revisión posible.
 
+- **2026-10-16 · release 0.31.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.41; B-040 a Hecho.
+
 ## Cómo retomar
 
-Todo hecho y probado en `feat/variants-layout-reference`; falta el release (tarea 5), solo cuando
-quien mantiene el repo lo pida: versión 0.31.0 con el flujo de `CLAUDE.md`; B-040 a **Hecho**.
+Terminado en 0.31.0. Idea que salió de este ítem: B-041.
