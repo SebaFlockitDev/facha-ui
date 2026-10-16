@@ -54,6 +54,12 @@ export interface ElementUsage extends Loc {
   text: string;
   /** Inside a <label>. */
   inLabel: boolean;
+  /** Its parent has text or an expression among its direct children (a label next to a dot). */
+  siblingText?: boolean;
+  /** It contains an svg or img: a cue besides color. */
+  graphic?: boolean;
+  /** Names its className interpolates (`chip-${order.status}` → order, status). */
+  classVars?: string[];
   /** Static classes of the intrinsic elements that contain it in the same file. */
   ancestorClasses: string[];
   /** The same, one list per ancestor, outermost first (B-029: nested surfaces). */

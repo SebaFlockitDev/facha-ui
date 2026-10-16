@@ -55792,10 +55792,26 @@ function extractJsx(file2, code2, ext, classHelpers) {
       else if (child && typeof child === "object") collectStrings(child, out);
     }
   };
+  const collectNames = (n, out) => {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "Identifier") out.push(String(n.name));
+    else if (n.type === "MemberExpression" || n.type === "OptionalMemberExpression") {
+      collectNames(n.object, out);
+      if (n.property?.type === "Identifier" && !n.computed) out.push(String(n.property.name));
+      else collectNames(n.property, out);
+    } else
+      for (const key of Object.keys(n)) {
+        if (key === "loc" || key === "start" || key === "end" || key === "extra" || key === "comments") continue;
+        const child = n[key];
+        if (Array.isArray(child)) child.forEach((c2) => collectNames(c2, out));
+        else if (child && typeof child === "object") collectNames(child, out);
+      }
+  };
   const attrsOf = (opening) => {
     const attrs = {};
     const dynamic = [];
     const classes = [];
+    const classVars = [];
     let spread = false;
     for (const a of opening.attributes) {
       if (a.type === "JSXSpreadAttribute") {
@@ -55817,12 +55833,16 @@ function extractJsx(file2, code2, ext, classHelpers) {
           dynamic.push(key);
         }
       }
-      if (key === "className" || key === "class") collectStrings(v, classes);
+      if (key === "className" || key === "class") {
+        collectStrings(v, classes);
+        if (v?.type === "JSXExpressionContainer") collectNames(v.expression, classVars);
+      }
     }
-    return { attrs, dynamic, classes, spread };
+    return { attrs, dynamic, classes, spread, classVars };
   };
   const textOf = (children) => {
     let name = "none";
+    let graphic = false;
     const parts = [];
     const unknown2 = () => {
       if (name !== "text") name = "unknown";
@@ -55850,6 +55870,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
             unknown2();
             continue;
           }
+          if (nm.tag === "svg" || nm.tag === "img") graphic = true;
           const a = attrsOf(c2.openingElement);
           if (a.attrs["aria-hidden"] === "true") continue;
           if (a.attrs["aria-label"] || a.attrs.title || nm.tag === "img" && a.attrs.alt) {
@@ -55865,10 +55886,14 @@ function extractJsx(file2, code2, ext, classHelpers) {
       }
     };
     walkChildren(children);
-    return { name, text: parts.join(" ").slice(0, 80) };
+    return { name, text: parts.join(" ").slice(0, 80), graphic };
   };
   const ancestors = [];
   const ancestorClassStack = [];
+  const childTextStack = [];
+  const hasDirectText = (children) => children.some(
+    (c2) => c2.type === "JSXText" && String(c2.value).trim() !== "" || c2.type === "JSXExpressionContainer" && c2.expression?.type !== "JSXEmptyExpression"
+  );
   const visit2 = (n) => {
     if (!n || typeof n !== "object") return;
     if (Array.isArray(n)) {
@@ -55887,6 +55912,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
           ...attrs,
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
+          siblingText: childTextStack[childTextStack.length - 1] ?? false,
           ancestorClasses: ancestorClassStack.flat(),
           ancestorClassLists: ancestorClassStack.map((a) => [...a]),
           file: file2,
@@ -55896,6 +55922,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
       }
       ancestors.push(nm.intrinsic ? nm.tag : "");
       ancestorClassStack.push(attrs?.classes ?? []);
+      childTextStack.push(hasDirectText(n.children));
       pushed = true;
       const tag = nm.tag || "?";
       for (const c2 of n.children) {
@@ -55954,6 +55981,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
     if (pushed) {
       ancestors.pop();
       ancestorClassStack.pop();
+      childTextStack.pop();
     }
   };
   visit2(ast);

@@ -154,10 +154,29 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
     }
   };
 
+  /** Identifier and property names inside an expression (not strings). */
+  const collectNames = (n: Node | null | undefined, out: string[]): void => {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "Identifier") out.push(String(n.name));
+    else if (n.type === "MemberExpression" || n.type === "OptionalMemberExpression") {
+      collectNames(n.object, out);
+      if (n.property?.type === "Identifier" && !n.computed) out.push(String(n.property.name));
+      else collectNames(n.property, out);
+    } else
+      for (const key of Object.keys(n)) {
+        if (key === "loc" || key === "start" || key === "end" || key === "extra" || key === "comments") continue;
+        const child = n[key];
+        if (Array.isArray(child)) child.forEach((c) => collectNames(c, out));
+        else if (child && typeof child === "object") collectNames(child, out);
+      }
+  };
+
   const attrsOf = (opening: Node) => {
     const attrs: Record<string, string> = {};
     const dynamic: string[] = [];
     const classes: string[] = [];
+    /** Names a className interpolates (`chip-${order.status}` → status), for a11y-color-only. */
+    const classVars: string[] = [];
     let spread = false;
     for (const a of opening.attributes as Node[]) {
       if (a.type === "JSXSpreadAttribute") {
@@ -179,14 +198,18 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
           dynamic.push(key);
         }
       }
-      if (key === "className" || key === "class") collectStrings(v, classes);
+      if (key === "className" || key === "class") {
+        collectStrings(v, classes);
+        if (v?.type === "JSXExpressionContainer") collectNames(v.expression, classVars);
+      }
     }
-    return { attrs, dynamic, classes, spread };
+    return { attrs, dynamic, classes, spread, classVars };
   };
 
   /** Text that can name the element: static text, an aria-label/title/alt below it, or unknown. */
-  const textOf = (children: Node[]): { name: ElementUsage["name"]; text: string } => {
+  const textOf = (children: Node[]): { name: ElementUsage["name"]; text: string; graphic: boolean } => {
     let name: ElementUsage["name"] = "none";
+    let graphic = false;
     const parts: string[] = [];
     const unknown = () => {
       if (name !== "text") name = "unknown";
@@ -214,6 +237,8 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
             unknown();
             continue;
           }
+          // An icon or image is a cue besides color (WCAG 1.4.1), even when hidden from assistive tech.
+          if (nm.tag === "svg" || nm.tag === "img") graphic = true;
           const a = attrsOf(c.openingElement);
           if (a.attrs["aria-hidden"] === "true") continue;
           if (a.attrs["aria-label"] || a.attrs.title || (nm.tag === "img" && a.attrs.alt)) {
@@ -229,11 +254,19 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
       }
     };
     walkChildren(children);
-    return { name, text: parts.join(" ").slice(0, 80) };
+    return { name, text: parts.join(" ").slice(0, 80), graphic };
   };
 
   const ancestors: string[] = [];
   const ancestorClassStack: string[][] = [];
+  /** Per open element: whether it has text (or an expression) among its direct children. */
+  const childTextStack: boolean[] = [];
+  const hasDirectText = (children: Node[]) =>
+    children.some(
+      (c) =>
+        (c.type === "JSXText" && String(c.value).trim() !== "") ||
+        (c.type === "JSXExpressionContainer" && c.expression?.type !== "JSXEmptyExpression"),
+    );
 
   const visit = (n: Node | null | undefined) => {
     if (!n || typeof n !== "object") return;
@@ -253,6 +286,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
           ...attrs,
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
+          siblingText: childTextStack[childTextStack.length - 1] ?? false,
           ancestorClasses: ancestorClassStack.flat(),
           ancestorClassLists: ancestorClassStack.map((a) => [...a]),
           file,
@@ -262,6 +296,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
       }
       ancestors.push(nm.intrinsic ? nm.tag : "");
       ancestorClassStack.push(attrs?.classes ?? []);
+      childTextStack.push(hasDirectText(n.children as Node[]));
       pushed = true;
 
       // UI text, for the microcopy rules: content of intrinsic and component elements alike, and
@@ -323,6 +358,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
     if (pushed) {
       ancestors.pop();
       ancestorClassStack.pop();
+      childTextStack.pop();
     }
   };
 
