@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.29.0** (§7.10–§7.39). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.30.0** (§7.10–§7.40). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -377,7 +377,7 @@ Invariantes: `totals.all = Σ totals por severidad = Σ byFile = Σ byRule`.
 ##### `propose_design_system` (B-025, §2.h)
 
 **Descripción (literal):**
-> Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Each direction is a seed plus a style (standard, sober or soft: default radius from the Material 3 corner scale, a tinted or untinted neutral, and cards raised by a Fluent 2 shadow or by Carbon's layers); with a brand color, the brand in the three styles; without one, 3 to 5 Radix accent seeds, each with a style; with brandColor and style, one direction (to mix two). Inputs come from the arguments, then the design brief, then a default. Deterministic: the same input gives the same output.
+> Generates a complete design system from published standards, for a project that has none: 12-step color scales (Radix Colors roles) for the accent, a neutral tinted with its hue and the four states, each step solved for the contrast Radix measures against the background, light and dark solved separately; the brand color is step 9 in both modes when text on it is legible. Then type scale (Carbon or Material 3 by density), spacing and control height (Carbon), radii (Material 3) and shadows (Fluent 2). Every text and control pair is proved against WCAG 2.2 on the final values. Each direction is a seed plus a style (standard, sober or soft: default radius from the Material 3 corner scale, a tinted or untinted neutral, and cards raised by a Fluent 2 shadow or by Carbon's layers); with a brand color, the brand in the three styles; without one, 3 to 5 Radix accent seeds, each with a style; with brandColor and style, one direction (to mix two). Inputs come from the arguments, then a reference page (reference: the JSON that /facha-ui:init reference wrote, giving the brand, style, radius, density and font, and the reference's pairs that fail WCAG with what replaces them), then the design brief, then a default. Deterministic: the same input gives the same output.
 > **When to use:** for a project with no design system (status missing), usually after the design brief, to show a system the team can approve — this is the read-only half of `/facha-ui:init system`. Never present it as existing tokens.
 > **Returns:** JSON with `designSystemStatus`, `brief`, `inputs` (value and origin of each), `typography`, `spacing`, `radius`, `directions` (per direction: `seed`, `scales`, `tokens` with name, role, light and dark value and sources, `proof` with every contrast pair, `adjustments`, `conflicts` with their solution, `notes` and the `css` blocks to write), `sources` and `notes`. Read-only: it never modifies files or accesses the network.
 
@@ -724,7 +724,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -887,6 +887,15 @@ Lo que ninguna fuente sostiene no se fija (el "croma moderado" de fintech que no
 **Skill** (`skills/init/system.md`): solo con `status: missing`; recomienda el brief si no hay. Genera las tres direcciones, arma el laboratorio si no existe, escribe `system/`, controla la copia con `check_ui` (solo se admiten los `unknown-token` de nombres que el sistema va a crear) y captura la muestra y la pantalla de cada dirección. El dev elige una o mezcla, y recién entonces sigue el plan de escritura. Muestra las entradas, los colores por rol, los ajustes y conflictos, la prueba de contraste y las demás escalas con su fuente, y exactamente qué escribe. Con la aprobación y el motivo escribe los bloques al principio del CSS global que carga la app, la propuesta en `.facha-ui/proposals/system-<fecha>.json` y la decisión `dec-<fecha>-system`. El modo oscuro se escribe si el brief lo pide; si no, queda en la propuesta. Con los tokens ya escritos, la copia y la muestra dan 0 errores en `check_ui`; después borra `system/` (y el andamiaje si lo creó y ningún run lo usa) y deja las capturas. Las pantallas no se tocan: el siguiente paso es `/facha-ui:variants`.
 
 ---
+
+**Desde una referencia (`/facha-ui:init reference <url|image>`, desde 0.30.0, §7.40).** "Quiero algo como esta página". Con el sí del desarrollador, la skill abre la URL con Playwright, toma una captura y corre un script fijo del plugin (`skills/init/scripts/reference-styles.js`, solo lectura: estilos calculados y tamaños, nunca textos, almacenamiento ni red) con `browser_evaluate`; es la única excepción de `init` a "el navegador solo captura". Guarda `.facha-ui/references/<slug>.json` y la captura. `propose_design_system` lo lee con la entrada `reference` (un archivo del proyecto: S2 intacta) y llena lo que los argumentos no dan, antes que el brief:
+- **marca:** el fondo del botón principal si tiene color (croma de 0.06 o más); si no, el color de los enlaces; si no, el fondo con color de más área; si no, un fondo translúcido con color (la marca usada como tinte), sin su alfa. Una referencia monocroma dice qué color queda y ofrece el de su botón;
+- **radio y estilo:** la mediana del radio de botón, tarjeta e input con borde, al paso más cercano de Material 3; 12px o más es `soft`, 4px o menos con un fondo sin matiz es `sober`, si no `standard`;
+- **densidad:** controles de 32px o menos, o texto de 14px o menos, es `compact`; 48px o más, `airy` (Carbon);
+- **tipografía:** solo si es de sistema o el proyecto ya la carga (CSS, `@fontsource`, `next/font`); si no, la pila de sistema y una nota de licencia;
+- **el informe:** los pares de la referencia (texto, títulos con su tamaño, texto del botón, enlaces) medidos con WCAG 2.2 sobre su fondo real (el del `body`, o el opaco de más área si es transparente), y para cada uno que falla, el token y el valor del sistema que lo reemplaza. Avisa que el color de marca es de otro producto.
+
+Con una imagen y sin URL, la IA propone los colores que ve y el desarrollador los confirma: son sus valores. Desde ahí sigue el modo `system` (S2b en adelante).
 
 ## 3. Adopción en un proyecto, paso a paso
 
@@ -1574,6 +1583,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** la pestaña Diseño (§7.35) funciona en proyectos shadcn/ui: `lab-palette.ts` lee `oklch()`, `hsl()` y los canales HSL sueltos (los tokens con `format: "hsl-channels"`, que `palette-base.mjs` y el endpoint conservan), y escribe cada valor nuevo en el formato del token. Con la marca gris (shadcn por defecto), un preset o el deslizador la pintan con el color del preset (el paso 9 de Radix) en los dos temas; Grafito la deja gris.
 - **Encontrado en la prueba real:** la solución para el texto sobre la marca pedía "texto oscuro" sobre índigo en el tema oscuro, donde se lee el blanco (5.2:1 contra 4.0:1). Ahora la dirección sale del fondo: blanco si su luminancia está bajo 0.179 (el cruce de la fórmula de WCAG), y lo mismo para la marca como texto.
 - **Tests:** ida y vuelta de `oklch()` y de canales sin cambiar el formato, la marca gris pintada y medida, la base de `shadcn-tw3` y `shadcn-tw4`, y el endpoint con canales.
+
+### 7.40 Versión 0.30.0: de referencias a tokens
+
+Ítem B-028 del backlog. Spec, decisiones y registro: [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).
+
+- **Qué cambia:** `/facha-ui:init reference <url|image>` (§2.h) y la entrada `reference` de `propose_design_system`.
+- **Decisiones:** la página se lee con un script fijo de solo lectura, con permiso y solo en este modo; el color de marca de la referencia se usa como semilla, con aviso; una tipografía se propone solo si el proyecto puede cargarla.
+- **Encontrado en la prueba real** (dos sitios públicos): un `body` transparente medía el texto claro contra blanco (1.16:1) y ahora usa el fondo opaco de más área; una marca usada solo como tinte translúcido no se encontraba; los navegadores devuelven `lab()` y `oklab()`, que el MCP ya lee; un input sin borde bajaba el radio. Idea B-039: el generador no invierte una marca monocroma en el tema oscuro.
+- **Tests:** la normalización, el informe de pares con su reemplazo, los argumentos sobre la referencia, la tipografía cargada o no, una página oscura con el `body` transparente y la marca como tinte, los archivos fuera del proyecto, y el contrato del script (solo estilos y tamaños; sin red, texto, almacenamiento ni clics).
 
 ---
 
