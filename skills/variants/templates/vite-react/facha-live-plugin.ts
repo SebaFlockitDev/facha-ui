@@ -14,7 +14,8 @@ import { handleGet, handlePost } from "./facha-live/live-core";
  */
 
 const LAB_BASE = "/facha-lab"; /*__LAB_BASE__*/
-const MAX_BODY = 64 * 1024;
+/** JSON requests; a reference image from the center is up to 5 MB, base64 in the body (B-042). */
+const MAX_BODY = 8 * 1024 * 1024;
 
 function readBody(req: IncomingMessage): Promise<Buffer | null> {
   return new Promise((resolve) => {

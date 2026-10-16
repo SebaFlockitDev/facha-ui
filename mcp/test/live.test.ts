@@ -51,7 +51,7 @@ describe("live endpoint · GET", () => {
   it("says the live mode is off when there is no active session", async () => {
     const root = project(null);
     const res = core.handleGet(get(), { root, production: false });
-    expect(await res.json()).toEqual({ active: false, palette: null });
+    expect(await res.json()).toEqual({ active: false, palette: null, center: null });
   });
 
   it("issues a session token once and lists the requests of that screen with their status", async () => {
@@ -76,7 +76,7 @@ describe("live endpoint · GET", () => {
 
   it("treats an expired session as off", async () => {
     const root = project({ slug: "orders", active: true, expiresAt: "2020-01-01T00:00:00Z" });
-    expect(await core.handleGet(get(), { root, production: false }).json()).toEqual({ active: false, palette: null });
+    expect(await core.handleGet(get(), { root, production: false }).json()).toEqual({ active: false, palette: null, center: null });
   });
 });
 
@@ -273,6 +273,84 @@ describe("live endpoint · palette", () => {
     expect((await send({ name: "x", tokens: {} })).status).toBe(400);
     fs.rmSync(path.join(root, ".facha-ui", "live", "palette.json"));
     expect((await send({ name: "x", tokens: { "--brand": { light: "#000000" } } })).status).toBe(400);
+  });
+});
+
+describe("live endpoint · the facha-ui center (B-042)", () => {
+  const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(32, 1)]);
+  const center = (root: string, extra: Record<string, unknown> = {}) =>
+    fs.writeFileSync(
+      path.join(root, ".facha-ui", "live", "center.json"),
+      JSON.stringify({
+        version: 1,
+        at: "2026-10-16T20:00:00-03:00",
+        project: { score: 72, designSystem: "partial", missing: ["status.info"], contrast: { pairs: 20, failing: 2 }, coverage: { components: 0.5, tokens: 0.9 } },
+        screens: [
+          { slug: "orders", file: "src/pages/Orders.tsx", route: "/orders", score: 61, worst: { rule: "theme-contrast", message: "Texto tenue", at: "src/index.css:12" }, variants: ["a"] },
+          { slug: "evil slug", file: "x" },
+        ],
+        ...extra,
+      }),
+    );
+  const projectRoot = () => {
+    const root = project({ scope: "project", active: true });
+    center(root);
+    return root;
+  };
+  const opts = (root: string) => ({ root, production: false });
+
+  it("serves the center's state, keeping only valid screens", async () => {
+    const root = projectRoot();
+    const body = (await core.handleGet(get(), opts(root)).json()) as any;
+    expect(body).toMatchObject({ active: true, scope: "project", slug: null });
+    expect(body.center.project).toMatchObject({ score: 72, designSystem: "partial", contrast: { pairs: 20, failing: 2 } });
+    expect(body.center.screens.map((x: any) => x.slug)).toEqual(["orders"]);
+  });
+
+  it("a project session takes the panel's requests of any screen", async () => {
+    const root = projectRoot();
+    const token = await tokenOf(root);
+    const res = await core.handlePost(post({ token, kind: "change", slug: "invoices", variant: "a", text: "mové los filtros arriba" }), opts(root));
+    expect(res.status).toBe(202);
+  });
+
+  it("takes a run for a screen of the center, with a goal, quick mode and a reference", async () => {
+    const root = projectRoot();
+    const token = await tokenOf(root);
+    const res = await core.handlePost(post({ token, kind: "run", slug: "orders", text: "que se vean primero los pendientes", quick: true, reference: "https://example.com/dashboard" }), opts(root));
+    expect(res.status).toBe(202);
+    const line = JSON.parse(fs.readFileSync(path.join(root, ".facha-ui", "live", "requests.jsonl"), "utf8").trim());
+    expect(line).toMatchObject({ kind: "run", slug: "orders", text: "que se vean primero los pendientes", quick: true, reference: "https://example.com/dashboard" });
+    expect((await core.handlePost(post({ token, kind: "run", slug: "unknown" }), opts(root))).status).toBe(400);
+    expect((await core.handlePost(post({ token, kind: "run", slug: "orders", reference: "../../etc/passwd" }), opts(root))).status).toBe(400);
+    expect((await core.handlePost(post({ token, kind: "run", slug: "orders", reference: "javascript:alert(1)" }), opts(root))).status).toBe(400);
+  });
+
+  it("saves an uploaded PNG in .facha-ui/references and lets a run use it", async () => {
+    const root = projectRoot();
+    const token = await tokenOf(root);
+    const res = await core.handlePost(post({ token, kind: "upload", data: "data:image/png;base64," + PNG.toString("base64") }), opts(root));
+    expect(res.status).toBe(201);
+    const { path: saved } = (await res.json()) as { path: string };
+    expect(saved).toMatch(/^\.facha-ui\/references\/upload-.+\.png$/);
+    expect(fs.readFileSync(path.join(root, saved)).equals(PNG)).toBe(true);
+    expect((await core.handlePost(post({ token, kind: "run", slug: "orders", reference: saved }), opts(root))).status).toBe(202);
+  });
+
+  it("refuses an upload that is not an image (whatever its name), too big, without the token or outside a project session", async () => {
+    const root = projectRoot();
+    const token = await tokenOf(root);
+    const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>').toString("base64");
+    expect((await core.handlePost(post({ token, kind: "upload", data: "data:image/png;base64," + svg }), opts(root))).status).toBe(415);
+    const big = Buffer.concat([PNG, Buffer.alloc(5 * 1024 * 1024)]).toString("base64");
+    expect((await core.handlePost(post({ token, kind: "upload", data: big }), opts(root))).status).toBe(413);
+    expect((await core.handlePost(post({ token: "x", kind: "upload", data: PNG.toString("base64") }), opts(root))).status).toBe(403);
+    expect((await core.handlePost(post({ token, kind: "upload", data: PNG.toString("base64") }), { root, production: true })).status).toBe(404);
+    const screenRoot = project();
+    const screenToken = await tokenOf(screenRoot);
+    expect((await core.handlePost(post({ token: screenToken, kind: "upload", data: PNG.toString("base64") }), opts(screenRoot))).status).toBe(400);
+    expect((await core.handlePost(post({ token: screenToken, kind: "run", slug: "orders" }), opts(screenRoot))).status).toBe(400);
+    expect(fs.existsSync(path.join(root, ".facha-ui", "references")) ? fs.readdirSync(path.join(root, ".facha-ui", "references")) : []).toEqual([]);
   });
 });
 

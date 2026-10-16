@@ -145,7 +145,8 @@ interface Target {
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette" | "vote";
+  kind: "change" | "choose" | "palette" | "vote" | "run";
+  slug?: string;
   variant: string;
   text: string;
   voter?: string;
@@ -157,7 +158,9 @@ interface LiveRequest {
 interface LiveState {
   active: boolean;
   token?: string;
-  slug?: string;
+  /** "project": the facha-ui center session, for every screen (B-042). */
+  scope?: "project" | "screen";
+  slug?: string | null;
   requests?: LiveRequest[];
   palette?: PaletteBase | null;
 }
@@ -776,7 +779,8 @@ export function LabPanel() {
     }
   }, []);
 
-  const mine = (live.requests ?? []).filter((r) => r.variant === here?.variant);
+  // In the center's project session the requests of every screen come: keep this one's.
+  const mine = (live.requests ?? []).filter((r) => r.variant === here?.variant && (!r.slug || r.slug === here?.slug));
   const pending = mine.some((r) => r.status.state === "queued" || r.status.state === "working");
   const fixReq = deviceFix ? mine.find((r) => r.id === deviceFix.id) : undefined;
 
@@ -1122,7 +1126,7 @@ export function LabPanel() {
   const sized = layout.width !== null && layout.height !== null;
   const wrapStyle: React.CSSProperties = placed ? { left: layout.x ?? 0, top: layout.y ?? 0, right: "auto", bottom: "auto" } : {};
   const cardStyle: React.CSSProperties = sized ? { width: layout.width ?? undefined, height: layout.height ?? undefined } : {};
-  const liveHere = live.active && live.slug === here.slug;
+  const liveHere = live.active && (live.scope === "project" || live.slug === here.slug);
   const showTab = tab === "palette" && !paletteBase ? "improve" : tab;
   const deviceIssues = issuesOf(deviceReport ?? []);
   // The newest question still waiting for an answer, unless a later request already answers it.

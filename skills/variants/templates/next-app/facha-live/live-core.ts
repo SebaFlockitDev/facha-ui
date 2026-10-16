@@ -13,6 +13,10 @@ import path from "node:path";
  * - a live session is active and the request carries its token.
  * Nothing here applies a variant: "choose" only tells the developer to confirm in Claude Code, and
  * "palette" only proposes new token values, which the developer reviews and approves there.
+ *
+ * The facha-ui center (B-042) opens a session for the whole project (`scope: "project"`): requests
+ * for any screen, "run" (propose variants of a screen) and "upload" (a reference image, saved in
+ * `.facha-ui/references/`). It never starts /facha-ui:init or /facha-ui:apply: only the developer does.
  */
 
 export interface LiveOptions {
@@ -28,7 +32,10 @@ export interface LiveOptions {
 }
 
 interface Session {
-  slug: string;
+  /** The screen of a per-screen session; absent in a project session. */
+  slug?: string;
+  /** "project": the center's session, for every screen (B-042). */
+  scope?: "project";
   runId?: string;
   active: boolean;
   startedAt?: string;
@@ -79,7 +86,11 @@ interface PaletteProposal {
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette" | "vote";
+  kind: "change" | "choose" | "palette" | "vote" | "run";
+  /** A "run" from the center: one variant instead of three. */
+  quick?: boolean;
+  /** A "run" from the center: a reference for the structure (an uploaded image or a URL). */
+  reference?: string;
   /** Who voted, for a "vote" (the reason goes in `text`). */
   voter?: string;
   slug: string;
@@ -104,6 +115,10 @@ const VALUE = /^(?!.*url\()[#\w\s(),.%/-]{1,300}$/;
 const HEX = /^#[0-9a-fA-F]{6}$/;
 /** Tokens kept from the palette base: colors, radii and control heights (B-031). */
 const MAX_BASE_TOKENS = 120;
+/** Reference images from the center: PNG, JPEG or WebP, by their first bytes, up to 5 MB. */
+const MAX_UPLOAD = 5 * 1024 * 1024;
+const REFERENCE_FILE = /^\.facha-ui\/references\/[\w.-]{1,80}\.(png|jpe?g|webp)$/;
+const REFERENCE_URL = /^https?:\/\/[^\s"'<>]{1,300}$/;
 const TEXT_FIELDS: [keyof Target, number][] = [
   ["selector", 300],
   ["text", 160],
@@ -152,7 +167,7 @@ function sameOrigin(req: Request, base: URL): boolean {
 
 function activeSession(root: string, now: Date): Session | null {
   const session = readJson<Session>(path.join(liveDir(root), "session.json"));
-  if (!session || session.active !== true || typeof session.slug !== "string") return null;
+  if (!session || session.active !== true || (session.scope !== "project" && typeof session.slug !== "string")) return null;
   if (session.expiresAt && Date.parse(session.expiresAt) < now.getTime()) return null;
   return session;
 }
@@ -291,6 +306,52 @@ function runInfo(root: string, slug: string) {
   return { slug, objective: oneLine(run.objective, 300) ?? "", status: oneLine(run.status, 20) ?? "", variants };
 }
 
+/** What the center shows, written by the center skill in .facha-ui/live/center.json; each field checked. */
+function readCenter(root: string) {
+  const file = path.join(liveDir(root), "center.json");
+  try {
+    if (fs.statSync(file).size > 256 * 1024) return null;
+  } catch {
+    return null;
+  }
+  const raw = readJson<Record<string, any>>(file);
+  if (!raw || typeof raw !== "object") return null;
+  const num = (v: unknown, max = 100) => (typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= max ? v : null);
+  const ratio = (v: unknown) => (v === null ? null : num(v, 1));
+  const screens = (Array.isArray(raw.screens) ? raw.screens : [])
+    .filter((s: any) => s && typeof s.slug === "string" && SLUG.test(s.slug))
+    .slice(0, 60)
+    .map((s: any) => ({
+      slug: s.slug as string,
+      file: oneLine(s.file, 200) ?? "",
+      route: oneLine(s.route, 120) ?? null,
+      score: num(s.score),
+      worst: s.worst ? { rule: oneLine(s.worst.rule, 60) ?? "", message: oneLine(s.worst.message, 240) ?? "", at: oneLine(s.worst.at, 200) ?? "" } : null,
+      variants: Array.isArray(s.variants) ? s.variants.filter((v: unknown) => typeof v === "string" && VARIANT.test(v)).slice(0, 12) : [],
+    }));
+  const p = raw.project && typeof raw.project === "object" ? raw.project : {};
+  return {
+    at: oneLine(raw.at, 40) ?? null,
+    lab: oneLine(raw.lab, 120) ?? null,
+    project: {
+      score: num(p.score),
+      designSystem: oneLine(p.designSystem, 20) ?? null,
+      missing: Array.isArray(p.missing) ? p.missing.map((m: unknown) => oneLine(m, 40)).filter(Boolean).slice(0, 20) : [],
+      contrast: p.contrast ? { pairs: num(p.contrast.pairs, 10000), failing: num(p.contrast.failing, 10000) } : null,
+      coverage: p.coverage ? { components: ratio(p.coverage.components ?? null), tokens: ratio(p.coverage.tokens ?? null) } : null,
+    },
+    screens,
+  };
+}
+
+/** The image kind of an upload, by its first bytes (never by its name), or null. */
+function imageKind(bytes: Buffer): "png" | "jpg" | "webp" | null {
+  if (bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "png";
+  if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpg";
+  if (bytes.length > 12 && bytes.subarray(0, 4).toString("latin1") === "RIFF" && bytes.subarray(8, 12).toString("latin1") === "WEBP") return "webp";
+  return null;
+}
+
 /** The votes recorded for a screen, newest last. */
 function votesOf(root: string, slug: string) {
   return readRequests(root)
@@ -307,17 +368,29 @@ export function handleGet(req: Request, opts: LiveOptions): Response {
   // The compare page asks for one run: its variants and the team's votes.
   const runSlug = new URL(req.url).searchParams.get("run");
   const compare = runSlug && SLUG.test(runSlug) ? { run: runInfo(opts.root, runSlug), votes: votesOf(opts.root, runSlug) } : {};
-  if (!session) return json(200, { active: false, palette, ...compare });
+  const center = readCenter(opts.root);
+  if (!session) return json(200, { active: false, palette, center, ...compare });
   if (!session.token) {
     session.token = randomUUID();
     fs.writeFileSync(path.join(liveDir(opts.root), "session.json"), JSON.stringify(session, null, 2) + "\n");
   }
   const status = readJson<{ requests?: Record<string, unknown> }>(path.join(liveDir(opts.root), "status.json"))?.requests ?? {};
+  const project = session.scope === "project";
   const requests = readRequests(opts.root)
-    .filter((r) => r.slug === session.slug)
-    .slice(-20)
+    .filter((r) => project || r.slug === session.slug)
+    .slice(project ? -60 : -20)
     .map((r) => ({ ...r, status: status[r.id] ?? { state: "queued" } }));
-  return json(200, { active: true, token: session.token, slug: session.slug, expiresAt: session.expiresAt ?? null, requests, palette, ...compare });
+  return json(200, {
+    active: true,
+    token: session.token,
+    scope: project ? "project" : "screen",
+    slug: session.slug ?? null,
+    expiresAt: session.expiresAt ?? null,
+    requests,
+    palette,
+    center,
+    ...compare,
+  });
 }
 
 export async function handlePost(req: Request, opts: LiveOptions): Promise<Response> {
@@ -341,14 +414,47 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
   const slug = body.slug;
   const variant = body.variant;
   const text = typeof body.text === "string" ? body.text.trim() : "";
+  const project = session.scope === "project";
+
+  // An image for a reference: saved, not a request for Claude Code.
+  if (kind === "upload") {
+    if (!project) return json(400, { error: "Uploads need the facha-ui center" });
+    const data = typeof body.data === "string" ? body.data.replace(/^data:image\/[\w+.-]+;base64,/, "") : "";
+    if (!data || data.length > Math.ceil((MAX_UPLOAD * 4) / 3) + 4 || !/^[A-Za-z0-9+/]+=*$/.test(data)) return json(413, { error: "An image of up to 5 MB" });
+    const bytes = Buffer.from(data, "base64");
+    const ext = imageKind(bytes);
+    if (!ext || bytes.length > MAX_UPLOAD) return json(415, { error: "Only PNG, JPEG or WebP images, up to 5 MB" });
+    const dir = path.join(opts.root, ".facha-ui", "references");
+    fs.mkdirSync(dir, { recursive: true });
+    const name = `upload-${now.toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 6)}.${ext}`;
+    fs.writeFileSync(path.join(dir, name), bytes);
+    return json(201, { path: `.facha-ui/references/${name}` });
+  }
+
+  // Propose variants of a screen, from the center.
+  if (kind === "run") {
+    if (!project) return json(400, { error: "Runs need the facha-ui center" });
+    const screens = readCenter(opts.root)?.screens ?? [];
+    if (typeof slug !== "string" || !screens.some((s) => s.slug === slug)) return json(400, { error: "Unknown screen" });
+    if (text.length > MAX_TEXT) return json(400, { error: `The goal goes up to ${MAX_TEXT} characters` });
+    const ref = typeof body.reference === "string" ? body.reference.trim() : "";
+    const refOk = !ref || (REFERENCE_FILE.test(ref) && fs.existsSync(path.join(opts.root, ref))) || REFERENCE_URL.test(ref);
+    if (!refOk) return json(400, { error: "The reference is an uploaded image or an http(s) URL" });
+    const entry: LiveRequest = { id: `req-${now.getTime()}-${randomUUID().slice(0, 8)}`, at: now.toISOString(), kind, slug, variant: "", text, quick: body.quick === true };
+    if (ref) entry.reference = ref;
+    fs.mkdirSync(liveDir(opts.root), { recursive: true });
+    fs.appendFileSync(path.join(liveDir(opts.root), "requests.jsonl"), JSON.stringify(entry) + "\n");
+    return json(202, { id: entry.id });
+  }
+
   if (kind !== "change" && kind !== "choose" && kind !== "palette" && kind !== "vote") {
-    return json(400, { error: "kind must be change, choose, palette or vote" });
+    return json(400, { error: "kind must be change, choose, palette, vote, run or upload" });
   }
   const voter = kind === "vote" ? oneLine(body.voter, 40) : undefined;
   if (kind === "vote" && (!voter || text.length === 0 || text.length > 500)) {
     return json(400, { error: "A vote needs your name and a reason (up to 500 characters)" });
   }
-  if (typeof slug !== "string" || !SLUG.test(slug) || slug !== session.slug) return json(400, { error: "Unknown screen" });
+  if (typeof slug !== "string" || !SLUG.test(slug) || (!project && slug !== session.slug)) return json(400, { error: "Unknown screen" });
   if (typeof variant !== "string" || !VARIANT.test(variant)) return json(400, { error: "Unknown variant" });
   if (text.length > MAX_TEXT || (kind === "change" && text.length === 0)) {
     return json(400, { error: `Write the change (1 to ${MAX_TEXT} characters)` });
