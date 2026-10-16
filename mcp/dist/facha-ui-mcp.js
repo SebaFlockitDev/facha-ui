@@ -56452,6 +56452,23 @@ function importLine(ctx, c2, fromFile) {
   }
   return `import { ${c2.name} } from "${spec}";`;
 }
+function componentUses(ctx, code2) {
+  const inv = inventory(ctx);
+  if (!inv.dir) return 0;
+  const replaceable = new Set(inv.components.filter((c2) => c2.standsFor.length).map((c2) => c2.name));
+  const imported = /* @__PURE__ */ new Set();
+  for (const m of code2.matchAll(/import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["']/g)) {
+    if (!/(^|\/)ui\//.test(m[2]) && !m[2].includes(inv.dir)) continue;
+    for (const part of m[1].split(",")) {
+      const local = part.trim().split(/\s+as\s+/).pop()?.trim();
+      const original = part.trim().split(/\s+as\s+/)[0]?.trim();
+      if (local && original && replaceable.has(original)) imported.add(local);
+    }
+  }
+  let n = 0;
+  for (const name of imported) n += [...code2.matchAll(new RegExp(`<${name}[\\s/>]`, "g"))].length;
+  return n;
+}
 
 // src/copy.ts
 var normalize = (s) => s.toLowerCase().replace(/[¡!¿?.,:;…"'«»()[\]]/g, " ").replace(/\s+/g, " ").trim();
@@ -59711,6 +59728,39 @@ function scoreOf(findings) {
   const score2 = Math.round(CATEGORIES.reduce((s, c2) => s + categories[c2].score * WEIGHTS[c2], 0));
   return { score: score2, categories };
 }
+var COLOR_PROPERTY = /^(color|background|background-color|border(-(top|right|bottom|left))?(-color)?|outline(-color)?|fill|stroke|caret-color|accent-color|text-decoration-color)$/;
+var COLOR_UTILITY = /^(?:[\w-]+:)*(?:bg|text|border(?:-[trblxy])?|ring|outline|fill|stroke|divide|placeholder|accent|caret|decoration|from|via|to)-(.+?)(?:\/\d+)?$/;
+var LITERAL_RULES = /* @__PURE__ */ new Set(["color-literal", "tailwind-palette-color"]);
+function coverageOf(ctx, files, usagesOf, violationsOf) {
+  const ui = inventory(ctx).dir;
+  const own2 = files.filter((f3) => !(ui && rel2(ctx.project, f3).startsWith(ui + "/")));
+  const isColorToken = (name) => ctx.tokens.byName.get(name)?.type === "color";
+  let used = 0;
+  let handmade = 0;
+  let viaToken = 0;
+  let literal2 = 0;
+  for (const f3 of own2) {
+    used += componentUses(ctx, readSource(f3) ?? "");
+    for (const v of violationsOf(f3)) {
+      if (v.rule === "ds-component-reuse") handmade++;
+      if (LITERAL_RULES.has(v.rule)) literal2++;
+    }
+    for (const u of usagesOf(f3)) {
+      if (u.kind === "decl" && COLOR_PROPERTY.test(u.property) && /var\(\s*--[\w-]+/.test(u.value)) {
+        const names = [...u.value.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => m[1]);
+        if (names.some(isColorToken)) viaToken++;
+      } else if (u.kind === "class") {
+        const color = u.raw.match(COLOR_UTILITY)?.[1];
+        if (color && (isColorToken(`--color-${color}`) || isColorToken(`--${color}`))) viaToken++;
+      }
+    }
+  }
+  const ratio = (a, b) => a + b ? Math.round(a / (a + b) * 100) / 100 : null;
+  return {
+    components: { used, handmade, ratio: ratio(used, handmade) },
+    tokens: { viaToken, literal: literal2, ratio: ratio(viaToken, literal2) }
+  };
+}
 function uxScore(ctx, input2) {
   let screens;
   if (input2) {
@@ -59719,11 +59769,13 @@ function uxScore(ctx, input2) {
   } else {
     screens = listProjectFiles(ctx.project).filter((f3) => SCREEN.test(rel2(ctx.project, f3)) && !isInLab(ctx.project, rel2(ctx.project, f3)));
   }
-  const violationsByFile = /* @__PURE__ */ new Map();
-  const violationsOf = (abs2) => {
-    if (!violationsByFile.has(abs2)) violationsByFile.set(abs2, scanFiles(ctx, [abs2]).violations);
-    return violationsByFile.get(abs2);
+  const scans = /* @__PURE__ */ new Map();
+  const scanOf = (abs2) => {
+    if (!scans.has(abs2)) scans.set(abs2, scanFiles(ctx, [abs2]));
+    return scans.get(abs2);
   };
+  const violationsOf = (abs2) => scanOf(abs2).violations;
+  const usagesOf = (abs2) => scanOf(abs2).usages;
   const results = screens.sort().map((abs2) => {
     const screen = rel2(ctx.project, abs2);
     const files = [...importsOf(ctx, abs2)];
@@ -59738,17 +59790,22 @@ function uxScore(ctx, input2) {
     }
     const { score: score2, categories } = scoreOf(findings);
     const worst = [...findings].sort((a, b) => PENALTY[b.severity] - PENALTY[a.severity] || (a.file < b.file ? -1 : 1) || a.line - b.line).slice(0, 5).map((f3) => ({ rule: f3.rule, severity: f3.severity, at: `${f3.file}:${f3.line}`, message: f3.message }));
-    return { screen, score: score2, categories, files: files.map((f3) => rel2(ctx.project, f3)).sort(), worst };
+    const coverage3 = coverageOf(ctx, files, usagesOf, violationsOf);
+    return { screen, score: score2, categories, coverage: coverage3, files: files.map((f3) => rel2(ctx.project, f3)).sort(), worst };
   });
   const average = results.length ? Math.round(results.reduce((s, r4) => s + r4.score, 0) / results.length) : null;
+  const allFiles = [...new Set(screens.flatMap((abs2) => [...importsOf(ctx, abs2)]))];
+  const coverage2 = coverageOf(ctx, allFiles, usagesOf, violationsOf);
   return {
     configSource: ctx.project.configSource,
     average,
+    coverage: coverage2,
     screens: results,
     method: {
       weights: WEIGHTS,
       penalty: PENALTY,
-      note: "Each category starts at 100 and loses 15 per error, 6 per warning and 2 per info found in the screen, its imported components and review_ui. Deterministic: use it to compare a screen with itself over time, not as an absolute grade."
+      note: "Each category starts at 100 and loses 15 per error, 6 per warning and 2 per info found in the screen, its imported components and review_ui. Deterministic: use it to compare a screen with itself over time, not as an absolute grade.",
+      coverage: "Not part of the score: components = uses of the system's components / (uses + native elements made by hand that have a component); tokens = color values from a token / (from a token + literals and default-palette colors). null when there is nothing to count."
     }
   };
 }

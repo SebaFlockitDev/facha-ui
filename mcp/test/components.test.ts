@@ -59,3 +59,14 @@ describe("ds-component-reuse", () => {
     expect(files.filter((f: string) => f === "app/settings/page.tsx")).toEqual([]);
   });
 });
+
+describe("ux_score · design-system coverage (B-030)", () => {
+  it("counts components used against made by hand, and colors from tokens against literals, next to the score", async () => {
+    const r = (await h.call("ux_score", {})).structuredContent;
+    const by = Object.fromEntries(r.screens.map((s: any) => [s.screen, s.coverage]));
+    expect(by["app/page.tsx"]).toEqual({ components: { used: 0, handmade: 1, ratio: 0 }, tokens: { viaToken: 5, literal: 1, ratio: 0.83 } });
+    expect(by["app/settings/page.tsx"]).toEqual({ components: { used: 2, handmade: 0, ratio: 1 }, tokens: { viaToken: 2, literal: 0, ratio: 1 } });
+    expect(r.coverage.components).toEqual({ used: 2, handmade: 1, ratio: 0.67 });
+    expect(r.method.coverage).toContain("Not part of the score");
+  });
+});
