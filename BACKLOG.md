@@ -27,19 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-028 · De referencias a tokens
-- **Estado:** en curso
-- **Prioridad:** P2 · **Tamaño:** L
-- **Por qué:** "quiero algo como esta página" es la forma más natural de pedir un estilo, y ya es estándar (Stitch, Visily, Uizard, Banani).
-- **Qué:** extraer colores y tipografías de una captura o de una página de referencia y normalizarlos en escalas accesibles con B-025, informando qué valor de la referencia no pasaba contraste y cuál lo reemplaza.
-- **Criterios de aceptación:** antes de la spec se decide cómo convive con S2 (el MCP no usa la red): la captura la toma la skill, con permiso del dev, y el MCP solo lee el archivo; cada valor extraído dice de dónde salió.
-- **Spec:** [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md)
-- **Depende de:** B-025
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/
-
-
-## Siguiente
-
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -47,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** correr axe-core, empaquetado y sin red, sobre cada variante del laboratorio, y sumar los hallazgos a la revisión y a `ux_score`.
 - **Criterios de aceptación:** hallazgos con criterio WCAG y selector; se decide cómo se inyecta axe sin ampliar las herramientas de Playwright permitidas (regla dura 6) o se amplían con su justificación.
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://storybook.js.org/docs/9/writing-tests/accessibility-testing.md
+
+## Siguiente
 
 ### B-005 · Regla `ux-missing-states`
 - **Estado:** listo para spec
@@ -166,6 +155,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.30.0:** B-028, `/facha-ui:init reference <url|image>`: un design system a partir de una página que te gusta, con el informe de lo que no pasaba el contraste; spec en [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).
 - **0.29.0:** B-038, el panel en vivo lee y escribe `oklch()`, `hsl()` y los canales HSL de shadcn/ui, y pinta la marca gris; spec en [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md).
 - **0.28.0:** B-004, la regla `a11y-color-only` (un estado que se muestra solo con color, WCAG 1.4.1); spec en [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md).
 - **0.27.0:** B-030, componentes del proyecto en `get_design_system`, la regla `ds-component-reuse` con el import exacto y la cobertura del design system en `ux_score`; spec en [`docs/specs/B-030-componente-reimplementado.md`](docs/specs/B-030-componente-reimplementado.md).

@@ -1,6 +1,6 @@
 # B-028 · De referencias a tokens
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/reference-to-tokens` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.30.0) · **Rama:** `feat/reference-to-tokens` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -114,7 +114,7 @@ acepta (regla dura 2). Sin tipografía: una imagen no la dice.
 - [x] 3. `skills/init/reference.md` y `init/SKILL.md` (modo, permiso, herramientas) · `b8e921f`
 - [x] 4. SPEC, guía, `help`, CHANGELOG · `60e79e1`
 - [x] 5. Prueba real (con las correcciones `9380d59` y `59a758d`)
-- [ ] 6. Release
+- [x] 6. Release 0.30.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -149,8 +149,10 @@ acepta (regla dura 2). Sin tipografía: una imagen no la dice.
     Material 3 `sm`, densidad `compact`; la nota decía "acentos de Radix" cuando quedaba la marca del
     brief: corregida.
 
+- **2026-10-16 · release 0.30.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.40; B-028 a Hecho y B-033 a Ahora.
+
 ## Cómo retomar
 
-Todo hecho en `feat/reference-to-tokens`; falta el release (tarea 6), solo cuando quien mantiene el
-repo lo pida: versión 0.30.0 con el flujo de `CLAUDE.md`; B-028 a **Hecho** y el primero de **Siguiente**
-a **Ahora**. Pendiente: probar el paso del navegador de la skill con el MCP de Playwright conectado.
+Terminado en 0.30.0. Pendiente: probar el paso del navegador de la skill con el MCP de Playwright
+conectado. Idea que salió de este ítem: B-039.
