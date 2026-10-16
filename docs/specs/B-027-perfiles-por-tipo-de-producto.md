@@ -1,6 +1,6 @@
 # B-027 · Perfiles por tipo de producto, con fuentes
 
-> **Estado:** en curso · **Rama:** `feat/product-profiles` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.23.0) · **Rama:** `feat/product-profiles` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Depende de:** B-025 y B-026 (hechos en 0.21.0 y 0.22.0) · **Última actualización:** 2026-10-16
 
@@ -92,7 +92,7 @@ filas de 32px y cifras tabulares; `get_design_system` devuelve el perfil.
 - [x] 3. Skills: `system.md`, `brief.md`, `variants`; contratos · `313cd38`
 - [x] 4. Docs: SPEC, `docs/uso.md`, `CHANGELOG.md` · `fbf25e4`
 - [x] 5. Prueba real
-- [ ] 6. Release
+- [x] 6. Release 0.23.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -118,9 +118,10 @@ filas de 32px y cifras tabulares; `get_design_system` devuelve el perfil.
   toma el tipo del brief, escala productiva de Carbon (`scaleFrom: profile internal-tool`),
   `--size-row: 32px`, `--numerals: tabular-nums`, controles de 32px; 62/62 pares en las tres
   direcciones.
+- **2026-10-16 · release 0.23.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.33 con la versión; B-027 a Hecho y B-029 a Ahora.
 
 ## Cómo retomar
 
-**Estado al 2026-10-16:** tareas 0 a 5 hechas en `feat/product-profiles`, sin push. Falta el release
-(tarea 6), con el OK de quien mantiene el repo: versión menor (0.23.0), con el flujo de `CLAUDE.md`;
-B-027 pasa a Hecho y el primero de Siguiente sube a Ahora.
+Terminado en 0.23.0. Sigue B-029 (reglas contra el "look genérico de IA"), que puede usar los perfiles:
+por ejemplo, que un panel denso no use la escala editorial.

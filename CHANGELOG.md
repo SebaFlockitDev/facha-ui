@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-16
+
 ### Added
 
 - Perfiles por tipo de producto: el tipo de producto del brief elige la escala tipográfica, un piso para el alto de controles, tokens (`--numerals` para cifras tabulares, `--size-row`, `--measure` para el largo de línea) y pautas de diseño, cada una con su fuente (Carbon, WCAG, Baymard, GOV.UK, MDN). La densidad del brief sigue mandando.
@@ -279,7 +281,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.19.1...v0.20.0

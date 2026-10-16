@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.22.0** (§7.10–§7.32). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.23.0** (§7.10–§7.33). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -713,7 +713,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1494,7 +1494,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Lo que encontró la prueba real** (Vite, sin design system): la vista funciona con los datos reales; con la marca fija, sobre una tabla las tres direcciones se parecen (cambian radio, gris y elevación), así que la skill lo dice y remite a la muestra; `check_ui` se aplica a la copia y a la muestra y no a `directions.css`, que guarda los valores; la muestra tenía un enlace sin destino claro y usaba `100vh`.
 - **Tests:** estilos (radio, gris, elevación, fuentes), diferencias entre cada par de direcciones con y sin marca, mezcla con `style`, `css.lab`, la muestra con 0 errores de `check_ui` contra un sistema generado en Vite y en Next con cada estilo, contratos de los templates y de las skills.
 
-### 7.33 Perfiles por tipo de producto
+### 7.33 Versión 0.23.0: perfiles por tipo de producto
 
 Ítem B-027 del backlog. Spec, fuentes y registro: [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).
 
