@@ -7,6 +7,18 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-16
+
+### Added
+
+- Reglas del guardián para las partes del "look genérico de IA" que rompen una regla publicada: `ux-gray-on-color` (texto gris sobre un fondo de color, según Radix), `a11y-gradient-text` (texto sobre un degradado, medido contra cada parada: WCAG 1.4.3) y `a11y-motion` (animaciones sin `prefers-reduced-motion`: WCAG 2.3.3). Todas como aviso.
+- `review_ui` suma la señal `nested-surfaces`: una tarjeta dentro de otra.
+- Principios nuevos: `ux:text-on-color` y `ux:wcag-2.3.3`.
+
+### Fixed
+
+- `theme-contrast` ya no mide un texto sobre un degradado como si el fondo fuera su primer color; lo mide `a11y-gradient-text` contra todas las paradas.
+
 ## [0.23.0] - 2026-10-16
 
 ### Added
@@ -281,7 +293,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.20.0...v0.21.0

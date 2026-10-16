@@ -164,6 +164,8 @@ export function textContrast(
     if (!fg) return null;
     const baseSurface = surf.names[0] ? tokenColor(ctx.tokens, surf.names[0], th) : undefined;
     if (background) {
+      // A gradient is not one color: a11y-gradient-text measures every stop (B-029).
+      if (/(?:linear|radial|conic)-gradient\(/.test(background)) return null;
       const bg = colorOf(ctx, background, th);
       // Unknown backdrop: a gradient/image, or a translucent overlay over something we cannot see.
       if (!bg || (bg.alpha ?? 1) < 1) return null;

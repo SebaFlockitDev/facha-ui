@@ -4928,8 +4928,8 @@ var require_parser = __commonJS({
       colon(tokens) {
         let brackets = 0;
         let prev, token, type;
-        for (let [i, element] of tokens.entries()) {
-          token = element;
+        for (let [i, element2] of tokens.entries()) {
+          token = element2;
           type = token[0];
           if (type === "(") {
             brackets += 1;
@@ -30410,10 +30410,10 @@ function _slugify() {
   return /* @__PURE__ */ _overwrite((input2) => slugify(input2));
 }
 // @__NO_SIDE_EFFECTS__
-function _array(Class2, element, params) {
+function _array(Class2, element2, params) {
   return new Class2({
     type: "array",
-    element,
+    element: element2,
     // get element() {
     //   return element;
     // },
@@ -33204,8 +33204,8 @@ var ZodArray = /* @__PURE__ */ $constructor("ZodArray", (inst, def) => {
     return this.element;
   }
 });
-function array(element, params) {
-  return _array(ZodArray, element, params);
+function array(element2, params) {
+  return _array(ZodArray, element2, params);
 }
 function keyof(schema) {
   const shape = schema._zod.def.shape;
@@ -34517,8 +34517,8 @@ function convertBaseSchema(schema, ctx) {
           zodSchema = zodSchema.check(z.maxLength(schema.maxItems));
         }
       } else if (items !== void 0) {
-        const element = convertSchema(items, ctx);
-        let arraySchema = z.array(element);
+        const element2 = convertSchema(items, ctx);
+        let arraySchema = z.array(element2);
         if (typeof schema.minItems === "number") {
           arraySchema = arraySchema.min(schema.minItems);
         }
@@ -40479,7 +40479,10 @@ var RULE_IDS = [
   "copy-error-text",
   "copy-all-caps",
   "copy-term",
-  "copy-voice"
+  "copy-voice",
+  "ux-gray-on-color",
+  "a11y-gradient-text",
+  "a11y-motion"
 ];
 var FachaError = class extends Error {
   constructor(code2, message, details = {}) {
@@ -40982,11 +40985,11 @@ function toParseErrorConstructor({
   syntaxPlugin
 }) {
   const hasMissingPlugin = reasonCode === "MissingPlugin" || reasonCode === "MissingOneOfPlugins";
-  return function constructor(loc2, pos, details) {
+  return function constructor(loc3, pos, details) {
     const error62 = new SyntaxError();
     error62.code = code2;
     error62.reasonCode = reasonCode;
-    error62.loc = loc2;
+    error62.loc = loc3;
     error62.pos = pos;
     error62.syntaxPlugin = syntaxPlugin;
     if (hasMissingPlugin) {
@@ -40997,7 +41000,7 @@ function toParseErrorConstructor({
         line,
         column,
         index: index2 = pos
-      } = overrides.loc ?? loc2;
+      } = overrides.loc ?? loc3;
       return constructor(new Position(line, column), index2, {
         ...details,
         ...overrides.details
@@ -41007,7 +41010,7 @@ function toParseErrorConstructor({
     Object.defineProperty(error62, "message", {
       configurable: true,
       get() {
-        const message = `${toMessage(details)} (${loc2.line}:${loc2.column})`;
+        const message = `${toMessage(details)} (${loc3.line}:${loc3.column})`;
         this.message = message;
         return message;
       },
@@ -41126,8 +41129,8 @@ function toESTreeLocation(node2) {
   return node2;
 }
 var estree = (superClass) => class ESTreeParserMixin extends superClass {
-  createPosition(loc2) {
-    return new Position(loc2.line, loc2.column);
+  createPosition(loc3) {
+    return new Position(loc3.line, loc3.column);
   }
   parse() {
     const file2 = super.parse();
@@ -41201,7 +41204,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     const {
       start,
       end,
-      loc: loc2,
+      loc: loc3,
       range,
       raw: raw2,
       value
@@ -41210,7 +41213,7 @@ var estree = (superClass) => class ESTreeParserMixin extends superClass {
     cloned.type = "Literal";
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc2;
+    cloned.loc = loc3;
     cloned.range = range;
     cloned.raw = raw2;
     cloned.value = value;
@@ -42152,10 +42155,10 @@ var ScopeHandler = class {
   treatFunctionsAsVarInScope(scope) {
     return !!(scope.flags & (2 | 128) || !this.parser.inModule && scope.flags & 1);
   }
-  declareName(name, bindingType, loc2) {
+  declareName(name, bindingType, loc3) {
     let scope = this.currentScope();
     if (bindingType & 8 || bindingType & 16) {
-      this.checkRedeclarationInScope(scope, name, bindingType, loc2);
+      this.checkRedeclarationInScope(scope, name, bindingType, loc3);
       let type = scope.names.get(name) || 0;
       if (bindingType & 16) {
         type = type | 4;
@@ -42172,7 +42175,7 @@ var ScopeHandler = class {
     } else if (bindingType & 4) {
       for (let i = this.scopeStack.length - 1; i >= 0; --i) {
         scope = this.scopeStack[i];
-        this.checkRedeclarationInScope(scope, name, bindingType, loc2);
+        this.checkRedeclarationInScope(scope, name, bindingType, loc3);
         scope.names.set(name, (scope.names.get(name) || 0) | 1);
         this.maybeExportDefined(scope, name);
         if (scope.flags & 3715) break;
@@ -42187,9 +42190,9 @@ var ScopeHandler = class {
       this.undefinedExports.delete(name);
     }
   }
-  checkRedeclarationInScope(scope, name, bindingType, loc2) {
+  checkRedeclarationInScope(scope, name, bindingType, loc3) {
     if (this.isRedeclaredInScope(scope, name, bindingType)) {
-      this.parser.raise(Errors.VarRedeclaration, loc2, {
+      this.parser.raise(Errors.VarRedeclaration, loc3, {
         identifierName: name
       });
     }
@@ -42245,15 +42248,15 @@ var FlowScopeHandler = class extends ScopeHandler {
   createScope(flags) {
     return new FlowScope(flags);
   }
-  declareName(name, bindingType, loc2) {
+  declareName(name, bindingType, loc3) {
     const scope = this.currentScope();
     if (bindingType & 2048) {
-      this.checkRedeclarationInScope(scope, name, bindingType, loc2);
+      this.checkRedeclarationInScope(scope, name, bindingType, loc3);
       this.maybeExportDefined(scope, name);
       scope.declareFunctions.add(name);
       return;
     }
-    super.declareName(name, bindingType, loc2);
+    super.declareName(name, bindingType, loc3);
   }
   isRedeclaredInScope(scope, name, bindingType) {
     if (super.isRedeclaredInScope(scope, name, bindingType)) return true;
@@ -43968,8 +43971,8 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     }
     return !isExport && this.isContextual(83);
   }
-  applyImportPhase(node2, isExport, phase, loc2) {
-    super.applyImportPhase(node2, isExport, phase, loc2);
+  applyImportPhase(node2, isExport, phase, loc3) {
+    super.applyImportPhase(node2, isExport, phase, loc3);
     if (isExport) {
       if (!phase && this.match(61)) {
         return;
@@ -44306,14 +44309,14 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       throw this.raise(Errors.UnterminatedComment, this.state.curPosition());
     }
   }
-  flowEnumErrorBooleanMemberNotInitialized(loc2, names) {
-    this.raise(FlowErrors.EnumBooleanMemberNotInitialized, loc2, names);
+  flowEnumErrorBooleanMemberNotInitialized(loc3, names) {
+    this.raise(FlowErrors.EnumBooleanMemberNotInitialized, loc3, names);
   }
-  flowEnumErrorInvalidMemberInitializer(loc2, enumContext) {
-    return this.raise(!enumContext.explicitType ? FlowErrors.EnumInvalidMemberInitializerUnknownType : enumContext.explicitType === "symbol" ? FlowErrors.EnumInvalidMemberInitializerSymbolType : FlowErrors.EnumInvalidMemberInitializerPrimaryType, loc2, enumContext);
+  flowEnumErrorInvalidMemberInitializer(loc3, enumContext) {
+    return this.raise(!enumContext.explicitType ? FlowErrors.EnumInvalidMemberInitializerUnknownType : enumContext.explicitType === "symbol" ? FlowErrors.EnumInvalidMemberInitializerSymbolType : FlowErrors.EnumInvalidMemberInitializerPrimaryType, loc3, enumContext);
   }
-  flowEnumErrorNumberMemberNotInitialized(loc2, details) {
-    this.raise(FlowErrors.EnumNumberMemberNotInitialized, loc2, details);
+  flowEnumErrorNumberMemberNotInitialized(loc3, details) {
+    this.raise(FlowErrors.EnumNumberMemberNotInitialized, loc3, details);
   }
   flowEnumErrorStringMemberInconsistentlyInitialized(node2, details) {
     this.raise(FlowErrors.EnumStringMemberInconsistentlyInitialized, node2, details);
@@ -44362,18 +44365,18 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
     };
   }
   flowEnumMemberRaw() {
-    const loc2 = this.state.startLoc;
+    const loc3 = this.state.startLoc;
     const id = this.parseIdentifier(true);
     const init = this.eat(25) ? this.flowEnumMemberInit() : {
       type: "none",
-      loc: loc2
+      loc: loc3
     };
     return {
       id,
       init
     };
   }
-  flowEnumCheckExplicitTypeMismatch(loc2, context, expectedType) {
+  flowEnumCheckExplicitTypeMismatch(loc3, context, expectedType) {
     const {
       explicitType
     } = context;
@@ -44381,7 +44384,7 @@ var flow = (superClass) => class FlowParserMixin extends superClass {
       return;
     }
     if (explicitType !== expectedType) {
-      this.flowEnumErrorInvalidMemberInitializer(loc2, context);
+      this.flowEnumErrorInvalidMemberInitializer(loc3, context);
     }
   }
   flowEnumMembers({
@@ -45418,10 +45421,10 @@ var TypeScriptScopeHandler = class extends ScopeHandler {
     }
     return false;
   }
-  declareName(name, bindingType, loc2) {
+  declareName(name, bindingType, loc3) {
     if (bindingType & 4096) {
       if (this.hasImport(name, true)) {
-        this.parser.raise(Errors.VarRedeclaration, loc2, {
+        this.parser.raise(Errors.VarRedeclaration, loc3, {
           identifierName: name
         });
       }
@@ -45435,10 +45438,10 @@ var TypeScriptScopeHandler = class extends ScopeHandler {
       scope.tsNames.set(name, type | 16);
       return;
     }
-    super.declareName(name, bindingType, loc2);
+    super.declareName(name, bindingType, loc3);
     if (bindingType & 2) {
       if (!(bindingType & 1)) {
-        this.checkRedeclarationInScope(scope, name, bindingType, loc2);
+        this.checkRedeclarationInScope(scope, name, bindingType, loc3);
         this.maybeExportDefined(scope, name);
       }
       type = type | 1;
@@ -46177,15 +46180,15 @@ var Tokenizer = class extends CommentsParser {
     }
     this.locData = locDataCache;
   }
-  setLoc(loc2) {
-    const dataIndex = this.offsetToSourcePos(loc2.index);
-    this.locData[dataIndex * 2] = loc2.line;
-    this.locData[dataIndex * 2 + 1] = loc2.column;
+  setLoc(loc3) {
+    const dataIndex = this.offsetToSourcePos(loc3.index);
+    this.locData[dataIndex * 2] = loc3.line;
+    this.locData[dataIndex * 2 + 1] = loc3.column;
   }
   getLoc(locIndex) {
     const dataIndex = this.offsetToSourcePos(locIndex);
-    const loc2 = new Position(this.locData[dataIndex * 2], this.locData[dataIndex * 2 + 1], locIndex);
-    return loc2;
+    const loc3 = new Position(this.locData[dataIndex * 2], this.locData[dataIndex * 2 + 1], locIndex);
+    return loc3;
   }
   pushToken(token) {
     this.tokens.length = this.state.tokensLength;
@@ -47052,38 +47055,38 @@ var Tokenizer = class extends CommentsParser {
     }
   }
   raise(toParseError, at, details = {}) {
-    const loc2 = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
-    const pos = at instanceof Position ? loc2.index : typeof at === "number" ? at : at.start;
-    const error62 = toParseError(loc2, pos, details);
+    const loc3 = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const pos = at instanceof Position ? loc3.index : typeof at === "number" ? at : at.start;
+    const error62 = toParseError(loc3, pos, details);
     if (!(this.optionFlags & 4096)) throw error62;
     if (!this.isLookahead) this.state.errors.push(error62);
     return error62;
   }
   raiseOverwrite(toParseError, at, details = {}) {
-    const loc2 = at instanceof Position ? at : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
-    const pos = at instanceof Position ? loc2.index : at.start;
+    const loc3 = at instanceof Position ? at : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const pos = at instanceof Position ? loc3.index : at.start;
     const errors = this.state.errors;
     for (let i = errors.length - 1; i >= 0; i--) {
       const error62 = errors[i];
       if (error62.pos === pos) {
-        return errors[i] = toParseError(loc2, pos, details);
+        return errors[i] = toParseError(loc3, pos, details);
       }
       if (error62.pos < pos) break;
     }
-    return this.raise(toParseError, loc2, details);
+    return this.raise(toParseError, loc3, details);
   }
   updateContext(prevType) {
   }
-  unexpected(loc2, type) {
-    throw this.raise(Errors.UnexpectedToken, loc2 != null ? loc2 : this.state.startLoc, {
+  unexpected(loc3, type) {
+    throw this.raise(Errors.UnexpectedToken, loc3 != null ? loc3 : this.state.startLoc, {
       expected: type ? tokenLabelName(type) : null
     });
   }
-  expectPlugin(pluginName, loc2) {
+  expectPlugin(pluginName, loc3) {
     if (this.hasPlugin(pluginName)) {
       return true;
     }
-    throw this.raise(Errors.MissingPlugin, loc2 != null ? loc2 : this.state.startLoc, {
+    throw this.raise(Errors.MissingPlugin, loc3 != null ? loc3 : this.state.startLoc, {
       missingPlugin: [pluginName]
     });
   }
@@ -47150,19 +47153,19 @@ var ClassScopeHandler = class {
   exit() {
     const oldClassScope = this.stack.pop();
     const current = this.current();
-    for (const [name, loc2] of Array.from(oldClassScope.undefinedPrivateNames)) {
+    for (const [name, loc3] of Array.from(oldClassScope.undefinedPrivateNames)) {
       if (current) {
         if (!current.undefinedPrivateNames.has(name)) {
-          current.undefinedPrivateNames.set(name, loc2);
+          current.undefinedPrivateNames.set(name, loc3);
         }
       } else {
-        this.parser.raise(Errors.InvalidPrivateFieldResolution, loc2, {
+        this.parser.raise(Errors.InvalidPrivateFieldResolution, loc3, {
           identifierName: name
         });
       }
     }
   }
-  declarePrivateName(name, elementType, loc2) {
+  declarePrivateName(name, elementType, loc3) {
     const {
       privateNames,
       loneAccessors,
@@ -47183,22 +47186,22 @@ var ClassScopeHandler = class {
       }
     }
     if (redefined) {
-      this.parser.raise(Errors.PrivateNameRedeclaration, loc2, {
+      this.parser.raise(Errors.PrivateNameRedeclaration, loc3, {
         identifierName: name
       });
     }
     privateNames.add(name);
     undefinedPrivateNames.delete(name);
   }
-  usePrivateName(name, loc2) {
+  usePrivateName(name, loc3) {
     let classScope;
     for (classScope of this.stack) {
       if (classScope.privateNames.has(name)) return;
     }
     if (classScope) {
-      classScope.undefinedPrivateNames.set(name, loc2);
+      classScope.undefinedPrivateNames.set(name, loc3);
     } else {
-      this.parser.raise(Errors.InvalidPrivateFieldResolution, loc2, {
+      this.parser.raise(Errors.InvalidPrivateFieldResolution, loc3, {
         identifierName: name
       });
     }
@@ -47242,7 +47245,7 @@ var ExpressionScopeHandler = class {
   exit() {
     this.stack.pop();
   }
-  recordParameterInitializerError(toParseError, loc2) {
+  recordParameterInitializerError(toParseError, loc3) {
     const {
       stack
     } = this;
@@ -47250,13 +47253,13 @@ var ExpressionScopeHandler = class {
     let scope = stack[i];
     while (!scope.isCertainlyParameterDeclaration()) {
       if (scope.canBeArrowParameterDeclaration()) {
-        scope.recordDeclarationError(toParseError, loc2);
+        scope.recordDeclarationError(toParseError, loc3);
       } else {
         return;
       }
       scope = stack[--i];
     }
-    this.parser.raise(toParseError, loc2);
+    this.parser.raise(toParseError, loc3);
   }
   recordArrowParameterBindingError(error62, node2) {
     const {
@@ -47408,9 +47411,9 @@ var UtilParser = class extends Tokenizer {
     if (allowAsi ? this.isLineTerminator() : this.eat(9)) return;
     this.raise(Errors.MissingSemicolon, this.state.lastTokEndLoc);
   }
-  expect(type, loc2) {
+  expect(type, loc3) {
     if (!this.eat(type)) {
-      this.unexpected(loc2, type);
+      this.unexpected(loc3, type);
     }
   }
   tryParse(fn5, oldState = this.state.clone()) {
@@ -47577,12 +47580,12 @@ var ExpressionErrors = class {
   voidPatternLoc = null;
 };
 var Node2 = class {
-  constructor(optionFlags, filename, pos, loc2) {
+  constructor(optionFlags, filename, pos, loc3) {
     this.start = pos;
     this.end = 0;
-    if (loc2 !== void 0) this.loc = new SourceLocation(loc2);
+    if (loc3 !== void 0) this.loc = new SourceLocation(loc3);
     if (optionFlags & 128) this.range = [pos, 0];
-    if (loc2 !== void 0 && filename) {
+    if (loc3 !== void 0 && filename) {
       this.loc.filename = filename;
     }
   }
@@ -47590,8 +47593,8 @@ var Node2 = class {
 };
 var NodePrototype = Node2.prototype;
 var NodeUtils = class extends UtilParser {
-  createPosition(loc2) {
-    return loc2;
+  createPosition(loc3) {
+    return loc3;
   }
   startNode() {
     const {
@@ -47600,15 +47603,15 @@ var NodeUtils = class extends UtilParser {
     this.setLoc(startLoc);
     return this.startNodeAt(startLoc);
   }
-  startNodeAt(loc2) {
+  startNodeAt(loc3) {
     const {
       optionFlags,
       filename
     } = this;
     if (!(optionFlags & 256)) {
-      return new Node2(optionFlags, filename, loc2.index);
+      return new Node2(optionFlags, filename, loc3.index);
     }
-    return new Node2(optionFlags, filename, loc2.index, this.createPosition(loc2));
+    return new Node2(optionFlags, filename, loc3.index, this.createPosition(loc3));
   }
   startNodeAtNode(type) {
     const {
@@ -47698,7 +47701,7 @@ var NodeUtils = class extends UtilParser {
       type,
       start,
       end,
-      loc: loc2,
+      loc: loc3,
       range,
       name
     } = node2;
@@ -47706,7 +47709,7 @@ var NodeUtils = class extends UtilParser {
     cloned.type = type;
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc2;
+    cloned.loc = loc3;
     cloned.range = range;
     cloned.name = name;
     if (node2.extra) cloned.extra = node2.extra;
@@ -47717,7 +47720,7 @@ var NodeUtils = class extends UtilParser {
       type,
       start,
       end,
-      loc: loc2,
+      loc: loc3,
       range,
       extra
     } = node2;
@@ -47725,7 +47728,7 @@ var NodeUtils = class extends UtilParser {
     cloned.type = type;
     cloned.start = start;
     cloned.end = end;
-    cloned.loc = loc2;
+    cloned.loc = loc3;
     cloned.range = range;
     cloned.extra = extra;
     cloned.value = node2.value;
@@ -47864,7 +47867,7 @@ var LValParser = class extends NodeUtils {
       case "SpreadElement":
         return this.isAssignable(node2.argument);
       case "ArrayExpression":
-        return node2.elements.every((element) => element === null || this.isAssignable(element));
+        return node2.elements.every((element2) => element2 === null || this.isAssignable(element2));
       case "AssignmentExpression":
         return node2.operator === "=";
       case "ParenthesizedExpression":
@@ -51283,15 +51286,15 @@ var StatementParser = class extends ExpressionParser {
     if (isExport) return false;
     return this.isContextual(101) || this.isContextual(93);
   }
-  applyImportPhase(node2, isExport, phase, loc2) {
+  applyImportPhase(node2, isExport, phase, loc3) {
     if (isExport) {
       return;
     }
     if (phase === "source") {
-      this.expectPlugin("sourcePhaseImports", loc2);
+      this.expectPlugin("sourcePhaseImports", loc3);
       node2.phase = "source";
     } else if (phase === "defer") {
-      this.expectPlugin("deferredImportEvaluation", loc2);
+      this.expectPlugin("deferredImportEvaluation", loc3);
       node2.phase = "defer";
     } else if (this.hasPlugin("sourcePhaseImports")) {
       node2.phase = null;
@@ -51689,16 +51692,16 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     return void 0;
   }
   tsParseModifiers(modifiers, errorTemplate = TSErrors.InvalidModifierOnTypeMember, modified, stopOnStartOfClassStaticBlock = false) {
-    const enforceOrder = (loc2, modifier, before, after) => {
+    const enforceOrder = (loc3, modifier, before, after) => {
       if (modifier === before && modified[after]) {
-        this.raise(TSErrors.InvalidModifiersOrder, loc2, {
+        this.raise(TSErrors.InvalidModifiersOrder, loc3, {
           orderedModifiers: [before, after]
         });
       }
     };
-    const incompatible = (loc2, modifier, mod1, mod2) => {
+    const incompatible = (loc3, modifier, mod1, mod2) => {
       if (modified[mod1] && modifier === mod2 || modified[mod2] && modifier === mod1) {
-        this.raise(TSErrors.IncompatibleModifiers, loc2, {
+        this.raise(TSErrors.IncompatibleModifiers, loc3, {
           modifiers: [mod1, mod2]
         });
       }
@@ -51781,11 +51784,11 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
         break;
       }
       trailingCommaPos = -1;
-      const element = parseElement();
-      if (element == null) {
+      const element2 = parseElement();
+      if (element2 == null) {
         return void 0;
       }
-      result.push(element);
+      result.push(element2);
       if (this.eat(8)) {
         trailingCommaPos = this.state.lastTokStartLoc.index;
         continue;
@@ -53262,8 +53265,8 @@ var typescript = (superClass) => class TypeScriptParserMixin extends superClass 
     }
     return !isExport && this.isContextual(83);
   }
-  applyImportPhase(node2, isExport, phase, loc2) {
-    super.applyImportPhase(node2, isExport, phase, loc2);
+  applyImportPhase(node2, isExport, phase, loc3) {
+    super.applyImportPhase(node2, isExport, phase, loc3);
     if (isExport) {
       node2.exportKind = phase === "type" ? "type" : "value";
     } else {
@@ -55624,6 +55627,7 @@ function extractCss(file2, code2, opts) {
     const siblingBackground = parent && "nodes" in parent ? (parent.nodes ?? []).find(
       (n) => n.type === "decl" && (n.prop === "background" || n.prop === "background-color")
     )?.value ?? null : null;
+    const siblingBackgroundImage = parent && "nodes" in parent ? (parent.nodes ?? []).find((n) => n.type === "decl" && n.prop === "background-image")?.value ?? null : null;
     usages.push({
       kind: "decl",
       context: "css",
@@ -55634,7 +55638,8 @@ function extractCss(file2, code2, opts) {
       line: start.line,
       column: start.column,
       locAt: makeLocAt(file2, valueStart.line, valueStart.column, valueRaw),
-      siblingBackground
+      siblingBackground,
+      siblingBackgroundImage
     });
   });
   return usages;
@@ -55871,6 +55876,7 @@ function extractJsx(file2, code2, ext, classHelpers) {
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
           ancestorClasses: ancestorClassStack.flat(),
+          ancestorClassLists: ancestorClassStack.map((a) => [...a]),
           file: file2,
           line: opening.loc.start.line,
           column: opening.loc.start.column + 1
@@ -55906,12 +55912,12 @@ function extractJsx(file2, code2, ext, classHelpers) {
     if (n.type === "JSXAttribute" && n.name?.type === "JSXIdentifier") {
       const name = n.name.name;
       const value = n.value;
-      const loc2 = { file: file2, line: n.loc.start.line, column: n.loc.start.column + 1 };
+      const loc3 = { file: file2, line: n.loc.start.line, column: n.loc.start.column + 1 };
       if (name === "className" || name === "class") {
         if (value?.type === "StringLiteral") fromString(value);
         else if (value?.type === "JSXExpressionContainer") fromClassExpr(value.expression);
       } else if (name === "style" && value?.type === "JSXExpressionContainer") {
-        usages.push({ kind: "inline-style", raw: code2.slice(n.start, n.end).replace(/\s+/g, " "), ...loc2 });
+        usages.push({ kind: "inline-style", raw: code2.slice(n.start, n.end).replace(/\s+/g, " "), ...loc3 });
         if (value.expression?.type === "ObjectExpression") fromStyleObject(value.expression);
       } else if (SVG_COLOR_ATTRS.has(name) && value?.type === "StringLiteral") {
         const s = inner(value);
@@ -56540,117 +56546,6 @@ function checkCopy(usages, config2, report) {
       );
     }
   }
-}
-
-// src/responsive.ts
-var PHONE_WIDTH = 343;
-var BREAKPOINT = /^(sm|md|lg|xl|2xl|min-\[[^\]]+\]|@\w+):/;
-var SCROLLS = /^(overflow-x-auto|overflow-x-scroll|overflow-auto|overflow-scroll)$/;
-var base2 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
-var unprefixed = (cls) => !BREAKPOINT.test(cls);
-function lengthPx(value) {
-  const m = value.trim().match(/^(\d+(?:\.\d+)?)(px|rem)$/);
-  if (!m) return null;
-  return m[2] === "rem" ? Number(m[1]) * 16 : Number(m[1]);
-}
-function fixedWidthPx(cls) {
-  const m = base2(cls).match(/^(?:min-)?w-(?:(\d+(?:\.\d+)?)|\[([^\]]+)\])$/);
-  if (!m) return null;
-  if (m[1]) return Number(m[1]) * 4;
-  return lengthPx(m[2]);
-}
-function checkResponsive(usages, overflowClasses, report) {
-  for (const e4 of usages.filter((u) => u.kind === "element")) {
-    const where = { file: e4.file, line: e4.line, column: e4.column };
-    const own2 = e4.classes.filter(unprefixed);
-    const capped = own2.some((c2) => /^max-w-(full|screen|\[100%\]|\[100vw\])$/.test(base2(c2)));
-    for (const c2 of own2) {
-      const px = fixedWidthPx(c2);
-      if (px != null && px > PHONE_WIDTH && !capped) {
-        report(
-          "responsive-fixed-width",
-          "warning",
-          where,
-          c2,
-          `Fixed width of ${Math.round(px)}px: wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
-          `Use w-full with a max-w-\u2026 cap, or set the fixed width only from a breakpoint up (md:${base2(c2)}).`
-        );
-        break;
-      }
-    }
-    const cols = own2.map((c2) => base2(c2).match(/^grid-cols-(\d+)$/)).find(Boolean);
-    if (cols && Number(cols[1]) >= 3 && !e4.classes.some((c2) => BREAKPOINT.test(c2) && /grid-cols-/.test(c2))) {
-      report(
-        "responsive-grid-columns",
-        "warning",
-        where,
-        cols[0],
-        `${cols[1]} columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / Number(cols[1]))}px.`,
-        `Start with 1 column and add them from breakpoints up (grid-cols-1 md:grid-cols-${cols[1]}), or use auto-fit with a minimum.`
-      );
-    }
-    if (e4.tag === "table") {
-      const containers = [...e4.ancestorClasses, ...e4.classes].map(base2);
-      const scrolls = containers.some((c2) => SCROLLS.test(c2) || overflowClasses.has(c2));
-      if (!scrolls) {
-        report(
-          "responsive-table-scroll",
-          "info",
-          where,
-          "<table>",
-          "Table with no horizontal scroll container in this file: on a phone it overflows the page or gets clipped.",
-          "Wrap it in an element with overflow-x: auto (overflow-x-auto), or show the rows as cards below a breakpoint. If the wrapper is in another file, ignore this."
-        );
-      }
-    }
-    if (own2.some((c2) => base2(c2) === "h-screen")) {
-      report(
-        "responsive-viewport-height",
-        "info",
-        where,
-        "h-screen",
-        "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
-        "Use h-dvh (or min-h-dvh), which follows the visible height."
-      );
-    }
-  }
-}
-function responsiveDecl(u) {
-  if (u.context === "svg-attribute") return null;
-  if (u.selector && /@media|@container/.test(u.selector)) return null;
-  const value = u.value.trim();
-  if (u.property === "width" || u.property === "min-width") {
-    const px = lengthPx(value);
-    if (px != null && px > PHONE_WIDTH) {
-      return {
-        rule: "responsive-fixed-width",
-        base: "warning",
-        message: `${u.property}: ${value} is wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
-        fix: `Use max-width: ${value} with width: 100%, or move the fixed width into a min-width media query.`
-      };
-    }
-  }
-  if (u.property === "grid-template-columns" && !/auto-(fit|fill)/.test(value)) {
-    const rep = value.match(/^repeat\(\s*(\d+)\s*,/);
-    const tracks = rep ? Number(rep[1]) : value.split(/\s+(?![^(]*\))/).filter(Boolean).length;
-    if (tracks >= 3) {
-      return {
-        rule: "responsive-grid-columns",
-        base: "warning",
-        message: `${tracks} grid columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / tracks)}px.`,
-        fix: "Use repeat(auto-fit, minmax(<min>, 1fr)), or set the columns inside a min-width media query."
-      };
-    }
-  }
-  if ((u.property === "height" || u.property === "min-height") && /^100vh$/.test(value)) {
-    return {
-      rule: "responsive-viewport-height",
-      base: "info",
-      message: "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
-      fix: "Use 100dvh, which follows the visible height (keep 100vh before it as a fallback if needed)."
-    };
-  }
-  return null;
 }
 
 // src/suggest.ts
@@ -57496,9 +57391,9 @@ function sprawl(ctx, usages) {
       const c2 = parseColor(lit.text);
       if (!c2) continue;
       const hex6 = toHex(c2).toLowerCase();
-      const loc2 = u.locAt(lit.index);
+      const loc3 = u.locAt(lit.index);
       const e4 = literals.get(hex6) ?? { color: c2, where: [] };
-      e4.where.push(`${loc2.file}:${loc2.line}`);
+      e4.where.push(`${loc3.file}:${loc3.line}`);
       literals.set(hex6, e4);
     }
   }
@@ -57662,6 +57557,7 @@ function textContrast(ctx, value, background, selector, minRatio, opts = { text:
     if (!fg) return null;
     const baseSurface = surf.names[0] ? tokenColor(ctx.tokens, surf.names[0], th) : void 0;
     if (background) {
+      if (/(?:linear|radial|conic)-gradient\(/.test(background)) return null;
       const bg = colorOf(ctx, background, th);
       if (!bg || (bg.alpha ?? 1) < 1) return null;
       ratios[th] = contrast2(fg, bg, baseSurface);
@@ -57847,6 +57743,300 @@ function partsHex(item, theme) {
   return out;
 }
 
+// src/look.ts
+var toOklch = converter_default("oklch");
+var chroma = (c2) => toOklch(c2)?.c ?? 0;
+var lightness = (c2) => toOklch(c2)?.l ?? 0;
+var isMidGray = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) < 0.045 && lightness(c2) >= 0.3 && lightness(c2) <= 0.85;
+var isColored = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) >= 0.06;
+var GRADIENT = /(?:linear|radial|conic)-gradient\(/;
+var themesOf = (ctx) => ctx.tokens.themes.length ? ctx.tokens.themes.map((t) => t.name) : ["default"];
+var loc2 = (u) => ({ file: u.file, line: u.line, column: u.column });
+var GRAY_FIX = "Use a text color of the background's own family (its strong or text step, e.g. --color-primary-strong or --color-<state>-text) or, on a solid fill, its on-color (--color-on-primary).";
+function gradientStops(ctx, value, theme) {
+  const out = [];
+  for (const m of value.matchAll(/var\(\s*(--[\w-]+)[^)]*\)/g)) {
+    const c2 = tokenColor(ctx.tokens, m[1], theme);
+    if (c2) out.push({ text: m[0], color: c2 });
+  }
+  for (const lit of findColorLiterals(value)) {
+    const c2 = parseColor(lit.text);
+    if (c2) out.push({ text: lit.text, color: c2 });
+  }
+  return out;
+}
+function gradientFailure(ctx, fg, stops) {
+  const min = minRatioOf(ctx);
+  for (const th of themesOf(ctx)) {
+    const f3 = fg(th);
+    const s = stops(th);
+    if (!f3 || s.length < 2) continue;
+    const worst = s.map((x) => ({ ...x, ratio: contrast2(f3, x.color) })).sort((a, b) => a.ratio - b.ratio)[0];
+    if (worst.ratio < min) return { theme: th, stop: worst.text, ratio: round2(worst.ratio, 2), min, fg: toHex(f3) };
+  }
+  return null;
+}
+function hasReducedMotion(ctx) {
+  for (const root2 of ctx.cssRoots.values()) {
+    let found = false;
+    root2.walkAtRules("media", (a) => {
+      if (/prefers-reduced-motion/.test(a.params)) found = true;
+    });
+    if (found) return true;
+  }
+  return false;
+}
+function cssDecl(ctx, u, report, reducedMotion) {
+  if (u.context !== "css") return;
+  const value = u.value.trim();
+  if (u.property === "color") {
+    const bg = u.siblingBackground ?? null;
+    const image = u.siblingBackgroundImage ?? null;
+    const gradient = [bg, image].find((b) => b && GRADIENT.test(b));
+    if (gradient) {
+      const fail2 = gradientFailure(ctx, (th) => colorOf(ctx, value, th), (th) => gradientStops(ctx, gradient, th));
+      if (fail2)
+        report(
+          "a11y-gradient-text",
+          "warning",
+          loc2(u),
+          `${u.selector ?? ""} { color: ${value} }`,
+          `Text on a gradient: ${fail2.ratio}:1 against the stop ${fail2.stop} in ${fail2.theme} (needs ${fail2.min}:1). The text has to reach the minimum on every part of the background behind it (WCAG 1.4.3, technique G18).`,
+          "Pick a text color that passes on every stop, darken or lighten the stops it does not pass on, or put the text on a solid area of the background.",
+          "css"
+        );
+      return;
+    }
+    if (!bg) return;
+    for (const th of themesOf(ctx)) {
+      const fg = colorOf(ctx, value, th);
+      const back = colorOf(ctx, bg, th);
+      if (fg && back && isMidGray(fg) && isColored(back)) {
+        report(
+          "ux-gray-on-color",
+          "warning",
+          loc2(u),
+          `${u.selector ?? ""} { color: ${value}; background: ${bg.trim()} }`,
+          `A gray text (${toHex(fg)}) on a colored background (${toHex(back)}) in ${th}: neither the background's own text color nor white or dark text on a solid, which is what Radix designs its scales for.`,
+          GRAY_FIX,
+          "css"
+        );
+        return;
+      }
+    }
+  }
+  if ((u.property === "animation" || u.property === "animation-name") && !/^(none|initial|inherit|unset)$/i.test(value)) {
+    if (u.selector && /prefers-reduced-motion/.test(u.selector)) return;
+    if (reducedMotion()) return;
+    report(
+      "a11y-motion",
+      "warning",
+      loc2(u),
+      `${u.selector ?? ""} { ${u.property}: ${value} }`,
+      "An animation, and no CSS of the project has a @media (prefers-reduced-motion: reduce) alternative: people who get dizzy or distracted by motion cannot turn it off (WCAG 2.3.3).",
+      "Add @media (prefers-reduced-motion: reduce) { <selector> { animation: none; } } (technique C39), or keep it only if the motion itself is essential.",
+      "css"
+    );
+  }
+}
+function utilityColor(ctx, cls, prefix2, theme) {
+  const utility = baseUtility(cls);
+  if (!utility.startsWith(`${prefix2}-`)) return void 0;
+  const arbitrary = parseArbitrary(cls);
+  if (arbitrary && arbitrary.prefix === prefix2) {
+    if (arbitrary.category !== "color") return void 0;
+    const c3 = colorOf(ctx, arbitrary.value, theme);
+    return c3 ? { text: utility, color: c3 } : void 0;
+  }
+  if (prefix2 === "text" || prefix2 === "bg") {
+    const p4 = parsePaletteClass(cls);
+    if (p4 && !p4.opacity && p4.property === (prefix2 === "text" ? "color" : "background-color")) {
+      const c3 = parseColor(p4.value);
+      if (c3) return { text: utility, color: c3 };
+    }
+  } else {
+    const key = utility.slice(prefix2.length + 1);
+    const p4 = parsePaletteClass(`bg-${key}`);
+    if (p4 && !p4.opacity) {
+      const c3 = parseColor(p4.value);
+      if (c3) return { text: utility, color: c3 };
+    }
+  }
+  const name = utility.slice(prefix2.length + 1);
+  const c2 = tokenColor(ctx.tokens, `--color-${name}`, theme);
+  return c2 ? { text: utility, color: c2 } : void 0;
+}
+function element(ctx, e4, report) {
+  const own2 = e4.classes.filter((c2) => !c2.includes(":"));
+  const first2 = (prefix2, th) => own2.map((c2) => utilityColor(ctx, c2, prefix2, th)).find(Boolean);
+  const gradient = own2.some((c2) => /^bg-(gradient-to|linear|radial|conic)-/.test(baseUtility(c2)));
+  if (gradient) {
+    const fail2 = gradientFailure(
+      ctx,
+      (th) => first2("text", th)?.color,
+      (th) => ["from", "via", "to"].map((p4) => first2(p4, th)).filter((x) => !!x)
+    );
+    if (fail2)
+      report(
+        "a11y-gradient-text",
+        "warning",
+        loc2(e4),
+        `<${e4.tag}> ${own2.join(" ")}`.slice(0, 200),
+        `Text on a gradient: ${fail2.ratio}:1 against ${fail2.stop} in ${fail2.theme} (needs ${fail2.min}:1). The text has to reach the minimum on every part of the background behind it (WCAG 1.4.3, technique G18).`,
+        "Pick a text color that passes on every stop, change the stops it does not pass on, or put the text on a solid area.",
+        "jsx-element"
+      );
+  } else {
+    for (const th of themesOf(ctx)) {
+      const fg = first2("text", th);
+      const bg = first2("bg", th);
+      if (fg && bg && isMidGray(fg.color) && isColored(bg.color)) {
+        report(
+          "ux-gray-on-color",
+          "warning",
+          loc2(e4),
+          `${fg.text} on ${bg.text}`,
+          `A gray text (${toHex(fg.color)}) on a colored background (${toHex(bg.color)}) in ${th}: neither the background's own text color nor white or dark text on a solid, which is what Radix designs its scales for.`,
+          GRAY_FIX,
+          "jsx-element"
+        );
+        break;
+      }
+    }
+  }
+  const animated = e4.classes.find((c2) => /^animate-(?!none$)/.test(c2));
+  if (animated && !e4.classes.some((c2) => c2.startsWith("motion-reduce:"))) {
+    report(
+      "a11y-motion",
+      "warning",
+      loc2(e4),
+      animated,
+      `${animated} runs for everyone: people who get dizzy or distracted by motion cannot turn it off (WCAG 2.3.3).`,
+      `Use motion-safe:${animated} so it only runs when the person has not asked for less motion, or add motion-reduce:animate-none; keep it only if the motion is essential.`,
+      "jsx-element"
+    );
+  }
+}
+function checkLook(ctx, usages, report) {
+  let cached2;
+  const reducedMotion = () => cached2 ??= hasReducedMotion(ctx);
+  for (const u of usages) {
+    if (u.kind === "decl") cssDecl(ctx, u, report, reducedMotion);
+    else if (u.kind === "element") element(ctx, u, report);
+  }
+}
+
+// src/responsive.ts
+var PHONE_WIDTH = 343;
+var BREAKPOINT = /^(sm|md|lg|xl|2xl|min-\[[^\]]+\]|@\w+):/;
+var SCROLLS = /^(overflow-x-auto|overflow-x-scroll|overflow-auto|overflow-scroll)$/;
+var base2 = (cls) => cls.slice(cls.lastIndexOf(":") + 1).replace(/^!/, "");
+var unprefixed = (cls) => !BREAKPOINT.test(cls);
+function lengthPx(value) {
+  const m = value.trim().match(/^(\d+(?:\.\d+)?)(px|rem)$/);
+  if (!m) return null;
+  return m[2] === "rem" ? Number(m[1]) * 16 : Number(m[1]);
+}
+function fixedWidthPx(cls) {
+  const m = base2(cls).match(/^(?:min-)?w-(?:(\d+(?:\.\d+)?)|\[([^\]]+)\])$/);
+  if (!m) return null;
+  if (m[1]) return Number(m[1]) * 4;
+  return lengthPx(m[2]);
+}
+function checkResponsive(usages, overflowClasses, report) {
+  for (const e4 of usages.filter((u) => u.kind === "element")) {
+    const where = { file: e4.file, line: e4.line, column: e4.column };
+    const own2 = e4.classes.filter(unprefixed);
+    const capped = own2.some((c2) => /^max-w-(full|screen|\[100%\]|\[100vw\])$/.test(base2(c2)));
+    for (const c2 of own2) {
+      const px = fixedWidthPx(c2);
+      if (px != null && px > PHONE_WIDTH && !capped) {
+        report(
+          "responsive-fixed-width",
+          "warning",
+          where,
+          c2,
+          `Fixed width of ${Math.round(px)}px: wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
+          `Use w-full with a max-w-\u2026 cap, or set the fixed width only from a breakpoint up (md:${base2(c2)}).`
+        );
+        break;
+      }
+    }
+    const cols = own2.map((c2) => base2(c2).match(/^grid-cols-(\d+)$/)).find(Boolean);
+    if (cols && Number(cols[1]) >= 3 && !e4.classes.some((c2) => BREAKPOINT.test(c2) && /grid-cols-/.test(c2))) {
+      report(
+        "responsive-grid-columns",
+        "warning",
+        where,
+        cols[0],
+        `${cols[1]} columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / Number(cols[1]))}px.`,
+        `Start with 1 column and add them from breakpoints up (grid-cols-1 md:grid-cols-${cols[1]}), or use auto-fit with a minimum.`
+      );
+    }
+    if (e4.tag === "table") {
+      const containers = [...e4.ancestorClasses, ...e4.classes].map(base2);
+      const scrolls = containers.some((c2) => SCROLLS.test(c2) || overflowClasses.has(c2));
+      if (!scrolls) {
+        report(
+          "responsive-table-scroll",
+          "info",
+          where,
+          "<table>",
+          "Table with no horizontal scroll container in this file: on a phone it overflows the page or gets clipped.",
+          "Wrap it in an element with overflow-x: auto (overflow-x-auto), or show the rows as cards below a breakpoint. If the wrapper is in another file, ignore this."
+        );
+      }
+    }
+    if (own2.some((c2) => base2(c2) === "h-screen")) {
+      report(
+        "responsive-viewport-height",
+        "info",
+        where,
+        "h-screen",
+        "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
+        "Use h-dvh (or min-h-dvh), which follows the visible height."
+      );
+    }
+  }
+}
+function responsiveDecl(u) {
+  if (u.context === "svg-attribute") return null;
+  if (u.selector && /@media|@container/.test(u.selector)) return null;
+  const value = u.value.trim();
+  if (u.property === "width" || u.property === "min-width") {
+    const px = lengthPx(value);
+    if (px != null && px > PHONE_WIDTH) {
+      return {
+        rule: "responsive-fixed-width",
+        base: "warning",
+        message: `${u.property}: ${value} is wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
+        fix: `Use max-width: ${value} with width: 100%, or move the fixed width into a min-width media query.`
+      };
+    }
+  }
+  if (u.property === "grid-template-columns" && !/auto-(fit|fill)/.test(value)) {
+    const rep = value.match(/^repeat\(\s*(\d+)\s*,/);
+    const tracks = rep ? Number(rep[1]) : value.split(/\s+(?![^(]*\))/).filter(Boolean).length;
+    if (tracks >= 3) {
+      return {
+        rule: "responsive-grid-columns",
+        base: "warning",
+        message: `${tracks} grid columns at every width: on a phone each one gets about ${Math.round(PHONE_WIDTH / tracks)}px.`,
+        fix: "Use repeat(auto-fit, minmax(<min>, 1fr)), or set the columns inside a min-width media query."
+      };
+    }
+  }
+  if ((u.property === "height" || u.property === "min-height") && /^100vh$/.test(value)) {
+    return {
+      rule: "responsive-viewport-height",
+      base: "info",
+      message: "100vh on a phone includes the area under the browser's address bar: the bottom gets hidden.",
+      fix: "Use 100dvh, which follows the visible height (keep 100vh before it as a fallback if needed)."
+    };
+  }
+  return null;
+}
+
 // src/rules.ts
 var RULES = [
   {
@@ -57930,6 +58120,9 @@ var RULES = [
   { id: "copy-error-text", severity: "info", summary: 'Error text that does not say what happened or what to do ("Ocurri\xF3 un error", "Something went wrong"), or shows technical details (status codes, exceptions).' },
   { id: "copy-all-caps", severity: "info", summary: "UI text written in capitals in the code (2+ words): harder to read; use CSS text-transform when it is a style." },
   { id: "copy-term", severity: "warning", summary: "A word the team decided not to use (copy.terms in the config), with the product's word for it." },
+  { id: "ux-gray-on-color", severity: "warning", summary: "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029)." },
+  { id: "a11y-gradient-text", severity: "warning", summary: "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18)." },
+  { id: "a11y-motion", severity: "warning", summary: "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3)." },
   { id: "copy-voice", severity: "warning", summary: `A form of address that breaks the product's voice (copy.voice: vos, t\xFA or usted), e.g. "puedes" in a product that says "pod\xE9s".` }
 ];
 var MESSAGES = {
@@ -57958,7 +58151,10 @@ var MESSAGES = {
   "copy-error-text": "Error text without what happened or what to do.",
   "copy-all-caps": "Text written in capitals.",
   "copy-term": "Word the product does not use.",
-  "copy-voice": "Form of address outside the product's voice."
+  "copy-voice": "Form of address outside the product's voice.",
+  "ux-gray-on-color": "Gray text on a colored background.",
+  "a11y-gradient-text": "Text that misses the minimum contrast on part of its gradient.",
+  "a11y-motion": "Animation without a reduced-motion alternative."
 };
 var ALWAYS_ALLOWED_VARS = /^--tw-/;
 function effectiveSeverity(ctx, rule2, base4, soft = false) {
@@ -57976,16 +58172,16 @@ function checkUsages(ctx, usages) {
   const otherThemes = ctx.tokens.themes.slice(1).map((t) => t.name);
   const allowed = new Set((ctx.project.config.allow?.literals ?? []).map((s) => s.toLowerCase()));
   const custom2 = customRules(ctx);
-  const push = (rule2, base4, loc2, found, property2, context, suggestion, breaksThemes = [], soft = false, message) => {
+  const push = (rule2, base4, loc3, found, property2, context, suggestion, breaksThemes = [], soft = false, message) => {
     const severity3 = rule2.startsWith("custom/") ? base4 : effectiveSeverity(ctx, rule2, base4, soft);
     if (severity3 === "off") return;
     violations.push({
-      id: `${loc2.file}:${loc2.line}:${loc2.column}:${rule2}`,
+      id: `${loc3.file}:${loc3.line}:${loc3.column}:${rule2}`,
       rule: rule2,
       severity: severity3,
-      file: loc2.file,
-      line: loc2.line,
-      column: loc2.column,
+      file: loc3.file,
+      line: loc3.line,
+      column: loc3.column,
       found: clip(found),
       property: property2,
       context,
@@ -58070,16 +58266,16 @@ function checkUsages(ctx, usages) {
         }
         continue;
       }
-      const loc2 = { file: u.file, line: u.line, column: u.column };
+      const loc3 = { file: u.file, line: u.line, column: u.column };
       const varOnly = a.value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
       if (varOnly) {
         const name = varOnly[1];
         if (!ctx.definedCustomProps.has(name) && !ALWAYS_ALLOWED_VARS.test(name)) {
-          push("unknown-token", "error", loc2, u.raw, a.property, "className", suggestTokenName(ctx, name));
+          push("unknown-token", "error", loc3, u.raw, a.property, "className", suggestTokenName(ctx, name));
         } else {
           const t = ctx.tokens.byName.get(name);
           const property2 = a.prefix === "text" && t?.type === "color" ? "color" : a.property;
-          push("tailwind-arbitrary-value", "info", loc2, u.raw, property2, "className", {
+          push("tailwind-arbitrary-value", "info", loc3, u.raw, property2, "className", {
             match: "none",
             kind: "none",
             value: null,
@@ -58092,13 +58288,13 @@ function checkUsages(ctx, usages) {
       if (a.category === "color") {
         const lit = findColorLiterals(a.value, a.property)[0];
         if (lit && !allowed.has(lit.text.toLowerCase())) {
-          push("color-literal", "error", loc2, u.raw, a.property, "className", suggestColor(ctx, lit.text, a.property), otherThemes);
+          push("color-literal", "error", loc3, u.raw, a.property, "className", suggestColor(ctx, lit.text, a.property), otherThemes);
           continue;
         }
       }
-      checkVarRefs(a.value, () => loc2, a.property, "className");
+      checkVarRefs(a.value, () => loc3, a.property, "className");
       const severity3 = a.category === "sizing" || a.category === "layout" ? "warning" : "error";
-      push("tailwind-arbitrary-value", severity3, loc2, u.raw, a.property, "className", suggestArbitrary(ctx, a));
+      push("tailwind-arbitrary-value", severity3, loc3, u.raw, a.property, "className", suggestArbitrary(ctx, a));
       continue;
     }
     if (u.kind === "element" || u.kind === "text") continue;
@@ -58195,16 +58391,21 @@ function checkUsages(ctx, usages) {
   checkResponsive(
     usages,
     overflowClasses,
-    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+    (rule2, base4, loc3, found, message, fix) => push(rule2, base4, loc3, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   checkCopy(
     usages,
     ctx.project.config.copy,
-    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+    (rule2, base4, loc3, found, message, fix) => push(rule2, base4, loc3, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+  );
+  checkLook(
+    ctx,
+    usages,
+    (rule2, base4, loc3, found, message, fix, context) => push(rule2, base4, loc3, found, null, context, { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   checkA11y(
     usages,
-    (rule2, base4, loc2, found, message, fix) => push(rule2, base4, loc2, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
+    (rule2, base4, loc3, found, message, fix) => push(rule2, base4, loc3, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message)
   );
   return { violations, unresolved };
 }
@@ -59023,6 +59224,20 @@ function lineOf2(text, re) {
   const m = re.exec(text);
   return m ? text.slice(0, m.index).split("\n").length : null;
 }
+function looksLikeCard(classes, classRule) {
+  const own2 = classes.filter((c2) => !c2.includes(":")).map(base3);
+  const rounded = own2.some((c2) => /^rounded(-(?!none|full)[\w-]+)?$/.test(c2));
+  const edge = own2.some((c2) => /^border(-[0-9]+)?$/.test(c2) || /^shadow(-(?!none)[\w-]+)?$/.test(c2));
+  if (rounded && edge) return true;
+  return own2.some((c2) => {
+    const decls = classRule.get(c2)?.decls ?? [];
+    const radius = decls.some((d) => d.prop === "border-radius" && !/^(0|0px|none)$/.test(d.value.trim()));
+    const border = decls.some(
+      (d) => /^border(-(top|right|bottom|left))?$/.test(d.prop) && !/^(0|none)\b/.test(d.value.trim()) || d.prop === "box-shadow" && d.value.trim() !== "none"
+    );
+    return radius && border;
+  });
+}
 function reviewUi(ctx, input2) {
   const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
   const relPath = rel2(ctx.project, abs2) || ".";
@@ -59145,6 +59360,19 @@ function reviewUi(ctx, input2) {
         "Sections without headings are hard to scan and to navigate with a screen reader.",
         "Give each section a heading (h2) with the project's section-title class."
       );
+    }
+    for (const e4 of elements) {
+      if (!looksLikeCard(e4.classes, classRule)) continue;
+      if (!(e4.ancestorClassLists ?? []).some((a) => looksLikeCard(a, classRule))) continue;
+      add(
+        "nested-surfaces",
+        "info",
+        e4.line,
+        `<${e4.tag}> with a border or shadow inside another card`,
+        "A boundary groups what is inside it (ux:gestalt-common-region): a card inside a card draws two groups around the same content, and the inner one often adds noise instead of structure.",
+        "Check that the inner boundary groups something on its own (a callout, a selected item); if not, drop its border or shadow and separate with space or a subtle background."
+      );
+      break;
     }
     if (isScreen && LOADS_DATA.test(source)) {
       for (const [state, line] of Object.entries(states)) {
@@ -62382,12 +62610,12 @@ var ZodSet2 = class _ZodSet extends ZodType2 {
     const valueType = this._def.valueType;
     function finalizeSet(elements2) {
       const parsedSet = /* @__PURE__ */ new Set();
-      for (const element of elements2) {
-        if (element.status === "aborted")
+      for (const element2 of elements2) {
+        if (element2.status === "aborted")
           return INVALID2;
-        if (element.status === "dirty")
+        if (element2.status === "dirty")
           status.dirty();
-        parsedSet.add(element.value);
+        parsedSet.add(element2.value);
       }
       return { status: status.value, value: parsedSet };
     }
@@ -67297,7 +67525,7 @@ var EMPTY_COMPLETION_RESULT = {
 };
 
 // src/propose.ts
-var toOklch = converter_default("oklch");
+var toOklch2 = converter_default("oklch");
 var WHERE_LIMIT = 12;
 function partOf(property2) {
   const p4 = (property2 ?? "").toLowerCase();
@@ -67423,7 +67651,7 @@ function scanStyles(ctx) {
     const stem = stemOf(sels[0] ?? null);
     const hover = sels.length > 0 && sels.every((s) => s.includes(":hover"));
     const translucent = alphaOf(g.color) < 1;
-    const onAccent = g.part === "fg" && !kind && !translucent && (toOklch(g.color)?.l ?? 0) > 0.95 && sels.some((s) => /primary|accent|brand|cta|(^|[-.])on-/.test(withoutPseudo(s)));
+    const onAccent = g.part === "fg" && !kind && !translucent && (toOklch2(g.color)?.l ?? 0) > 0.95 && sels.some((s) => /primary|accent|brand|cta|(^|[-.])on-/.test(withoutPseudo(s)));
     let role;
     let name;
     const suffix = hover ? "-hover" : "";
@@ -67452,15 +67680,15 @@ function scanStyles(ctx) {
     taken.add(candidate);
   }
   const deriveSurfaceLike = (c2, theme, delta) => {
-    const s = toOklch(surfaceIn(theme));
-    const o = toOklch(c2);
+    const s = toOklch2(surfaceIn(theme));
+    const o = toOklch2(c2);
     const dark = s.l < 0.5;
     return parseColor(formatHex(oklch2(s.l + (dark ? delta : -delta / 2), Math.max(o.c ?? 0, 0.05), o.h)));
   };
   const readableOn = (c2, bg) => {
     if (contrast2(c2, bg) >= minRatio) return c2;
-    const o = toOklch(c2);
-    const dir = toOklch(bg).l < 0.5 ? 1 : -1;
+    const o = toOklch2(c2);
+    const dir = toOklch2(bg).l < 0.5 ? 1 : -1;
     for (let step = 1; step <= 100; step++) {
       const cand = parseColor(formatHex(oklch2(o.l + dir * step * 0.01, o.c ?? 0, o.h)));
       if (contrast2(cand, bg) >= minRatio) return cand;
@@ -67642,7 +67870,7 @@ function scanStyles(ctx) {
 // src/generate.ts
 var MODES = ["light", "dark"];
 var KINDS = ["success", "warning", "danger", "info"];
-var toOklch2 = converter_default("oklch");
+var toOklch3 = converter_default("oklch");
 var gamut = toGamut("rgb", "oklch");
 var oklabDistance3 = differenceEuclidean("oklab");
 var deuteranopia2 = filterDeficiencyDeuter(1);
@@ -67652,7 +67880,7 @@ var raw = (a, b) => contrast(a, b);
 var r2 = (n) => Math.round(n * 100) / 100;
 var r3 = (n) => Math.round(n * 1e3) / 1e3;
 var lch2 = (h) => {
-  const c2 = toOklch2(parse_default(h));
+  const c2 = toOklch3(parse_default(h));
   return { mode: "oklch", l: c2.l, c: c2.c ?? 0, h: Number.isFinite(c2.h) ? c2.h : 0 };
 };
 var fmtOklch = (h) => {
@@ -67675,9 +67903,9 @@ function solve(mode, h, c2, target, bg) {
 }
 function neutralScale(mode, h, pure) {
   const m = RADIX[mode];
-  const chroma = (i) => pure ? 0 : m.grayC[i];
-  const bg = hex5({ mode: "oklch", l: pure ? PURE_GRAY_L1[mode] : m.grayL[0], c: chroma(0), h });
-  return m.grayContrast.map((t, i) => i === 0 ? bg : solve(mode, h, chroma(i), t, bg));
+  const chroma2 = (i) => pure ? 0 : m.grayC[i];
+  const bg = hex5({ mode: "oklch", l: pure ? PURE_GRAY_L1[mode] : m.grayL[0], c: chroma2(0), h });
+  return m.grayContrast.map((t, i) => i === 0 ? bg : solve(mode, h, chroma2(i), t, bg));
 }
 function accentScale(mode, solid, bg, onText, textMin) {
   const m = RADIX[mode];
@@ -68155,7 +68383,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.23.0";
+var VERSION = "0.24.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

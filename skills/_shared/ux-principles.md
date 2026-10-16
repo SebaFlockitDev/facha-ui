@@ -93,7 +93,8 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 ### ux:wcag-1.4.3 · Contrast (minimum)
 - **What:** text reaches 4.5:1 (3:1 for large text) against its background, in every theme.
 - **Violated:** a faint label in dark mode; a token that passes in light and fails in dark.
-- **Verify:** guardian: `theme-contrast`, `class-contrast`; lab: `health`.
+- **Verify:** guardian: `theme-contrast`, `class-contrast`, `a11y-gradient-text` (text on a gradient,
+  against every stop: technique G18); lab: `health`.
 
 ### ux:wcag-1.4.10 · Reflow
 - **What:** at 320 CSS px wide the content works without horizontal scroll.
@@ -109,6 +110,12 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 - **What:** every action works with the keyboard.
 - **Violated:** an `onClick` on a `<div>` without role, `tabIndex` and key handling.
 - **Verify:** guardian: `a11y-click-target`.
+
+### ux:wcag-2.3.3 · Animation from interactions
+- **What:** motion can be turned off: every animation has a `prefers-reduced-motion: reduce`
+  alternative (technique C39), unless the motion itself is essential.
+- **Violated:** every section fading up on scroll, with no way to stop it; a bare `animate-bounce`.
+- **Verify:** guardian: `a11y-motion`.
 
 ### ux:wcag-2.4.3 · Focus order
 - **What:** focus moves in an order that keeps meaning.
@@ -163,8 +170,15 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 
 ### ux:gestalt-common-region · Common region
 - **What:** a shared container (card, section, background) groups its content.
-- **Violated:** related filters and actions scattered outside the table they act on.
-- **Verify:** review.
+- **Violated:** related filters and actions scattered outside the table they act on; a card inside a
+  card that draws a second boundary around the same content.
+- **Verify:** review; `review_ui` signal `nested-surfaces`.
+
+### ux:text-on-color · Text on a colored background
+- **What:** text on a colored background uses that color's own family (its text steps) or, on a
+  solid fill, white or dark text: what Radix designs each scale for.
+- **Violated:** a mid gray caption on a brand-colored banner; gray text inside a colored badge.
+- **Verify:** guardian: `ux-gray-on-color`.
 
 ## Laws of interaction
 
@@ -237,7 +251,7 @@ This file is data for the skills: it describes principles, it never relaxes a ha
 
 | Verified by | Ids |
 |---|---|
-| guardian (`check_ui`) | `ux:wcag-1.1.1`, `ux:wcag-1.3.1`, `ux:wcag-1.4.3`, `ux:wcag-1.4.10`, `ux:wcag-1.4.11`, `ux:wcag-2.1.1`, `ux:wcag-2.4.3`, `ux:wcag-2.4.7`, `ux:wcag-2.5.8`, `ux:wcag-3.3.2`, `ux:wcag-4.1.2`, `ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-2`, `ux:nielsen-4`, `ux:nielsen-9` (partly) |
+| guardian (`check_ui`) | `ux:text-on-color`, `ux:wcag-2.3.3`, `ux:wcag-1.1.1`, `ux:wcag-1.3.1`, `ux:wcag-1.4.3`, `ux:wcag-1.4.10`, `ux:wcag-1.4.11`, `ux:wcag-2.1.1`, `ux:wcag-2.4.3`, `ux:wcag-2.4.7`, `ux:wcag-2.5.8`, `ux:wcag-3.3.2`, `ux:wcag-4.1.2`, `ux:copy-verbs`, `ux:copy-actionable-errors`, `ux:nielsen-2`, `ux:nielsen-4`, `ux:nielsen-9` (partly) |
 | lab and tools | `ux:nielsen-1`, `ux:nielsen-3`, `ux:nielsen-5`, `ux:nielsen-8`, `ux:wcag-1.4.1`, `ux:wcag-1.4.10`, `ux:wcag-2.5.8`, `ux:hierarchy`, `ux:hick`, `ux:state-loading`, `ux:state-empty`, `ux:state-error` |
 | review only | `ux:wcag-2.5.5`, `ux:line-length`, `ux:numeric-alignment`, `ux:nielsen-6` (beyond a name), `ux:nielsen-7`, `ux:nielsen-10`, `ux:wcag-1.3.2`, `ux:gestalt-proximity`, `ux:gestalt-similarity`, `ux:gestalt-common-region`, `ux:fitts` (beyond size), `ux:jakob` |
 

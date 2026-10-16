@@ -28,6 +28,9 @@ export const RULE_IDS = [
   "copy-all-caps",
   "copy-term",
   "copy-voice",
+  "ux-gray-on-color",
+  "a11y-gradient-text",
+  "a11y-motion",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

@@ -216,6 +216,9 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | `theme-contrast` | error si el fondo es conocido, warning si no | Un texto que no llega a 4.5:1 contra su fondo en algún tema. Sugiere un token legible en todos los temas |
 | `class-contrast` | igual que la anterior | Una clase del CSS cuyo color de texto falla, marcada en cada componente que la usa |
 | `non-text-contrast` | warning | Bordes de campos y botones, anillos de foco e íconos por debajo de 3:1 (WCAG 1.4.11) |
+| `ux-gray-on-color` | warning | Texto gris sobre un fondo de color: usá el texto de esa misma familia o, sobre un color sólido, blanco u oscuro (como diseña Radix sus escalas) |
+| `a11y-gradient-text` | warning | Texto sobre un degradado que no llega al contraste mínimo en alguna parte (se mide contra cada parada) |
+| `a11y-motion` | warning | Animaciones sin alternativa para quien pide menos movimiento (`prefers-reduced-motion`, `motion-safe:` en Tailwind) |
 
 Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste, los **estados que se confunden por color** (también simulando deuteranopía y protanopía) y la **paleta inflada**: tokens o colores casi idénticos que podrían ser uno solo, y tamaños de letra o radios que difieren en medio píxel. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
 
