@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-032 · Matriz completa de contraste
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** hoy se controla el contraste de los pares que aparecen en el código; un sistema accesible garantiza cada texto sobre cada fondo donde puede aparecer. Además, `theme-contrast` puede sugerir para un texto rojo de error un gris secundario, y el aviso pasa a parecer información común (absorbe B-008).
 - **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.

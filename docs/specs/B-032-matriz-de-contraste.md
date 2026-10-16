@@ -1,6 +1,6 @@
 # B-032 · Matriz completa de contraste
 
-> **Estado:** en spec · **Rama:** `feat/contrast-matrix` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/contrast-matrix` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md); absorbe B-008 ·
 > **Última actualización:** 2026-10-16
 
@@ -40,7 +40,7 @@ sobre qué fondos. Además, la sugerencia de contraste puede cambiar el signific
     un contrato firmado, obliga a seguir cada versión mayor y trata una implementación que no esté al
     día como violación de copyright. facha-ui es MIT y lo usan equipos de empresas.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. La matriz: sección `contrast` de `get_design_system`
 
@@ -119,7 +119,7 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
 - La matriz en los fixtures existentes (shadcn con Tailwind 3 y 4, un sistema generado).
 - Prueba real en las apps de prueba.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las cuatro recomendadas)
 
 1. **APCA queda afuera** (recomendado). No está en WCAG 3, que todavía no eligió algoritmo, y su
    licencia prohíbe el uso comercial sin contrato. WCAG 2.2 es lo que se exige hoy. La alternativa es
@@ -162,8 +162,8 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
 - **2026-10-16:** relevado el contraste de hoy; prueba sobre un proyecto mínimo con los dos casos que
   rompen B-008; investigados el redondeo (Understanding 1.4.3) y APCA (estado en WCAG 3 y licencia);
   spec escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las cuatro decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/contrast-matrix`.
+En curso en `feat/contrast-matrix`: seguir por la primera tarea sin marcar.
