@@ -10,7 +10,7 @@ Plugin de Claude Code que trabaja como un diseñador UI senior dentro de tu proy
    /plugin install facha-ui@facha-ui
    ```
 2. **Abrí Claude Code en tu proyecto** (React con Next.js App Router o con Vite). No hace falta configurar nada.
-3. **Preguntá** *"¿cómo está la UI de mi proyecto?"*, o corré `/facha-ui:start`.
+3. **Preguntá** *"¿cómo está la UI de mi proyecto?"*, o corré `/facha-ui:start`. O decí *"abrí facha-ui"* (`/facha-ui:center`) y usalo todo desde una pantalla: tus pantallas de peor a mejor, variantes con una captura arrastrada y el design system.
 
 Vas a ver, en menos de un minuto y sin que se escriba nada:
 - tu proyecto y su design system en palabras simples (tokens, temas, qué falta);

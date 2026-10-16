@@ -901,6 +901,14 @@ Lo que ninguna fuente sostiene no se fija (el "croma moderado" de fintech que no
 
 Con una imagen y sin URL, la IA propone los colores que ve y el desarrollador los confirma: son sus valores. Desde ahí sigue el modo `system` (S2b en adelante).
 
+### 2.i El centro (`/facha-ui:center`, B-042, desde 0.32.0)
+
+Una sola puerta de entrada para usar facha-ui sin recordar comandos (`ux:nielsen-6`). La skill `center` (con palabras: "abrí facha-ui") arma el laboratorio si falta, con su portada, el centro (`lab-center.tsx`: `page.tsx` en Next; `LabHome` en el `main.tsx` de Vite); escribe `.facha-ui/live/center.json` con el estado del proyecto (de `ux_score`, `get_design_system` y las corridas); abre una **sesión de proyecto** (`session.json` con `scope: "project"`, para todas las pantallas y sus paneles) y escucha como el modo en vivo.
+
+- **La página:** el estado del proyecto en palabras; las pantallas de peor a mejor con su peor problema, sus variantes y **"Proponer variantes"** (objetivo opcional, rápido o completo, y una captura de referencia arrastrada, elegida o pegada, o una URL); el design system con el comando exacto de `init` para copiar (`init system`, `init`, `init reference <captura|url>`). Shadow DOM con estilos propios, como el panel.
+- **El endpoint** (`live-core.ts`): en una sesión de proyecto acepta pedidos de cualquier pantalla; `run` (una pantalla de `center.json`, objetivo de hasta 2000 caracteres, `quick`, `reference`: un archivo de `.facha-ui/references/` que exista o una URL http(s)); `upload` (PNG, JPEG o WebP por sus primeros bytes, hasta 5 MB, guardado como `.facha-ui/references/upload-<fecha>-<n>.<ext>`). Solo en desarrollo, con las mismas reglas de origen y token. El `GET` suma `center`, con cada campo validado.
+- **Cada pedido lo procesa su skill:** `run` sigue `variants` (con `quick.md` y `reference.md` si corresponden); una URL de referencia se abre solo con un sí en el chat; los pedidos del panel siguen `live.md`. `init` y `apply` nunca se disparan desde el centro.
+
 ## 3. Adopción en un proyecto, paso a paso
 
 ### 3.1 Requisitos
@@ -1604,6 +1612,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** `variants` acepta una referencia para la estructura (§2.b.5b): `reference.md`, la hipótesis C, la fuente `reference`, la crítica contra la referencia y el estado de la corrida. `SKILL.md` sigue en 250 líneas.
 - **Decisiones:** imágenes y URLs (con permiso, solo una captura); la referencia ocupa la hipótesis C; solo estructura, nunca valores visuales.
 - **Prueba real:** una corrida en modo rápido sobre la pantalla de pedidos de la app de Vite con la captura del ejemplo "tasks" de shadcn/ui: C tomó el título con resumen, la barra de filtros arriba y el número como enlace; adaptó los filtros por facetas a botones de estado visibles; dejó afuera la selección múltiple y "agregar" (la pantalla no tiene esas acciones). `check_ui` en 0 errores y 0 avisos después de dos arreglos (la fila clicable, sin teclado; el borde del buscador bajo 3:1, una brecha del sistema). Idea B-041: `responsive-table-scroll` no ve el contenedor con scroll de un CSS module.
+
+### 7.42 Versión 0.32.0: el centro facha-ui
+
+Ítem B-042 del backlog (etapa 1), pedido por el desarrollador. Spec, decisiones y registro: [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md).
+
+- **Qué cambia:** la skill `center` y la página del centro (§2.i), la sesión de proyecto, los pedidos `run` y `upload` del endpoint, y `center.json`. La portada del laboratorio pasa a ser el centro.
+- **Decisiones:** una skill nueva (`start` sigue de solo lectura); una sesión para todo el proyecto; la subida acotada a imágenes reales; `init` y `apply` siguen siendo del desarrollador (el centro muestra el comando).
+- **Tests:** el endpoint (la sesión de proyecto, `run` con sus validaciones, `upload` con una imagen real, un SVG con nombre de PNG, una de más de 5 MB, sin token, en producción y fuera de una sesión de proyecto), los contratos de la skill y de la página (sin `init` ni `apply`, solo su propio endpoint) y el andamiaje.
 
 ---
 

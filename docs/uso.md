@@ -6,6 +6,14 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 
 **¿Empezás de cero?** Pedí *"enseñame a usar facha-ui"* (`/facha-ui:learn`): un curso de 9 lecciones sobre tu propio proyecto que explica cada idea, la muestra con tus datos reales y termina con un ejercicio. No escribe nada. Después volvé a esta guía.
 
+**La forma fácil, sin comandos: el centro.** Con la app corriendo, decile a Claude Code *"abrí facha-ui"* (`/facha-ui:center`). Se abre una página en el laboratorio con:
+- **cómo está tu proyecto:** el puntaje de UX, el design system, el contraste y cuánto de la UI usa tu sistema, en palabras;
+- **tus pantallas, de la que más necesita a la que menos**, cada una con su problema más grave y **"Proponer variantes"**: escribís qué querés lograr (si querés), elegís una variante rápida o tres, y **arrastrás una captura** de una pantalla que te guste (o pegás su dirección) para usar su estructura;
+- **las variantes en curso**, para abrirlas, compararlas y votar, con el estado de cada pedido;
+- **el design system:** si falta, cómo crearlo; y **"Como esta página"**, con una captura o una dirección.
+
+Claude escucha detrás mientras esté abierta la conversación. Lo que cambia tu código (crear tokens, aplicar una variante) lo arrancás vos: el centro te muestra el comando exacto con un botón para copiarlo. Las capturas que subís quedan en `.facha-ui/references/` (sumalo al `.gitignore`).
+
 **Resumen del flujo:**
 
 1. Instalar el plugin.
