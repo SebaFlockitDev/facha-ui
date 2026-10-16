@@ -1,6 +1,6 @@
 # B-038 · Colores `oklch()` y HSL en el panel en vivo
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/panel-oklch` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.29.0) · **Rama:** `feat/panel-oklch` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** visto en B-031 ([spec](B-031-controles-de-diseno-en-el-panel.md), decisión 11) ·
 > **Última actualización:** 2026-10-16
 
@@ -75,7 +75,7 @@ traen su hex (`lab-palette.ts`, `PRESETS`). Con el deslizador, se usa el croma d
 - [x] 2. `palette-base.mjs` y `live-core.ts`, tests · `9e9c047`
 - [x] 3. Docs
 - [x] 4. Prueba real (con las correcciones `d97c6a6`, `8832882` y la de la marca como texto)
-- [ ] 5. Release
+- [x] 5. Release 0.29.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -101,7 +101,9 @@ traen su hex (`lab-palette.ts`, `PRESETS`). Con el deslizador, se usa el croma d
   (2.9:1) y el texto de los botones (3.4:1), con las soluciones en la dirección correcta. Los canales HSL
   de Tailwind 3 quedan probados en los tests (ida y vuelta) y en la base de `shadcn-tw3`.
 
+- **2026-10-16 · release 0.29.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.39; B-038 a Hecho.
+
 ## Cómo retomar
 
-Todo hecho y probado en `feat/panel-oklch`; falta el release (tarea 5), solo cuando quien mantiene
-el repo lo pida: versión 0.29.0 con el flujo de `CLAUDE.md`; B-038 a **Hecho**.
+Terminado en 0.29.0.

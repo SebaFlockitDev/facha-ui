@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-038 · Colores `oklch()` y HSL en el panel en vivo
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** S
-- **Por qué:** shadcn/ui es la base más común de los proyectos React, y la pestaña Diseño del panel no funciona en ninguna de sus formas: con Tailwind 4 los tokens están en `oklch()` y con Tailwind 3 son canales HSL sueltos, y el panel solo lee hex y `rgb()`.
-- **Qué:** el panel lee y escribe `oklch()`, `hsl()` y los canales HSL en el formato de cada token; con la marca gris (shadcn por defecto), los presets la pintan.
-- **Criterios de aceptación:** la pestaña Diseño aparece en `shadcn-tw3` y `shadcn-tw4`; la propuesta conserva el formato de cada valor; con la marca gris, un preset la pinta y se mide el texto sobre ella.
-- **Spec:** [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md)
-- **Referencias:** [spec de B-031](docs/specs/B-031-controles-de-diseno-en-el-panel.md), `skills/variants/templates/next-app/lab-palette.ts`
-
 ### B-028 · De referencias a tokens
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** L
@@ -173,6 +164,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.29.0:** B-038, el panel en vivo lee y escribe `oklch()`, `hsl()` y los canales HSL de shadcn/ui, y pinta la marca gris; spec en [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md).
 - **0.28.0:** B-004, la regla `a11y-color-only` (un estado que se muestra solo con color, WCAG 1.4.1); spec en [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md).
 - **0.27.0:** B-030, componentes del proyecto en `get_design_system`, la regla `ds-component-reuse` con el import exacto y la cobertura del design system en `ux_score`; spec en [`docs/specs/B-030-componente-reimplementado.md`](docs/specs/B-030-componente-reimplementado.md).
 - **0.26.0:** B-032 (absorbe B-008), matriz completa de contraste en `get_design_system`, contraste sin redondear y sugerencias que conservan el significado; spec en [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md).

@@ -7,6 +7,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-10-16
+
 ### Added
 
 - La pestaña Diseño del panel en vivo funciona en proyectos shadcn/ui: lee `oklch()` (Tailwind 4), `hsl()` y los canales HSL sueltos (Tailwind 3), y escribe cada valor nuevo en el formato que tenía el token.
@@ -346,7 +348,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.25.0...v0.26.0
