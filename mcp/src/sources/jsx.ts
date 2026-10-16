@@ -254,6 +254,7 @@ export function extractJsx(file: string, code: string, ext: string, classHelpers
           ...textOf(n.children),
           inLabel: ancestors.includes("label"),
           ancestorClasses: ancestorClassStack.flat(),
+          ancestorClassLists: ancestorClassStack.map((a) => [...a]),
           file,
           line: opening.loc!.start.line,
           column: opening.loc!.start.column + 1,

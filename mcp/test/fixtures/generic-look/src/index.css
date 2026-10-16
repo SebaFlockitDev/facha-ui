@@ -1,0 +1,27 @@
+/* Fixture for the generic-look rules (B-029): each rule below is a positive or a negative case. */
+:root {
+  --color-background: #ffffff;
+  --color-foreground: #1e1f25;
+  --color-primary: #4f46e5;
+  --color-on-primary: #ffffff;
+}
+
+/* ux-gray-on-color: positive, a mid gray on the brand color. */
+.promo { background: var(--color-primary); color: #6b7280; }
+/* negative: the on-color of the brand. */
+.promo-ok { background: var(--color-primary); color: var(--color-on-primary); }
+/* negative: a barely tinted surface is not a colored background. */
+.tint { background: #f5f7ff; color: #6b7280; }
+/* negative: near-black text on a bright solid. */
+.bright { background: #fde047; color: #1f2937; }
+
+/* a11y-gradient-text: positive, white fails on the light stop. */
+.hero { background: linear-gradient(90deg, #4f46e5, #f5f3ff); color: #ffffff; }
+/* negative: white passes on both stops (background-image). */
+.hero-ok { background-image: linear-gradient(#1e1b4b, #312e81); color: #ffffff; }
+
+/* a11y-motion: positive, an entrance animation and no reduced-motion query in the project. */
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fade-up 300ms ease-out; }
+/* negative: transitions are not animations. */
+.lift { transition: transform 150ms ease; }

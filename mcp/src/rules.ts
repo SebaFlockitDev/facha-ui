@@ -1,5 +1,6 @@
 import { checkA11y, removesFocusOutline } from "./a11y.js";
 import { checkCopy } from "./copy.js";
+import { checkLook } from "./look.js";
 import { checkResponsive, responsiveDecl } from "./responsive.js";
 import { findColorLiterals } from "./color.js";
 import type { Context } from "./context.js";
@@ -100,6 +101,9 @@ export const RULES: { id: RuleId; severity: Severity; summary: string }[] = [
   { id: "copy-error-text", severity: "info", summary: "Error text that does not say what happened or what to do (\"Ocurrió un error\", \"Something went wrong\"), or shows technical details (status codes, exceptions)." },
   { id: "copy-all-caps", severity: "info", summary: "UI text written in capitals in the code (2+ words): harder to read; use CSS text-transform when it is a style." },
   { id: "copy-term", severity: "warning", summary: "A word the team decided not to use (copy.terms in the config), with the product's word for it." },
+  { id: "ux-gray-on-color", severity: "warning", summary: "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029)." },
+  { id: "a11y-gradient-text", severity: "warning", summary: "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18)." },
+  { id: "a11y-motion", severity: "warning", summary: "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3)." },
   { id: "copy-voice", severity: "warning", summary: "A form of address that breaks the product's voice (copy.voice: vos, tú or usted), e.g. \"puedes\" in a product that says \"podés\"." },
 ];
 
@@ -130,6 +134,9 @@ const MESSAGES: Record<RuleId, string> = {
   "copy-all-caps": "Text written in capitals.",
   "copy-term": "Word the product does not use.",
   "copy-voice": "Form of address outside the product's voice.",
+  "ux-gray-on-color": "Gray text on a colored background.",
+  "a11y-gradient-text": "Text that misses the minimum contrast on part of its gradient.",
+  "a11y-motion": "Animation without a reduced-motion alternative.",
 };
 
 const ALWAYS_ALLOWED_VARS = /^--tw-/;
@@ -386,6 +393,10 @@ export function checkUsages(ctx: Context, usages: Usage[]): FileResult {
   );
   checkCopy(usages, ctx.project.config.copy, (rule, base, loc, found, message, fix) =>
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
+  );
+  // The parts of the generic AI look that break a published rule (B-029).
+  checkLook(ctx, usages, (rule, base, loc, found, message, fix, context) =>
+    push(rule, base, loc, found, null, context, { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),
   );
   checkA11y(usages, (rule, base, loc, found, message, fix) =>
     push(rule, base, loc, found, null, "jsx-element", { match: "none", kind: "none", value: null, detail: fix, source: null }, [], false, message),

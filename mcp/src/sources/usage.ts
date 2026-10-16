@@ -30,6 +30,8 @@ export interface DeclUsage extends Loc {
   locAt(index: number): Loc;
   /** Background declared in the same CSS rule, when present (for pair contrast). */
   siblingBackground?: string | null;
+  /** background-image declared in the same CSS rule (a gradient behind the text, B-029). */
+  siblingBackgroundImage?: string | null;
 }
 
 /**
@@ -54,6 +56,8 @@ export interface ElementUsage extends Loc {
   inLabel: boolean;
   /** Static classes of the intrinsic elements that contain it in the same file. */
   ancestorClasses: string[];
+  /** The same, one list per ancestor, outermost first (B-029: nested surfaces). */
+  ancestorClassLists?: string[][];
 }
 
 /** Static UI text: an element's text content, or a copy attribute (placeholder, title, aria-label, alt, label). */

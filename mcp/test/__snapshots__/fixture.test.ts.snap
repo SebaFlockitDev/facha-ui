@@ -426,6 +426,21 @@ exports[`get_design_system (fixture) > parses tokens, configured themes, roles, 
       "summary": "A word the team decided not to use (copy.terms in the config), with the product's word for it.",
     },
     {
+      "id": "ux-gray-on-color",
+      "severity": "warning",
+      "summary": "A mid gray text on a colored background: Radix designs text steps for backgrounds of the same scale, and white or dark text for solids (B-029).",
+    },
+    {
+      "id": "a11y-gradient-text",
+      "severity": "warning",
+      "summary": "Text on a gradient that misses the minimum contrast against one of its stops (WCAG 1.4.3, technique G18).",
+    },
+    {
+      "id": "a11y-motion",
+      "severity": "warning",
+      "summary": "An animation with no reduced-motion alternative: CSS animation with no prefers-reduced-motion query in the project, or animate-* without motion-safe: / motion-reduce: (WCAG 2.3.3).",
+    },
+    {
       "id": "copy-voice",
       "severity": "warning",
       "summary": "A form of address that breaks the product's voice (copy.voice: vos, tú or usted), e.g. "puedes" in a product that says "podés".",

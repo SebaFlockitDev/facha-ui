@@ -29,6 +29,10 @@ export function extractCss(
             (n: any) => n.type === "decl" && (n.prop === "background" || n.prop === "background-color"),
           ) as any)?.value ?? null
         : null;
+    const siblingBackgroundImage =
+      parent && "nodes" in parent
+        ? ((parent.nodes ?? []).find((n: any) => n.type === "decl" && n.prop === "background-image") as any)?.value ?? null
+        : null;
     usages.push({
       kind: "decl",
       context: "css",
@@ -40,6 +44,7 @@ export function extractCss(
       column: start.column,
       locAt: makeLocAt(file, valueStart.line, valueStart.column, valueRaw),
       siblingBackground,
+      siblingBackgroundImage,
     });
   });
   return usages;

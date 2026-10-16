@@ -1,6 +1,6 @@
 # B-029 · Reglas contra el "look genérico de IA"
 
-> **Estado:** en spec · **Rama:** `feat/generic-look-rules` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/generic-look-rules` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -24,7 +24,7 @@ una regla.
 | El mismo radio y sombra en todos los bloques | Sin fuente, y no se puede ver archivo por archivo | **Afuera** (queda como idea para la revisión) |
 | Una sola tipografía sin escala | Ya lo cubren `tailwind-default-scale`, los tokens de tamaño y `review_ui` (más de 4 tamaños) | **Ya cubierto** |
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Tres reglas del guardián (severidad: aviso)
 
@@ -72,7 +72,7 @@ reglas nuevas. Las skills no cambian: el guardián y `review_ui` ya se usan en c
 
 ### 6. Prueba real y release
 
-## Decisiones a confirmar
+## Decisiones confirmadas (2026-10-16: las dos recomendadas)
 
 1. **Tres reglas, una señal de revisión y tres señales afuera**, según la tabla. Recomendado: una
    regla sin fuente sería gusto disfrazado de verificación, lo mismo que facha-ui critica de las

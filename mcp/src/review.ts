@@ -13,7 +13,7 @@ import { FachaError, type Severity } from "./types.js";
 
 export interface ReviewFinding {
   id: string;
-  heuristic: "primary-action" | "accents" | "type-scale" | "headings" | "states";
+  heuristic: "primary-action" | "accents" | "type-scale" | "headings" | "states" | "nested-surfaces";
   severity: Severity;
   file: string;
   line: number;
@@ -57,6 +57,25 @@ export function withoutComments(code: string): string {
 function lineOf(text: string, re: RegExp): number | null {
   const m = re.exec(text);
   return m ? text.slice(0, m.index).split("\n").length : null;
+}
+
+/**
+ * Classes that make an element look like a card: a corner radius plus a border or a shadow (Tailwind
+ * utilities on the same element, or one project class that declares both).
+ */
+function looksLikeCard(classes: string[], classRule: Map<string, { decls: { prop: string; value: string }[] }>): boolean {
+  const own = classes.filter((c) => !c.includes(":")).map(base);
+  const rounded = own.some((c) => /^rounded(-(?!none|full)[\w-]+)?$/.test(c));
+  const edge = own.some((c) => /^border(-[0-9]+)?$/.test(c) || /^shadow(-(?!none)[\w-]+)?$/.test(c));
+  if (rounded && edge) return true;
+  return own.some((c) => {
+    const decls = classRule.get(c)?.decls ?? [];
+    const radius = decls.some((d) => d.prop === "border-radius" && !/^(0|0px|none)$/.test(d.value.trim()));
+    const border = decls.some(
+      (d) => (/^border(-(top|right|bottom|left))?$/.test(d.prop) && !/^(0|none)\b/.test(d.value.trim())) || (d.prop === "box-shadow" && d.value.trim() !== "none"),
+    );
+    return radius && border;
+  });
 }
 
 export function reviewUi(ctx: Context, input: string) {
@@ -171,6 +190,15 @@ export function reviewUi(ctx: Context, input: string) {
       add("headings", "info", 1, "no heading in the screen",
         "Sections without headings are hard to scan and to navigate with a screen reader.",
         "Give each section a heading (h2) with the project's section-title class.");
+    }
+    // A card inside a card: two boundaries that both claim to group the same content (common region).
+    for (const e of elements) {
+      if (!looksLikeCard(e.classes, classRule)) continue;
+      if (!(e.ancestorClassLists ?? []).some((a) => looksLikeCard(a, classRule))) continue;
+      add("nested-surfaces", "info", e.line, `<${e.tag}> with a border or shadow inside another card`,
+        "A boundary groups what is inside it (ux:gestalt-common-region): a card inside a card draws two groups around the same content, and the inner one often adds noise instead of structure.",
+        "Check that the inner boundary groups something on its own (a callout, a selected item); if not, drop its border or shadow and separate with space or a subtle background.");
+      break;
     }
     if (isScreen && LOADS_DATA.test(source)) {
       for (const [state, line] of Object.entries(states)) {
