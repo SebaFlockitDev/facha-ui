@@ -1,6 +1,6 @@
 # B-028 · De referencias a tokens
 
-> **Estado:** en curso · **Rama:** `feat/reference-to-tokens` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/reference-to-tokens` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -101,31 +101,56 @@ acepta (regla dura 2). Sin tipografía: una imagen no la dice.
 
 ## Criterios de aceptación
 
-- [ ] Antes de la spec se decide cómo convive con S2: la captura la toma la skill, con permiso del dev,
+- [x] Antes de la spec se decide cómo convive con S2: la captura la toma la skill, con permiso del dev,
   y el MCP solo lee el archivo (resuelto en el punto 1).
-- [ ] Cada valor extraído dice de dónde salió.
-- [ ] El informe dice qué valor de la referencia no pasaba contraste y cuál lo reemplaza.
-- [ ] Nada se escribe sin aprobación; la página no se abre sin permiso.
+- [x] Cada valor extraído dice de dónde salió.
+- [x] El informe dice qué valor de la referencia no pasaba contraste y cuál lo reemplaza.
+- [x] Nada se escribe sin aprobación; la página no se abre sin permiso.
 
 ## Tareas
 
-- [ ] 1. El script de lectura y su contrato
-- [ ] 2. `reference` en `propose_design_system`: normalización e informe, tests
-- [ ] 3. `skills/init/reference.md` y `init/SKILL.md` (modo, permiso, herramientas)
-- [ ] 4. SPEC, guía, `help`, CHANGELOG
-- [ ] 5. Prueba real
+- [x] 1. El script de lectura y su contrato · `9551569`
+- [x] 2. `reference` en `propose_design_system`: normalización e informe, tests · `9551569`, `e645ea7`
+- [x] 3. `skills/init/reference.md` y `init/SKILL.md` (modo, permiso, herramientas) · `b8e921f`
+- [x] 4. SPEC, guía, `help`, CHANGELOG · `60e79e1`
+- [x] 5. Prueba real (con las correcciones `9380d59` y `59a758d`)
 - [ ] 6. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **Las herramientas de Playwright no se pre-aprueban en `init`:** además de la pregunta de la skill,
+   Claude Code pide permiso para abrir la página y para correr el script. Dos permisos para algo que
+   toca un sitio ajeno.
+2. **El fixture de la referencia se versiona forzado** (`git add -f`): vive en `.facha-ui/references/`,
+   la ruta real, que el `.gitignore` del repo ignora.
+3. **Un `body` transparente** (muchos sitios) toma el fondo opaco de más área; antes caía a blanco.
+4. **Una marca usada solo como tinte translúcido** (sitios de documentación) cuenta, con su color sin
+   alfa, después del botón, los enlaces y los fondos opacos.
+5. **El radio de un input sin borde no cuenta:** un buscador sin borde con radio 0 bajaba el radio
+   medido.
+6. **Una referencia monocroma** dice qué color de marca queda (el del brief, si hay) y ofrece el de su
+   botón. Con una marca casi negra, el generador la deja igual en oscuro: idea B-039.
 
 ## Registro
 
 - **2026-10-16:** relevado (el generador ya tiene las entradas; S2 y el bundle no decodifican
   imágenes); spec escrito y plan presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 4; 378 tests, typecheck y `claude plugin validate` en verde.
+- **2026-10-16, prueba real:** el script, tal cual, sobre dos sitios públicos desde el navegador de
+  Claude Code (el MCP de Playwright del plugin no conectó en esta sesión, así que el paso de la skill
+  con `browser_evaluate` queda por probar en una sesión donde conecte), y el resultado por el MCP con
+  la app sin diseño:
+  - una página de documentación oscura: la primera versión medía su texto claro contra blanco (1.16:1)
+    y no encontraba la marca, usada solo como tinte; corregido: fondo `#111113`, texto a 16.2:1, marca
+    `#2f62ff`, sistema con 62 pares que pasan; tipografía comercial, no propuesta, con la nota de
+    licencia;
+  - un sitio monocromo: el navegador devuelve `lab()` y `oklab()` (el MCP los lee); radio 10px →
+    Material 3 `sm`, densidad `compact`; la nota decía "acentos de Radix" cuando quedaba la marca del
+    brief: corregida.
 
 ## Cómo retomar
 
-En curso en `feat/reference-to-tokens`: seguir por la primera tarea sin marcar.
+Todo hecho en `feat/reference-to-tokens`; falta el release (tarea 6), solo cuando quien mantiene el
+repo lo pida: versión 0.30.0 con el flujo de `CLAUDE.md`; B-028 a **Hecho** y el primero de **Siguiente**
+a **Ahora**. Pendiente: probar el paso del navegador de la skill con el MCP de Playwright conectado.
