@@ -111,7 +111,7 @@ textarea { min-height: 64px; resize: vertical; }
 .drop.over { border-color: #ff8a4c; background: #1f1a17; }
 .thumb { max-width: 220px; max-height: 140px; border-radius: 8px; border: 1px solid #3a4256; }
 .check { display: flex; align-items: center; gap: 8px; }
-code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: #0e1119; border: 1px solid #3a4256; border-radius: 6px; padding: 2px 6px; word-break: break-all; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: #0e1119; border: 1px solid #3a4256; border-radius: 6px; padding: 2px 6px; overflow-wrap: anywhere; }
 .command { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid #ff8a4c; border-radius: 10px; padding: 10px 12px; background: #1f1a17; }
 .error { color: #ff9b94; }
 .ok { color: #8af0b0; }
@@ -128,13 +128,14 @@ function pct(v: number | null | undefined): string {
 
 /** A command to paste in Claude Code, with a copy button that falls back to selecting the text. */
 function Command({ text, why }: { text: string; why: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"" | "copied" | "selected">("");
   const ref = useRef<HTMLElement>(null);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
+      setCopied("copied");
     } catch {
+      setCopied("selected");
       const sel = window.getSelection();
       const range = document.createRange();
       if (ref.current && sel) {
@@ -150,14 +151,14 @@ function Command({ text, why }: { text: string; why: string }) {
         {why} <code ref={ref}>{text}</code>
       </span>
       <button type="button" onClick={() => void copy()}>
-        {copied ? "Copiado" : "Copiar"}
+        {copied === "copied" ? "Copiado" : copied === "selected" ? "Seleccionado: Ctrl+C" : "Copiar"}
       </button>
     </div>
   );
 }
 
 /** A reference: an image dropped, chosen or pasted, or a URL. Uploads go to .facha-ui/references/. */
-function Reference({ id, onChange }: { id: string; onChange: (r: { file: File | null; url: string }) => void }) {
+function Reference({ id, label, onChange }: { id: string; label: string; onChange: (r: { file: File | null; url: string }) => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [over, setOver] = useState(false);
@@ -175,7 +176,7 @@ function Reference({ id, onChange }: { id: string; onChange: (r: { file: File | 
   };
   return (
     <div className="form-part" onPaste={(e) => take(e.clipboardData.files[0])}>
-      <span className="muted">Referencia de estructura (opcional): una captura de una pantalla que te guste.</span>
+      <span className="muted">{label}</span>
       <div
         className={`drop${over ? " over" : ""}`}
         role="button"
@@ -324,7 +325,7 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
             <span>¿Qué querés lograr en esta pantalla? (opcional)</span>
             <textarea value={goal} maxLength={2000} placeholder="Por ejemplo: que se vean primero los pedidos pendientes" onChange={(e) => setGoal(e.target.value)} />
           </label>
-          <Reference id={`ref-${screen.slug}`} onChange={setRef} />
+          <Reference id={`ref-${screen.slug}`} label="Referencia de estructura (opcional): una captura de una pantalla que te guste." onChange={setRef} />
           <label className="check">
             <input type="checkbox" checked={quick} onChange={(e) => setQuick(e.target.checked)} />
             <span>Una sola variante (más rápido). Sin marcar, tres para comparar.</span>
@@ -370,7 +371,7 @@ function DesignSystem({ center, upload }: { center: CenterData; upload: (f: File
           {status === "missing"
             ? "Tu proyecto todavía no tiene un design system (tokens de color, tipografía y espacios)."
             : status === "partial"
-              ? `Tu design system está incompleto: faltan ${center.project.missing.slice(0, 4).join(", ") || "algunos roles"}.`
+              ? `Tu design system está incompleto: faltan ${center.project.missing.slice(0, 4).join(", ") || "algunos roles"}${center.project.missing.length > 4 ? ` y ${center.project.missing.length - 4} más` : ""}.`
               : "Tu design system está completo."}
         </p>
         {status === "missing" ? (
@@ -381,7 +382,7 @@ function DesignSystem({ center, upload }: { center: CenterData; upload: (f: File
         <div className="form">
           <b>Como esta página</b>
           <span className="muted">Un design system con los colores, la tipografía y los radios de una página que te guste, con el contraste corregido.</span>
-          <Reference id="ref-ds" onChange={setRef} />
+          <Reference id="ref-ds" label="La página de referencia: una captura de una página cuyos colores y tipografía te gusten." onChange={setRef} />
           <div className="row">
             <button type="button" onClick={() => void prepare()}>
               Preparar el comando
@@ -481,7 +482,11 @@ function Center({ routes }: { routes: Routes }) {
               <div className="tile">
                 <span className="muted">Usa tu sistema</span>
                 <span className="big">{pct(center.project.coverage?.tokens)}</span>
-                <span className="muted">de los colores salen de tokens; {pct(center.project.coverage?.components)} de botones e inputs usan tus componentes</span>
+                <span className="muted">
+                  {center.project.coverage?.tokens == null && center.project.coverage?.components == null
+                    ? "Todavía no hay colores ni botones para contar."
+                    : `de los colores salen de tokens; ${pct(center.project.coverage?.components)} de botones e inputs usan tus componentes`}
+                </span>
               </div>
             </div>
           </section>
@@ -504,7 +509,7 @@ function Center({ routes }: { routes: Routes }) {
 
         {center && listening && <DesignSystem center={center} upload={upload} />}
 
-        {center?.at && <p className="muted">Estado medido: {new Date(center.at).toLocaleString()}.</p>}
+        {center?.at && <p className="muted">Estado medido: {new Date(center.at).toLocaleString()}</p>}
       </div>
     </main>
   );
