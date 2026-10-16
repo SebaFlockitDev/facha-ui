@@ -32,6 +32,7 @@ export const RULE_IDS = [
   "a11y-gradient-text",
   "a11y-motion",
   "ds-component-reuse",
+  "a11y-color-only",
 ] as const;
 export type RuleId = (typeof RULE_IDS)[number];
 

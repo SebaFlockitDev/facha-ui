@@ -1,0 +1,9 @@
+:root {
+  --bg: #ffffff;
+  --text: #0f172a;
+  --success: #15803d;
+  --danger: #b91c1c;
+}
+.dot { width: 8px; height: 8px; border-radius: 9999px; }
+.dot-paid { background: var(--success); }
+.dot-overdue { background: var(--danger); }
