@@ -522,7 +522,7 @@ allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_syste
    - trade-offs.
    Cierra con la comparación y el comando para aplicar: `/facha-ui:apply <slug> <a|b|c>`. **No aplica nada.**
 9. **Ajustar una variante (desde 0.6.0, §7.14).** Con `/facha-ui:variants <slug> <a|b|c> "<cambio>"`, o pidiéndolo en la conversación, se ajusta esa variante en su lugar: brechas antes de tocar, cambio mínimo, guardián, capturas nuevas y una revisión (`r<n>`) en el run con el pedido textual. "Como variante nueva" crea `<x>2`.
-10. **Modo en vivo (desde 0.7.0, §7.15).** Con `/facha-ui:variants <slug> live`, cada variante muestra un panel: el dev pide cambios (que se aplican como en el paso 9), señala elementos con un clic y prueba paletas para toda la app con sus conflictos y soluciones. Las paletas se proponen en `.facha-ui/proposals/` y solo `/facha-ui:init palette` las adopta. El panel nunca aplica nada.
+10. **Modo en vivo (desde 0.7.0, §7.15).** Con `/facha-ui:variants <slug> live`, cada variante muestra un panel: el dev pide cambios (que se aplican como en el paso 9), señala elementos con un clic y prueba decisiones de diseño para toda la app (desde 0.25.0, pestaña **Diseño**, §7.35: tono de la marca, grises, radio, alto de controles y contraste del texto) con su contraste, sus conflictos y sus soluciones. Las combinaciones se proponen en `.facha-ui/proposals/` y solo `/facha-ui:init palette` las adopta. El panel nunca aplica nada.
 
 #### 2.b.3 Citas de fuente (obligatorias)
 
@@ -547,7 +547,7 @@ Los valores visuales solo aceptan `token`, `class`, `rule` o `decision`. `object
 |---|---|---|
 | Archivos | `app/lab/<slug>/<x>/page.tsx` | `facha-lab/<slug>/<x>/Page.tsx` (una carpeta por variante, como en Next, para el CSS module y las revisiones) |
 | URL | `/lab/<slug>/<x>` | `/facha-lab/?screen=<slug>&v=<x>` |
-| Andamiaje (una vez) | `app/lab/layout.tsx` (hace `notFound()` si `NODE_ENV === "production"`), `lab-theme.tsx` (aplica `?theme=`), `lab-panel.tsx` (panel en vivo) y `facha-live/route.ts` + `live-core.ts` (endpoint en vivo, 404 en producción) | `facha-lab/index.html` + `main.tsx` (importa el CSS global de la app, busca las variantes con `import.meta.glob` y monta la que pide la URL), `providers.tsx` (importa los providers de la app; un `BrowserRouter` pasa a `MemoryRouter` en la ruta de la pantalla), `compare.tsx` (`?compare=<slug>`, sin votos), y `lab-theme`, `lab-state` y `lab-responsive` compartidos con Next. Vite lo sirve en dev sin tocar ningún archivo de la app |
+| Andamiaje (una vez) | `app/lab/layout.tsx` (hace `notFound()` si `NODE_ENV === "production"`), `lab-theme.tsx` (aplica `?theme=`), `lab-panel.tsx` (panel en vivo, con su lógica de diseño en `lab-palette.ts`) y `facha-live/route.ts` + `live-core.ts` (endpoint en vivo, 404 en producción) | `facha-lab/index.html` + `main.tsx` (importa el CSS global de la app, busca las variantes con `import.meta.glob` y monta la que pide la URL), `providers.tsx` (importa los providers de la app; un `BrowserRouter` pasa a `MemoryRouter` en la ruta de la pantalla), `compare.tsx` (`?compare=<slug>`, sin votos), y `lab-theme`, `lab-state`, `lab-responsive`, `lab-panel` y `lab-palette` compartidos con Next. Vite lo sirve en dev sin tocar ningún archivo de la app |
 | Fuera de producción | `notFound()` en el layout + `lab.dir` en `.gitignore` (paso de adopción) | `vite build` solo construye el `index.html` de la raíz; `main.tsx` no monta nada si `import.meta.env.PROD`; si el `vite.config` lista el lab en `build.rollupOptions.input`, se avisa. Más `lab.dir` en `.gitignore` |
 
 #### 2.b.5 Estado: `.facha-ui/runs/<slug>.json`
@@ -1515,6 +1515,25 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** tres reglas del guardián (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`, §2.a.4), la señal `nested-surfaces` de `review_ui` y los principios `ux:text-on-color` y `ux:wcag-2.3.3`; `theme-contrast` deja de medir un degradado como si fuera su primer color.
 - **Criterio:** de siete señales del backlog, las que tienen fuente son reglas; las demás quedan afuera o como señal de revisión, con el motivo. Una regla sin fuente sería gusto disfrazado de verificación.
 - **Tests:** fixture `generic-look` con positivos y negativos de cada regla y de la señal; 0 hallazgos nuevos en los fixtures existentes y en la muestra del laboratorio con un sistema generado; cada regla en la línea de verificación de su principio.
+
+### 7.35 Versión 0.25.0: controles de diseño en el panel en vivo
+
+Ítem B-031 del backlog (incluye B-036). Spec, decisiones y registro: [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).
+
+- **Qué cambia:** la pestaña **Paleta** del panel (§7.15) pasa a **Diseño**, con cinco controles, cada uno con su fuente:
+  - **tono** de la marca: presets que son los acentos de Radix, nombrados por su escala y sin afirmaciones de mercado (B-036), un deslizador o "tu color". La familia de la marca y los neutros teñidos corren de tono conservando la luminosidad;
+  - **grises:** puros, o teñidos con el croma de los grises de Radix;
+  - **radio:** la escala de esquinas de Material 3 (0 a 16px), proporcional en todos los tokens de radio; `full` queda;
+  - **alto de controles y filas:** 32, 40 o 48px, los tamaños de Carbon, todos sobre los 24px de WCAG 2.5.8;
+  - **contraste del texto:** AA (4.5:1) o AAA (7:1). Oscurece o aclara lo mínimo los textos que no llegan, y dice cuáles.
+
+  Un control que el sistema no puede usar se muestra desactivado, con el motivo. El espaciado y los estados no cambian.
+- **Cómo:** la lógica sale del componente a `lab-palette.ts` (puro, con tests; sus constantes son copias de `standards.ts`). `palette-base.mjs` suma los tokens de radio y de alto escritos en px o rem (un radio con `calc()` o `var()` sigue a su base en el navegador), y el endpoint los acepta (hasta 120 tokens).
+- **Contraste y conflictos:** el informe muestra el par más bajo de cada clase por tema: texto, marca como texto, texto sobre la marca (botones, nuevo) y bordes de controles, cada uno con su mínimo. Los conflictos van uno por token y tema, con la peor superficie.
+- **Proponer y adoptar:** la propuesta lleva un nombre que resume la combinación ("Índigo · radio 12px · contraste alto"). El modo paleta de `init` pasa a `skills/init/palette.md` y adopta radios y altos además de colores, con el contraste medido solo sobre los colores.
+- **Decisiones:** "densidad" es solo el alto de controles y filas, porque ninguna fuente dice cuánto mover una escala de espacios ajena. El contraste tiene los dos niveles de WCAG (AA y AAA). Los presets se nombran por su escala de Radix.
+- **Encontrado en la prueba real:** un token que cambiaba solo en el tema claro se escribía con `!important` en `:root`. Eso pisaba el tema oscuro del proyecto: el título quedaba oscuro sobre oscuro con el informe en verde. Ahora la vista previa escribe el token en todos los temas.
+- **Tests:** `lab-palette.test.ts`, el endpoint con tokens de radio y de alto, `palette-base.mjs` sobre un fixture con radios y los contratos de las skills (el andamiaje copia `lab-palette.ts`, `apply` lo borra, el modo en vivo actualiza un panel viejo). El test del andamiaje ahora lee los imports de varias líneas. Con el de una línea, un `lab-palette.ts` faltante habría roto el laboratorio de Vite como en B-001.
 
 ---
 

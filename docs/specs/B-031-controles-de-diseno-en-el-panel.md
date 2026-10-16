@@ -1,6 +1,6 @@
 # B-031 · Controles de diseño en el panel en vivo
 
-> **Estado:** en curso · **Rama:** `feat/panel-design-controls` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/panel-design-controls` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -82,30 +82,76 @@ los estados ya se calculan en el momento.
 
 ## Criterios de aceptación
 
-- [ ] Cada cambio muestra los pares que dejan de pasar WCAG y una solución.
-- [ ] La combinación elegida queda como propuesta en `.facha-ui/proposals/`.
-- [ ] Fuera del laboratorio no cambia ningún archivo.
-- [ ] La lógica del panel tiene tests, y sus constantes coinciden con `standards.ts`.
+- [x] Cada cambio muestra los pares que dejan de pasar WCAG y una solución (probado en el navegador: marca como texto y texto de los botones con un color propio claro).
+- [x] La combinación elegida queda como propuesta en `.facha-ui/proposals/` (el endpoint la acepta con el radio; L6 escribe `from`/`to`).
+- [x] Fuera del laboratorio no cambia ningún archivo (`src/index.css` de la app de prueba intacto).
+- [x] La lógica del panel tiene tests, y sus constantes coinciden con `standards.ts`.
 
 ## Tareas
 
-- [ ] 1. `lab-palette.ts` (lógica pura y controles nuevos), tests
-- [ ] 2. `lab-panel.tsx`: controles, informe, presets (B-036), propuesta
-- [ ] 3. `palette-base.mjs` y `live-core.ts`: tokens de radio y alto; tests
-- [ ] 4. Skills: `lab.md` (andamiaje), `live.md` (L6), `init` (modo paleta); contratos
-- [ ] 5. Docs
-- [ ] 6. Prueba real
-- [ ] 7. Release
+- [x] 1. `lab-palette.ts` (lógica pura y controles nuevos), tests
+- [x] 2. `lab-panel.tsx`: controles, informe, presets (B-036), propuesta
+- [x] 3. `palette-base.mjs` y `live-core.ts`: tokens de radio y alto; tests
+- [x] 4. Skills: `lab.md` (andamiaje), `live.md` (L1, L6), `init` (modo paleta en `palette.md`), `apply`; contratos
+- [x] 5. Docs (SPEC §2.b y §7.35, `docs/uso.md` 5.1 y 6.6, `help`, CHANGELOG)
+- [x] 6. Prueba real
+- [ ] 7. Release (cuando lo pida quien mantiene el repo)
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **La pestaña pasa de "Paleta" a "Diseño"**: ahora cambia radios, alturas y contraste, no solo
+   colores, y el nombre tiene que decir lo que hace (`ux:nielsen-2`).
+2. **El modo paleta de `init` va a `skills/init/palette.md`**: `init/SKILL.md` tenía 247 de 250
+   líneas, y la regla del repo dice que lo que se usa en un solo modo va aparte.
+3. **Se mide el texto sobre la marca** (`--on-primary` sobre `--primary`, WCAG 1.4.3): la prueba
+   real mostró texto blanco sobre un cyan claro (1.8:1) sin aviso. Se empareja por nombre
+   (`--on-primary`, `--color-on-primary`, `--primary-foreground`) o, si hay uno solo, el único
+   `on-accent`.
+4. **Los conflictos de contraste van uno por token y tema**, con la peor superficie y cuántas más
+   fallan: la marca sobre tres superficies eran tres líneas casi iguales (`ux:nielsen-8`).
+5. **La razón se trunca** (`formatRatio`: 4.49 se lee 4.4): redondear decía "baja a 4.5:1 (mínimo
+   4.5:1)", el mismo error que se corrigió en B-025.
+6. **La vista previa escribe cada token cambiado en todos los temas**: con el valor solo en `:root`,
+   su `!important` le ganaba a la declaración normal del tema oscuro del proyecto.
+7. **El endpoint guarda hasta 120 tokens de la base** (antes 80): con radios y alturas, un sistema
+   generado podía quedarse sin sus radios en silencio.
+8. **Un panel viejo se actualiza al activar el modo en vivo** (L1, si no importa `./lab-palette`):
+   es UI de facha-ui, y sin eso un laboratorio existente nunca vería los controles.
+9. **El test del andamiaje lee imports de varias líneas**: el de una línea no veía el import de
+   `lab-palette`, y un andamiaje sin ese archivo habría roto el laboratorio de Vite (como B-001).
+10. **El test importa `lab-palette.ts` en tiempo de ejecución**, como `live.test.ts` con
+    `live-core.ts`: las plantillas están fuera del `rootDir` de `mcp/`. Se verificó aparte con
+    `tsc --strict --noUncheckedIndexedAccess`.
+11. **Colores `oklch()`: fuera de este ítem** (idea B-038). `palette-base.mjs` y `lab-palette.ts` solo
+    leen hex y `rgb()`, así que un proyecto shadcn/ui con Tailwind 4 no tiene pestaña Diseño.
 
 ## Registro
 
 - **2026-10-16:** relevado el panel; spec escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
+- **2026-10-16:** tarea 1 (`lab-palette.ts` y 12 tests); tarea 2 (`lab-panel.tsx` importa la lógica, pestaña
+  Diseño con los cinco controles); tarea 3 (`palette-base.mjs` y el endpoint con radios y alturas);
+  tarea 4 (`lab.md`, `live.md` L1 y L6, `init/palette.md`, `apply`, contratos); B-036 absorbido;
+  idea B-038.
+- **2026-10-16, prueba real** (app de prueba de Vite con la pantalla `orders`, modo en vivo emulado
+  como L1, panel en el navegador):
+  - los presets, el deslizador de tono, los grises puros, el radio 16px y el contraste alto se ven
+    en toda la app; el contraste alto ajustó `--text-muted` y llegó a 7.0:1; sin token de alto, el
+    control aparece desactivado con su motivo;
+  - un color propio claro (`#22d3ee`) mostró sus conflictos con solución; ahí se encontró que faltaba
+    medir el texto de los botones (decisión 3) y que los conflictos se repetían (decisión 4);
+  - con tono 247° en el tema oscuro, el título quedó oscuro sobre oscuro con el informe en verde:
+    el `!important` de `:root` pisaba el tema oscuro (decisión 6). Corregido y medido en la página:
+    `--text` vale lo que dice el informe;
+  - *Proponer este diseño* llegó al endpoint (202) con nombre, colores, `--radius` y los conflictos;
+    L6 emulado escribió la propuesta con `from`/`to` y el panel mostró "Propuesta lista";
+  - la elección sobrevive a la recarga; *Volver al original* deja todo como estaba; la app no cambió
+    fuera del laboratorio.
+- **2026-10-16:** docs (SPEC §2.b y §7.35, guía, `help`, CHANGELOG). 336 tests en verde.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan. Con el OK: "Plan (propuesto…)" pasa a "Plan aprobado (fecha)", el
-estado a `en curso`, y se arranca por la tarea 1 en `feat/panel-design-controls`.
+Todo está hecho y probado en `feat/panel-design-controls`; falta el release (tarea 7), solo cuando
+quien mantiene el repo lo pida: versión 0.25.0 en `plugin.json`, `mcp/package.json`, el lockfile y
+`server.ts`; CHANGELOG de Unreleased a 0.25.0 con fecha y enlaces del pie; B-031 a **Hecho**
+(incluye B-036); merge `--no-ff` a `main`, tag, push y actualizar el plugin.
