@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-038 · Colores `oklch()` y HSL en el panel en vivo
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** S
 - **Por qué:** shadcn/ui es la base más común de los proyectos React, y la pestaña Diseño del panel no funciona en ninguna de sus formas: con Tailwind 4 los tokens están en `oklch()` y con Tailwind 3 son canales HSL sueltos, y el panel solo lee hex y `rgb()`.
 - **Qué:** el panel lee y escribe `oklch()`, `hsl()` y los canales HSL en el formato de cada token; con la marca gris (shadcn por defecto), los presets la pintan.

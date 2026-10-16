@@ -1,6 +1,6 @@
 # B-038 · Colores `oklch()` y HSL en el panel en vivo
 
-> **Estado:** en spec · **Rama:** `feat/panel-oklch` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/panel-oklch` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** visto en B-031 ([spec](B-031-controles-de-diseno-en-el-panel.md), decisión 11) ·
 > **Última actualización:** 2026-10-16
 
@@ -23,7 +23,7 @@ pestaña. El MCP ya lee los dos formatos (culori, y `format: "hsl-channels"` des
 - shadcn por defecto tiene la **marca gris** (`--primary` casi negro en claro, casi blanco en oscuro): un
   cambio de tono no tiene a qué aplicarse, porque el tono solo corre los colores con croma.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Leer y escribir los formatos del proyecto (`lab-palette.ts`)
 
@@ -53,7 +53,7 @@ traen su hex (`lab-palette.ts`, `PRESETS`). Con el deslizador, se usa el croma d
   toma el color del preset; `palette-base.mjs` sobre `shadcn-tw3` y `shadcn-tw4` da la base.
 - Prueba real en el navegador sobre un proyecto shadcn con Tailwind 4.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las dos recomendadas)
 
 1. **Escribir cada valor en el formato que tenía** (recomendado): `oklch()` sigue en `oklch()`, los
    canales siguen en canales. La alternativa es escribir todo en hex, que es más simple pero cambia el
@@ -84,8 +84,8 @@ traen su hex (`lab-palette.ts`, `PRESETS`). Con el deslizador, se usa el croma d
 ## Registro
 
 - **2026-10-16:** relevado; spec escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las dos decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las dos decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/panel-oklch`.
+En curso en `feat/panel-oklch`: seguir por la primera tarea sin marcar.
