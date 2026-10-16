@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.23.0** (§7.10–§7.33). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.24.0** (§7.10–§7.34). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -718,7 +718,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -1508,7 +1508,7 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Fuentes** verificadas el 2026-10-16: Carbon (style strategies, data table), WCAG 2.5.5 y 1.4.8, Baymard (largo de línea), GOV.UK (números en tablas) y MDN (`tabular-nums`). Polaris y Material 3 no se pudieron leer sin navegador y no se usan.
 - **Tests:** cada valor de cada perfil cita una fuente con URL; las pautas citan principios que existen; el generador aplica cada perfil, la densidad del brief manda y sin perfil nada cambia; todo sistema con perfil pasa cada par de contraste; `profile` por el brief y la tool por el MCP.
 
-### 7.34 Reglas contra el look genérico de IA
+### 7.34 Versión 0.24.0: reglas contra el look genérico de IA
 
 Ítem B-029 del backlog. Spec, fuentes señal por señal y registro: [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
 

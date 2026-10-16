@@ -1,6 +1,6 @@
 # B-029 · Reglas contra el "look genérico de IA"
 
-> **Estado:** en curso · **Rama:** `feat/generic-look-rules` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.24.0) · **Rama:** `feat/generic-look-rules` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -98,7 +98,7 @@ reglas nuevas. Las skills no cambian: el guardián y `review_ui` ya se usan en c
 - [x] 3. Principios · `9369c18`
 - [x] 4. Docs y `help` · `e190393`
 - [x] 5. Prueba real
-- [ ] 6. Release
+- [x] 6. Release 0.24.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -128,9 +128,10 @@ reglas nuevas. Las skills no cambian: el guardián y `review_ui` ya se usan en c
   animaciones y las tarjetas anidadas, pero **no** el gris sobre la marca: era `slate-500`, croma
   0.041, y el umbral estaba en 0.03. Subido a 0.045, con un caso nuevo en el fixture; ahora salen las
   cuatro reglas y las apps reales siguen en 0.
+- **2026-10-16 · release 0.24.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.34 con la versión; B-029 a Hecho y B-031 a Ahora.
 
 ## Cómo retomar
 
-**Estado al 2026-10-16:** tareas 0 a 5 hechas en `feat/generic-look-rules`, sin push. Falta el release
-(tarea 6), con el OK de quien mantiene el repo: versión menor (0.24.0), con el flujo de `CLAUDE.md`;
-B-029 pasa a Hecho y el primero de Siguiente sube a Ahora.
+Terminado en 0.24.0. Ideas que salieron de este ítem: el mismo radio y sombra en todos los bloques (sin
+fuente hoy) podría volver como señal de revisión si aparece una.
