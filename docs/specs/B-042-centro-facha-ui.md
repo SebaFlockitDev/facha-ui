@@ -106,30 +106,46 @@ navegable.
 
 ## Criterios de aceptación
 
-- [ ] Con "abrí facha-ui", el centro muestra el estado del proyecto y las pantallas de peor a mejor.
-- [ ] Desde el centro se piden variantes de una pantalla, con objetivo y con una captura arrastrada.
-- [ ] La subida solo acepta imágenes reales y acotadas, en desarrollo, con origen y token.
-- [ ] `init` y `apply` nunca se disparan desde el centro: se muestra el comando.
+- [x] Con "abrí facha-ui", el centro muestra el estado del proyecto y las pantallas de peor a mejor.
+- [x] Desde el centro se piden variantes de una pantalla, con objetivo y con una captura arrastrada.
+- [x] La subida solo acepta imágenes reales y acotadas, en desarrollo, con origen y token.
+- [x] `init` y `apply` nunca se disparan desde el centro: se muestra el comando.
 
 ## Tareas
 
-- [ ] 1. Endpoint: sesión de proyecto, `run`, `upload`, `center.json`; tests
-- [ ] 2. La página del centro (Vite y Next) y el andamiaje
-- [ ] 3. La skill `center`; contratos
-- [ ] 4. Docs (`docs/uso.md`, SPEC, `help`, `start`, CHANGELOG)
-- [ ] 5. Prueba real
+- [x] 1. Endpoint: sesión de proyecto, `run`, `upload`, `center.json`; tests
+- [x] 2. La página del centro (Vite y Next) y el andamiaje
+- [x] 3. La skill `center`; contratos
+- [x] 4. Docs (`docs/uso.md`, SPEC, `help`, `start`, CHANGELOG)
+- [x] 5. Prueba real
 - [ ] 6. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Pantallas en Vite:** `ux_score` solo reconoce `page.tsx` (Next) y en Vite devuelve `screens: []`.
+  El centro lista entonces los archivos de `src/pages/` o `src/routes/`, sin puntaje y con el peor
+  problema de `check_ui` (C3). Que `ux_score` los mida queda como idea B-043 (afecta también el modo
+  `score` de CI).
+- **La zona de referencia lleva su etiqueta:** en una pantalla es "referencia de estructura"; en el
+  design system, "una página cuyos colores y tipografía te gusten" (`ux:nielsen-2`: habla en los términos de
+  quien la usa).
+- **Copiar sin portapapeles:** cuando el navegador lo rechaza, el texto queda seleccionado y el botón dice
+  "Seleccionado: Ctrl+C" (`ux:nielsen-1`: el estado del sistema, visible).
 
 ## Registro
 
 - **2026-10-16:** pedido del desarrollador; agregado al backlog (B-042) con su OK; relevado; spec de la
   etapa 1 escrito y plan presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 4: endpoint (`027c970`), página y andamiaje (`744cb10`), skill y contratos
+  (`2d6cc14`), docs (`0463c97`). 388 tests en verde.
+- **2026-10-16:** prueba real en la app Vite de prueba, en el navegador: el centro con `center.json` y una
+  sesión de proyecto; se abrió "Proponer variantes", se escribió un objetivo, se soltó un PNG real (se guardó en
+  `.facha-ui/references/upload-….png`, firma PNG verificada) y el pedido `run` llegó a `requests.jsonl` con
+  objetivo, `quick` y la ruta; "En cola" pasó a "Listo" al escribir `status.json`; "Preparar el comando"
+  subió la captura y mostró `/facha-ui:init reference <ruta>`; a 375 px, sin scroll horizontal. Se
+  corrigieron cinco detalles de la página (`3943665`) y la falta de pantallas en Vite (`f0067a2`).
 
 ## Cómo retomar
 
-En curso en `feat/center`: seguir por la primera tarea sin marcar.
+En `feat/center`, tareas 1 a 5 hechas. Falta la 6 (release 0.32.0), solo cuando el desarrollador lo pida.
