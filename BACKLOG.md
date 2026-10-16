@@ -28,11 +28,12 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-004 · Regla `a11y-color-only`
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** un estado que se distingue solo por color falla WCAG 1.4.1 (`ux:wcag-1.4.1`); hoy solo lo ve la revisión.
 - **Qué:** el guardián marca chips, puntos o filas de estado cuyo único diferenciador es una clase o token de color, sin texto ni ícono en el mismo elemento.
 - **Criterios de aceptación:** positivos y negativos en un fixture; 0 falsos positivos en los fixtures existentes; `ux-principles.md` la pasa a "verificado por el guardián".
+- **Spec:** [`docs/specs/B-004-a11y-color-only.md`](docs/specs/B-004-a11y-color-only.md)
 - **Referencias:** SPEC §6 (reglas UX), `skills/_shared/ux-principles.md`
 
 ## Siguiente
