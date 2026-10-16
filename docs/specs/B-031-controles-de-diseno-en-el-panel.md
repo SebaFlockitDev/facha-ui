@@ -1,6 +1,6 @@
 # B-031 · Controles de diseño en el panel en vivo
 
-> **Estado:** en spec · **Rama:** `feat/panel-design-controls` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/panel-design-controls` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -22,7 +22,7 @@ cambia el tono de la marca y de los grises teñidos, y nada más.
   solo `/facha-ui:init palette` escribe tokens, con aprobación.
 - Nada de esa lógica tiene tests: vive dentro del componente.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Cinco controles, cada uno con su fuente
 
@@ -72,7 +72,7 @@ los estados ya se calculan en el momento.
 - SPEC, `docs/uso.md` (6.6, modo en vivo), `CHANGELOG.md`.
 - Prueba en la app de prueba de Vite, en el navegador.
 
-## Decisiones a confirmar
+## Decisiones confirmadas (2026-10-16: las tres recomendadas)
 
 1. **Incluir B-036** (presets con fuente) en este ítem. Recomendado: toca la misma parte del panel.
 2. **"Densidad" se limita al alto de controles y de filas**; el espaciado no se toca. Recomendado:
