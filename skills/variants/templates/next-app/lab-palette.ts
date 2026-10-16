@@ -502,8 +502,11 @@ export interface Pair {
   ratio: number;
   min: number;
   kind: "text" | "brand" | "border" | "onBrand";
-  /** The text is lighter than its background: the way out is a lighter text, not a darker one. */
-  lighter: boolean;
+  /**
+   * White reaches more contrast on this background than black: its relative luminance is under
+   * 0.179, where (L + 0.05) / 0.05 = 1.05 / (L + 0.05) in WCAG's formula. The way out is a light text.
+   */
+  lightWins: boolean;
 }
 
 /** The text drawn on the brand (buttons): --on-primary, --color-on-primary, --primary-foreground, or the only on-accent token. */
@@ -531,7 +534,7 @@ export function contrastPairs(raw: PaletteBase, written: TokenValues, level: "AA
   const pair = (theme: string, fgName: string, bgName: string, min: number, kind: Pair["kind"]) => {
     const fg = plainColor(valueOf(fgName, theme));
     const bg = plainColor(valueOf(bgName, theme));
-    if (fg && bg) out.push({ theme, fg: fgName, bg: bgName, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min, kind, lighter: luminance(fg) > luminance(bg) });
+    if (fg && bg) out.push({ theme, fg: fgName, bg: bgName, ratio: Math.round(contrastRatio(fg, bg) * 100) / 100, min, kind, lightWins: luminance(bg) < 0.179 });
   };
   for (const theme of base.themes.map((t) => t.name)) {
     for (const f of fgs) for (const s of surfaces) pair(theme, f.name, s, f.min, f.kind);
@@ -613,10 +616,10 @@ export function designConflicts(raw: PaletteBase, choice: DesignChoice | null, s
   for (const pairs of [...broken.values()].slice(0, 4)) {
     const p = pairs.reduce((low, x) => (x.ratio < low.ratio ? x : low));
     const more = pairs.length > 1 ? `; también sobre ${pairs.length - 1} ${pairs.length > 2 ? "superficies más" : "superficie más"}` : "";
-    // Text on the brand: darker text goes darker or lighter, by where it sits against the brand.
+    // Text on the brand: light or dark text, by which one the brand lets reach more contrast.
     const fix =
       p.kind === "onBrand"
-        ? `el texto de los botones necesita ${WCAG_MIN.AA}:1 sobre la marca (WCAG 1.4.3): ${p.lighter ? "un texto más claro (blanco) sobre ella, o un tono más oscuro de la marca" : "un texto más oscuro sobre ella, o un tono más claro de la marca"}.`
+        ? `el texto de los botones necesita ${WCAG_MIN.AA}:1 sobre la marca (WCAG 1.4.3): ${p.lightWins ? "un texto claro (blanco) sobre ella, o un tono más oscuro de la marca" : "un texto oscuro sobre ella, o un tono más claro de la marca"}.`
         : FIX[p.kind];
     out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1)${more}.`, fix });
   }
