@@ -1,6 +1,6 @@
 # B-032 · Matriz completa de contraste
 
-> **Estado:** en curso · **Rama:** `feat/contrast-matrix` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/contrast-matrix` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md); absorbe B-008 ·
 > **Última actualización:** 2026-10-16
 
@@ -136,26 +136,39 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
 
 ## Criterios de aceptación
 
-- [ ] La matriz sale en `get_design_system` (`contrast`), con cada texto sobre cada fondo donde puede
+- [x] La matriz sale en `get_design_system` (`contrast`), con cada texto sobre cada fondo donde puede
   aparecer, en cada tema.
-- [ ] Un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un
+- [x] Un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un
   gris (criterio de B-008), ni el token de otro estado.
-- [ ] 4.497:1 no pasa el mínimo de 4.5:1.
-- [ ] 0 cambios de resultado en los fixtures existentes salvo los que la matriz o el redondeo explican.
+- [x] 4.497:1 no pasa el mínimo de 4.5:1 (probado con 4.4989:1).
+- [x] 0 cambios de resultado en los fixtures existentes salvo los que la matriz o el redondeo explican:
+  un último decimal truncado (1.19 → 1.18) y el texto blanco sobre la marca oscura (3.67:1), que ahora sí sale.
 
 ## Tareas
 
-- [ ] 1. Contraste sin redondear (`color.ts` y las reglas), tests
-- [ ] 2. La matriz (`contrast.ts`, sección `contrast`), fixture y tests
-- [ ] 3. Sugerencias con significado (`visual.ts`), tests de B-008
-- [ ] 4. `health` mide `on-accent`
-- [ ] 5. `variants`, SPEC, guía, `help`, CHANGELOG
-- [ ] 6. Prueba real
-- [ ] 7. Release
+- [x] 1. Contraste sin redondear (`color.ts` y las reglas), tests · `28ce107`
+- [x] 2. La matriz (`contrast.ts`, sección `contrast`), fixture y tests · `e841459`
+- [x] 3. Sugerencias con significado (`visual.ts`), tests de B-008 · `69e7ccb`
+- [x] 4. `health` mide `on-accent` · `a4cd3a2`
+- [x] 5. `variants`, SPEC, guía, `help`, CHANGELOG · `639ef21`
+- [x] 6. Prueba real
+- [ ] 7. Release (cuando lo pida quien mantiene el repo)
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **Un alias puro se mide una vez, como su destino.** Tailwind 4 repite cada token como `--color-x:
+   var(--x)`, y en `shadcn-tw4` eso duplicaba la matriz (114 pares; con la deduplicación, 29).
+2. **`--text` y `--foreground` solos no forman par:** el nombre tiene que tener algo antes del sufijo.
+   La primera versión emparejaba `--text` con `--bg` por accidente.
+3. **El token liso de un estado se mide como texto solo si el estado no tiene variante de texto.** En
+   Radix y en el generador, el paso 9 (`--color-danger`) es un fondo sólido y el texto es el 11
+   (`--color-danger-text`).
+4. **`health` empareja el texto sobre color con la misma regla de nombres que la matriz**
+   (`namedBackgrounds`), así nunca discrepan.
+5. **Los umbrales salen de reglas que ya existen:** croma de 0.06 para "un color" (`ux-gray-on-color`)
+   y 40° de tono para "la misma familia" (el panel en vivo).
+6. **Un gris escrito a mano sigue recibiendo el texto más cercano:** cambiar un gris por otro gris no
+   cambia lo que significa.
 
 ## Registro
 
@@ -163,7 +176,20 @@ Los tokens `on-accent` se miden contra el fondo con el que forman par (punto 1, 
   rompen B-008; investigados el redondeo (Understanding 1.4.3) y APCA (estado en WCAG 3 y licencia);
   spec escrito y plan presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 5. El fixture de siempre mostró un caso nuevo y real: `--color-on-primary`
+  (blanco) sobre la marca del tema oscuro da 3.67:1, y antes nadie lo medía.
+- **2026-10-16, prueba real:**
+  - matriz sobre el sistema generado de la app sin diseño: 26 pares, todos pasan (confirma al
+    generador); sobre `shadcn-tw4`: 29 pares, con el borde de `--input` en 1.25:1 y `--muted-foreground`
+    solo para texto grande (4.33:1), los dos valores por defecto de shadcn;
+  - el proyecto mínimo de la sonda: el rojo escrito a mano y el `--status-danger` que no llega ahora son
+    brechas (ese sistema no tiene un rojo legible), no un gris ni el verde de éxito;
+  - `audit_project` en las dos apps de prueba, `next-visual` y `shadcn-tw4`: los mismos totales que la
+    0.25.0;
+  - 353 tests, typecheck y `claude plugin validate` en verde.
 
 ## Cómo retomar
 
-En curso en `feat/contrast-matrix`: seguir por la primera tarea sin marcar.
+Todo hecho y probado en `feat/contrast-matrix`; falta el release (tarea 7), solo cuando quien mantiene
+el repo lo pida: versión 0.26.0 con el flujo de `CLAUDE.md`; B-032 a **Hecho** (absorbe B-008) y el
+primero de **Siguiente** a **Ahora**.
