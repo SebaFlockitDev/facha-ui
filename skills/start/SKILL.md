@@ -85,8 +85,9 @@ Call `ux_score` (no arguments: every screen outside the lab) and `audit_project`
 1. **Score:** the project `average` (0 to 100) and, in one line, what it measures: consistency
    with the design system, accessibility, responsive, microcopy, hierarchy and states. Say it is
    a trend to compare the project with itself, not an absolute grade. Name the screen with the
-   lowest `score` and its weakest category. With no screens (`average` null), say so and use
-   only `audit_project`.
+   lowest `score` and its weakest category. Add the design-system coverage in one line
+   (`coverage`: components used vs made by hand, colors from tokens vs literals; skip a null
+   ratio). With no screens (`average` null), say so and use only `audit_project`.
 2. **Totals:** `audit_project.totals` (errors, warnings, info) and the file with the most
    violations (`top`).
 3. **The 3 most serious problems:** from the `worst` of every screen and `audit_project.byRule`,

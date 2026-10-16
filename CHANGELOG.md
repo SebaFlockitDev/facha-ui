@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- `get_design_system` conoce los componentes de tu carpeta de UI (sección `components`: `components.json` o `components/ui`), con su import y qué elemento nativo reemplaza cada uno.
+- Regla `ds-component-reuse` (aviso): un `<button>`, `<input>`, `<select>`, `<table>`… hecho a mano cuando el proyecto lo tiene como componente, con el import exacto. Vale también para las variantes del laboratorio.
+- `ux_score` muestra la cobertura del design system, al lado del puntaje y sin cambiarlo: componentes usados contra hechos a mano, y colores de tokens contra literales.
+
 ## [0.26.0] - 2026-10-16
 
 ### Added

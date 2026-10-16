@@ -190,6 +190,7 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | Pedido | Tool | Qué devuelve |
 |---|---|---|
 | *"¿Qué design system tiene este proyecto?"* | `get_design_system` | Tokens por tema, clases reutilizables, `coverage` (roles que faltan), `gaps` (literales sin token), `health` (contraste por tema), `contrast` (la matriz de contraste), `guidelines` y `decisions` |
+| *"¿Qué componentes tiene el proyecto?"* | `get_design_system` → `components` | Los componentes de tu carpeta de UI (`components/ui`), con su import y qué elemento nativo reemplazan. Si alguien escribe un `<button>` a mano teniendo `Button`, el guardián avisa (`ds-component-reuse`) con el import exacto |
 | *"¿Qué texto puedo poner sobre este panel?"* | `get_design_system` → `contrast` | Para cada fondo, los textos que pasan WCAG en todos los temas, los que solo sirven para títulos grandes y los que no pasan |
 | *"¿Qué color uso para X?"* | `get_design_system` | El token, o la aclaración de que no existe y cuál es la alternativa |
 | *"Revisá `app/orders/page.tsx`"* | `check_ui` | Violaciones con archivo:línea, severidad y sugerencia de token |
@@ -475,7 +476,7 @@ Revisa el recorrido como un senior: que la misma acción se llame igual en cada 
 
 ## 7c. Puntaje de UX y CI
 
-Preguntá *"¿qué puntaje de UX tiene cada pantalla?"* (`ux_score`): de 0 a 100, en consistencia, accesibilidad, responsive, microcopy y jerarquía y estados, con los hallazgos que más puntos cuestan. Es una tendencia: sirve para comparar una pantalla consigo misma.
+Preguntá *"¿qué puntaje de UX tiene cada pantalla?"* (`ux_score`): de 0 a 100, en consistencia, accesibilidad, responsive, microcopy y jerarquía y estados, con los hallazgos que más puntos cuestan. Es una tendencia: sirve para comparar una pantalla consigo misma. Al lado, sin cambiar el puntaje, la **cobertura del design system**: cuántos botones, inputs y tablas usan los componentes del proyecto y cuántos están hechos a mano, y cuántos colores salen de un token.
 
 Para que el CI falle si una pantalla empeora:
 
