@@ -732,6 +732,14 @@ describe("B-026 · the direction preview in the lab", () => {
     expect(fs.readFileSync(path.join(REPO, "skills", "variants", "SKILL.md"), "utf8")).toContain("never `system`, reserved by `init`");
   });
 
+  it("B-027: the profile reaches the skills: the brief names it, init system shows it, variants cites it", () => {
+    const read = (...p: string[]) => fs.readFileSync(path.join(REPO, "skills", ...p), "utf8").replace(/\s+/g, " ");
+    expect(read("init", "brief.md")).toContain("The type picks a profile");
+    expect(read("init", "system.md")).toContain("**The product's profile** (`profile`, from the brief's product type)");
+    expect(read("variants", "SKILL.md")).toContain("`profile.guidelines` (the product's) count too");
+    expect(read("variants", "SKILL.md")).toContain("decisions, brief, profile)");
+  });
+
   it("the live panel never reads system/ as a run", () => {
     expect(read("next-app/lab-panel.tsx")).toContain('slug === "system"');
   });
