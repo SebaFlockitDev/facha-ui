@@ -620,7 +620,9 @@ export function designConflicts(raw: PaletteBase, choice: DesignChoice | null, s
     const fix =
       p.kind === "onBrand"
         ? `el texto de los botones necesita ${WCAG_MIN.AA}:1 sobre la marca (WCAG 1.4.3): ${p.lightWins ? "un texto claro (blanco) sobre ella, o un tono más oscuro de la marca" : "un texto oscuro sobre ella, o un tono más claro de la marca"}.`
-        : FIX[p.kind];
+        : p.kind === "brand"
+          ? `un tono más ${p.lightWins ? "claro" : "oscuro"} de la marca para el texto, o enlaces con el color de texto y subrayado.`
+          : FIX[p.kind];
     out.push({ kind: "contrast", text: `En ${p.theme}, ${p.fg} sobre ${p.bg} baja a ${formatRatio(p.ratio)}:1 (mínimo ${p.min}:1)${more}.`, fix });
   }
   return out;

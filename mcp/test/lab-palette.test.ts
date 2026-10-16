@@ -282,6 +282,9 @@ describe("lab-palette · oklch() and HSL, the formats of shadcn/ui (B-038)", () 
     const dark = designConflicts(tw4, indigo, []).find((c) => c.text.startsWith("En dark, --primary-foreground sobre --primary"));
     // …and the way out is white text: on indigo-9 white reaches 5.2:1 and black only 4.0:1.
     expect(dark?.fix).toContain("un texto claro (blanco)");
+    // The brand as text on a dark surface needs a lighter tone, not a darker one.
+    const brandDark = designConflicts(tw4, indigo, []).find((c) => c.text.startsWith("En dark, --primary sobre --background"));
+    expect(brandDark?.fix).toContain("un tono más claro de la marca");
     // On a light brand (cyan-9, the custom color of the earlier test) the way out is dark text.
     const cyanOn: PaletteBase = { ...BASE, tokens: [...BASE.tokens, { name: "--on-primary", role: "on-accent", values: { light: "#ffffff", dark: "#ffffff" } }] };
     const light = designConflicts(cyanOn, customChoice(cyanOn, "#22d3ee")!, []).find((c) => c.text.includes("--on-primary sobre --primary"));
