@@ -7,6 +7,13 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-16
+
+### Added
+
+- **El centro facha-ui** (`/facha-ui:center`, o *"abrí facha-ui"*): una página en el laboratorio para usar facha-ui sin recordar comandos. Muestra cómo está tu proyecto, tus pantallas de la que más necesita a la que menos con un botón para proponer variantes (con un objetivo y una captura que arrastrás o una URL), las variantes en curso y el design system, con el comando exacto para lo que cambia tu código. Claude escucha detrás.
+- El modo en vivo acepta una sesión para todo el proyecto, y el endpoint del laboratorio, la subida de capturas de referencia (PNG, JPEG o WebP, hasta 5 MB, solo en desarrollo).
+
 ## [0.31.0] - 2026-10-16
 
 ### Added
@@ -361,7 +368,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.32.0...HEAD
+[0.32.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.30.0...v0.31.0
 [0.30.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.28.0...v0.29.0

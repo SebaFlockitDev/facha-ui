@@ -186,4 +186,4 @@ workspace root other than the project stays shown for the developer to add: it i
 
 End with one line that repeats the recommendation, and:
 
-> Para ver todos los comandos: `/facha-ui:help`. Si querés que te enseñe paso a paso: `/facha-ui:learn`.
+> Para tenerlo todo en una pantalla, sin comandos: *"abrí facha-ui"* (`/facha-ui:center`). Para ver todos los comandos: `/facha-ui:help`. Si querés que te enseñe paso a paso: `/facha-ui:learn`.

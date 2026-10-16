@@ -57,7 +57,10 @@ Además, cada vez que Claude escribe un archivo de UI, el guardián automático 
 | `/facha-ui:init system` | Para un proyecto sin tokens: arma un design system completo (escalas de color en claro y oscuro, tipografía, espaciado, radios y sombras) desde estándares publicados (Radix, Carbon, Material 3, Fluent 2) y tu brief, con cada par de contraste verificado contra WCAG 2.2. Antes de escribir, te muestra 3 direcciones (tu color de marca en tres estilos: estándar, sobrio y suave) sobre tu pantalla real y sobre una página de muestra, lado a lado y con capturas. Escribe solo la que elegís y aprobás (solo vos lo podés lanzar) |
 | `/facha-ui:init palette <archivo>` | Adopta en toda la app una paleta que probaste en el panel en vivo, con contraste y conflictos verificados (solo vos lo podés lanzar) |
 | `/facha-ui:learn [1-9\|<tema>]` | Curso práctico sobre tu propio proyecto: design system, IA y UI con criterio, en 9 lecciones. Solo lee |
+| `/facha-ui:center` | El centro: todo en una pantalla, sin comandos |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
+
+**La forma fácil:** decile *"abrí facha-ui"* (`/facha-ui:center`). Se abre el **centro** en el navegador: cómo está tu proyecto, tus pantallas de la que más necesita a la que menos, con un botón para proponer variantes (con un objetivo y una captura que arrastrás), las variantes en curso y el design system. Claude escucha detrás mientras esté abierta esta conversación. Crear tokens y aplicar los arrancás vos: el centro te da el comando para copiar.
 
 **Flujo en 4 pasos**
 

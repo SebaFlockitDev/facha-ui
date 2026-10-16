@@ -37,6 +37,11 @@ const emit = (r) => {
   if (r.kind === "palette" && r.palette && typeof r.palette === "object") line.palette = r.palette;
   // A team vote from the compare page: who voted (the reason is the text).
   if (r.kind === "vote" && typeof r.voter === "string") line.voter = r.voter.slice(0, 40);
+  // A run asked from the facha-ui center (B-042): one variant or three, and a reference, if any.
+  if (r.kind === "run") {
+    line.quick = r.quick === true;
+    if (typeof r.reference === "string") line.reference = r.reference.slice(0, 300);
+  }
   process.stdout.write(JSON.stringify(line) + "\n");
 };
 
