@@ -1,6 +1,6 @@
 # B-040 · Variantes con la estructura de una captura de referencia
 
-> **Estado:** en curso · **Rama:** `feat/variants-layout-reference` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/variants-layout-reference` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** pedido del desarrollador después de B-028 ("¿ya se le puede pasar capturas de páginas que
 > quiero?") · **Última actualización:** 2026-10-16
 
@@ -87,30 +87,51 @@ y no se sigue.
 
 ## Criterios de aceptación
 
-- [ ] Una corrida con una captura da una variante C con su estructura, adaptada a la pantalla, y cada
+- [x] Una corrida con una captura da una variante C con su estructura, adaptada a la pantalla, y cada
   decisión de estructura cita la región de la captura.
-- [ ] Ningún valor visual sale de la captura (`check_ui` en 0 errores, como siempre).
-- [ ] Si la estructura de la referencia no sirve para la tarea, la skill lo dice y adapta, con el
+- [x] Ningún valor visual sale de la captura (`check_ui` en 0 errores, como siempre).
+- [x] Si la estructura de la referencia no sirve para la tarea, la skill lo dice y adapta, con el
   motivo.
 
 ## Tareas
 
-- [ ] 1. `skills/variants/reference.md` y los cambios en `SKILL.md` (entrada, C, fuente), contratos
-- [ ] 2. `run-state.md` y la crítica (Step 7b)
-- [ ] 3. Docs
-- [ ] 4. Prueba real
+- [x] 1. `skills/variants/reference.md` y los cambios en `SKILL.md` (entrada, C, fuente), contratos · `1a77722`
+- [x] 2. `run-state.md` y la crítica (Step 7b) · `1a77722`
+- [x] 3. Docs · `5153b65`
+- [x] 4. Prueba real
 - [ ] 5. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+1. **La crítica contra la referencia va en `reference.md` (RF4)**, no en el Step 7b de `SKILL.md`: el
+   archivo ya está en el máximo de 250 líneas, y solo se usa cuando hay referencia.
+2. **En modo rápido, la única variante es C** (`quick.md`): con una referencia, es lo que se pidió.
+3. **La descripción de `variants` suma la frase** "hacé la pantalla de pedidos con una estructura como
+   esta captura", para que la skill se active con esas palabras.
 
 ## Registro
 
 - **2026-10-16:** pedido del desarrollador; agregado al backlog (B-040) con su OK; relevado; spec escrito
   y plan presentado, pendiente de aprobación.
 - **2026-10-16:** plan aprobado con las tres decisiones recomendadas.
+- **2026-10-16:** tareas 1 a 3; 380 tests y `claude plugin validate` en verde.
+- **2026-10-16, prueba real:** una corrida en modo rápido, emulada siguiendo `reference.md`, sobre la
+  pantalla de pedidos de la app de Vite, con la captura del ejemplo "tasks" de shadcn/ui:
+  - lectura: título con una línea de resumen arriba a la izquierda, avatar arriba a la derecha; una barra
+    a todo lo ancho con búsqueda, filtros por facetas (estado, prioridad) y la acción principal al
+    final; la tabla con selección, identificador y una etiqueta antes del título;
+  - encaje: la barra de filtros y el resumen sirven a la tarea (encontrar lo que espera revisión); la
+    selección múltiple y "agregar" no, porque la pantalla no tiene acciones en lote ni alta;
+  - la variante C: título con "3 pedidos esperan revisión", búsqueda por cliente o número, botones de
+    estado visibles (5 estados: verlos es más rápido que abrir un menú, `ux:nielsen-6`), arranca en
+    "Pendiente de revisión", y el número de pedido como enlace;
+  - el guardián: primero 2 avisos (la fila clicable sin teclado; el borde del buscador a 1.23:1, por
+    debajo de 3:1, una brecha del sistema: no hay token de borde fuerte, se usó `--text-muted`), después
+    0 errores y 0 avisos; queda un *info* falso (idea B-041);
+  - la crítica: a 800px la búsqueda y los filtros quedan en dos filas, y un conteo en cada filtro, como
+    en la referencia, ayudaría: una revisión posible.
 
 ## Cómo retomar
 
-En curso en `feat/variants-layout-reference`: seguir por la primera tarea sin marcar.
+Todo hecho y probado en `feat/variants-layout-reference`; falta el release (tarea 5), solo cuando
+quien mantiene el repo lo pida: versión 0.31.0 con el flujo de `CLAUDE.md`; B-040 a **Hecho**.
