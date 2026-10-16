@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-042 · Centro facha-ui
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** L
 - **Por qué:** facha-ui ya se usa con palabras, pero hay que saber qué pedir: no se ve qué pantallas hay, cuáles están peor ni qué variantes quedaron abiertas. Una pantalla deja reconocer en lugar de recordar (`ux:nielsen-6`).
 - **Qué:** con "abrí facha-ui", una página en el laboratorio con el estado del proyecto, las pantallas de peor a mejor con "Proponer variantes" (objetivo y una captura arrastrada), las variantes en curso y el design system; Claude escucha detrás. `init` y `apply` siguen siendo del desarrollador: el centro muestra el comando.

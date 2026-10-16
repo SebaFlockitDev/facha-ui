@@ -1,6 +1,6 @@
 # B-042 · Centro facha-ui (etapa 1)
 
-> **Estado:** en spec · **Rama:** `feat/center` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/center` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** pedido del desarrollador ("manejar todo esto de manera sencilla, sin memorizar comandos,
 > desde una pantalla, con subida de imágenes") · **Última actualización:** 2026-10-16
 
@@ -23,7 +23,7 @@ a la vista (`ux:nielsen-1`). Los comandos quedan para quien ya los conoce (`ux:n
   y por eso no los dispara la IA. El panel ya muestra una frase para copiar en el chat cuando hace falta
   una confirmación (`ChatConfirm`).
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. Una puerta de entrada: la skill `center`
 
@@ -84,7 +84,7 @@ estilos propios del panel (no usa ni toca el design system del proyecto) y acces
 - Prueba real: el centro en la app de Vite, una corrida pedida desde el centro con una captura
   arrastrada, y el comando de `init reference` copiado desde ahí.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las cuatro recomendadas)
 
 1. **Una skill nueva, `center`** (recomendado): `start` sigue siendo un análisis de solo lectura, y el
    centro necesita escribir el laboratorio y escuchar. La alternativa es sumarlo a `start`, que dejaría
@@ -128,8 +128,8 @@ navegable.
 
 - **2026-10-16:** pedido del desarrollador; agregado al backlog (B-042) con su OK; relevado; spec de la
   etapa 1 escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las cuatro decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/center`.
+En curso en `feat/center`: seguir por la primera tarea sin marcar.
