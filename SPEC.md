@@ -237,11 +237,13 @@ Las descripciones se escriben en inglés porque son la interfaz del producto ope
 ##### `get_design_system`
 
 **Descripción (literal):**
-> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one, with the profile of its product type (defaults and guidelines from published systems, each with its source).
+> Returns the project's design system as parsed from its source code: tokens (CSS custom properties with their value per theme, inferred role, comment and file:line), detected themes, type and radius scales, reusable component classes, coverage gaps against facha-ui's minimum design-system contract, active validation rules, project guidelines, previously approved design decisions and the design brief (product, users, personality, density, brand color) when the team recorded one, with the profile of its product type (defaults and guidelines from published systems, each with its source), and the contrast matrix: every text on every background where it can appear, per theme, with its WCAG 2.2 level and, for each background, the text that can go on it.
 > **When to use:** before writing or modifying any UI, and to answer questions such as "which color/size/component should I use for X?". If no token covers the need, the correct answer is that there is no token: report the gap — never invent a value.
-> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`, `brief`, `profile`. Read-only: it never modifies files or accesses the network.
+> **Returns:** JSON with `status` (ok | partial | missing), `project`, `tokens`, `scales`, `componentClasses`, `coverage`, `gaps`, `health`, `rules`, `guidelines`, `decisions`, `brief`, `profile`, `contrast`. Read-only: it never modifies files or accesses the network.
 
-**Entrada:** `{ sections?: ("project"|"tokens"|"scales"|"componentClasses"|"coverage"|"gaps"|"health"|"rules"|"guidelines"|"decisions")[] }`. Por defecto, todas.
+**Entrada:** `{ sections?: ("project"|"tokens"|"scales"|"componentClasses"|"coverage"|"gaps"|"health"|"rules"|"guidelines"|"decisions"|"brief"|"profile"|"contrast")[] }`. Por defecto, todas.
+
+**Matriz de contraste (`contrast`, desde 0.26.0, §7.36).** Cada texto sobre cada fondo donde puede aparecer, en cada tema, con su fuente: los `text.*` sobre las superficies (WCAG 1.4.3); los pares por nombre (`X-foreground`, `X-fg` u `on-X` sobre `X`, como shadcn/ui y Material; `X-text` sobre `X-bg` o `X-subtle`, como Radix y el generador); el texto de cada estado sobre las superficies (su variante de texto, o el token liso si no la tiene); los pares que el proyecto declara en una misma regla (con `archivo:línea`); y los bordes de controles y el anillo de foco a 3:1 (WCAG 1.4.11). Cada par tiene su razón truncada y su nivel por tema: AAA (7:1), AA, solo texto grande (de 3:1 a 4.5:1: 24px, o 18.66px en negrita) o no pasa. Un alias puro (`--color-x: var(--x)`) se mide una vez, como su destino. `bySurface` dice, para cada fondo, qué textos pasan en todos los temas, cuáles solo sirven para texto grande y cuáles no pasan.
 
 **Salida (forma):**
 
@@ -1534,6 +1536,16 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Decisiones:** "densidad" es solo el alto de controles y filas, porque ninguna fuente dice cuánto mover una escala de espacios ajena. El contraste tiene los dos niveles de WCAG (AA y AAA). Los presets se nombran por su escala de Radix.
 - **Encontrado en la prueba real:** un token que cambiaba solo en el tema claro se escribía con `!important` en `:root`. Eso pisaba el tema oscuro del proyecto: el título quedaba oscuro sobre oscuro con el informe en verde. Ahora la vista previa escribe el token en todos los temas.
 - **Tests:** `lab-palette.test.ts`, el endpoint con tokens de radio y de alto, `palette-base.mjs` sobre un fixture con radios y los contratos de las skills (el andamiaje copia `lab-palette.ts`, `apply` lo borra, el modo en vivo actualiza un panel viejo). El test del andamiaje ahora lee los imports de varias líneas. Con el de una línea, un `lab-palette.ts` faltante habría roto el laboratorio de Vite como en B-001.
+
+### 7.36 Versión 0.26.0: matriz completa de contraste
+
+Ítem B-032 del backlog (absorbe B-008). Spec, decisiones y registro: [`docs/specs/B-032-matriz-de-contraste.md`](docs/specs/B-032-matriz-de-contraste.md).
+
+- **Qué cambia:** `get_design_system` suma la sección `contrast` (§2.a), con cada texto sobre cada fondo donde puede aparecer. `health` mide el texto sobre color (`on-accent`) contra el fondo con el que forma par, que antes se salteaba.
+- **Sin redondeo:** pasa o no pasa se decide con la razón sin redondear en todas las reglas de contraste ("4.499:1 would not meet the 4.5:1 threshold", Understanding 1.4.3); el número que se muestra se trunca.
+- **Sugerencias con significado (B-008):** un estado solo recibe tokens de su mismo estado. Un color escrito a mano, sin token gemelo y bajo un selector que no dice su estado, toma la familia del color del sistema de tono más cercano (a 40° o menos; croma de 0.06 o más). Si esa familia no tiene un token legible, es una brecha: un color nunca recibe un gris.
+- **Decisiones:** APCA queda afuera (no está en WCAG 3, que todavía no eligió algoritmo, y su licencia prohíbe el uso comercial sin contrato); la sección viene por defecto; sin redondeo en todas las reglas.
+- **Tests:** fixture `contrast-matrix` (cada clase de par, un par en 4.4989:1, los casos de B-008), los alias de Tailwind 4 sobre `shadcn-tw4`, y el fixture de siempre, donde ahora sale el texto blanco sobre la marca del tema oscuro (3.67:1).
 
 ---
 

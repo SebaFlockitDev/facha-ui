@@ -189,7 +189,8 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 
 | Pedido | Tool | Qué devuelve |
 |---|---|---|
-| *"¿Qué design system tiene este proyecto?"* | `get_design_system` | Tokens por tema, clases reutilizables, `coverage` (roles que faltan), `gaps` (literales sin token), `health` (contraste por tema), `guidelines` y `decisions` |
+| *"¿Qué design system tiene este proyecto?"* | `get_design_system` | Tokens por tema, clases reutilizables, `coverage` (roles que faltan), `gaps` (literales sin token), `health` (contraste por tema), `contrast` (la matriz de contraste), `guidelines` y `decisions` |
+| *"¿Qué texto puedo poner sobre este panel?"* | `get_design_system` → `contrast` | Para cada fondo, los textos que pasan WCAG en todos los temas, los que solo sirven para títulos grandes y los que no pasan |
 | *"¿Qué color uso para X?"* | `get_design_system` | El token, o la aclaración de que no existe y cuál es la alternativa |
 | *"Revisá `app/orders/page.tsx`"* | `check_ui` | Violaciones con archivo:línea, severidad y sugerencia de token |
 | *"¿Cuántas violaciones tiene el proyecto?"* | `audit_project` | Totales por severidad, por regla y por archivo |
@@ -221,6 +222,8 @@ Antes de pedir variantes, conviene saber en qué estado está el design system. 
 | `a11y-motion` | warning | Animaciones sin alternativa para quien pide menos movimiento (`prefers-reduced-motion`, `motion-safe:` en Tailwind) |
 
 Además, `health` (en `get_design_system` y `audit_project`) informa los tokens de texto que fallan contraste, los **estados que se confunden por color** (también simulando deuteranopía y protanopía) y la **paleta inflada**: tokens o colores casi idénticos que podrían ser uno solo, y tamaños de letra o radios que difieren en medio píxel. Si querés que los contrastes contra las superficies sean errores, declaralas en la config: `"contrast": { "surfaces": ["--panel"] }`.
+
+La **matriz de contraste** (`get_design_system` → `contrast`) mide cada texto sobre cada fondo donde puede aparecer, en claro y en oscuro: los textos sobre las superficies, el texto de cada botón sobre su color (`--on-primary` sobre `--primary`, `--primary-foreground` sobre `--primary`), cada estado sobre las superficies y su propio fondo, los pares que tu CSS declara juntos y los bordes de los inputs y el anillo de foco (3:1). Cada par dice su nivel: AAA, AA, solo texto grande (títulos de 24px o más, o 18.66px en negrita) o no pasa. Se decide como pide WCAG, sin redondear: 4.49:1 no llega a 4.5:1. Cuando un texto no llega, la sugerencia conserva lo que significa: un error recibe un token de error, nunca un gris ni el verde de "éxito"; si no hay uno legible, te lo marca como brecha.
 
 ### 5.0 Si no tenés ningún diseño definido: `/facha-ui:init brief`
 

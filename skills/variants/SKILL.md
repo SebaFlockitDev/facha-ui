@@ -225,7 +225,7 @@ agent is not available, say so and present without it.
 | `guideline` | A project guideline | `g<n>` + text |
 | `pattern` | A pattern observed in the project | `file:line` of the example |
 | `decision` | A previous approved decision | Decision id |
-| `health` | Avoiding a token that fails contrast in a theme | Token + ratios |
+| `health` · `contrast` | Text for a background: `contrast.bySurface` (pass in every theme; `largeOnly` only at 24px or 18.66px bold) | Pair + ratios |
 | `objective` | A structural choice (order, grouping, layout) derived from the goal | — |
 | `request` | A structural choice the developer asked for in a refinement | `r<n>` + the request |
 | `ux-principle` | A structural or interaction choice justified by a UX principle | The principle's id (e.g. `ux:hick`) |
