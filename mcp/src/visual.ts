@@ -1,6 +1,6 @@
 import { differenceEuclidean, filterDeficiencyDeuter, filterDeficiencyProt, type Color } from "culori";
 import type { Rule } from "postcss";
-import { contrast, findColorLiterals, parseColor, round, toHex } from "./color.js";
+import { contrast, findColorLiterals, parseColor, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { selectorContext, themeForSelector, tokenColor } from "./tokens.js";
 import type { Suggestion } from "./types.js";
@@ -196,7 +196,7 @@ export function textContrast(
   if (opts.text !== false && !background && defaultTheme && ratios[defaultTheme] !== undefined && ratios[defaultTheme]! < 1.5) return null;
   return {
     failing: measured.filter((th) => ratios[th]! < minRatio),
-    ratios,
+    ratios: Object.fromEntries(measured.map((th) => [th, shownRatio(ratios[th]!)])),
     against,
     minRatio,
     certain: !!background || surf.configured,

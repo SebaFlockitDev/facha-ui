@@ -1,6 +1,6 @@
 import { converter, formatHex, type Color } from "culori";
 import { scanFiles } from "./check.js";
-import { alphaOf, contrast, parseColor, round, toHex } from "./color.js";
+import { alphaOf, contrast, parseColor, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { coverage } from "./design-system.js";
 import { listProjectFiles } from "./project.js";
@@ -315,8 +315,8 @@ export function scanStyles(ctx: Context) {
       for (const th of themes) {
         const b = bg?.colorIn(th.name);
         if (!b) continue;
-        const ratio = round(contrast(parseColor(p.values[th.name]!.value)!, b, surfaceIn(th.name)), 2);
-        p.contrast[th.name] = { against: bg!.name, ratio, ok: ratio >= minRatio };
+        const raw = contrast(parseColor(p.values[th.name]!.value)!, b, surfaceIn(th.name));
+        p.contrast[th.name] = { against: bg!.name, ratio: shownRatio(raw), ok: raw >= minRatio };
       }
     }
   }

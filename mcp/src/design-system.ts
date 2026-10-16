@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseBrief } from "./brief.js";
 import { PROFILES, SOURCES, type SourceId } from "./standards.js";
-import { contrast, round, toHex } from "./color.js";
+import { contrast, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { toPx } from "./context.js";
 import { listProjectFiles } from "./project.js";
@@ -96,6 +96,7 @@ export function health(ctx: Context, usages: Usage[]) {
     }
     const breaksIn = themes.filter((th) => ratios[th] !== undefined && ratios[th]! < minRatio);
     if (breaksIn.length === 0) continue;
+    for (const th of Object.keys(ratios)) ratios[th] = shownRatio(ratios[th]!);
     out.push({
       kind: "token-contrast",
       token: t.name,

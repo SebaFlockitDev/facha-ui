@@ -40428,7 +40428,10 @@ function compositeOver(fg, bg) {
 function contrast2(fg, bg, base4) {
   const solidBg = alphaOf(bg) < 1 && base4 ? compositeOver(bg, base4) : bg;
   const solidFg = alphaOf(fg) < 1 ? compositeOver(fg, solidBg) : fg;
-  return Math.round(contrast(solidFg, solidBg) * 100) / 100;
+  return contrast(solidFg, solidBg);
+}
+function shownRatio(ratio) {
+  return Math.floor(ratio * 100 + 1e-9) / 100;
 }
 function toHex(c2) {
   return alphaOf(c2) < 1 ? formatHex8(c2) : formatHex(c2);
@@ -57585,7 +57588,7 @@ function textContrast(ctx, value, background, selector, minRatio, opts = { text:
   if (opts.text !== false && !background && defaultTheme2 && ratios[defaultTheme2] !== void 0 && ratios[defaultTheme2] < 1.5) return null;
   return {
     failing: measured.filter((th) => ratios[th] < minRatio),
-    ratios,
+    ratios: Object.fromEntries(measured.map((th) => [th, shownRatio(ratios[th])])),
     against,
     minRatio,
     certain: !!background || surf.configured
@@ -57772,7 +57775,7 @@ function gradientFailure(ctx, fg, stops) {
     const s = stops(th);
     if (!f3 || s.length < 2) continue;
     const worst = s.map((x) => ({ ...x, ratio: contrast2(f3, x.color) })).sort((a, b) => a.ratio - b.ratio)[0];
-    if (worst.ratio < min) return { theme: th, stop: worst.text, ratio: round2(worst.ratio, 2), min, fg: toHex(f3) };
+    if (worst.ratio < min) return { theme: th, stop: worst.text, ratio: shownRatio(worst.ratio), min, fg: toHex(f3) };
   }
   return null;
 }
@@ -58924,6 +58927,7 @@ function health(ctx, usages) {
     }
     const breaksIn = themes.filter((th) => ratios[th] !== void 0 && ratios[th] < minRatio);
     if (breaksIn.length === 0) continue;
+    for (const th of Object.keys(ratios)) ratios[th] = shownRatio(ratios[th]);
     out.push({
       kind: "token-contrast",
       token: t.name,
@@ -67756,8 +67760,8 @@ function scanStyles(ctx) {
       for (const th of themes) {
         const b = bg?.colorIn(th.name);
         if (!b) continue;
-        const ratio = round2(contrast2(parseColor(p4.values[th.name].value), b, surfaceIn(th.name)), 2);
-        p4.contrast[th.name] = { against: bg.name, ratio, ok: ratio >= minRatio };
+        const raw2 = contrast2(parseColor(p4.values[th.name].value), b, surfaceIn(th.name));
+        p4.contrast[th.name] = { against: bg.name, ratio: shownRatio(raw2), ok: raw2 >= minRatio };
       }
     }
   }
