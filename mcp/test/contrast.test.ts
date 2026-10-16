@@ -71,7 +71,7 @@ describe("contrast matrix · get_design_system", () => {
   });
 
   it("marks the pairs the project declares together, with where", () => {
-    expect(pair("--danger-text", "--panel").used).toEqual({ count: 1, where: ["app/globals.css:40"] });
+    expect(pair("--danger-text", "--panel").used).toEqual({ count: 1, where: ["app/globals.css:42"] });
   });
 
   it("measures control borders and the focus ring at 3:1, and not decorative borders", () => {
@@ -84,7 +84,7 @@ describe("contrast matrix · get_design_system", () => {
     expect(matrix.bySurface["--bg"]).toEqual({
       pass: ["--card-foreground", "--danger-text", "--success", "--text"],
       largeOnly: ["--text-teal"],
-      fail: ["--text-faint"],
+      fail: ["--text-faint", "--warning"],
     });
     expect(matrix.bySurface["--primary"].pass).toEqual(["--on-primary"]);
   });
@@ -104,5 +104,39 @@ describe("contrast matrix · get_design_system", () => {
     } finally {
       await shadcn.close();
     }
+  });
+});
+
+describe("contrast suggestions keep the meaning (B-008)", () => {
+  let byLine: Map<number, any>;
+  beforeAll(async () => {
+    const r = await h.call("check_ui", { path: "app/globals.css", rules: ["theme-contrast"] });
+    byLine = new Map(r.structuredContent.violations.map((v: any) => [v.line, v]));
+  });
+
+  it("a red written by hand under a neutral selector gets the error token, not a gray", () => {
+    expect(byLine.get(43)).toMatchObject({ found: "#ef4444", suggestion: { value: "var(--danger-text)" } });
+  });
+
+  it("an error token that fails gets an error token that passes", () => {
+    expect(byLine.get(44)).toMatchObject({ found: "var(--danger)", suggestion: { value: "var(--danger-text)" } });
+  });
+
+  it("a state with no readable token is a gap, never another state that passes", () => {
+    const v = byLine.get(46);
+    expect(v.found).toBe("var(--warning)");
+    expect(v.suggestion).toMatchObject({ match: "none", value: null });
+    expect(v.suggestion.detail).toContain("No warning status token");
+  });
+
+  it("a color with no token of its hue is a gap, never a gray", () => {
+    const v = byLine.get(47);
+    expect(v.found).toBe("#0891b2");
+    expect(v.suggestion.value).toBeNull();
+    expect(v.suggestion.detail).toContain("a gray would change what it means");
+  });
+
+  it("a gray written by hand still gets the nearest text token", () => {
+    expect(byLine.get(45).suggestion.value).toBe("var(--card-foreground)");
   });
 });

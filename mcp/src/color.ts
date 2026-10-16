@@ -94,6 +94,19 @@ export function contrast(fg: Color, bg: Color, base?: Color): number {
   return wcagContrast(solidFg, solidBg);
 }
 
+const toOklch = converter("oklch");
+
+/** OKLCH chroma and hue of a color (hue 0 for grays). */
+export function chromaHue(c: Color): { c: number; h: number } {
+  const o = toOklch(c);
+  return { c: o?.c ?? 0, h: o?.h ?? 0 };
+}
+
+/** Degrees between two hues, 0 to 180. */
+export function hueDistance(a: number, b: number): number {
+  return Math.abs(((a - b + 540) % 360) - 180);
+}
+
 /** A ratio to show: truncated to 2 decimals, so a failing 4.497 reads 4.49 and never 4.5. */
 export function shownRatio(ratio: number): number {
   return Math.floor(ratio * 100 + 1e-9) / 100;

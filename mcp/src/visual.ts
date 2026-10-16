@@ -1,9 +1,12 @@
 import { differenceEuclidean, filterDeficiencyDeuter, filterDeficiencyProt, type Color } from "culori";
 import type { Rule } from "postcss";
-import { contrast, findColorLiterals, parseColor, round, shownRatio, toHex } from "./color.js";
+import { chromaHue, contrast, findColorLiterals, hueDistance, parseColor, round, shownRatio, toHex } from "./color.js";
 import type { Context } from "./context.js";
 import { selectorContext, themeForSelector, tokenColor } from "./tokens.js";
 import type { Suggestion } from "./types.js";
+
+/** OKLCH chroma from which a color reads as colored: ux-gray-on-color's threshold for a colored background. */
+const COLORED_CHROMA = 0.06;
 
 /**
  * Visual-quality checks that stay deterministic (SPEC §7.11): contrast of each text usage against
@@ -212,7 +215,8 @@ export function suggestReadable(ctx: Context, value: string, background: string 
   const defaultTheme = ctx.tokens.themes[0]?.name ?? "light";
   const current = colorOf(ctx, value, defaultTheme);
   const readable = (role: string) => /^(text\.|on-accent|accent|status\.)/.test(role);
-  const familyOf = (role: string) => role.split(".")[0]!;
+  // A state is its own family (B-008): an error never gets the success token, nor a warning the info one.
+  const familyOf = (role: string) => (role.startsWith("status.") ? role : role.split(".")[0]!);
   // The role the value plays: its token's role, or the role of the token the literal (almost) equals.
   const own = value.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
   const twin = !own && current
@@ -222,9 +226,25 @@ export function suggestReadable(ctx: Context, value: string, background: string 
       })
     : undefined;
   const statusKind = selector ? statusKindOf(selector) : null;
+  // A color written by hand that is no token and whose selector names no state (B-032): it means
+  // what the system's color of the nearest hue means, within 40° (the live panel's brand family).
+  // Colored is chroma 0.06 or more, ux-gray-on-color's threshold. Without one, it is a gap: a color
+  // never gets a gray.
+  const colored = !own && !twin && !statusKind && current && chromaHue(current).c >= COLORED_CHROMA ? chromaHue(current) : null;
+  const kin = colored
+    ? ctx.tokens.tokens
+        .filter((t) => t.type === "color" && /^(accent|status\.)/.test(t.role))
+        .map((t) => ({ t, ch: tokenColor(ctx.tokens, t.name, defaultTheme) }))
+        .filter((x): x is { t: (typeof x)["t"]; ch: Color } => !!x.ch && chromaHue(x.ch).c >= COLORED_CHROMA)
+        .map((x) => ({ role: x.t.role, d: hueDistance(chromaHue(x.ch).h, colored.h) }))
+        .filter((x) => x.d <= 40)
+        .sort((a, b) => a.d - b.d)[0]
+    : undefined;
   const role =
     (own ? ctx.tokens.byName.get(own)?.role : twin?.role) ??
-    (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null);
+    (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null) ??
+    kin?.role ??
+    (colored ? "colored" : null);
   const passing = ctx.tokens.tokens
     // Colors meant to be read: text, accents, statuses. Surfaces and borders are never suggested as text.
     .filter((t) => t.type === "color" && readable(t.role) && t.name !== own)
@@ -239,7 +259,7 @@ export function suggestReadable(ctx: Context, value: string, background: string 
   // tokens; a status or accent color never falls back to an unrelated family: that is a gap.
   const sameFamily = role && readable(role) ? passing.filter((x) => familyOf(x.t.role) === familyOf(role)) : [];
   const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
-  const textLike = !role || !readable(role) || familyOf(role) === "text" || (!!own && familyOf(role) === "accent");
+  const textLike = !role || (role !== "colored" && !readable(role)) || familyOf(role) === "text" || (!!own && familyOf(role) === "accent");
   const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
   const why = describeContrast(r);
   if (candidates.length === 0) {
@@ -247,7 +267,10 @@ export function suggestReadable(ctx: Context, value: string, background: string 
       match: "none",
       kind: "none",
       value: null,
-      detail: `${why}. No ${role?.startsWith("status.") ? "status" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") ? " (/facha-ui:init can propose status tokens)" : ""}.`,
+      detail:
+        role === "colored"
+          ? `${why}. It is a color, and the system has no token of its hue: a gray would change what it means. It is a gap (/facha-ui:init colors can propose a token for it).`
+          : `${why}. No ${role?.startsWith("status.") ? `${role.slice("status.".length)} status` : role?.startsWith("accent") ? "brand" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") || role?.startsWith("accent") ? " (/facha-ui:init can propose one; a gray or another state would change what it means)" : ""}.`,
       source: null,
     };
   }

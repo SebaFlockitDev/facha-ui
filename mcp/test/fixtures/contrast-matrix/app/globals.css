@@ -14,6 +14,7 @@
   --danger-text: #b91c1c;
   --on-danger: #450a0a;
   --success: #15803d;
+  --warning: #f59e0b;
   --border: #e2e8f0;
   --border-input: #cbd5e1;
   --ring: #4f46e5;
@@ -33,6 +34,7 @@
   --danger-text: #fca5a5;
   --on-danger: #450a0a;
   --success: #4ade80;
+  --warning: #fbbf24;
   --border: #334155;
   --border-input: #64748b;
   --ring: #818cf8;
@@ -41,4 +43,6 @@
 .msg { color: #ef4444; }
 .alert-error { color: var(--danger); }
 .note { color: #6b7280; }
+.alert-warning { color: var(--warning); }
+.tag { color: #0891b2; }
 .field input { border: 1px solid var(--border-input); }

@@ -40430,6 +40430,14 @@ function contrast2(fg, bg, base4) {
   const solidFg = alphaOf(fg) < 1 ? compositeOver(fg, solidBg) : fg;
   return contrast(solidFg, solidBg);
 }
+var toOklch = converter_default("oklch");
+function chromaHue(c2) {
+  const o = toOklch(c2);
+  return { c: o?.c ?? 0, h: o?.h ?? 0 };
+}
+function hueDistance(a, b) {
+  return Math.abs((a - b + 540) % 360 - 180);
+}
 function shownRatio(ratio) {
   return Math.floor(ratio * 100 + 1e-9) / 100;
 }
@@ -57453,6 +57461,7 @@ function sprawl(ctx, usages) {
 }
 
 // src/visual.ts
+var COLORED_CHROMA = 0.06;
 var STATUS_KINDS = [
   ["danger", /danger|error|unpaid|fail|cancel|reject|destructive|invalid|negative|overdue/],
   ["warning", /warn|pending|review|caution|attention/],
@@ -57601,21 +57610,23 @@ function suggestReadable(ctx, value, background, selector, r4) {
   const defaultTheme2 = ctx.tokens.themes[0]?.name ?? "light";
   const current = colorOf(ctx, value, defaultTheme2);
   const readable = (role2) => /^(text\.|on-accent|accent|status\.)/.test(role2);
-  const familyOf = (role2) => role2.split(".")[0];
+  const familyOf = (role2) => role2.startsWith("status.") ? role2 : role2.split(".")[0];
   const own2 = value.trim().match(/^var\(\s*(--[\w-]+)\s*\)$/)?.[1];
   const twin = !own2 && current ? ctx.tokens.tokens.find((t) => {
     const c2 = t.type === "color" ? tokenColor(ctx.tokens, t.name, defaultTheme2) : void 0;
     return c2 && readable(t.role) && oklabDistance2(current, c2) * 100 < 2;
   }) : void 0;
   const statusKind = selector ? statusKindOf(selector) : null;
-  const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null);
+  const colored = !own2 && !twin && !statusKind && current && chromaHue(current).c >= COLORED_CHROMA ? chromaHue(current) : null;
+  const kin = colored ? ctx.tokens.tokens.filter((t) => t.type === "color" && /^(accent|status\.)/.test(t.role)).map((t) => ({ t, ch: tokenColor(ctx.tokens, t.name, defaultTheme2) })).filter((x) => !!x.ch && chromaHue(x.ch).c >= COLORED_CHROMA).map((x) => ({ role: x.t.role, d: hueDistance(chromaHue(x.ch).h, colored.h) })).filter((x) => x.d <= 40).sort((a, b) => a.d - b.d)[0] : void 0;
+  const role = (own2 ? ctx.tokens.byName.get(own2)?.role : twin?.role) ?? (statusKind ? `status.${statusKind === "neutral" ? "other" : statusKind}` : null) ?? kin?.role ?? (colored ? "colored" : null);
   const passing = ctx.tokens.tokens.filter((t) => t.type === "color" && readable(t.role) && t.name !== own2).map((t) => ({ t, res: textContrast(ctx, `var(${t.name})`, background, selector, r4.minRatio) })).filter((x) => x.res && x.res.failing.length === 0).map((x) => {
     const c2 = tokenColor(ctx.tokens, x.t.name, defaultTheme2);
     return { ...x, d: current && c2 ? oklabDistance2(current, c2) : Number.POSITIVE_INFINITY };
   }).sort((a, b) => a.d - b.d || (a.t.name < b.t.name ? -1 : 1));
   const sameFamily = role && readable(role) ? passing.filter((x) => familyOf(x.t.role) === familyOf(role)) : [];
   const textOnly = passing.filter((x) => x.t.role.startsWith("text."));
-  const textLike = !role || !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
+  const textLike = !role || role !== "colored" && !readable(role) || familyOf(role) === "text" || !!own2 && familyOf(role) === "accent";
   const candidates = sameFamily.length ? sameFamily : textLike ? textOnly : [];
   const why = describeContrast(r4);
   if (candidates.length === 0) {
@@ -57623,7 +57634,7 @@ function suggestReadable(ctx, value, background, selector, r4) {
       match: "none",
       kind: "none",
       value: null,
-      detail: `${why}. No ${role?.startsWith("status.") ? "status" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") ? " (/facha-ui:init can propose status tokens)" : ""}.`,
+      detail: role === "colored" ? `${why}. It is a color, and the system has no token of its hue: a gray would change what it means. It is a gap (/facha-ui:init colors can propose a token for it).` : `${why}. No ${role?.startsWith("status.") ? `${role.slice("status.".length)} status` : role?.startsWith("accent") ? "brand" : "text"} token reaches it on this background in every theme: it is a gap${role?.startsWith("status.") || role?.startsWith("accent") ? " (/facha-ui:init can propose one; a gray or another state would change what it means)" : ""}.`,
       source: null
     };
   }
@@ -57747,9 +57758,9 @@ function partsHex(item, theme) {
 }
 
 // src/look.ts
-var toOklch = converter_default("oklch");
-var chroma = (c2) => toOklch(c2)?.c ?? 0;
-var lightness = (c2) => toOklch(c2)?.l ?? 0;
+var toOklch2 = converter_default("oklch");
+var chroma = (c2) => toOklch2(c2)?.c ?? 0;
+var lightness = (c2) => toOklch2(c2)?.l ?? 0;
 var isMidGray = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) < 0.045 && lightness(c2) >= 0.3 && lightness(c2) <= 0.85;
 var isColored = (c2) => (c2.alpha ?? 1) >= 1 && chroma(c2) >= 0.06;
 var GRADIENT = /(?:linear|radial|conic)-gradient\(/;
@@ -67665,7 +67676,7 @@ var EMPTY_COMPLETION_RESULT = {
 };
 
 // src/propose.ts
-var toOklch2 = converter_default("oklch");
+var toOklch3 = converter_default("oklch");
 var WHERE_LIMIT = 12;
 function partOf(property2) {
   const p4 = (property2 ?? "").toLowerCase();
@@ -67791,7 +67802,7 @@ function scanStyles(ctx) {
     const stem = stemOf(sels[0] ?? null);
     const hover = sels.length > 0 && sels.every((s) => s.includes(":hover"));
     const translucent = alphaOf(g.color) < 1;
-    const onAccent = g.part === "fg" && !kind && !translucent && (toOklch2(g.color)?.l ?? 0) > 0.95 && sels.some((s) => /primary|accent|brand|cta|(^|[-.])on-/.test(withoutPseudo(s)));
+    const onAccent = g.part === "fg" && !kind && !translucent && (toOklch3(g.color)?.l ?? 0) > 0.95 && sels.some((s) => /primary|accent|brand|cta|(^|[-.])on-/.test(withoutPseudo(s)));
     let role;
     let name;
     const suffix = hover ? "-hover" : "";
@@ -67820,15 +67831,15 @@ function scanStyles(ctx) {
     taken.add(candidate);
   }
   const deriveSurfaceLike = (c2, theme, delta) => {
-    const s = toOklch2(surfaceIn(theme));
-    const o = toOklch2(c2);
+    const s = toOklch3(surfaceIn(theme));
+    const o = toOklch3(c2);
     const dark = s.l < 0.5;
     return parseColor(formatHex(oklch2(s.l + (dark ? delta : -delta / 2), Math.max(o.c ?? 0, 0.05), o.h)));
   };
   const readableOn = (c2, bg) => {
     if (contrast2(c2, bg) >= minRatio) return c2;
-    const o = toOklch2(c2);
-    const dir = toOklch2(bg).l < 0.5 ? 1 : -1;
+    const o = toOklch3(c2);
+    const dir = toOklch3(bg).l < 0.5 ? 1 : -1;
     for (let step = 1; step <= 100; step++) {
       const cand = parseColor(formatHex(oklch2(o.l + dir * step * 0.01, o.c ?? 0, o.h)));
       if (contrast2(cand, bg) >= minRatio) return cand;
@@ -68010,7 +68021,7 @@ function scanStyles(ctx) {
 // src/generate.ts
 var MODES = ["light", "dark"];
 var KINDS = ["success", "warning", "danger", "info"];
-var toOklch3 = converter_default("oklch");
+var toOklch4 = converter_default("oklch");
 var gamut = toGamut("rgb", "oklch");
 var oklabDistance3 = differenceEuclidean("oklab");
 var deuteranopia2 = filterDeficiencyDeuter(1);
@@ -68020,7 +68031,7 @@ var raw = (a, b) => contrast(a, b);
 var r2 = (n) => Math.round(n * 100) / 100;
 var r3 = (n) => Math.round(n * 1e3) / 1e3;
 var lch2 = (h) => {
-  const c2 = toOklch3(parse_default(h));
+  const c2 = toOklch4(parse_default(h));
   return { mode: "oklch", l: c2.l, c: c2.c ?? 0, h: Number.isFinite(c2.h) ? c2.h : 0 };
 };
 var fmtOklch = (h) => {
