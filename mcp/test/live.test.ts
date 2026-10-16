@@ -215,6 +215,32 @@ describe("live endpoint · palette", () => {
     expect(line).toMatchObject({ kind: "palette", text: "", palette });
   });
 
+  it("serves radius and control-height tokens and accepts a proposal that changes them (B-031)", async () => {
+    const root = project();
+    const shapes = {
+      ...base,
+      tokens: [
+        ...base.tokens,
+        { name: "--radius", role: "radius", values: { light: "8px", dark: "8px" } },
+        { name: "--size-control", role: "generic", values: { light: "2.5rem" } },
+        ...Array.from({ length: 90 }, (_, i) => ({ name: `--gray-${i}`, role: "surface.raised", values: { light: "#f8fafc" } })),
+      ],
+    };
+    fs.writeFileSync(path.join(root, ".facha-ui", "live", "palette.json"), JSON.stringify(shapes));
+    const body = (await core.handleGet(get(), { root, production: false }).json()) as any;
+    expect(body.palette.tokens.map((t: any) => t.name).slice(0, 4)).toEqual(["--brand", "--surface", "--radius", "--size-control"]);
+    expect(body.palette.tokens).toHaveLength(2 + 2 + 90);
+    const token = await tokenOf(root);
+    const palette = {
+      name: "Índigo · radio 12px · controles 48px",
+      tokens: { "--brand": { light: "#3e63dd" }, "--radius": { light: "12px", dark: "12px" }, "--size-control": { light: "48px" } },
+    };
+    const res = await core.handlePost(post({ token, kind: "palette", slug: "orders", variant: "a", palette }), { root, production: false });
+    expect(res.status).toBe(202);
+    const line = JSON.parse(fs.readFileSync(path.join(root, ".facha-ui", "live", "requests.jsonl"), "utf8").trim());
+    expect(line.palette).toEqual(palette);
+  });
+
   it("refuses unknown tokens or themes, CSS injection and proposals without a base", async () => {
     const root = withPalette();
     const token = await tokenOf(root);
@@ -247,6 +273,20 @@ describe("palette base script", () => {
     expect(base.tokens.some((t: any) => t.name === "--primary")).toBe(true);
     expect(base.tokens.every((t: any) => !String(t.role ?? "").startsWith("status"))).toBe(true);
     expect(Array.isArray(base.references)).toBe(true);
+  }, 20000);
+
+  it("adds the radius tokens written in px or rem, and leaves var() and calc() radii to follow in the browser", async () => {
+    const script = path.join(REPO, "skills", "variants", "scripts", "palette-base.mjs");
+    const fixture = path.join(REPO, "mcp", "test", "fixtures", "next-tailwind");
+    const out = await new Promise<string>((resolve, reject) => {
+      const child = spawn(process.execPath, [script, fixture, "--anchor", "--primary"], { stdio: ["ignore", "pipe", "ignore"] });
+      let text = "";
+      child.stdout.on("data", (d) => (text += d));
+      child.on("exit", (code) => (code === 0 ? resolve(text) : reject(new Error(`exit ${code}`))));
+    });
+    const radii = JSON.parse(out).tokens.filter((t: any) => t.role === "radius");
+    expect(radii.map((t: any) => t.name)).toEqual(["--radius", "--radius-small"]);
+    expect(radii[0].values.light).toBe("12px");
   }, 20000);
 });
 

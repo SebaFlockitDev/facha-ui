@@ -622,7 +622,7 @@ describe("Vite lab template", () => {
       expect(code, f).not.toMatch(/from "next\//);
       for (const m of code.matchAll(/\bfetch\(\s*([^,)]+)/g)) expect(m[1], f).toMatch(/^`\$\{LAB_BASE\}\/facha-live/);
     }
-    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx", "lab-panel.tsx", "facha-live/live-core.ts"]) {
+    for (const shared of ["lab-theme.tsx", "lab-state.ts", "lab-responsive.tsx", "lab-panel.tsx", "lab-palette.ts", "facha-live/live-core.ts"]) {
       expect(fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", shared), "utf8"), shared).not.toMatch(/from "next\//);
     }
   });
@@ -670,7 +670,8 @@ describe("lab scaffold: every file the scaffold copies finds what it imports", (
         expect(src && fs.existsSync(src), `${framework}: ${file} has a template`).toBe(true);
         const code = fs.readFileSync(src!, "utf8");
         const imports = [
-          ...[...code.matchAll(/^import .* from "(\.{1,2}\/[^"]+)";$/gm)].map((m) => m[1]!),
+          // Multi-line imports too: lab-panel.tsx imports lab-palette.ts over several lines (B-031).
+          ...[...code.matchAll(/^import [^;]*? from "(\.{1,2}\/[^"]+)";$/gm)].map((m) => m[1]!),
           ...[...code.matchAll(/<script type="module" src="(\.{1,2}\/[^"]+)">/g)].map((m) => m[1]!),
         ];
         for (const spec of imports) {
@@ -681,6 +682,30 @@ describe("lab scaffold: every file the scaffold copies finds what it imports", (
       }
     });
   }
+});
+
+describe("B-031 · the panel's design logic travels with the panel", () => {
+  const skill = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8").replace(/\r\n/g, "\n");
+
+  it("live mode copies lab-palette.ts with the panel, and updates a panel from an older version", () => {
+    const live = skill("variants/live.md");
+    expect(live).toContain("does not import `./lab-palette`");
+    expect(live.match(/`lab-palette\.ts`/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(live).toContain("**Diseño** tab");
+  });
+
+  it("apply removes lab-palette.ts with the rest of the scaffold, in both labs", () => {
+    expect(skill("apply/SKILL.md").match(/`lab-palette\.ts`/g)).toHaveLength(2);
+  });
+
+  it("init's palette mode lives in palette.md and takes radii and control heights, with contrast only for colors", () => {
+    expect(skill("init/SKILL.md")).toContain("`palette <file>` (`palette.md`)");
+    const palette = skill("init/palette.md");
+    for (const step of ["## P1 ·", "## P2 ·", "## P3 ·", "## P4 ·", "## P5 ·"]) expect(palette, step).toContain(step);
+    expect(palette).toContain("computed only for the color tokens");
+    expect(palette).toContain("WCAG 2.5.8");
+    expect(skill("variants/live.md")).toContain("the WCAG contrast of the colors only");
+  });
 });
 
 describe("B-026 · the direction preview in the lab", () => {

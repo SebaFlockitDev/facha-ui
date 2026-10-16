@@ -277,13 +277,13 @@ Cuando el design system no existe o le faltan roles, como los colores de estado,
 
 Desde ese momento, `get_design_system` devuelve los tokens nuevos y `variants` los usa.
 
-**Adoptar una paleta** probada en el panel en vivo (6.6):
+**Adoptar un diseño** probado en el panel en vivo (6.6): colores, radios y alto de controles.
 
 ```text
-/facha-ui:init palette .facha-ui/proposals/palette-20261009-1937-azul-confianza.json
+/facha-ui:init palette .facha-ui/proposals/palette-20261009-1937-indigo-radio-12px.json
 ```
 
-Verifica que la propuesta siga vigente, te muestra cada token antes y después, el contraste por tema y los conflictos con su solución (por ejemplo, colores escritos a mano que quedarían con el color anterior y conviene convertir en tokens). Cambia solo esos valores, después de tu aprobación y con el motivo, y registra la decisión.
+Verifica que la propuesta siga vigente, te muestra cada token antes y después, el contraste por tema (de los colores) y los conflictos con su solución (por ejemplo, colores escritos a mano que quedarían con el color anterior y conviene convertir en tokens). Cambia solo esos valores, después de tu aprobación y con el motivo, y registra la decisión.
 
 ---
 
@@ -390,7 +390,14 @@ En cada variante aparece un panel **facha-ui** abajo a la derecha. Necesita la a
   - Si el arreglo toca código fuera del laboratorio (CSS global, componentes compartidos), el aviso **Necesita tu decisión** te da la frase para confirmarlo en la conversación de Claude Code, con un botón para copiarla. Desde el panel no se puede aprobar.
 - **Pedir un cambio:** lo escribís en el panel y tocás *Pedir cambio* (o Ctrl+Enter). Claude lo aplica como revisión, con las mismas reglas que en 6.5, y la página se actualiza sola. El panel muestra el estado: en cola, aplicando, listo, necesita tu decisión o no se pudo. Si falta un valor en el design system, te lo pregunta ahí mismo con las opciones.
 - **⌖ Señalar:** en lugar de describir "el botón de abajo", hacé clic en él. Queda como `[1]` (hasta 3) y lo nombrás en el texto: *"mové [1] arriba de la tabla"*. Mientras señalás, la página no reacciona a los clics; ↑ elige el contenedor que lo envuelve, ↓ vuelve, Esc cancela. Claude recibe qué elemento es y qué componente lo dibuja.
-- **Paleta:** probá otra paleta sobre toda la app con un clic (Azul confianza, Índigo, Turquesa, Verde, Grafito neutro) o con tu propio color. Es solo una vista previa en tu navegador. El panel te muestra el contraste y, antes de que propongas, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "entregado", y qué paletas no tienen ese problema. *Proponer esta paleta* la guarda en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1).
+- **Diseño:** probá decisiones de diseño sobre toda la app, solo en tu navegador:
+  - **Color de la marca:** un preset (los acentos de Radix: Índigo, Azul, Cyan, Teal, Ciruela y Violeta, o Grafito, casi sin color), el deslizador de **Tono** o tu propio color.
+  - **Grises:** puros, o teñidos con el tono de la marca (como los grises de Radix).
+  - **Radio:** 0, 4, 8, 12 o 16px (la escala de Material 3); todos los radios del sistema se escalan en proporción.
+  - **Alto de controles:** 32, 40 o 48px (los tamaños de Carbon), si tu sistema tiene `--size-control`. Si no lo tiene, el control aparece desactivado y te dice por qué.
+  - **Contraste del texto:** Estándar (4.5:1, AA) o Alto (7:1, AAA): oscurece (o aclara, en oscuro) lo mínimo los textos que no llegan, y te dice cuáles.
+
+  Con cada cambio ves el contraste más bajo por tema y, antes de proponer, los conflictos con su solución: por ejemplo, que un verde de marca se confunde con el estado "entregado" (y qué presets no tienen ese problema), o que el texto blanco de los botones deja de leerse sobre una marca clara. *Proponer este diseño* guarda la combinación en `.facha-ui/proposals/`; para adoptarla en toda la app, `/facha-ui:init palette <archivo>` (ver 5.1). *Volver al original* deshace la vista previa.
 - **Elegir esta variante** no aplica nada: te pide confirmar con `/facha-ui:apply` en Claude Code, como siempre.
 - **Ver en Móvil 375 / Tablet 768:** abre la variante a ese ancho, con el medidor de responsive encendido (desborde, contenido aplastado por una columna lateral, objetivos y textos chicos). Esc la cierra.
 - **El panel:** se arrastra por el título (doble clic lo vuelve a la esquina), se ajusta de tamaño desde la esquina inferior derecha, **–** lo minimiza a una pastilla abajo a la derecha y **×** lo oculta (vuelve al recargar o con Alt+Shift+F). No aparece en las capturas automáticas.
@@ -492,7 +499,7 @@ Atajos útiles:
 - *"Corré check_ui sobre lo que cambiaste"*: antes de commitear.
 - *"Auditá el proyecto y mostrame los 5 archivos con más errores"*: para planificar una limpieza.
 - *"Ajustá la B en vivo"*: activa el panel para pedir cambios mientras mirás la variante.
-- *"Quiero probar otra paleta para la app"*: el panel en vivo, pestaña **Paleta**.
+- *"Quiero probar otra paleta, otro radio o más contraste"*: el panel en vivo, pestaña **Diseño**.
 
 ---
 
@@ -557,7 +564,7 @@ Atajos útiles:
 | `.facha-ui/runs/<slug>.json` | Estado del run: hipótesis, intentos, decisiones, brechas y el historial de ajustes de cada variante |
 | `.facha-ui/screenshots/<slug>/` | Capturas por variante y tema |
 | `.facha-ui/live/` | Modo en vivo: sesión (con su token), pedidos, estados y la base de la paleta. No lo versiones |
-| `.facha-ui/proposals/` | Paletas propuestas desde el panel |
+| `.facha-ui/proposals/` | Diseños propuestos desde el panel (colores, radios y altos) |
 | `.facha-ui/reports/<slug>.html` | Reporte para compartir: variantes, crítica, votos y capturas |
 | `.facha-ui/flows/<slug>.json` | Revisión de un flujo |
 | `app/lab/compare/[slug]/page.tsx` | Página para comparar variantes y votar (solo en desarrollo) |

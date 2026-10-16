@@ -27,17 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-031 · Controles de diseño en el panel en vivo
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** ajustar el diseño con controles directos y ver el efecto en el momento ya es lo esperable (Claude Design, Realtime Colors, tweakcn); hoy el panel solo prueba paletas armadas.
-- **Qué:** en el panel, controles de tono, tinte de los neutros, radio, densidad y nivel de contraste (como el `contrastLevel` de Material), aplicados a la variante con el contraste recalculado en el momento. Nada se escribe hasta `/facha-ui:init palette`.
-- **Criterios de aceptación:** cada cambio muestra los pares que dejan de pasar WCAG y una solución; la combinación elegida queda como propuesta en `.facha-ui/proposals/`; fuera del laboratorio no cambia ningún archivo.
-- **Depende de:** B-025
-- **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), `skills/variants/live.md`, https://www.realtimecolors.com/docs/how-it-works
-
-## Siguiente
-
 ### B-032 · Matriz completa de contraste
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -45,6 +34,8 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 - **Qué:** cada token de texto contra cada fondo posible, en claro y oscuro; WCAG 2.2 decide y APCA se informa como dato orientativo. Las sugerencias conservan el significado (estado, acento, texto) y, si ningún token lo cumple, lo reportan como brecha.
 - **Criterios de aceptación:** la matriz sale en `get_design_system` o en `audit_project`; un texto de error con contraste bajo recibe un token de error legible o una brecha, nunca un gris (criterio de B-008).
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), SPEC §6, https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
+
+## Siguiente
 
 ### B-030 · Componente reimplementado y cobertura del design system
 - **Estado:** listo para spec
@@ -190,13 +181,14 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
 - **B-037 · `near-duplicate-tokens` según el rol:** visto en la prueba de B-025: la regla de paleta inflada compara tokens de cualquier rol, y en un sistema generado marca pares que se parecen por diseño (fondo y panel, que son los pasos 1 y 2 de Radix; el blanco del texto sobre acento y el casi blanco del fondo). Su propia nota dice que se ignoren "si son roles distintos": que la regla los deje afuera y siga marcando los del mismo rol.
-- **B-036 · Paletas del panel sin fuente:** las paletas predefinidas del panel en vivo traen afirmaciones sin fuente ("El más usado en bancos y fintech: transmite seguridad", `skills/variants/templates/next-app/lab-panel.tsx:196`), contra la regla de que toda decisión de UI tiene una fuente. Reemplazarlas por las semillas del generador (B-025), con su fuente, o sacar las afirmaciones.
+- **B-038 · Colores `oklch()` en el panel en vivo:** visto en B-031: `palette-base.mjs` y `lab-palette.ts` solo leen colores hex y `rgb()`, así que un proyecto con los tokens en `oklch()` (shadcn/ui con Tailwind 4, como el fixture `shadcn-tw4`) no tiene base y el panel no muestra la pestaña Diseño. Leerlos, y escribir los valores nuevos en `oklch()`, el formato del proyecto.
 - **B-035 · `scan_styles` en un proyecto sin temas:** visto en la prueba de B-024, sobre una app sin ningún bloque de tema: las propuestas salen con `values: {}` (falta el valor del tema por defecto), un gris de texto secundario (`#475569`, usado en "Cancelado", `.muted` y encabezados) se propone como `--status-danger-fg`, y el color de marca se parte en dos propuestas, una como `status.info`. Con un brief, su color de marca debería proponerse como `accent.primary`.
 
 ## Hecho
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.25.0:** B-031 (incluye B-036), controles de diseño en el panel en vivo: tono, grises, radio, alto de controles y contraste del texto, con presets de Radix y el contraste y los conflictos recalculados en cada cambio; spec en [`docs/specs/B-031-controles-de-diseno-en-el-panel.md`](docs/specs/B-031-controles-de-diseno-en-el-panel.md).
 - **0.24.0:** B-029, reglas del guardián para las partes del look genérico de IA que rompen una regla publicada (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`) y la señal `nested-surfaces`; spec en [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
 - **0.23.0:** B-027, perfiles por tipo de producto (escala, controles, tokens y pautas con fuente, desde el brief); spec en [`docs/specs/B-027-perfiles-por-tipo-de-producto.md`](docs/specs/B-027-perfiles-por-tipo-de-producto.md).
 - **0.22.0:** B-026, tres direcciones (semilla + estilo) sobre la pantalla real y una página de muestra, en el laboratorio, antes de escribir; spec en [`docs/specs/B-026-direcciones-sobre-la-pantalla-real.md`](docs/specs/B-026-direcciones-sobre-la-pantalla-real.md).
