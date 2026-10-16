@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-030 · Componente reimplementado y cobertura del design system
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P2 · **Tamaño:** M
 - **Por qué:** la IA suele rehacer a mano lo que el proyecto ya tiene como componente; Lovable y v0 ya controlan que se use el sistema.
 - **Qué:** un aviso cuando se arma a mano un elemento que el proyecto ya tiene como componente (un `<button>` con clases, existiendo `components/ui/button`), con el import sugerido. `ux_score` suma la cobertura: cuánto de la UI usa componentes y tokens del sistema.

@@ -1,6 +1,6 @@
 # B-030 · Componente reimplementado y cobertura del design system
 
-> **Estado:** en spec · **Rama:** `feat/component-reuse` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso · **Rama:** `feat/component-reuse` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** [estudio de herramientas](../research/2026-10-15-herramientas-de-diseno.md) ·
 > **Última actualización:** 2026-10-16
 
@@ -21,7 +21,7 @@ variantes), y cada copia se desvía con el tiempo. Lovable y v0 ya controlan que
 - El fixture `shadcn-tw4` tiene un `<button className="bg-primary …">` a mano y ningún
   `components/ui/`.
 
-## Plan (propuesto, pendiente de aprobación)
+## Plan aprobado (2026-10-16)
 
 ### 1. El inventario de componentes (sección `components` de `get_design_system`)
 
@@ -69,7 +69,7 @@ Junto al puntaje de cada pantalla y del proyecto, un bloque `coverage`:
 - `ux_score` con la cobertura (test).
 - Prueba real en las apps de prueba.
 
-## Decisiones para confirmar
+## Decisiones confirmadas (2026-10-16: las cuatro recomendadas)
 
 1. **Avisa sobre todo elemento hecho a mano que tenga componente, con clases o sin ellas**
    (recomendado). Un `<button>` sin clases también se ve distinto del sistema. La alternativa es
@@ -106,8 +106,8 @@ Junto al puntaje de cada pantalla y del proyecto, un bloque `coverage`:
 
 - **2026-10-16:** relevado lo que existe (tokens y clases, sin componentes React); spec escrito y plan
   presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan y de las cuatro decisiones. Con el OK: "Plan (propuesto…)" pasa a "Plan
-aprobado (fecha)", el estado a `en curso`, y se arranca por la tarea 1 en `feat/component-reuse`.
+En curso en `feat/component-reuse`: seguir por la primera tarea sin marcar.
