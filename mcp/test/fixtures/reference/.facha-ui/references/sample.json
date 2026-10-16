@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "url": "https://example.com/pricing",
+  "capturedAt": "2026-10-16T18:00:00-03:00",
+  "screenshot": ".facha-ui/references/sample.png",
+  "styles": {
+    "viewport": { "width": 1280, "height": 800 },
+    "body": { "from": "body", "background-color": "rgb(255, 255, 255)", "color": "rgb(55, 65, 81)", "font-family": "Inter, system-ui, sans-serif", "font-size": "16px", "font-weight": "400", "height": 2400 },
+    "headings": [{ "from": "h1.title", "color": "rgb(17, 24, 39)", "font-family": "Inter, sans-serif", "font-size": "40px", "font-weight": "700", "height": 48 }],
+    "button": { "from": "a.btn.btn-primary", "background-color": "rgb(79, 70, 229)", "color": "rgb(255, 255, 255)", "border-top-color": "rgb(79, 70, 229)", "border-top-width": "0px", "border-top-left-radius": "12px", "font-family": "Inter, sans-serif", "font-size": "16px", "font-weight": "600", "height": 40 },
+    "buttons": 6,
+    "link": { "from": "a.nav-link", "color": "rgb(96, 165, 250)", "font-family": "Inter, sans-serif", "font-size": "16px", "font-weight": "400", "height": 20 },
+    "card": { "from": "div.card", "background-color": "rgb(255, 255, 255)", "color": "rgb(55, 65, 81)", "border-top-color": "rgb(229, 231, 235)", "border-top-width": "1px", "border-top-left-radius": "16px", "font-family": "Inter, sans-serif", "font-size": "16px", "font-weight": "400", "height": 320 },
+    "input": null,
+    "backgrounds": [{ "color": "rgb(255, 255, 255)", "area": 3000000 }, { "color": "rgb(79, 70, 229)", "area": 40000 }]
+  }
+}
