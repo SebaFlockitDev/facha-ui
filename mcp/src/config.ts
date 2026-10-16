@@ -37,6 +37,8 @@ export const ConfigSchema = z
       .strict()
       .default({}),
     include: z.array(z.string().min(1)).optional(),
+    /** Globs of the screen files (B-043); when present they replace the detection by framework. */
+    screens: z.array(z.string().min(1)).min(1).optional(),
     exclude: z.array(z.string().min(1)).optional(),
     rules: z.partialRecord(z.enum(RULE_IDS), severity).optional(),
     allow: z.object({ literals: z.array(z.string()).default([]) }).strict().optional(),
