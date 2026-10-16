@@ -15183,12 +15183,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f3;
     };
-    function addFormats(ajv, list3, fs10, exportName) {
+    function addFormats(ajv, list3, fs11, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f3 of list3)
-        ajv.addFormat(f3, fs10[f3]);
+        ajv.addFormat(f3, fs11[f3]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15197,7 +15197,7 @@ var require_dist = __commonJS({
 });
 
 // src/index.ts
-import fs9 from "node:fs";
+import fs10 from "node:fs";
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 import process2 from "node:process";
@@ -56180,8 +56180,8 @@ function createContext(root2, ws) {
       if (themeForSelector(ctx, project.config.tokens.themes) !== null) return;
       for (const d of decls) {
         if (d.prop !== "font-size") continue;
-        const px = toPx(d.value);
-        if (px != null) fontSizeUses.set(px, [...fontSizeUses.get(px) ?? [], ctx]);
+        const px2 = toPx(d.value);
+        if (px2 != null) fontSizeUses.set(px2, [...fontSizeUses.get(px2) ?? [], ctx]);
       }
       if (!rule2.selector.includes(".")) return;
       const tokensUsed = /* @__PURE__ */ new Set();
@@ -56199,11 +56199,11 @@ function createContext(root2, ws) {
         literals
       });
       const single = rule2.selector.trim().match(/^\.([\w-]+)$/);
-      const fs10 = decls.find((d) => d.prop === "font-size");
+      const fs11 = decls.find((d) => d.prop === "font-size");
       const atRule2 = rule2.parent?.name;
-      if (single && fs10 && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule2 || atRule2 === "layer")) {
-        const px = toPx(fs10.value);
-        if (px != null) typographyClasses.push({ className: single[1], fontSizePx: px, source });
+      if (single && fs11 && decls.every((d) => TYPO_PROPS.has(d.prop)) && (!atRule2 || atRule2 === "layer")) {
+        const px2 = toPx(fs11.value);
+        if (px2 != null) typographyClasses.push({ className: single[1], fontSizePx: px2, source });
       }
     });
   }
@@ -57121,34 +57121,34 @@ function suggestColor(ctx, literal2, property2) {
   return NONE2(parts.join(" "));
 }
 function suggestFontSize(ctx, value) {
-  const px = toPx(value);
-  if (px == null) return NONE2(`No font-size token or typography class for ${value}.`);
-  const used = ctx.fontSizeUses.get(px);
-  const usedNote = used && used.length > 0 ? ` ${px}px is used in project CSS rules (${[...new Set(used)].slice(0, 4).join(", ")}) but no typography class or token exposes it.` : "";
+  const px2 = toPx(value);
+  if (px2 == null) return NONE2(`No font-size token or typography class for ${value}.`);
+  const used = ctx.fontSizeUses.get(px2);
+  const usedNote = used && used.length > 0 ? ` ${px2}px is used in project CSS rules (${[...new Set(used)].slice(0, 4).join(", ")}) but no typography class or token exposes it.` : "";
   const sizeTokens = ctx.tokens.tokens.filter((t) => t.role === "font-size");
-  const tokenExact = sizeTokens.find((t) => toPx(tokenValue(ctx.tokens, t.name, defaultTheme(ctx)) ?? "") === px);
+  const tokenExact = sizeTokens.find((t) => toPx(tokenValue(ctx.tokens, t.name, defaultTheme(ctx)) ?? "") === px2);
   if (tokenExact) {
     return { match: "exact", kind: "token", value: `var(${tokenExact.name})`, detail: `Font-size token with the same value.`, source: tokenExact.source };
   }
   const classes = [...ctx.typographyClasses].sort(
-    (a, b) => Math.abs(a.fontSizePx - px) - Math.abs(b.fontSizePx - px) || (a.className < b.className ? -1 : 1)
+    (a, b) => Math.abs(a.fontSizePx - px2) - Math.abs(b.fontSizePx - px2) || (a.className < b.className ? -1 : 1)
   );
   const best = classes[0];
   const noToken = sizeTokens.length === 0 ? " No font-size token exists." : "";
-  if (best && best.fontSizePx === px) {
-    return { match: "exact", kind: "class", value: best.className, detail: `Typography class .${best.className} sets ${px}px.${noToken}`, source: best.source };
+  if (best && best.fontSizePx === px2) {
+    return { match: "exact", kind: "class", value: best.className, detail: `Typography class .${best.className} sets ${px2}px.${noToken}`, source: best.source };
   }
-  if (best && Math.abs(best.fontSizePx - px) <= FONT_SIZE_RANGE_PX) {
+  if (best && Math.abs(best.fontSizePx - px2) <= FONT_SIZE_RANGE_PX) {
     return {
       match: "nearest",
       kind: "class",
       value: best.className,
-      detail: `${best.fontSizePx}px, nearest step of the type scale (\u0394 ${round2(Math.abs(best.fontSizePx - px), 2)}px).${noToken}${usedNote}`,
+      detail: `${best.fontSizePx}px, nearest step of the type scale (\u0394 ${round2(Math.abs(best.fontSizePx - px2), 2)}px).${noToken}${usedNote}`,
       source: best.source
     };
   }
   return NONE2(
-    `No font-size token or typography class for ${px}px.${best ? ` Nearest typography class .${best.className} (${best.fontSizePx}px) is out of range.` : ""}${usedNote}`
+    `No font-size token or typography class for ${px2}px.${best ? ` Nearest typography class .${best.className} (${best.fontSizePx}px) is out of range.` : ""}${usedNote}`
   );
 }
 function suggestArbitrary(ctx, a) {
@@ -57157,8 +57157,8 @@ function suggestArbitrary(ctx, a) {
       if (a.property === "font-size") return suggestFontSize(ctx, a.value);
       return NONE2(`No token or class for ${a.property} ${a.value}.`);
     case "radius": {
-      const px = toPx(a.value);
-      const t = ctx.tokens.tokens.find((t2) => t2.role === "radius" && toPx(tokenValue(ctx.tokens, t2.name, defaultTheme(ctx)) ?? "") === px);
+      const px2 = toPx(a.value);
+      const t = ctx.tokens.tokens.find((t2) => t2.role === "radius" && toPx(tokenValue(ctx.tokens, t2.name, defaultTheme(ctx)) ?? "") === px2);
       return t ? { match: "exact", kind: "token", value: `var(${t.name})`, detail: `Radius token with the same value.`, source: t.source } : NONE2(`No radius token for ${a.value}.`);
     }
     case "shadow": {
@@ -57166,13 +57166,13 @@ function suggestArbitrary(ctx, a) {
       return t ? { match: "exact", kind: "token", value: `var(${t.name})`, detail: `Shadow token with the same value.`, source: t.source } : NONE2(`No shadow token for this value.`);
     }
     case "spacing": {
-      const px = toPx(a.value);
-      if (px == null || a.prefix == null) return NONE2(`No spacing step for ${a.value}.`);
-      const step = px / 4;
-      const sign = px < 0 || a.prefix.startsWith("-") ? "-" : "";
+      const px2 = toPx(a.value);
+      if (px2 == null || a.prefix == null) return NONE2(`No spacing step for ${a.value}.`);
+      const step = px2 / 4;
+      const sign = px2 < 0 || a.prefix.startsWith("-") ? "-" : "";
       const prefix2 = a.prefix.replace(/^-/, "");
       if (Number.isInteger(step)) {
-        return { match: "exact", kind: "class", value: `${sign}${prefix2}-${Math.abs(step)}`, detail: `${px}px is step ${Math.abs(step)} of the 4px spacing scale.`, source: null };
+        return { match: "exact", kind: "class", value: `${sign}${prefix2}-${Math.abs(step)}`, detail: `${px2}px is step ${Math.abs(step)} of the 4px spacing scale.`, source: null };
       }
       const r4 = Math.round(step);
       return { match: "nearest", kind: "class", value: `${sign}${prefix2}-${Math.abs(r4)}`, detail: `Nearest step of the 4px spacing scale (${Math.abs(r4) * 4}px).`, source: null };
@@ -57810,25 +57810,25 @@ function suggestScale(ctx, s) {
   const theme = ctx.tokens.themes[0]?.name ?? "light";
   const none = (detail) => ({ match: "none", kind: "none", value: null, detail, source: null });
   if (s.kind === "fontSize") {
-    const px = toPx(s.value);
-    return px == null ? none(`No font-size step for ${s.value}.`) : suggestFontSize(ctx, `${round2(px, 2)}px`);
+    const px2 = toPx(s.value);
+    return px2 == null ? none(`No font-size step for ${s.value}.`) : suggestFontSize(ctx, `${round2(px2, 2)}px`);
   }
   if (s.kind === "radius") {
-    const px = toPx(s.value);
-    if (px == null) return none(`No radius step for ${s.value}.`);
-    const radii = ctx.tokens.tokens.filter((t) => t.role === "radius").map((t) => ({ name: t.name, source: t.source, px: toPx(tokenValue(ctx.tokens, t.name, theme) ?? "") })).filter((x) => x.px != null).sort((a, b) => Math.abs(a.px - px) - Math.abs(b.px - px) || (a.name < b.name ? -1 : 1));
+    const px2 = toPx(s.value);
+    if (px2 == null) return none(`No radius step for ${s.value}.`);
+    const radii = ctx.tokens.tokens.filter((t) => t.role === "radius").map((t) => ({ name: t.name, source: t.source, px: toPx(tokenValue(ctx.tokens, t.name, theme) ?? "") })).filter((x) => x.px != null).sort((a, b) => Math.abs(a.px - px2) - Math.abs(b.px - px2) || (a.name < b.name ? -1 : 1));
     const best = radii[0];
-    if (best && Math.abs(best.px - px) <= 2) {
+    if (best && Math.abs(best.px - px2) <= 2) {
       return {
-        match: best.px === px ? "exact" : "nearest",
+        match: best.px === px2 ? "exact" : "nearest",
         kind: "token",
         value: `var(${best.name})`,
-        detail: `${best.name} is ${best.px}px (${s.utility} is ${px}px).`,
+        detail: `${best.name} is ${best.px}px (${s.utility} is ${px2}px).`,
         source: best.source
       };
     }
     return none(
-      radii.length ? `No radius token within 2px of ${px}px. Project radius tokens: ${radii.map((r4) => `${r4.name} (${r4.px}px)`).join(", ")}.` : "No radius tokens in the project: it is a gap (/facha-ui:init scales can propose a scale)."
+      radii.length ? `No radius token within 2px of ${px2}px. Project radius tokens: ${radii.map((r4) => `${r4.name} (${r4.px}px)`).join(", ")}.` : "No radius tokens in the project: it is a gap (/facha-ui:init scales can propose a scale)."
     );
   }
   if (s.kind === "shadow") {
@@ -57931,8 +57931,8 @@ function sprawl(ctx, usages) {
   for (const cc of ctx.componentClasses) {
     for (const d of cc.decls) {
       if (!/radius/.test(d.prop) || d.value.includes("var(")) continue;
-      const px = toPx(d.value);
-      if (px != null && px < 999) radii.set(px, [...radii.get(px) ?? [], cc.selector]);
+      const px2 = toPx(d.value);
+      if (px2 != null && px2 < 999) radii.set(px2, [...radii.get(px2) ?? [], cc.selector]);
     }
   }
   steps("border-radius", radii, 1);
@@ -58145,14 +58145,14 @@ function checkResponsive(usages, overflowClasses, report) {
     const own2 = e4.classes.filter(unprefixed);
     const capped = own2.some((c2) => /^max-w-(full|screen|\[100%\]|\[100vw\])$/.test(base2(c2)));
     for (const c2 of own2) {
-      const px = fixedWidthPx(c2);
-      if (px != null && px > PHONE_WIDTH && !capped) {
+      const px2 = fixedWidthPx(c2);
+      if (px2 != null && px2 > PHONE_WIDTH && !capped) {
         report(
           "responsive-fixed-width",
           "warning",
           where,
           c2,
-          `Fixed width of ${Math.round(px)}px: wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
+          `Fixed width of ${Math.round(px2)}px: wider than a phone (${PHONE_WIDTH}px usable at 375px), so the page scrolls sideways.`,
           `Use w-full with a max-w-\u2026 cap, or set the fixed width only from a breakpoint up (md:${base2(c2)}).`
         );
         break;
@@ -58200,8 +58200,8 @@ function responsiveDecl(u) {
   if (u.selector && /@media|@container/.test(u.selector)) return null;
   const value = u.value.trim();
   if (u.property === "width" || u.property === "min-width") {
-    const px = lengthPx(value);
-    if (px != null && px > PHONE_WIDTH) {
+    const px2 = lengthPx(value);
+    if (px2 != null && px2 > PHONE_WIDTH) {
       return {
         rule: "responsive-fixed-width",
         base: "warning",
@@ -58798,7 +58798,7 @@ function parseBrief(ctx) {
     if (m) entries.push({ id: m[1], title: clean(m[2]), line: i, end: lines.length });
   });
   if (!entries.length) return null;
-  const read = (e4) => {
+  const read2 = (e4) => {
     const fields = {};
     for (let i = e4.line + 1; i < e4.end; i++) {
       const m = lines[i].match(/^-\s+\*\*([^*:]+):\*\*\s*(.*)$/);
@@ -58807,10 +58807,10 @@ function parseBrief(ctx) {
     }
     return fields;
   };
-  const dated = entries.map((e4, i) => ({ e: e4, i, date: read(e4).date?.value.match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? e4.id.slice(4, 14) }));
+  const dated = entries.map((e4, i) => ({ e: e4, i, date: read2(e4).date?.value.match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? e4.id.slice(4, 14) }));
   dated.sort((a, b) => a.date.localeCompare(b.date) || a.i - b.i);
   const latest = dated[dated.length - 1];
-  const f3 = read(latest.e);
+  const f3 = read2(latest.e);
   const brief = {
     id: latest.e.id,
     title: latest.e.title,
@@ -59323,12 +59323,12 @@ function declaredIn(ctx, token, theme) {
 }
 function scales(ctx) {
   const theme = ctx.tokens.themes[0]?.name ?? "light";
-  const fmt = (px) => `${round2(px, 2)}px`;
+  const fmt = (px2) => `${round2(px2, 2)}px`;
   const fontTokens = ctx.tokens.tokens.filter((t) => t.role === "font-size");
   const fontValues = /* @__PURE__ */ new Set([...ctx.fontSizeUses.keys()]);
   for (const t of fontTokens) {
-    const px = toPx(tokenValue(ctx.tokens, t.name, theme) ?? "");
-    if (px != null) fontValues.add(px);
+    const px2 = toPx(tokenValue(ctx.tokens, t.name, theme) ?? "");
+    if (px2 != null) fontValues.add(px2);
   }
   const classes = {};
   for (const c2 of [...ctx.typographyClasses].sort((a, b) => a.fontSizePx - b.fontSizePx)) {
@@ -59339,13 +59339,13 @@ function scales(ctx) {
   for (const cc of ctx.componentClasses) {
     for (const d of cc.decls) {
       if (!/radius/.test(d.prop)) continue;
-      const px = toPx(d.value);
-      if (px != null && !radiusValues.has(px)) radiusValues.set(px, fmt(px));
+      const px2 = toPx(d.value);
+      if (px2 != null && !radiusValues.has(px2)) radiusValues.set(px2, fmt(px2));
     }
   }
   for (const t of radiusTokens) {
-    const px = toPx(tokenValue(ctx.tokens, t.name, theme) ?? "");
-    if (px != null) radiusValues.set(px, `${fmt(px)} (${t.name})`);
+    const px2 = toPx(tokenValue(ctx.tokens, t.name, theme) ?? "");
+    if (px2 != null) radiusValues.set(px2, `${fmt(px2)} (${t.name})`);
   }
   const src = (tokens, inferred) => tokens && inferred ? "tokens+inferred" : tokens ? "tokens" : inferred ? "inferred" : "none";
   return {
@@ -59639,21 +59639,21 @@ function reviewUi(ctx, input2) {
         const b = base3(c2);
         const typo = typography2.get(b);
         if (typo != null) sizes.add(typo);
-        const fs10 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
-        const ccPx = fs10 ? toPx(fs10.value) : null;
+        const fs11 = classRule.get(b)?.decls.find((d) => d.prop === "font-size");
+        const ccPx = fs11 ? toPx(fs11.value) : null;
         if (ccPx != null) sizes.add(ccPx);
         const scale = parseScaleClass(b);
         if (scale?.kind === "fontSize" && scale.value) {
-          const px = toPx(scale.value);
-          if (px != null) sizes.add(px);
+          const px2 = toPx(scale.value);
+          if (px2 != null) sizes.add(px2);
         }
         const arb = b.match(/^text-\[(\d+(?:\.\d+)?)(px|rem)\]$/);
         if (arb) sizes.add(arb[2] === "rem" ? Number(arb[1]) * 16 : Number(arb[1]));
       }
     }
     for (const u of usages) if (u.kind === "decl" && u.property === "font-size") {
-      const px = toPx(u.value);
-      if (px != null) sizes.add(px);
+      const px2 = toPx(u.value);
+      if (px2 != null) sizes.add(px2);
     }
     const headings = elements.filter((e4) => /^h[1-6]$/.test(e4.tag)).map((e4) => ({ level: Number(e4.tag[1]), text: e4.text, line: e4.line }));
     const isScreen = SCREEN_FILE.test(file2);
@@ -68546,9 +68546,9 @@ function sharedTokens(input2) {
     ...t.scale.map((s) => same(`--text-${s.name}`, "font-size", `${s.px}px`, [t.scaleSource])),
     same("--leading-normal", "generic", String(LINE_HEIGHT.body), ["wcag148"]),
     same("--leading-tight", "generic", String(LINE_HEIGHT.heading), ["material3Heading"]),
-    ...SPACING2.map((px, i) => same(`--space-${i + 1}`, "spacing", `${px}px`, ["carbonSpacing"])),
+    ...SPACING2.map((px2, i) => same(`--space-${i + 1}`, "spacing", `${px2}px`, ["carbonSpacing"])),
     same("--size-control", "generic", `${controlOf(input2)}px`, controlOf(input2) > DENSITY[input2.density].control ? [...profileOf2(input2).control.sources, "wcag258"] : ["carbonSize", "wcag258"]),
-    ...RADII.filter(([name]) => name !== "none").map(([name, px]) => same(`--radius-${name}`, "radius", `${px}px`, ["material3Shape"])),
+    ...RADII.filter(([name]) => name !== "none").map(([name, px2]) => same(`--radius-${name}`, "radius", `${px2}px`, ["material3Shape"])),
     ...SHADOWS.levels.map(([name, depth]) => ({ name: `--shadow-${name}`, role: "shadow", light: fluentShadow(depth, "light"), dark: fluentShadow(depth, "dark"), sources: ["fluentShadow"] })),
     ...(profileOf2(input2)?.tokens ?? []).map((t2) => same(t2.name, "generic", t2.value, [...t2.sources]))
   ];
@@ -68603,9 +68603,115 @@ function proposeSystem(input2) {
   };
 }
 
+// src/reference.ts
+import fs9 from "node:fs";
+var COLORED = 0.06;
+var SYSTEM_FONTS = /^(system-ui|-apple-system|blinkmacsystemfont|segoe ui|roboto|helvetica( neue)?|arial|sans-serif|serif|monospace|ui-sans-serif|ui-serif|ui-monospace|georgia|times new roman|verdana|tahoma)$/i;
+var px = (v) => {
+  const m = v?.trim().match(/^(-?\d+(?:\.\d+)?)px$/);
+  return m ? Number(m[1]) : null;
+};
+var colorOf2 = (v) => v ? parseColor(v.trim()) ?? null : null;
+var opaque = (c2) => !!c2 && (c2.alpha ?? 1) >= 1;
+var firstFamily = (stack) => stack?.split(",")[0]?.trim().replace(/^["']|["']$/g, "") || null;
+function read(ctx, input2) {
+  const { abs: abs2, isDir } = resolveUserPath(ctx.project, input2);
+  if (isDir) throw new FachaError("INVALID_INPUT", `reference must be a file: ${input2}`, { field: "reference" });
+  let raw2;
+  try {
+    raw2 = JSON.parse(fs9.readFileSync(abs2, "utf8"));
+  } catch {
+    throw new FachaError("INVALID_INPUT", `reference is not valid JSON: ${input2}`, { field: "reference" });
+  }
+  const r4 = raw2;
+  if (!r4 || typeof r4 !== "object" || typeof r4.url !== "string" || !r4.styles || typeof r4.styles !== "object")
+    throw new FachaError("INVALID_INPUT", "reference has no url and styles (written by /facha-ui:init reference)", { field: "reference" });
+  return r4;
+}
+function projectLoads(ctx, family) {
+  const name = family.toLowerCase();
+  const slug = name.replace(/\s+/g, "-");
+  const pkgPath = `${ctx.project.root}/package.json`;
+  const pkg = fs9.existsSync(pkgPath) ? readSource(pkgPath) ?? "" : "";
+  if (new RegExp(`"@fontsource(-variable)?/${slug}"`).test(pkg)) return `package.json (@fontsource/${slug})`;
+  const ident2 = family.replace(/\s+/g, "_");
+  for (const f3 of listProjectFiles(ctx.project)) {
+    if (!/\.(css|tsx|ts|jsx|js)$/.test(f3)) continue;
+    const text = readSource(f3) ?? "";
+    if (/\.css$/.test(f3) && text.toLowerCase().includes(name) && /@font-face|font-family/i.test(text)) return rel2(ctx.project, f3);
+    if (/next\/font\/google/.test(text) && new RegExp(`\\b${ident2}\\b`).test(text)) return `${rel2(ctx.project, f3)} (next/font)`;
+  }
+  return null;
+}
+function fromReference(ctx, input2, level) {
+  const r4 = read(ctx, input2);
+  const s = r4.styles;
+  let host = r4.url;
+  try {
+    host = new URL(r4.url).host;
+  } catch {
+  }
+  const notes = [];
+  const bodyBg = colorOf2(s.body?.["background-color"]) ?? colorOf2(s.backgrounds?.[0]?.color);
+  const ground = opaque(bodyBg) ? bodyBg : parseColor("#ffffff");
+  const colored = (c2) => opaque(c2) && chromaHue(c2).c >= COLORED;
+  const buttonBg = colorOf2(s.button?.["background-color"]);
+  const linkColor = colorOf2(s.link?.color);
+  const usedBg = (s.backgrounds ?? []).map((b) => ({ ...b, c: colorOf2(b.color) })).find((b) => colored(b.c));
+  const brand = colored(buttonBg) ? { c: buttonBg, from: `the primary button's background (${s.button?.from ?? "button"})` } : colored(linkColor) ? { c: linkColor, from: `the links' color (${s.link?.from ?? "a"})` } : usedBg ? { c: usedBg.c, from: "the most used colored background" } : null;
+  const brandColor = brand ? { value: toHex(brand.c), from: brand.from } : null;
+  if (brandColor) notes.push(`${brandColor.value} is the brand color of ${host}: the system takes it as its seed. If the product should not look like ${host}, pass another brandColor or move its hue.`);
+  else notes.push(`${host} has no colored button, link or background: its brand reads as neutral, so the directions come from Radix's accents.`);
+  const radii = [px(s.button?.["border-top-left-radius"]), px(s.card?.["border-top-left-radius"]), px(s.input?.["border-top-left-radius"])].filter(
+    (v) => v !== null && v < 999
+  );
+  const median = radii.length ? radii.sort((a, b) => a - b)[Math.floor(radii.length / 2)] : null;
+  const step = median === null ? null : RADII.filter(([n]) => n !== "full").reduce((best, x) => Math.abs(x[1] - median) < Math.abs(best[1] - median) ? x : best);
+  const radius = step && median !== null ? { value: step[1], from: `${median}px measured on the button and cards \u2192 Material 3 "${step[0]}" (${step[1]}px)` } : null;
+  const groundTint = chromaHue(ground).c;
+  const style = radius && radius.value >= 12 ? { value: "soft", from: `radius ${radius.value}px (12px or more)` } : radius && radius.value <= 4 && groundTint < 0.01 ? { value: "sober", from: `radius ${radius.value}px and a background without tint` } : { value: "standard", from: radius ? `radius ${radius.value}px` : "no radius measured" };
+  const control = s.button?.height ?? s.input?.height ?? null;
+  const bodySize = px(s.body?.["font-size"]);
+  const density = control !== null && control <= 32 || bodySize !== null && bodySize <= 14 ? { value: "compact", from: `controls ${control ?? "\u2013"}px, text ${bodySize ?? "\u2013"}px (Carbon sm: 32px)` } : control !== null && control >= 48 ? { value: "airy", from: `controls ${control}px (Carbon lg: 48px)` } : { value: "balanced", from: `controls ${control ?? "\u2013"}px, text ${bodySize ?? "\u2013"}px` };
+  const family = firstFamily(s.body?.["font-family"]);
+  let fontFamily = { value: null, family, from: "none measured: the system font stack" };
+  if (family) {
+    if (SYSTEM_FONTS.test(family)) fontFamily = { value: s.body["font-family"].trim(), family, from: `${family} is a system font` };
+    else {
+      const loads = projectLoads(ctx, family);
+      fontFamily = loads ? { value: `"${family}", system-ui, sans-serif`, family, from: `the project already loads it (${loads})` } : { value: null, family, from: `${family} is not loaded by the project and may need a license: the system font stack, unless the developer confirms it (fontFamily)` };
+    }
+  }
+  const min = level === "AAA" ? 7 : 4.5;
+  const large = level === "AAA" ? 4.5 : 3;
+  const isLarge = (b) => {
+    const size = px(b?.["font-size"]) ?? 0;
+    return size >= 24 || size >= 18.66 && Number(b?.["font-weight"] ?? 400) >= 700;
+  };
+  const pairs = [];
+  const measure = (pair, fgV, bgC, box, needs) => {
+    const fg = colorOf2(fgV);
+    if (!opaque(fg) || !opaque(bgC)) return;
+    const raw2 = contrast2(fg, bgC);
+    pairs.push({ pair, fg: toHex(fg), bg: toHex(bgC), ratio: shownRatio(raw2), min: needs, pass: raw2 >= needs, from: box?.from ?? "body" });
+  };
+  measure("text on the background", s.body?.color, ground, s.body, min);
+  for (const h of s.headings ?? []) measure(`${h.from ?? "heading"} on the background`, h.color, ground, h, isLarge(h) ? large : min);
+  if (s.button) measure("the button's text on the button", s.button.color, colorOf2(s.button["background-color"]), s.button, isLarge(s.button) ? large : min);
+  if (s.link) measure("links on the background", s.link.color, ground, s.link, min);
+  return { url: r4.url, host, file: input2, brandColor, style, radius, density, fontFamily, pairs, notes };
+}
+var REPLACEMENT = {
+  "text on the background": ["--color-foreground", "--color-background"],
+  "the button's text on the button": ["--color-on-primary", "--color-primary"],
+  "links on the background": ["--color-primary-strong", "--color-background"]
+};
+
 // src/propose-system.ts
 function proposeDesignSystem(ctx, args) {
   const brief = parseBrief(ctx);
+  const ref = args.reference ? fromReference(ctx, args.reference, args.level ?? brief?.accessibility ?? "AA") : null;
+  const fromRef = (what) => `reference ${ref.host}: ${what}`;
   const at = (field) => `brief ${brief.id} (${brief.at[field]})`;
   let brandColor;
   let brandFrom = "none: seeds from Radix accents";
@@ -68614,15 +68720,21 @@ function proposeDesignSystem(ctx, args) {
     if (!c2) throw new FachaError("INVALID_INPUT", `brandColor is not a CSS color: ${JSON.stringify(args.brandColor.slice(0, 60))}`, { field: "brandColor" });
     brandColor = toHex(c2);
     brandFrom = "argument";
+  } else if (ref?.brandColor) {
+    brandColor = ref.brandColor.value;
+    brandFrom = fromRef(ref.brandColor.from);
   } else if (brief?.brandColor) {
     brandColor = brief.brandColor.hex;
     brandFrom = at("brandColor");
   }
   const productType = brief?.product?.type && PROFILES[brief.product.type] ? brief.product.type : void 0;
   const profile = productType ? PROFILES[productType] : void 0;
-  const density = args.density ?? brief?.density ?? profile?.density?.value ?? "balanced";
-  const densityFrom = args.density ? "argument" : brief?.density ? at("density") : profile?.density ? `profile ${productType} (${profile.density.sources.join(", ")})` : "default: balanced";
+  const density = args.density ?? ref?.density.value ?? brief?.density ?? profile?.density?.value ?? "balanced";
+  const densityFrom = args.density ? "argument" : ref ? fromRef(ref.density.from) : brief?.density ? at("density") : profile?.density ? `profile ${productType} (${profile.density.sources.join(", ")})` : "default: balanced";
   const level = args.level ?? brief?.accessibility ?? "AA";
+  const fontFamily = args.fontFamily ?? ref?.fontFamily.value ?? void 0;
+  const radius = args.radius ?? ref?.radius?.value;
+  const style = args.style ?? ref?.style.value;
   const levelFrom = args.level ? "argument" : brief?.accessibility ? at("accessibility") : "default: WCAG 2.2 AA";
   const project = getDesignSystem(ctx, ["project"]).project;
   const format = project.tailwind.detected && project.tailwind.version === "4" ? "tailwind4" : "css";
@@ -68632,16 +68744,36 @@ function proposeDesignSystem(ctx, args) {
     density: { value: density, from: densityFrom },
     level: { value: level, from: levelFrom },
     format: { value: format, from: format === "tailwind4" ? "package.json: tailwindcss 4 (default theme in @theme)" : "plain CSS custom properties in :root" },
-    fontFamily: { value: args.fontFamily ?? null, from: args.fontFamily ? "argument" : "none: the system font stack" },
-    radius: { value: args.radius ?? null, from: args.radius !== void 0 ? "argument" : "each direction's style (Material 3 corner scale)" },
-    style: { value: args.style ?? null, from: args.style ? "argument" : "none: directions take the standard, sober and soft styles" }
+    fontFamily: {
+      value: fontFamily ?? null,
+      from: args.fontFamily ? "argument" : ref ? fromRef(ref.fontFamily.from) : "none: the system font stack"
+    },
+    radius: {
+      value: radius ?? null,
+      from: args.radius !== void 0 ? "argument" : ref?.radius ? fromRef(ref.radius.from) : "each direction's style (Material 3 corner scale)"
+    },
+    style: { value: style ?? null, from: args.style ? "argument" : ref ? fromRef(ref.style.from) : "none: directions take the standard, sober and soft styles" }
   };
-  const system = proposeSystem({ brandColor, density, level, format, fontFamily: args.fontFamily, radius: args.radius, seeds: args.seeds, style: args.style, productType });
+  const system = proposeSystem({ brandColor, density, level, format, fontFamily, radius, seeds: args.seeds, style, productType });
+  const first2 = system.directions[0];
+  const valueIn = (name) => first2?.tokens.find((t) => t.name === name);
+  const reference = ref ? {
+    url: ref.url,
+    file: ref.file,
+    pairs: ref.pairs.map((p4) => {
+      if (p4.pass) return p4;
+      const [fg, bg] = REPLACEMENT[p4.pair] ?? ["--color-foreground", "--color-background"];
+      const proof = first2?.proof.find((x) => x.mode === "light" && x.fg === fg && x.bg === bg);
+      return { ...p4, replacedBy: { fg, bg, light: [valueIn(fg)?.light, valueIn(bg)?.light], ratio: proof?.ratio ?? null } };
+    }),
+    notes: ref.notes
+  } : null;
   const cov = coverage(ctx);
   return {
     designSystemStatus: cov.status,
     brief: brief ? { id: brief.id, source: brief.source } : null,
     inputs,
+    ...reference ? { reference } : {},
     ...system,
     notes: [
       "A proposal: nothing is written. /facha-ui:init system shows it and writes it only with the developer's approval.",
@@ -68937,7 +69069,8 @@ function createServer(opts) {
         fontFamily: external_exports.string().max(200).optional(),
         radius: external_exports.number().int().min(0).max(32).optional(),
         seeds: external_exports.number().int().min(3).max(5).optional(),
-        style: external_exports.enum(["standard", "sober", "soft"]).optional()
+        style: external_exports.enum(["standard", "sober", "soft"]).optional(),
+        reference: external_exports.string().min(1).max(300).optional().describe("A reference page read by /facha-ui:init reference: .facha-ui/references/<slug>.json")
       },
       annotations: { title: "Propose design system", ...READ_ONLY }
     },
@@ -69046,7 +69179,7 @@ function score(argv) {
   const result = uxScore(ctx, argValue(argv, "--path"));
   const baselineFile = argValue(argv, "--baseline");
   const min = argValue(argv, "--min");
-  const down = baselineFile && fs9.existsSync(baselineFile) ? regressions(result, JSON.parse(fs9.readFileSync(baselineFile, "utf8"))) : [];
+  const down = baselineFile && fs10.existsSync(baselineFile) ? regressions(result, JSON.parse(fs10.readFileSync(baselineFile, "utf8"))) : [];
   const low = min ? result.screens.filter((s) => s.score < Number(min)).map((s) => ({ screen: s.screen, score: s.score })) : [];
   process.stdout.write(JSON.stringify(result, null, 2) + "\n");
   for (const r4 of down) process.stderr.write(`UX score went down: ${r4.screen} ${r4.before} \u2192 ${r4.after}

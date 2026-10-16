@@ -192,6 +192,7 @@ export function createServer(opts: ServerOptions): McpServer {
         radius: z.number().int().min(0).max(32).optional(),
         seeds: z.number().int().min(3).max(5).optional(),
         style: z.enum(["standard", "sober", "soft"]).optional(),
+        reference: z.string().min(1).max(300).optional().describe("A reference page read by /facha-ui:init reference: .facha-ui/references/<slug>.json"),
       },
       annotations: { title: "Propose design system", ...READ_ONLY },
     },
