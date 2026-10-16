@@ -28,11 +28,12 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-029 · Reglas contra el "look genérico de IA"
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** los generadores de UI tienden al promedio de la web. Las defensas que existen (frontend-design, Impeccable) son instrucciones en el prompt y nadie las verifica; un guardián determinístico que sí lo haga es un diferencial de facha-ui.
 - **Qué:** reglas del guardián, cada una con su principio `ux:`: texto gris sobre fondo de color, neutros grises puros cuando hay color de marca, tarjetas dentro de tarjetas, el mismo radio y sombra en todos los bloques, degradados de fondo decorativos, animación de entrada en cada sección y una sola tipografía sin escala.
 - **Criterios de aceptación:** positivos y negativos en un fixture; severidad de aviso; 0 falsos positivos en los fixtures existentes; cada regla figura en `ux-principles.md` como "verificado por el guardián".
+- **Spec:** [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md)
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://claude.com/resources/articles/improving-frontend-design-through-skills , `skills/_shared/ux-principles.md`
 
 ## Siguiente
