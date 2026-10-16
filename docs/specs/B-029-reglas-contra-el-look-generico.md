@@ -28,7 +28,7 @@ una regla.
 
 ### 1. Tres reglas del guardián (severidad: aviso)
 
-- **`ux-gray-on-color`**: texto de un gris medio (croma OKLCH < 0.03, luminosidad entre 0.3 y 0.85)
+- **`ux-gray-on-color`**: texto de un gris medio (croma OKLCH < 0.045, luminosidad entre 0.3 y 0.85; el umbral subió de 0.03 en la prueba real, ver el registro)
   sobre un fondo de color (croma ≥ 0.06), en la misma regla CSS o el mismo elemento. Sugerencia: el
   texto de la misma familia (`--color-primary-strong`, `--color-*-text`) o, sobre un sólido, el texto
   sobre acento (`--color-on-*`). No marca texto casi negro ni casi blanco, ni fondos apenas teñidos.
@@ -83,34 +83,54 @@ reglas nuevas. Las skills no cambian: el guardián y `review_ui` ya se usan en c
 
 ## Criterios de aceptación
 
-- [ ] Positivos y negativos en un fixture para cada regla y para la señal.
-- [ ] Severidad de aviso.
-- [ ] 0 falsos positivos en los fixtures existentes, en los templates del laboratorio y en la muestra
+- [x] Positivos y negativos en un fixture para cada regla y para la señal.
+- [x] Severidad de aviso.
+- [x] 0 falsos positivos en los fixtures existentes, en los templates del laboratorio y en la muestra
   con un sistema generado.
-- [ ] Cada regla figura en `ux-principles.md` como verificada por el guardián.
-- [ ] Cada regla cita su fuente.
+- [x] Cada regla figura en `ux-principles.md` como verificada por el guardián (test).
+- [x] Cada regla cita su fuente.
 
 ## Tareas
 
 - [x] 0. Fuentes verificadas (tabla de arriba)
-- [ ] 1. `look.ts` (tres reglas), registro, tests con el fixture, bundle
-- [ ] 2. Señal `nested-surfaces` en `review_ui`, tests
-- [ ] 3. Principios
-- [ ] 4. Docs y `help`
-- [ ] 5. Prueba real
+- [x] 1. `look.ts` (tres reglas), registro, tests con el fixture, bundle · `9369c18`
+- [x] 2. Señal `nested-surfaces` en `review_ui`, tests · `9369c18`
+- [x] 3. Principios · `9369c18`
+- [x] 4. Docs y `help` · `e190393`
+- [x] 5. Prueba real
 - [ ] 6. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **`theme-contrast` deja de medir degradados.** `colorOf` tomaba el primer color de un degradado
+  como si fuera un fondo sólido, contra lo que dice el comentario de `textContrast` ("no se adivina").
+  Ahora `textContrast` devuelve `null` con un degradado y lo mide `a11y-gradient-text`, contra
+  todas las paradas. Un caso que antes podía ser error pasa a aviso (anotado en el CHANGELOG).
+- **`siblingBackgroundImage`** en los usos de CSS: un degradado puede venir en `background-image`.
+- **`ancestorClassLists`** en los elementos JSX: la señal `nested-surfaces` mira las clases de cada
+  ancestro por separado, para que un borde de uno y un radio de otro no parezcan una tarjeta.
+- **Umbral de gris en 0.045** (antes 0.03): la prueba real mostró que el `slate-500` de Tailwind, el
+  gris típico de lo generado, tiene croma 0.041 y quedaba afuera. Un azul grisáceo de verdad (0.063)
+  sigue contando como color.
+- **Las tres reglas, la señal y los principios entraron en un solo commit** (`9369c18`): comparten
+  el fixture y los tests.
 
 ## Registro
 
 - **2026-10-16:** fuentes verificadas; de siete señales, tres son reglas, una es señal de revisión,
   dos quedan afuera (contradicen a Radix y Carbon, o no tienen fuente) y una ya estaba cubierta.
   Spec escrito y plan presentado, pendiente de aprobación.
+- **2026-10-16:** plan aprobado. Tareas 1 a 4 (`9369c18`, `e190393`); 317 tests.
+- **2026-10-16 · prueba real:** el guardián completo sobre las dos apps de prueba: 0 hallazgos de las
+  reglas nuevas (sin falsos positivos). Sobre una landing "de manual" generada por IA (hero con
+  degradado y texto blanco, banner con gris sobre la marca, animación de entrada en cada sección,
+  `animate-bounce`, tarjetas anidadas): detectó el degradado (1.23:1 contra `#e0e7ff`), las dos
+  animaciones y las tarjetas anidadas, pero **no** el gris sobre la marca: era `slate-500`, croma
+  0.041, y el umbral estaba en 0.03. Subido a 0.045, con un caso nuevo en el fixture; ahora salen las
+  cuatro reglas y las apps reales siguen en 0.
 
 ## Cómo retomar
 
-Esperar la aprobación del plan. Con el OK: "Plan (propuesto…)" pasa a "Plan aprobado (fecha)", el
-estado a `en curso`, y se arranca por la tarea 1 en `feat/generic-look-rules`.
+**Estado al 2026-10-16:** tareas 0 a 5 hechas en `feat/generic-look-rules`, sin push. Falta el release
+(tarea 6), con el OK de quien mantiene el repo: versión menor (0.24.0), con el flujo de `CLAUDE.md`;
+B-029 pasa a Hecho y el primero de Siguiente sube a Ahora.
