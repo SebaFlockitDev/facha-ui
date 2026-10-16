@@ -7,6 +7,16 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- Reglas del guardián para las partes del "look genérico de IA" que rompen una regla publicada: `ux-gray-on-color` (texto gris sobre un fondo de color, según Radix), `a11y-gradient-text` (texto sobre un degradado, medido contra cada parada: WCAG 1.4.3) y `a11y-motion` (animaciones sin `prefers-reduced-motion`: WCAG 2.3.3). Todas como aviso.
+- `review_ui` suma la señal `nested-surfaces`: una tarjeta dentro de otra.
+- Principios nuevos: `ux:text-on-color` y `ux:wcag-2.3.3`.
+
+### Fixed
+
+- `theme-contrast` ya no mide un texto sobre un degradado como si el fondo fuera su primer color; lo mide `a11y-gradient-text` contra todas las paradas.
+
 ## [0.23.0] - 2026-10-16
 
 ### Added

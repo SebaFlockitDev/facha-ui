@@ -394,7 +394,7 @@ Señales de un recorrido entre pantallas, dadas en orden: la misma acción con n
 > **When to use:** after the guardian passes, to review a screen or a variant like a senior designer would, together with its captures; and to answer "what would you improve in this screen?". Confirm each signal on the captures before changing anything.
 > **Returns:** JSON with `files` (per file: `primaryActions`, `accents`, `fontSizesPx`, `headings`, `states`), `findings` (heuristic, severity, evidence, why it matters, fix), `summary` and `notes`. Read-only.
 
-**Entrada:** `{ path: string }`. Las señales son heurísticas (warning o info), nunca errores: orientan la crítica, no bloquean. Umbrales: más de 1 acción primaria, más de 2 acentos, más de 4 tamaños de texto; títulos (varios `h1`, pantalla sin título propio ni título pasado al shell); estados `loading`/`empty`/`error` en pantallas que cargan datos (`empty` solo si muestran listas).
+**Entrada:** `{ path: string }`. Las señales son heurísticas (warning o info), nunca errores: orientan la crítica, no bloquean. Desde B-029, `nested-surfaces` (info): un elemento con aspecto de tarjeta (radio y borde o sombra) dentro de otro, clase por clase de cada ancestro (`ux:gestalt-common-region`). Umbrales: más de 1 acción primaria, más de 2 acentos, más de 4 tamaños de texto; títulos (varios `h1`, pantalla sin título propio ni título pasado al shell); estados `loading`/`empty`/`error` en pantallas que cargan datos (`empty` solo si muestran listas).
 
 #### 2.a.4 Reglas del guardián
 
@@ -426,6 +426,11 @@ Señales de un recorrido entre pantallas, dadas en orden: la misma acción con n
 | `copy-all-caps` | info (0.11.0) | Texto de 2+ palabras escrito en mayúsculas en el código (usar `text-transform` si es estilo) | `IMPORTE TOTAL DEL MES` |
 | `copy-term` | warning (0.11.0) | Una palabra que el equipo decidió no usar (`copy.terms`), con la palabra del producto | `orden` → `pedido` |
 | `copy-voice` | warning (0.11.0) | Un tratamiento fuera de la voz del producto (`copy.voice`): formas de vos, tú o usted | `Puedes` en un producto que dice `podés` |
+| `ux-gray-on-color` | warning (B-029) | Texto de un gris medio (croma OKLCH < 0.03, luminosidad 0.3–0.85) sobre un fondo de color (croma ≥ 0.06), en la misma regla CSS o el mismo elemento: Radix diseña el texto de cada escala para su propio fondo, y blanco u oscuro sobre los sólidos | `.promo { background: var(--color-primary); color: #6b7280 }` |
+| `a11y-gradient-text` | warning (B-029) | Texto sobre un degradado que no llega al mínimo contra alguna de sus paradas (WCAG 1.4.3, técnica G18). Desde B-029, `theme-contrast` ya no mide un degradado como si fuera su primer color | `background: linear-gradient(#4f46e5, #f5f3ff); color: #fff` |
+| `a11y-motion` | warning (B-029) | Una animación sin alternativa de movimiento reducido: `animation` en CSS cuando ningún CSS del proyecto tiene `@media (prefers-reduced-motion: reduce)` (técnica C39), o `animate-*` sin `motion-safe:` ni `motion-reduce:` (WCAG 2.3.3) | `.fade-up { animation: fade-up 300ms }` |
+
+**Look genérico de IA (B-029).** Las tres reglas anteriores son las partes de ese look que rompen una regla publicada. Del resto, la señal de "tarjetas dentro de tarjetas" no tiene una fuente que diga que se eviten y queda como señal de `review_ui` (`nested-surfaces`, info); los grises puros con color de marca quedan afuera (Radix: el gris puro va bien con cualquier color; Carbon lo usa); el mismo radio y sombra en todo no tiene fuente; y una sola tipografía sin escala ya la cubren `tailwind-default-scale`, los tokens de tamaño y `review_ui`. El detalle, con las fuentes: [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
 
 **Salud del design system (`health`)**, informativo y una sola vez por token, no por cada uso: tokens que no cumplen contraste contra las superficies en **ningún** tema (p. ej. `--color-text-subtle`) y tokens del tema base que otro tema no redefine y no están en `invariant`. Desde 0.3.0 suma `status-confusable`: pares de estados (éxito, advertencia, peligro…) cuyos colores se distinguen poco con visión normal o con deuteranopía o protanopía simuladas. Desde 0.5.0 suma la **paleta inflada**: `near-duplicate-tokens` (tokens de color casi iguales en todos los temas), `near-duplicate-literals` (colores escritos a mano casi iguales) y `near-duplicate-steps` (tamaños de letra a ±0,5 px y radios a ±1 px).
 
@@ -1502,6 +1507,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Principios nuevos** en `ux-principles.md`: `ux:line-length`, `ux:numeric-alignment` y `ux:wcag-2.5.5`.
 - **Fuentes** verificadas el 2026-10-16: Carbon (style strategies, data table), WCAG 2.5.5 y 1.4.8, Baymard (largo de línea), GOV.UK (números en tablas) y MDN (`tabular-nums`). Polaris y Material 3 no se pudieron leer sin navegador y no se usan.
 - **Tests:** cada valor de cada perfil cita una fuente con URL; las pautas citan principios que existen; el generador aplica cada perfil, la densidad del brief manda y sin perfil nada cambia; todo sistema con perfil pasa cada par de contraste; `profile` por el brief y la tool por el MCP.
+
+### 7.34 Reglas contra el look genérico de IA
+
+Ítem B-029 del backlog. Spec, fuentes señal por señal y registro: [`docs/specs/B-029-reglas-contra-el-look-generico.md`](docs/specs/B-029-reglas-contra-el-look-generico.md).
+
+- **Qué cambia:** tres reglas del guardián (`ux-gray-on-color`, `a11y-gradient-text`, `a11y-motion`, §2.a.4), la señal `nested-surfaces` de `review_ui` y los principios `ux:text-on-color` y `ux:wcag-2.3.3`; `theme-contrast` deja de medir un degradado como si fuera su primer color.
+- **Criterio:** de siete señales del backlog, las que tienen fuente son reglas; las demás quedan afuera o como señal de revisión, con el motivo. Una regla sin fuente sería gusto disfrazado de verificación.
+- **Tests:** fixture `generic-look` con positivos y negativos de cada regla y de la señal; 0 hallazgos nuevos en los fixtures existentes y en la muestra del laboratorio con un sistema generado; cada regla en la línea de verificación de su principio.
 
 ---
 
