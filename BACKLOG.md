@@ -28,11 +28,12 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-028 · De referencias a tokens
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P2 · **Tamaño:** L
 - **Por qué:** "quiero algo como esta página" es la forma más natural de pedir un estilo, y ya es estándar (Stitch, Visily, Uizard, Banani).
 - **Qué:** extraer colores y tipografías de una captura o de una página de referencia y normalizarlos en escalas accesibles con B-025, informando qué valor de la referencia no pasaba contraste y cuál lo reemplaza.
 - **Criterios de aceptación:** antes de la spec se decide cómo convive con S2 (el MCP no usa la red): la captura la toma la skill, con permiso del dev, y el MCP solo lee el archivo; cada valor extraído dice de dónde salió.
+- **Spec:** [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md)
 - **Depende de:** B-025
 - **Referencias:** [estudio](docs/research/2026-10-15-herramientas-de-diseno.md), https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-updates/
 
