@@ -888,6 +888,15 @@ Lo que ninguna fuente sostiene no se fija (el "croma moderado" de fintech que no
 
 ---
 
+**Desde una referencia (`/facha-ui:init reference <url|image>`, desde 0.30.0, §7.40).** "Quiero algo como esta página". Con el sí del desarrollador, la skill abre la URL con Playwright, toma una captura y corre un script fijo del plugin (`skills/init/scripts/reference-styles.js`, solo lectura: estilos calculados y tamaños, nunca textos, almacenamiento ni red) con `browser_evaluate`; es la única excepción de `init` a "el navegador solo captura". Guarda `.facha-ui/references/<slug>.json` y la captura. `propose_design_system` lo lee con la entrada `reference` (un archivo del proyecto: S2 intacta) y llena lo que los argumentos no dan, antes que el brief:
+- **marca:** el fondo del botón principal si tiene color (croma de 0.06 o más); si no, el color de los enlaces; si no, el fondo con color de más área; si no, un fondo translúcido con color (la marca usada como tinte), sin su alfa. Una referencia monocroma dice qué color queda y ofrece el de su botón;
+- **radio y estilo:** la mediana del radio de botón, tarjeta e input con borde, al paso más cercano de Material 3; 12px o más es `soft`, 4px o menos con un fondo sin matiz es `sober`, si no `standard`;
+- **densidad:** controles de 32px o menos, o texto de 14px o menos, es `compact`; 48px o más, `airy` (Carbon);
+- **tipografía:** solo si es de sistema o el proyecto ya la carga (CSS, `@fontsource`, `next/font`); si no, la pila de sistema y una nota de licencia;
+- **el informe:** los pares de la referencia (texto, títulos con su tamaño, texto del botón, enlaces) medidos con WCAG 2.2 sobre su fondo real (el del `body`, o el opaco de más área si es transparente), y para cada uno que falla, el token y el valor del sistema que lo reemplaza. Avisa que el color de marca es de otro producto.
+
+Con una imagen y sin URL, la IA propone los colores que ve y el desarrollador los confirma: son sus valores. Desde ahí sigue el modo `system` (S2b en adelante).
+
 ## 3. Adopción en un proyecto, paso a paso
 
 ### 3.1 Requisitos
@@ -1574,6 +1583,15 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 - **Qué cambia:** la pestaña Diseño (§7.35) funciona en proyectos shadcn/ui: `lab-palette.ts` lee `oklch()`, `hsl()` y los canales HSL sueltos (los tokens con `format: "hsl-channels"`, que `palette-base.mjs` y el endpoint conservan), y escribe cada valor nuevo en el formato del token. Con la marca gris (shadcn por defecto), un preset o el deslizador la pintan con el color del preset (el paso 9 de Radix) en los dos temas; Grafito la deja gris.
 - **Encontrado en la prueba real:** la solución para el texto sobre la marca pedía "texto oscuro" sobre índigo en el tema oscuro, donde se lee el blanco (5.2:1 contra 4.0:1). Ahora la dirección sale del fondo: blanco si su luminancia está bajo 0.179 (el cruce de la fórmula de WCAG), y lo mismo para la marca como texto.
 - **Tests:** ida y vuelta de `oklch()` y de canales sin cambiar el formato, la marca gris pintada y medida, la base de `shadcn-tw3` y `shadcn-tw4`, y el endpoint con canales.
+
+### 7.40 Versión 0.30.0: de referencias a tokens
+
+Ítem B-028 del backlog. Spec, decisiones y registro: [`docs/specs/B-028-de-referencias-a-tokens.md`](docs/specs/B-028-de-referencias-a-tokens.md).
+
+- **Qué cambia:** `/facha-ui:init reference <url|image>` (§2.h) y la entrada `reference` de `propose_design_system`.
+- **Decisiones:** la página se lee con un script fijo de solo lectura, con permiso y solo en este modo; el color de marca de la referencia se usa como semilla, con aviso; una tipografía se propone solo si el proyecto puede cargarla.
+- **Encontrado en la prueba real** (dos sitios públicos): un `body` transparente medía el texto claro contra blanco (1.16:1) y ahora usa el fondo opaco de más área; una marca usada solo como tinte translúcido no se encontraba; los navegadores devuelven `lab()` y `oklab()`, que el MCP ya lee; un input sin borde bajaba el radio. Idea B-039: el generador no invierte una marca monocroma en el tema oscuro.
+- **Tests:** la normalización, el informe de pares con su reemplazo, los argumentos sobre la referencia, la tipografía cargada o no, una página oscura con el `body` transparente y la marca como tinte, los archivos fuera del proyecto, y el contrato del script (solo estilos y tamaños; sin red, texto, almacenamiento ni clics).
 
 ---
 

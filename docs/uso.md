@@ -260,6 +260,16 @@ Después te muestra el plan de la elegida: los colores por rol, **qué tuvo que 
 
 Con tu aprobación escribe los tokens al principio de tu CSS global (en Tailwind 4, en `@theme`) y registra la decisión. Tus pantallas no cambian: el guardián va a marcar sus colores escritos a mano, y el paso siguiente es pedir variantes (*"mejorá la pantalla de pedidos"*) que ya usan el sistema.
 
+### 5.0c Un design system como el de una página que te gusta: `/facha-ui:init reference`
+
+```text
+/facha-ui:init reference https://example.com
+```
+
+"Quiero algo como esta página". Antes de abrir nada te pide permiso. Con tu sí, abre la página, toma una captura y lee los colores, la tipografía y los radios que calcula (no lee sus textos). Te muestra de dónde sale cada valor ("el fondo del botón principal", "16px de radio en botones y tarjetas"), qué color de la referencia no pasaba el contraste y con qué lo reemplaza, y te avisa que el color de marca es de otro producto. La tipografía solo la propone si tu proyecto ya la carga; si es una fuente comercial, te pregunta si la tenés licenciada. Después sigue igual que `init system`: la dirección sobre tu pantalla real, el plan y tu aprobación.
+
+Con una captura en lugar de una URL (`/facha-ui:init reference diseño.png`), te propone los colores que ve y vos los confirmás o corregís.
+
 ### 5.1 Si faltan tokens: `/facha-ui:init`
 
 Cuando el design system no existe o le faltan roles, como los colores de estado, `/facha-ui:init` te ayuda a crearlos **sin inventar**:
