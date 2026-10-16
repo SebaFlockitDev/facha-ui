@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-043 · `ux_score` con pantallas de Vite
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** `ux_score` y `review_ui` solo reconocen pantallas `page.tsx` (Next): en Vite el centro sale sin puntajes, el puntaje de CI no protege nada y `review_ui` no pide título ni estados a las pantallas (`ux:states`).
 - **Qué:** reconocer las pantallas de Vite por lo que monta el router y por carpetas de convención (`src/pages/`, `src/routes/`, `src/views/`, `src/screens/`), con la opción `screens` de la config para reemplazarlas; un archivo pasado explícitamente siempre se mide.

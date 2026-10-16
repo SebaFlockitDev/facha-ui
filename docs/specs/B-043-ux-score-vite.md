@@ -1,6 +1,6 @@
 # B-043 · `ux_score` con pantallas de Vite
 
-> **Estado:** en spec · **Rama:** `feat/ux-score-vite` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/ux-score-vite` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** prueba real de B-042 (el centro de una app Vite salía sin pantallas) · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -23,7 +23,7 @@ Vite es uno de los dos frameworks de laboratorio soportados (SPEC §2.b.4).
 - El fixture `mcp/test/fixtures/vite-react` tiene `src/pages/Orders.tsx`, que `App.tsx` monta con
   `<Route path="/orders" element={<Orders />} />` (React Router).
 
-## Plan propuesto
+## Plan aprobado (2026-10-16, con las cuatro decisiones recomendadas)
 
 | Archivo | Cambio |
 |---|---|
@@ -61,29 +61,45 @@ Vite es uno de los dos frameworks de laboratorio soportados (SPEC §2.b.4).
 
 ## Criterios de aceptación
 
-- [ ] En una app Vite, `ux_score` sin argumentos mide las pantallas que monta el router y las de las carpetas por convención, con su ruta cuando está escrita.
-- [ ] Un archivo pasado a `ux_score` siempre se mide.
-- [ ] El modo `score` de CI falla cuando baja una pantalla de Vite.
-- [ ] `review_ui` aplica sus controles de pantalla en Vite.
-- [ ] Next no cambia (los snapshots de Next siguen iguales).
+- [x] En una app Vite, `ux_score` sin argumentos mide las pantallas que monta el router y las de las carpetas por convención, con su ruta cuando está escrita.
+- [x] Un archivo pasado a `ux_score` siempre se mide.
+- [x] El modo `score` de CI falla cuando baja una pantalla de Vite.
+- [x] `review_ui` aplica sus controles de pantalla en Vite.
+- [x] Next no cambia: las mismas pantallas y los mismos puntajes (suma `route`).
 
 ## Tareas
 
-- [ ] 1. `screens.ts` y la config `screens`; tests
-- [ ] 2. `ux_score` y `review_ui` con la noción nueva; fixture `vite-router`; tests
-- [ ] 3. El centro (C3) y las docs
-- [ ] 4. Prueba real (el centro de la app Vite de prueba, con puntajes)
+- [x] 1. `screens.ts` y la config `screens`; tests
+- [x] 2. `ux_score` y `review_ui` con la noción nueva; fixture `vite-router`; tests
+- [x] 3. El centro (C3) y las docs
+- [x] 4. Prueba real (el centro de la app Vite de prueba, con puntajes)
 - [ ] 5. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **`route` también en Next**, desde las carpetas (`app/(grupo)/orders/page.tsx` → `/orders`; los grupos y los
+  slots `@x` no cuentan). El campo es nuevo y no cambia ningún puntaje; el centro lo usa en los dos frameworks.
+- **Rutas de layout:** un objeto de ruta con `children` o un `<Route>` que no se cierra solo envuelve otras rutas
+  y no es una pantalla (el `Shell` del fixture aparecía como pantalla en `/`).
+- **La ruta más específica gana:** una pantalla montada en `/` y en `/orders` queda con `/orders`. Una ruta
+  relativa (hija de otra) o un `index` quedan con `route: null`: componer rutas anidadas queda afuera.
+- **Tareas 1 y 2 en un commit:** `screens.ts` sin `ux_score` no tenía uso ni forma de probarse de punta a punta.
+- **La 0.32.0 salió con el frontmatter de `center` roto** (`: ` dentro de la descripción sin comillas): la skill
+  cargaba sin descripción y "abrí facha-ui" no la abría. Lo encontró `claude plugin validate` al verificar
+  este ítem; la verificación anterior miraba solo su última línea. Arreglado en `fix/center-frontmatter`
+  (`eba5279`, mergeado acá) con un test que parsea el frontmatter de cada skill y del agente.
 
 ## Registro
 
 - **2026-10-16:** visto en la prueba de B-042 y anotado como idea; el desarrollador pidió arrancarlo.
   Relevado; spec y plan escritos, pendientes de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas. Tareas 1 y 2 (`1cba4dc`): `screens.ts`, la
+  config `screens`, `ux_score` y `review_ui`, el fixture `vite-router` y 9 tests. Tarea 3 (`9011aab`): el
+  centro toma sus pantallas solo de `ux_score`; SPEC §7.43, uso, CHANGELOG y la descripción de la herramienta.
+  406 tests en verde.
+- **2026-10-16 · prueba real:** `ux_score` sobre las tres apps Vite de prueba: `src/pages/Orders.tsx` en `/orders`
+  con 98, 98 y 95 (antes, `screens: []`). El centro abierto en la primera mostró el 98 sin recargar.
 
 ## Cómo retomar
 
-Plan propuesto, esperando la aprobación del desarrollador.
+En `feat/ux-score-vite`, tareas 1 a 4 hechas. Falta la 5 (release 0.33.0, que lleva también el arreglo de `center`), solo cuando el desarrollador lo pida.
