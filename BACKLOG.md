@@ -27,6 +27,15 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
+### B-038 · Colores `oklch()` y HSL en el panel en vivo
+- **Estado:** en spec
+- **Prioridad:** P1 · **Tamaño:** S
+- **Por qué:** shadcn/ui es la base más común de los proyectos React, y la pestaña Diseño del panel no funciona en ninguna de sus formas: con Tailwind 4 los tokens están en `oklch()` y con Tailwind 3 son canales HSL sueltos, y el panel solo lee hex y `rgb()`.
+- **Qué:** el panel lee y escribe `oklch()`, `hsl()` y los canales HSL en el formato de cada token; con la marca gris (shadcn por defecto), los presets la pintan.
+- **Criterios de aceptación:** la pestaña Diseño aparece en `shadcn-tw3` y `shadcn-tw4`; la propuesta conserva el formato de cada valor; con la marca gris, un preset la pinta y se mide el texto sobre ella.
+- **Spec:** [`docs/specs/B-038-panel-con-oklch.md`](docs/specs/B-038-panel-con-oklch.md)
+- **Referencias:** [spec de B-031](docs/specs/B-031-controles-de-diseno-en-el-panel.md), `skills/variants/templates/next-app/lab-palette.ts`
+
 ### B-028 · De referencias a tokens
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** L
@@ -158,7 +167,6 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 - **B-021 · Ejecución fuera de Claude Code:** el mismo flujo como agente (LangGraph, Strands) reutilizando el MCP.
 - **B-022 · UI web de configuración:** editor visual de `facha-ui.config.json`, roles y reglas `custom`.
 - **B-037 · `near-duplicate-tokens` según el rol:** visto en la prueba de B-025: la regla de paleta inflada compara tokens de cualquier rol, y en un sistema generado marca pares que se parecen por diseño (fondo y panel, que son los pasos 1 y 2 de Radix; el blanco del texto sobre acento y el casi blanco del fondo). Su propia nota dice que se ignoren "si son roles distintos": que la regla los deje afuera y siga marcando los del mismo rol.
-- **B-038 · Colores `oklch()` en el panel en vivo:** visto en B-031: `palette-base.mjs` y `lab-palette.ts` solo leen colores hex y `rgb()`, así que un proyecto con los tokens en `oklch()` (shadcn/ui con Tailwind 4, como el fixture `shadcn-tw4`) no tiene base y el panel no muestra la pestaña Diseño. Leerlos, y escribir los valores nuevos en `oklch()`, el formato del proyecto.
 - **B-035 · `scan_styles` en un proyecto sin temas:** visto en la prueba de B-024, sobre una app sin ningún bloque de tema: las propuestas salen con `values: {}` (falta el valor del tema por defecto), un gris de texto secundario (`#475569`, usado en "Cancelado", `.muted` y encabezados) se propone como `--status-danger-fg`, y el color de marca se parte en dos propuestas, una como `status.info`. Con un brief, su color de marca debería proponerse como `accent.primary`.
 
 ## Hecho
