@@ -111,21 +111,29 @@ export function fromReference(ctx: Context, input: string, level: "AA" | "AAA"):
     /* not a URL: keep it as written */
   }
   const notes: string[] = [];
-  const bodyBg = colorOf(s.body?.["background-color"]) ?? colorOf(s.backgrounds?.[0]?.color);
-  const ground = opaque(bodyBg) ? bodyBg : parseColor("#ffffff")!;
+  // The page's background: the body's, else (a transparent body, as on many sites) the biggest opaque one.
+  const ground =
+    [colorOf(s.body?.["background-color"]), ...(s.backgrounds ?? []).map((b) => colorOf(b.color))].find((c): c is Color => opaque(c)) ??
+    parseColor("#ffffff")!;
 
   // Brand: the primary button's own color, else the links', else the most used colored background.
   const colored = (c: Color | null) => opaque(c) && chromaHue(c).c >= COLORED;
   const buttonBg = colorOf(s.button?.["background-color"]);
   const linkColor = colorOf(s.link?.color);
   const usedBg = (s.backgrounds ?? []).map((b) => ({ ...b, c: colorOf(b.color) })).find((b) => colored(b.c));
+  // A brand used only as a tint (a translucent highlight, as in many docs sites): its color, without the alpha.
+  const tint = (s.backgrounds ?? [])
+    .map((b) => colorOf(b.color))
+    .find((c) => c && (c.alpha ?? 1) >= 0.1 && (c.alpha ?? 1) < 1 && chromaHue({ ...c, alpha: 1 }).c >= COLORED);
   const brand = colored(buttonBg)
     ? { c: buttonBg, from: `the primary button's background (${s.button?.from ?? "button"})` }
     : colored(linkColor)
       ? { c: linkColor, from: `the links' color (${s.link?.from ?? "a"})` }
       : usedBg
         ? { c: usedBg.c!, from: "the most used colored background" }
-        : null;
+        : tint
+          ? { c: { ...tint, alpha: 1 }, from: "a translucent colored background (the brand used as a tint), without its alpha" }
+          : null;
   const brandColor = brand ? { value: toHex(brand.c!), from: brand.from } : null;
   if (brandColor) notes.push(`${brandColor.value} is the brand color of ${host}: the system takes it as its seed. If the product should not look like ${host}, pass another brandColor or move its hue.`);
   else notes.push(`${host} has no colored button, link or background: its brand reads as neutral, so the directions come from Radix's accents.`);

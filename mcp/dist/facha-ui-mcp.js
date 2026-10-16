@@ -68652,13 +68652,13 @@ function fromReference(ctx, input2, level) {
   } catch {
   }
   const notes = [];
-  const bodyBg = colorOf2(s.body?.["background-color"]) ?? colorOf2(s.backgrounds?.[0]?.color);
-  const ground = opaque(bodyBg) ? bodyBg : parseColor("#ffffff");
+  const ground = [colorOf2(s.body?.["background-color"]), ...(s.backgrounds ?? []).map((b) => colorOf2(b.color))].find((c2) => opaque(c2)) ?? parseColor("#ffffff");
   const colored = (c2) => opaque(c2) && chromaHue(c2).c >= COLORED;
   const buttonBg = colorOf2(s.button?.["background-color"]);
   const linkColor = colorOf2(s.link?.color);
   const usedBg = (s.backgrounds ?? []).map((b) => ({ ...b, c: colorOf2(b.color) })).find((b) => colored(b.c));
-  const brand = colored(buttonBg) ? { c: buttonBg, from: `the primary button's background (${s.button?.from ?? "button"})` } : colored(linkColor) ? { c: linkColor, from: `the links' color (${s.link?.from ?? "a"})` } : usedBg ? { c: usedBg.c, from: "the most used colored background" } : null;
+  const tint = (s.backgrounds ?? []).map((b) => colorOf2(b.color)).find((c2) => c2 && (c2.alpha ?? 1) >= 0.1 && (c2.alpha ?? 1) < 1 && chromaHue({ ...c2, alpha: 1 }).c >= COLORED);
+  const brand = colored(buttonBg) ? { c: buttonBg, from: `the primary button's background (${s.button?.from ?? "button"})` } : colored(linkColor) ? { c: linkColor, from: `the links' color (${s.link?.from ?? "a"})` } : usedBg ? { c: usedBg.c, from: "the most used colored background" } : tint ? { c: { ...tint, alpha: 1 }, from: "a translucent colored background (the brand used as a tint), without its alpha" } : null;
   const brandColor = brand ? { value: toHex(brand.c), from: brand.from } : null;
   if (brandColor) notes.push(`${brandColor.value} is the brand color of ${host}: the system takes it as its seed. If the product should not look like ${host}, pass another brandColor or move its hue.`);
   else notes.push(`${host} has no colored button, link or background: its brand reads as neutral, so the directions come from Radix's accents.`);

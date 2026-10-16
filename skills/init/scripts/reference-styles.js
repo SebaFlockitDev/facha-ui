@@ -30,7 +30,7 @@
 
   // Backgrounds by area: the page's own colors, biggest first.
   const areas = new Map();
-  for (const el of [document.body, ...all]) {
+  for (const el of [document.documentElement, document.body, ...all]) {
     const bg = getComputedStyle(el).backgroundColor;
     if (!opaque(bg)) continue;
     const r = el.getBoundingClientRect();

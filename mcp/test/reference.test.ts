@@ -72,6 +72,38 @@ describe("propose_design_system · reference", () => {
     }
   });
 
+  it("a dark page with a transparent body and a brand used only as a tint (found on a real docs site)", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "facha-ref-"));
+    fs.cpSync(FIXTURE, dir, { recursive: true });
+    const dark = {
+      version: 1,
+      url: "https://example.org/docs",
+      styles: {
+        body: { from: "body", "background-color": "rgba(0, 0, 0, 0)", color: "rgb(238, 238, 238)", "font-family": "system-ui, sans-serif", "font-size": "16px" },
+        button: null,
+        link: { from: "a.nav", color: "rgb(237, 238, 240)", "font-size": "16px" },
+        backgrounds: [
+          { color: "rgb(17, 17, 19)", area: 2000000 },
+          { color: "rgba(47, 98, 255, 0.235)", area: 60000 },
+        ],
+      },
+    };
+    fs.writeFileSync(path.join(dir, ".facha-ui", "references", "dark.json"), JSON.stringify(dark));
+    const c = await connect(dir);
+    try {
+      const out = (await c.call("propose_design_system", { reference: ".facha-ui/references/dark.json" })).structuredContent;
+      // The page's background is the biggest opaque one, not white: its light text passes.
+      expect(out.reference.pairs.find((p: any) => p.pair === "text on the background")).toMatchObject({ bg: "#111113", pass: true });
+      expect(out.inputs.brandColor.value).toBe("#2f62ff");
+      expect(out.inputs.brandColor.from).toContain("the brand used as a tint");
+      // A system font is proposed as it is: it needs no loading nor license.
+      expect(out.inputs.fontFamily.value).toBe("system-ui, sans-serif");
+    } finally {
+      await c.close();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("refuses a file outside the project or that is not a reference", async () => {
     const outside = await h.call("propose_design_system", { reference: "../../../package.json" });
     expect(outside.isError).toBe(true);
