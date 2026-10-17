@@ -126,6 +126,14 @@ textarea { min-height: 64px; resize: vertical; }
 .drop.over { border-color: #ff8a4c; background: #1f1a17; }
 .thumb { max-width: 220px; max-height: 140px; border-radius: 8px; border: 1px solid #3a4256; }
 .check { display: flex; align-items: center; gap: 8px; }
+fieldset.count { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+fieldset.count legend { padding: 0; margin-bottom: 6px; }
+.options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.option { display: flex; align-items: flex-start; gap: 10px; border: 1px solid #3a4256; border-radius: 10px; padding: 10px 12px; cursor: pointer; background: #0e1119; }
+.option:has(input:checked) { border-color: #ff8a4c; background: #1f1a17; }
+.option:has(input:focus-visible) { outline: 2px solid #ff8a4c; outline-offset: 2px; }
+.option input { margin-top: 3px; }
+.option b { display: block; }
 code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: #0e1119; border: 1px solid #3a4256; border-radius: 6px; padding: 2px 6px; overflow-wrap: anywhere; }
 .command { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid #ff8a4c; border-radius: 10px; padding: 10px 12px; background: #1f1a17; }
 .error { color: #ff9b94; }
@@ -146,6 +154,23 @@ function Delta({ now, before, when }: { now: number | null; before: number | nul
       <span className="muted">{since}</span>
     </span>
   );
+}
+
+/** How many variants the developer chose last, in this browser (B-045). 3 when unknown or unavailable. */
+const COUNT_KEY = "facha-ui:center:count";
+function readCount(): 1 | 3 {
+  try {
+    return window.localStorage.getItem(COUNT_KEY) === "1" ? 1 : 3;
+  } catch {
+    return 3;
+  }
+}
+function saveCount(count: 1 | 3) {
+  try {
+    window.localStorage.setItem(COUNT_KEY, String(count));
+  } catch {
+    /* storage unavailable: the choice lasts for this page */
+  }
 }
 
 function scoreClass(score: number | null): string {
@@ -281,7 +306,9 @@ function asDataUrl(file: File): Promise<string> {
 function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScreen; live: LiveState; routes: Routes; post: (b: Record<string, unknown>) => Promise<boolean>; upload: (f: File) => Promise<string | null> }) {
   const [open, setOpen] = useState(false);
   const [goal, setGoal] = useState("");
-  const [quick, setQuick] = useState(true);
+  // 3 to compare unless this browser chose 1 last (B-045): comparing is what facha-ui is for.
+  const [count, setCount] = useState<1 | 3>(() => readCount());
+  const quick = count === 1;
   const [ref, setRef] = useState<{ file: File | null; url: string }>({ file: null, url: "" });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -372,14 +399,29 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
             <span>¿Qué querés lograr en esta pantalla? (opcional)</span>
             <textarea value={goal} maxLength={2000} placeholder="Por ejemplo: que se vean primero los pedidos pendientes" onChange={(e) => setGoal(e.target.value)} />
           </label>
+          <fieldset className="count">
+            <legend>¿Cuántas querés?</legend>
+            <div className="options">
+              <label className="option">
+                <input type="radio" name={`count-${screen.slug}`} checked={count === 3} onChange={() => (setCount(3), saveCount(3))} />
+                <span>
+                  <b>3 para comparar</b>
+                  <span className="muted">Tres direcciones distintas, capturas en todos los temas y tamaños, y la revisión del crítico. Tarda más.</span>
+                </span>
+              </label>
+              <label className="option">
+                <input type="radio" name={`count-${screen.slug}`} checked={count === 1} onChange={() => (setCount(1), saveCount(1))} />
+                <span>
+                  <b>1 rápida</b>
+                  <span className="muted">La que mejor responde al diagnóstico, con el guardián y sin el crítico. Tarda menos.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
           <Reference id={`ref-${screen.slug}`} label="Referencia de estructura (opcional): una captura de una pantalla que te guste." onChange={setRef} />
-          <label className="check">
-            <input type="checkbox" checked={quick} onChange={(e) => setQuick(e.target.checked)} />
-            <span>Una sola variante (más rápido). Sin marcar, tres para comparar.</span>
-          </label>
           <div className="row">
             <button type="button" className="primary" disabled={sending} onClick={() => void submit()}>
-              {sending ? "Enviando…" : "Proponer variantes"}
+              {sending ? "Enviando…" : count === 3 ? "Proponer 3 variantes" : "Proponer 1 variante"}
             </button>
             <button type="button" onClick={() => setOpen(false)}>
               Cancelar
