@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- **El centro dice si Claude está escuchando de verdad:** en verde mientras escucha; en ámbar si la sesión sigue abierta pero nadie escucha (por ejemplo, cerraste la conversación), con el aviso de que lo que pidas queda en cola. El panel de cada variante avisa lo mismo.
+- **"Volver a medir"** en el centro, y la diferencia con la medición anterior en el puntaje del proyecto y de cada pantalla ("↑ 4 desde el …"). Después de cada corrida de variantes se vuelve a medir solo.
+- **"Elegir esta"** en cada variante del centro: muestra el comando `/facha-ui:apply` para aplicarla. Nunca aplica nada.
+
 ### Fixed
 
 - `review_ui` vuelve a revisar los estados (carga, vacío, error) y el título de las variantes del laboratorio: desde 0.33.0 no las trataba como pantallas.

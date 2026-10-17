@@ -60,7 +60,7 @@ Además, cada vez que Claude escribe un archivo de UI, el guardián automático 
 | `/facha-ui:center` | El centro: todo en una pantalla, sin comandos |
 | `/facha-ui:help [variants\|flow\|apply\|init\|learn\|tools\|files]` | Esta ayuda |
 
-**La forma fácil:** decile *"abrí facha-ui"* (`/facha-ui:center`). Se abre el **centro** en el navegador: cómo está tu proyecto, tus pantallas de la que más necesita a la que menos, con un botón para proponer variantes (con un objetivo y una captura que arrastrás), las variantes en curso y el design system. Claude escucha detrás mientras esté abierta esta conversación. Crear tokens y aplicar los arrancás vos: el centro te da el comando para copiar.
+**La forma fácil:** decile *"abrí facha-ui"* (`/facha-ui:center`). Se abre el **centro** en el navegador: cómo está tu proyecto, tus pantallas de la que más necesita a la que menos, con un botón para proponer variantes (con un objetivo y una captura que arrastrás), las variantes en curso (con "Elegir esta") y el design system, y "Volver a medir" con la diferencia con la medición anterior. Claude escucha detrás mientras esté abierta esta conversación, y el centro avisa si deja de hacerlo. Crear tokens y aplicar los arrancás vos: el centro te da el comando para copiar.
 
 **Flujo en 4 pasos**
 
