@@ -8,7 +8,7 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 
 **La forma fácil, sin comandos: el centro.** Con la app corriendo, decile a Claude Code *"abrí facha-ui"* (`/facha-ui:center`). Se abre una página en el laboratorio con:
 - **cómo está tu proyecto:** el puntaje de UX, el design system, el contraste y cuánto de la UI usa tu sistema, en palabras;
-- **tus pantallas, de la que más necesita a la que menos**, cada una con su problema más grave y **"Proponer variantes"**: escribís qué querés lograr (si querés), elegís una variante rápida o tres, y **arrastrás una captura** de una pantalla que te guste (o pegás su dirección) para usar su estructura;
+- **tus pantallas, de la que más necesita a la que menos**, cada una con su problema más grave y **"Proponer variantes"**: escribís qué querés lograr (si querés), elegís **cuántas** ("3 para comparar", que viene elegida, con la revisión del crítico, o "1 rápida"; recuerda tu última elección), y **arrastrás una captura** de una pantalla que te guste (o pegás su dirección) para usar su estructura;
 - **las variantes en curso**, para abrirlas, compararlas y votar, con el estado de cada pedido;
 - **el design system:** si falta, cómo crearlo; y **"Como esta página"**, con una captura o una dirección.
 

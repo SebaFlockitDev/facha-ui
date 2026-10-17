@@ -11,7 +11,7 @@ import { reviewFlow } from "./flow.js";
 import type { Workspace } from "./project.js";
 import { FachaError } from "./types.js";
 
-export const VERSION = "0.34.0";
+export const VERSION = "0.35.0";
 
 /** Server instructions, literal from SPEC §2.a.2. */
 export const INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.

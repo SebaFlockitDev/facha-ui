@@ -7,6 +7,12 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-16
+
+### Changed
+
+- **En el centro, "Proponer variantes" pregunta cuántas querés:** "3 para comparar" (viene elegida: tres direcciones, capturas en todos los temas y tamaños, y la revisión del crítico) o "1 rápida". Antes venía marcada una sola, sin que se viera. El botón dice cuántas se van a proponer y el centro recuerda tu última elección.
+
 ## [0.34.0] - 2026-10-16
 
 ### Added
@@ -399,7 +405,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.34.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.35.0...HEAD
+[0.35.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...v0.32.0

@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.34.0** (§7.10–§7.44). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.35.0** (§7.10–§7.45). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -729,7 +729,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",
@@ -906,7 +906,7 @@ Con una imagen y sin URL, la IA propone los colores que ve y el desarrollador lo
 
 Una sola puerta de entrada para usar facha-ui sin recordar comandos (`ux:nielsen-6`). La skill `center` (con palabras: "abrí facha-ui") arma el laboratorio si falta, con su portada, el centro (`lab-center.tsx`: `page.tsx` en Next; `LabHome` en el `main.tsx` de Vite); escribe `.facha-ui/live/center.json` con el estado del proyecto (de `ux_score`, `get_design_system` y las corridas); abre una **sesión de proyecto** (`session.json` con `scope: "project"`, para todas las pantallas y sus paneles) y escucha como el modo en vivo.
 
-- **La página:** el estado del proyecto en palabras; las pantallas de peor a mejor con su peor problema, sus variantes y **"Proponer variantes"** (objetivo opcional, rápido o completo, y una captura de referencia arrastrada, elegida o pegada, o una URL); el design system con el comando exacto de `init` para copiar (`init system`, `init`, `init reference <captura|url>`). Shadow DOM con estilos propios, como el panel.
+- **La página:** el estado del proyecto en palabras; las pantallas de peor a mejor con su peor problema, sus variantes y **"Proponer variantes"** (objetivo opcional; "¿Cuántas querés?" con "3 para comparar" elegida de entrada o "1 rápida", desde 0.35.0, B-045, recordada en el navegador; y una captura de referencia arrastrada, elegida o pegada, o una URL); el design system con el comando exacto de `init` para copiar (`init system`, `init`, `init reference <captura|url>`). Shadow DOM con estilos propios, como el panel.
 - **El endpoint** (`live-core.ts`): en una sesión de proyecto acepta pedidos de cualquier pantalla; `run` (una pantalla de `center.json`, objetivo de hasta 2000 caracteres, `quick`, `reference`: un archivo de `.facha-ui/references/` que exista o una URL http(s)); `upload` (PNG, JPEG o WebP por sus primeros bytes, hasta 5 MB, guardado como `.facha-ui/references/upload-<fecha>-<n>.<ext>`). Solo en desarrollo, con las mismas reglas de origen y token. El `GET` suma `center`, con cada campo validado.
 - **Cada pedido lo procesa su skill:** `run` sigue `variants` (con `quick.md` y `reference.md` si corresponden); una URL de referencia se abre solo con un sí en el chat; los pedidos del panel siguen `live.md`. `init` y `apply` nunca se disparan desde el centro.
 - **En vivo** (desde 0.34.0, B-044): el watcher deja `.facha-ui/live/listener.json` cada 10 s y el `GET` responde `listening` mientras esa señal tiene menos de 45 s; el centro y el panel distinguen "escuchando" de "sesión abierta sin escucha" (los pedidos quedan en cola). El pedido `measure` ("Volver a medir") repite la medición; `center.json` guarda `history` (24 puntos del proyecto) y `previous` por pantalla, y el centro muestra la diferencia con flecha y texto (`ux:wcag-1.4.1`). "Elegir esta" manda `choose` y muestra `/facha-ui:apply <slug> <x>`.
@@ -1636,6 +1636,13 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 
 - **Qué cambia:** la escucha real (la señal del watcher), "Volver a medir", la evolución por proyecto y por pantalla, y "Elegir esta" (§2.i). Además, `review_ui` vuelve a tratar como pantalla a una variante del laboratorio (se había perdido en 0.33.0).
 - **Tests:** `listening` con señal fresca, vieja, `stopped`, inválida y sin sesión; `measure` solo en sesión de proyecto; `history` y `previous` saneados; el watcher escribe su señal, la marca `stopped` al terminar y emite `measure`; los contratos de la página (el comando de `apply` sin dispararlo, la tendencia con flecha y texto) y del watcher (su única escritura); `review_ui` sobre variantes de Vite y de Next.
+
+### 7.45 Versión 0.35.0: "¿Cuántas querés?" en el centro
+
+Ítem B-045 del backlog: quien pidió variantes desde el centro recibió una sola sin elegirlo. Spec, decisiones y registro: [`docs/specs/B-045-cuantas-variantes.md`](docs/specs/B-045-cuantas-variantes.md).
+
+- **Qué cambia:** la casilla "Una sola variante", marcada de entrada, pasa a una pregunta visible con dos opciones que dicen qué incluyen; "3 para comparar" viene elegida, el botón dice cuántas se proponen y la última elección se recuerda en el navegador (§2.i).
+- **Tests:** el contrato de la página (la pregunta, las opciones, 3 de entrada, el texto del botón y la vuelta a 3 si el almacenamiento falla).
 
 ---
 

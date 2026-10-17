@@ -842,6 +842,26 @@ describe("B-044 · the center, live", () => {
   });
 });
 
+describe("B-045 · how many variants, asked in the center", () => {
+  const page = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-center.tsx"), "utf8");
+
+  it("asks how many as a visible question, with 3 to compare chosen unless this browser chose 1", () => {
+    expect(page).toContain("<legend>¿Cuántas querés?</legend>");
+    expect(page).toContain("<b>3 para comparar</b>");
+    expect(page).toContain("<b>1 rápida</b>");
+    expect(page).toContain('getItem(COUNT_KEY) === "1" ? 1 : 3');
+    expect(page).toContain("const quick = count === 1;");
+    expect(page).not.toContain('type="checkbox" checked={quick}');
+  });
+
+  it("the button says how many it will propose, and storage failures fall back to 3", () => {
+    expect(page).toContain('count === 3 ? "Proponer 3 variantes" : "Proponer 1 variante"');
+    const read = page.slice(page.indexOf("function readCount"), page.indexOf("function saveCount"));
+    expect(read).toMatch(/try \{[\s\S]*\} catch \{\s*return 3;/);
+    expect(page.slice(page.indexOf("function saveCount"))).toMatch(/^[^]*?try \{[^]*?\} catch/);
+  });
+});
+
 describe("B-026 · the direction preview in the lab", () => {
   const T = path.join(REPO, "skills", "variants", "templates");
   const read = (p: string) => fs.readFileSync(path.join(T, p), "utf8").replace(/\r\n/g, "\n");
