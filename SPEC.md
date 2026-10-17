@@ -910,6 +910,7 @@ Una sola puerta de entrada para usar facha-ui sin recordar comandos (`ux:nielsen
 - **El endpoint** (`live-core.ts`): en una sesión de proyecto acepta pedidos de cualquier pantalla; `run` (una pantalla de `center.json`, objetivo de hasta 2000 caracteres, `quick`, `reference`: un archivo de `.facha-ui/references/` que exista o una URL http(s)); `upload` (PNG, JPEG o WebP por sus primeros bytes, hasta 5 MB, guardado como `.facha-ui/references/upload-<fecha>-<n>.<ext>`). Solo en desarrollo, con las mismas reglas de origen y token. El `GET` suma `center`, con cada campo validado.
 - **Cada pedido lo procesa su skill:** `run` sigue `variants` (con `quick.md` y `reference.md` si corresponden); una URL de referencia se abre solo con un sí en el chat; los pedidos del panel siguen `live.md`. `init` y `apply` nunca se disparan desde el centro.
 - **En vivo** (desde 0.34.0, B-044): el watcher deja `.facha-ui/live/listener.json` cada 10 s y el `GET` responde `listening` mientras esa señal tiene menos de 45 s; el centro y el panel distinguen "escuchando" de "sesión abierta sin escucha" (los pedidos quedan en cola). El pedido `measure` ("Volver a medir") repite la medición; `center.json` guarda `history` (24 puntos del proyecto) y `previous` por pantalla, y el centro muestra la diferencia con flecha y texto (`ux:wcag-1.4.1`). "Elegir esta" manda `choose` y muestra `/facha-ui:apply <slug> <x>`.
+- **Editar una pantalla** (desde 0.36.0, B-046): "Editar esta pantalla" manda `edit`; Claude sigue `variants/edit.md` y copia la pantalla tal cual a la variante **E** (solo cambian los imports, para la carpeta del laboratorio), la mide con el guardián (su línea base) y la suma a la corrida sin tocar A, B ni C. E queda `valid` con 0 errores o `draft` con los que ya tenía la pantalla (`apply` toma solo `valid`); cada cambio desde su panel sigue `refine.md`. El centro muestra "Seguir editando" y nunca navega solo; el panel dice "Edición de tu pantalla" y suma "Arreglá lo que marca el guardián".
 
 ## 3. Adopción en un proyecto, paso a paso
 
@@ -1643,6 +1644,14 @@ Pedido del dev: completar en Vite lo que quedó para después en la 0.17.0. Apro
 
 - **Qué cambia:** la casilla "Una sola variante", marcada de entrada, pasa a una pregunta visible con dos opciones que dicen qué incluyen; "3 para comparar" viene elegida, el botón dice cuántas se proponen y la última elección se recuerda en el navegador (§2.i).
 - **Tests:** el contrato de la página (la pregunta, las opciones, 3 de entrada, el texto del botón y la vuelta a 3 si el almacenamiento falla).
+
+### 7.46 Versión 0.36.0: editar una pantalla sin pedir variantes
+
+Ítem B-046 del backlog, pedido por el desarrollador. Spec, decisiones y registro: [`docs/specs/B-046-editar-pantalla.md`](docs/specs/B-046-editar-pantalla.md).
+
+- **Qué cambia:** el modo edición de `variants` (`edit.md`), el pedido `edit` del endpoint, "Editar esta pantalla" en el centro y el panel de la edición (§2.i). `apply`, `refine` y el estado de la corrida conocen la variante E y su estado `draft`.
+- **Decisiones:** E nace como copia fiel (un solo modelo: "estás editando E"); la letra es `e`, fija; con errores heredados queda `draft` y no `failed`; el panel sobre la app en su ruta real queda para otro ítem.
+- **Tests:** el endpoint (`edit` solo en sesión de proyecto y para una pantalla conocida); los contratos de `edit.md` (copia sin cambios, imports reescritos, nunca el original ni A, B o C, reabrir sin copiar), de `draft` en `apply`, `refine` y `run-state`, del centro (los botones, sin navegar solo) y del panel.
 
 ---
 

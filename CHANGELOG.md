@@ -7,6 +7,11 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Added
+
+- **"Editar esta pantalla" en el centro:** ajustá una pantalla tal como está, sin pedir variantes. Claude la copia a una variante **E** y la abrís con el panel en vivo de siempre (marcar elementos, pedir cambios, mejorar con un clic, probar paletas). Tu archivo no cambia hasta que la apliques con `/facha-ui:apply <pantalla> e`, y cada cambio pasa por el guardián. Si tu pantalla ya tenía errores, la E queda en borrador y el panel ofrece "Arreglá lo que marca el guardián". La próxima vez, el centro dice "Seguir editando".
+- También con palabras: *"quiero editar la pantalla de pedidos"*.
+
 ## [0.35.0] - 2026-10-16
 
 ### Changed
