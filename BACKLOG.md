@@ -28,11 +28,12 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-046 · Editar una pantalla sin pedir variantes
-- **Estado:** listo para spec
+- **Estado:** en spec
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** el panel en vivo solo aparece en las variantes: para ajustar la pantalla real hay que pedir variantes primero. La industria edita sobre la app corriendo (Lovable Visual Edits, Onlook, Builder.io, la barra de Vercel), pero casi siempre escribe directo en el código, sin validar ni pedir OK.
 - **Qué:** "Editar esta pantalla" en el centro abre la pantalla original en el laboratorio (el componente real, no una copia) con el mismo panel; el primer cambio crea por detrás una variante de edición validada por el guardián, que el panel muestra desde ahí; se aplica con `/facha-ui:apply` como cualquier variante. El panel sobre la app en su ruta real queda para después (en Next obliga a tocar el layout).
 - **Criterios de aceptación:** se puede marcar y pedir cambios sobre la pantalla original sin pedir variantes; el archivo original no cambia hasta `apply`; cada cambio pasa por el guardián; el centro muestra el comando para aplicarla.
+- **Spec:** [`docs/specs/B-046-editar-pantalla.md`](docs/specs/B-046-editar-pantalla.md)
 - **Referencias:** `skills/variants/live.md`, `skills/variants/templates/next-app/lab-panel.tsx`
 
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
