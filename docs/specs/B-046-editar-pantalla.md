@@ -1,6 +1,6 @@
 # B-046 · Editar una pantalla sin pedir variantes
 
-> **Estado:** aprobado, en curso · **Rama:** `feat/edit-screen` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/edit-screen` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** el desarrollador quiso entrar a editar sin tener que pedir una variante · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -58,28 +58,43 @@ hacer eso: nada se aplica sin aprobación y el guardián valida antes (`CLAUDE.m
 
 ## Criterios de aceptación
 
-- [ ] Desde el centro, "Editar esta pantalla" abre la pantalla con el panel, sin pedir variantes.
-- [ ] El archivo original no cambia hasta `apply`, y A, B y C no se tocan.
-- [ ] Cada cambio pasa por el guardián; con errores heredados, E queda `draft` y el panel dice qué falta.
-- [ ] El centro muestra el comando para aplicar la E.
+- [x] Desde el centro, "Editar esta pantalla" abre la pantalla con el panel, sin pedir variantes.
+- [x] El archivo original no cambia hasta `apply`, y A, B y C no se tocan.
+- [x] Cada cambio pasa por el guardián; con errores heredados, E queda `draft` y el panel dice qué falta.
+- [x] El centro muestra el comando para aplicar la E.
 
 ## Tareas
 
-- [ ] 1. El endpoint (`edit`) y `edit.md`; `variants`, `center` y `apply`; tests y contratos
-- [ ] 2. El centro y el panel; contratos
-- [ ] 3. Docs
-- [ ] 4. Prueba real (editar `orders` desde el centro, pedir un cambio, ver la E y el comando)
+- [x] 1. El endpoint (`edit`) y `edit.md`; `variants`, `center` y `apply`; tests y contratos
+- [x] 2. El centro y el panel; contratos
+- [x] 3. Docs
+- [x] 4. Prueba real (editar `orders` desde el centro, pedir un cambio, ver la E y el comando)
 - [ ] 5. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Los errores heredados se cuentan en el mensaje del pedido, no en el panel:** el panel no lee la corrida; el
+  estado `done` de `edit` (E4) dice cuántos errores heredó la E, y el panel lo muestra entre los pedidos de la
+  pantalla. "Arreglá lo que marca el guardián" se ofrece siempre en la E.
+- **La pastilla del panel minimizado también dice "edición"**, no "variante E": se vio en la prueba real.
+- **El contrato de `variants` exige "Before step X1, read"** para cada parte: la línea de *Inputs* se escribió así
+  y `edit.md` se sumó a las partes que el test controla.
 
 ## Registro
 
 - **2026-10-16:** pedido del desarrollador; agregado al backlog (B-046) con su OK junto con B-045. Relevado; spec y
   plan escritos, pendientes de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas. Tarea 1 (`9d4a149`): `edit` en el endpoint,
+  `edit.md`, `variants`, `refine`, `run-state`, `center` y `apply`, con sus tests. Tarea 2 (`b5d9167`): el centro y el
+  panel. Tarea 3 (`1820063`): docs. 424 tests en verde.
+- **2026-10-16 · prueba real** en la app Vite de prueba (servidor reiniciado por el endpoint): "Editar esta pantalla"
+  pasó a "Preparando la edición…" y llegó como `edit` por el watcher; se copió `src/pages/Orders.tsx` a la E (el diff
+  muestra solo el import) con el mismo resultado del guardián (0 errores, 1 advertencia), quedó `valid` y se sumó
+  a la corrida junto a la A sin tocarla; el centro mostró "Seguir editando" y "E (tu edición)". En la E, el panel dijo
+  "Edición de tu pantalla", la nota de copia y "Arreglá lo que marca el guardián"; "Mejorar la accesibilidad" llegó
+  como `change`, se hizo la revisión r1 (el número de pedido como enlace con `--primary`), el guardián pasó a
+  0 advertencias y la página mostró 6 enlaces alcanzables con Tab. El archivo original no cambió.
 
 ## Cómo retomar
 
-En curso en `feat/edit-screen`: seguir por la primera tarea sin marcar.
+En `feat/edit-screen`, tareas 1 a 4 hechas. Falta la 5 (release 0.36.0), solo cuando el desarrollador lo pida.
