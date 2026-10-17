@@ -1,6 +1,6 @@
 # facha-ui · variants · refine a variant
 
-Read by `SKILL.md` before step R1, when the input is `<slug> <a|b|c> "<change>"` or the developer
+Read by `SKILL.md` before step R1, when the input is `<slug> <a|b|c|e> "<change>"` or the developer
 asks, in the conversation, for a change to one variant. Every hard rule of `SKILL.md` still
 applies.
 
@@ -43,7 +43,8 @@ offer a version that keeps the intent without breaking it.
 ## R4 · Guardian loop
 
 Same as Step 6 of `SKILL.md`: `check_ui` on the variant (and `_shared/` if it changed), at most 3
-attempts. The variant's `status` becomes `valid` or `failed` according to the result.
+attempts. The variant's `status` becomes `valid` or `failed` according to the result. An edit (E) in
+`draft` passes as `edit.md` E5 says.
 
 ## R4b · Critique of the change
 

@@ -1,6 +1,6 @@
 ---
 name: variants
-description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant, also in plain words - "hacé la pantalla de pedidos con una estructura como esta captura" (a reference), "mejorá la pantalla de pedidos", "dame alternativas para /orders", "hacelo rápido" or "una sola variante" (quick mode), "en la B mové los filtros arriba" (refine), "probá colores más cálidos" (palettes in live mode).
+description: Generates 3 design variants of a React screen or component that follow the project's design system, validates each with facha-ui check_ui until it has 0 errors, and lists their lab URLs for capture. Also refines one variant on request, keeping a revision history, and runs a live mode where the developer adjusts variants, points at elements and previews palettes from a panel in the lab. Use when the developer asks for variants, alternatives or design proposals for a screen, or asks to change a variant, also in plain words - "hacé la pantalla de pedidos con una estructura como esta captura" (a reference), "mejorá la pantalla de pedidos", "dame alternativas para /orders", "hacelo rápido" or "una sola variante" (quick mode), "en la B mové los filtros arriba" (refine), "probá colores más cálidos" (palettes in live mode), "quiero editar la pantalla de pedidos" (edit it as it is, as variant E).
 argument-hint: "<screen|route|file> \"<goal>\" [--rapido]  ·  <slug> <a|b|c> \"<change>\"  ·  <slug> live [stop]"
 allowed-tools: Read, Glob, Grep, Agent, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__audit_project, mcp__plugin_facha-ui_facha-ui__scan_styles, mcp__plugin_facha-ui_facha-ui__review_ui
 ---
@@ -22,11 +22,11 @@ principles. Talk in the developer's language; the `.md` files below are relative
    ("la pantalla de pedidos": find it and say which file); resolve it to `{ file, route, slug }`
    (kebab-case: `/orders` → `orders`, `OrderCard.tsx` → `order-card`; never `system`, reserved by `init`). `<goal>` is free text
    ("make overdue orders stand out"). Follow Steps 1 to 9. With a reference for the structure (an image, `--ref <file|url>`): **before Step 3b, read `reference.md`**.
-2. **Refine a variant:** `<slug> <a|b|c> "<change>"`, or a change to one variant asked in the
+2. **Refine a variant:** `<slug> <a|b|c|e> "<change>"`, or a change to one variant asked in the
    conversation ("in B, move the filters above the table"). **Before step R1, read `refine.md`**
    and follow R1 to R7.
-3. **Live mode:** `<slug> live`, or `<slug> live stop`. **Before step L1, read `live.md`** and
-   follow it.
+3. **Live mode:** `<slug> live` or `<slug> live stop`: **Before step L1, read `live.md`**. **Edit** a
+   screen as it is ("editá la pantalla de pedidos"): **Before step E1, read `edit.md`**.
 4. **Quick mode:** a new run with `--rapido` or `--quick`, or the developer asks for it in their
    words ("rápido", "una sola variante"): one variant instead of three. **Before step 1, read
    `quick.md`**: it lists what changes; everything else here still applies.

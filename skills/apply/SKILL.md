@@ -1,7 +1,7 @@
 ---
 name: apply
 description: Applies a facha-ui variant that the developer has explicitly approved, checks the result with a before/after visual diff and UX score, removes the lab files and records the decision in the design-decisions memory.
-argument-hint: "<screen-slug> <a|b|c>"
+argument-hint: "<screen-slug> <a|b|c|e>"
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, mcp__plugin_facha-ui_facha-ui__get_design_system, mcp__plugin_facha-ui_facha-ui__check_ui, mcp__plugin_facha-ui_facha-ui__ux_score, mcp__plugin_facha-ui_facha-ui__audit_project
 ---
@@ -68,7 +68,8 @@ variant yourself, not even "the obvious one".
    - it does not exist;
    - `status` is not `generated` (already `applied` or `discarded`);
    - the variant is not in `variants`, or its `status` is not `valid`. A `failed` variant
-     can never be applied: suggest a new `/facha-ui:variants` run.
+     can never be applied: suggest a new `/facha-ui:variants` run. An edit (E) in `draft` keeps errors
+     the screen already had: suggest "Arreglá lo que marca el guardián" in its panel first.
 3. **Re-run the guardian.** `check_ui` on `<lab.dir>/<slug>/<variant>` and, if it exists,
    `<lab.dir>/<slug>/_shared`. The files may have changed since the run. Any error → stop
    and show the violations.

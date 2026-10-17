@@ -27,14 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-046 · Editar una pantalla sin pedir variantes
-- **Estado:** listo para spec
-- **Prioridad:** P1 · **Tamaño:** M
-- **Por qué:** el panel en vivo solo aparece en las variantes: para ajustar la pantalla real hay que pedir variantes primero. La industria edita sobre la app corriendo (Lovable Visual Edits, Onlook, Builder.io, la barra de Vercel), pero casi siempre escribe directo en el código, sin validar ni pedir OK.
-- **Qué:** "Editar esta pantalla" en el centro abre la pantalla original en el laboratorio (el componente real, no una copia) con el mismo panel; el primer cambio crea por detrás una variante de edición validada por el guardián, que el panel muestra desde ahí; se aplica con `/facha-ui:apply` como cualquier variante. El panel sobre la app en su ruta real queda para después (en Next obliga a tocar el layout).
-- **Criterios de aceptación:** se puede marcar y pedir cambios sobre la pantalla original sin pedir variantes; el archivo original no cambia hasta `apply`; cada cambio pasa por el guardián; el centro muestra el comando para aplicarla.
-- **Referencias:** `skills/variants/live.md`, `skills/variants/templates/next-app/lab-panel.tsx`
-
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
@@ -164,6 +156,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.36.0:** B-046, «Editar esta pantalla» en el centro: la pantalla se copia a la variante E (borrador si hereda errores), se edita con el panel en vivo y se aplica con `/facha-ui:apply <slug> e`; spec en [`docs/specs/B-046-editar-pantalla.md`](docs/specs/B-046-editar-pantalla.md).
 - **0.35.0:** B-045, «¿Cuántas querés?» en el centro («3 para comparar» de entrada o «1 rápida», recordada en el navegador); spec en [`docs/specs/B-045-cuantas-variantes.md`](docs/specs/B-045-cuantas-variantes.md).
 - **0.34.0:** B-044, el centro en vivo (escucha real con la señal del watcher, «Volver a medir», la evolución por proyecto y pantalla, y «Elegir esta»), y el arreglo de `review_ui` con las variantes del laboratorio; spec en [`docs/specs/B-044-centro-en-vivo.md`](docs/specs/B-044-centro-en-vivo.md).
 - **0.33.0:** B-043, `ux_score` y `review_ui` con pantallas de Vite (lo que monta el router, con su ruta, y las carpetas por convención; la opción `screens` de la config), y el arreglo del frontmatter de `center`; spec en [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md).

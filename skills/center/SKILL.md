@@ -98,6 +98,8 @@ Write its status in `.facha-ui/live/status.json` as `live.md` says (`working`, t
   URL needs the yes of hard rule 4, so set `needs-input` with
   `confirmInChat: "sí, abrí la referencia"` and ask here. At the end, `done` with the variants' letters,
   and measure again as for `measure`.
+- **`edit`** ("Editar esta pantalla"): **read `../variants/edit.md`** and follow E1 to E4. Its changes then
+  come from E's panel, as `change` requests.
 - **`measure`** ("Volver a medir"): repeat C1 and C3, keeping the trend, then `done` with the new score.
 - **`choose`** ("Elegir esta", from the center or a panel): as `live.md` L4. The center already shows
   `/facha-ui:apply <slug> <x>` to paste; never apply it.

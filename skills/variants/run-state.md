@@ -20,7 +20,7 @@ Write and Edit tools only.
   "reference": { "source": "<path or url>", "capture": "...", "structure": [ { "region": "...", "where": "...", "note": "..." } ], "fit": "..." },
   "variants": [
     {
-      "id": "a", "hypothesis": "...", "principles": ["ux:hierarchy", "ux:nielsen-1"], "status": "valid | failed",
+      "id": "a", "hypothesis": "...", "principles": ["ux:hierarchy", "ux:nielsen-1"], "status": "valid | failed | draft",
       "files": ["..."],
       "urls": { "light": "http://...", "dark": "http://...?theme=dark" },
       "attempts": [ { "n": 1, "error": 0, "warning": 0, "info": 0 } ],
@@ -51,7 +51,9 @@ Write and Edit tools only.
 ```
 
 - `mode`: add `"mode": "quick"` next to `status` in a quick run (`quick.md`), which has one
-  variant; a full run has no `mode`.
+  variant, and `"mode": "edit"` in a run created by an edit (`edit.md`); a full run has no `mode`.
+- An edit (E) has a `baseline` (the guardian on the copy, `edit.md` E2) and is `draft` while it keeps
+  errors the screen already had; `apply` takes only `valid`.
 - `attempts`: one entry per guardian attempt (Step 6); `finalCheck` is the last one.
 - `screenshots`: paths relative to the workspace, exactly as captured; never move them.
 - `critique` comes from Step 7b and `review` from the `ux-reviewer` agent (Step 7c), as it wrote

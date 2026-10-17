@@ -418,6 +418,36 @@ describe("live endpoint · the center, live (B-044)", () => {
   });
 });
 
+describe("live endpoint · edit a screen (B-046)", () => {
+  const opts = (root: string) => ({ root, production: false });
+  const withCenter = (session: Record<string, unknown>) => {
+    const root = project(session);
+    fs.writeFileSync(
+      path.join(root, ".facha-ui", "live", "center.json"),
+      JSON.stringify({ version: 1, project: {}, screens: [{ slug: "orders", file: "src/pages/Orders.tsx", variants: [] }] }),
+    );
+    return root;
+  };
+
+  it("takes an edit of a screen of the center, as variant E", async () => {
+    const root = withCenter({ scope: "project", active: true });
+    const token = await tokenOf(root);
+    const res = await core.handlePost(post({ token, kind: "edit", slug: "orders" }), opts(root));
+    expect(res.status).toBe(202);
+    const line = JSON.parse(fs.readFileSync(path.join(root, ".facha-ui", "live", "requests.jsonl"), "utf8").trim());
+    expect(line).toMatchObject({ kind: "edit", slug: "orders", variant: "e", text: "" });
+  });
+
+  it("refuses an unknown screen, and an edit outside the center", async () => {
+    const root = withCenter({ scope: "project", active: true });
+    const token = await tokenOf(root);
+    expect((await core.handlePost(post({ token, kind: "edit", slug: "invoices" }), opts(root))).status).toBe(400);
+    const screen = withCenter({ slug: "orders", active: true });
+    const screenToken = await tokenOf(screen);
+    expect((await core.handlePost(post({ token: screenToken, kind: "edit", slug: "orders" }), opts(screen))).status).toBe(400);
+  });
+});
+
 describe("palette base script", () => {
   it("prints the themes, the color tokens and the anchor from get_design_system", async () => {
     const script = path.join(REPO, "skills", "variants", "scripts", "palette-base.mjs");

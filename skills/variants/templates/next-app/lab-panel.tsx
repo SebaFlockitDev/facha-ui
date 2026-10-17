@@ -91,6 +91,13 @@ const QUICK = [
   },
 ] as const;
 
+/** On an edit (E, B-046): fix the errors the screen already had, so it can be applied. */
+const GUARDIAN = {
+  id: "guardian",
+  label: "Arreglá lo que marca el guardián",
+  text: "Arreglá los errores que marca el guardián en esta edición (los que ya tenía la pantalla), con los tokens y las clases del proyecto, sin cambiar nada más.",
+} as const;
+
 const STATE_OPTIONS = [
   { value: "", label: "Datos reales" },
   { value: "loading", label: "Cargando" },
@@ -1191,6 +1198,11 @@ export function LabPanel() {
       </div>
       <div className="section">
         <span className="label">Mejorar con un clic</span>
+        {here.variant === "e" && (
+          <p className="muted" role="note">
+            Es una copia de tu pantalla: tu archivo no cambia hasta que la apliques con <code>/facha-ui:apply {here.slug} e</code>.
+          </p>
+        )}
         {!liveHere && <LiveOff slug={here.slug} />}
         {liveHere && live.listening === false && (
           <p className="liveoff" role="note">
@@ -1198,7 +1210,7 @@ export function LabPanel() {
           </p>
         )}
         <div className="quick">
-          {QUICK.map((q) => (
+          {(here.variant === "e" ? [GUARDIAN, ...QUICK] : QUICK).map((q) => (
             <button key={q.id} className="act" type="button" disabled={sending || !liveHere} title={q.text} onClick={() => void quick(q.label, q.text)}>
               {q.label}
             </button>
@@ -1531,7 +1543,7 @@ export function LabPanel() {
           <span className="pillbox">
             <button className="pill" type="button" onClick={() => setOpen(true)} aria-expanded="false" title="Abrir el panel">
               <span className={`dot ${live.active ? "on" : ""}`} />
-              facha-ui · variante {letter}
+              facha-ui · {here.variant === "e" ? "edición" : `variante ${letter}`}
               {changed ? ` · ${describeChoice(choice)}` : ""}
             </button>
             <button className="pill-x" type="button" onClick={hide} aria-label="Ocultar el panel" title="Ocultar (vuelve al recargar o con Alt+Shift+F)">
@@ -1558,7 +1570,7 @@ export function LabPanel() {
             >
               <span className="title">
                 <span className="grip" aria-hidden="true">⋮⋮</span>
-                Variante {letter} · {here.slug}
+                {here.variant === "e" ? "Edición de tu pantalla" : `Variante ${letter}`} · {here.slug}
               </span>
               <span className="tools">
                 <button className="icon" type="button" onClick={minimize} aria-label="Minimizar" title="Minimizar">–</button>
