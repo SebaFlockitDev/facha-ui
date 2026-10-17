@@ -5,7 +5,8 @@
 // Prints one JSON line per request typed in the lab's live panel, so each one wakes Claude Code.
 // On start it also prints the requests that have no final status yet (none is lost when the
 // monitor is re-armed). It exits, printing {"kind":"stopped"}, when the live session ends.
-// It only reads files.
+// Its only write is .facha-ui/live/listener.json, a heartbeat every 10 s: while it is fresh, the
+// center and the panel know Claude Code is listening (B-044). Everything else is read.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -13,6 +14,7 @@ const dir = path.resolve(process.argv[2] ?? ".facha-ui/live");
 const requestsFile = path.join(dir, "requests.jsonl");
 const sessionFile = path.join(dir, "session.json");
 const statusFile = path.join(dir, "status.json");
+const listenerFile = path.join(dir, "listener.json");
 const FINAL = new Set(["done", "needs-input", "failed", "chosen", "proposed"]);
 
 const readJson = (file) => {
@@ -45,6 +47,20 @@ const emit = (r) => {
   process.stdout.write(JSON.stringify(line) + "\n");
 };
 
+const beat = (stopped = false) => {
+  try {
+    fs.writeFileSync(listenerFile, JSON.stringify(stopped ? { at: new Date().toISOString(), stopped: true } : { at: new Date().toISOString() }) + "\n");
+  } catch {
+    /* the folder is gone: the session ended */
+  }
+};
+const stop = () => {
+  beat(true);
+  process.stdout.write(JSON.stringify({ kind: "stopped" }) + "\n");
+  process.exit(0);
+};
+for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, stop);
+
 const parseLines = (text) =>
   text
     .split("\n")
@@ -57,10 +73,9 @@ const parseLines = (text) =>
       }
     });
 
-if (!active()) {
-  process.stdout.write(JSON.stringify({ kind: "stopped" }) + "\n");
-  process.exit(0);
-}
+if (!active()) stop();
+beat();
+setInterval(() => beat(), 10_000);
 
 // Requests left without a final status (for example while the monitor was being re-armed).
 let offset = 0;
@@ -75,10 +90,7 @@ try {
 
 let pending = "";
 setInterval(() => {
-  if (!active()) {
-    process.stdout.write(JSON.stringify({ kind: "stopped" }) + "\n");
-    process.exit(0);
-  }
+  if (!active()) stop();
   let size;
   try {
     size = fs.statSync(requestsFile).size;

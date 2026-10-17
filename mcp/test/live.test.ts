@@ -354,6 +354,70 @@ describe("live endpoint · the facha-ui center (B-042)", () => {
   });
 });
 
+describe("live endpoint · the center, live (B-044)", () => {
+  const NOW = new Date("2026-10-16T21:00:00.000Z");
+  const opts = (root: string) => ({ root, production: false, now: () => NOW });
+  const beat = (root: string, beat: Record<string, unknown>) =>
+    fs.writeFileSync(path.join(root, ".facha-ui", "live", "listener.json"), JSON.stringify(beat));
+  const seconds = (n: number) => new Date(NOW.getTime() - n * 1000).toISOString();
+  const listeningOf = async (root: string) => ((await core.handleGet(get(), opts(root)).json()) as any).listening;
+
+  it("says Claude Code is listening only while the watcher's heartbeat is fresh", async () => {
+    const root = project({ scope: "project", active: true });
+    expect(await listeningOf(root)).toBe(false); // no heartbeat yet
+    beat(root, { at: seconds(5) });
+    expect(await listeningOf(root)).toBe(true);
+    beat(root, { at: seconds(60) });
+    expect(await listeningOf(root)).toBe(false); // the conversation was closed
+    beat(root, { at: seconds(1), stopped: true });
+    expect(await listeningOf(root)).toBe(false);
+    beat(root, { at: "not a date" });
+    expect(await listeningOf(root)).toBe(false);
+  });
+
+  it("without a session there is nothing to listen to", async () => {
+    const root = project(null);
+    beat(root, { at: seconds(1) });
+    const body = (await core.handleGet(get(), opts(root)).json()) as any;
+    expect(body.active).toBe(false);
+    expect(body.listening).toBeUndefined();
+  });
+
+  it("takes a measure request only in a project session", async () => {
+    const root = project({ scope: "project", active: true });
+    const token = await tokenOf(root);
+    const res = await core.handlePost(post({ token, kind: "measure" }), opts(root));
+    expect(res.status).toBe(202);
+    const line = JSON.parse(fs.readFileSync(path.join(root, ".facha-ui", "live", "requests.jsonl"), "utf8").trim());
+    expect(line).toMatchObject({ kind: "measure", slug: "", variant: "", text: "" });
+    const screen = project();
+    const screenToken = await tokenOf(screen);
+    expect((await core.handlePost(post({ token: screenToken, kind: "measure" }), opts(screen))).status).toBe(400);
+  });
+
+  it("serves the project's earlier measures and each screen's previous score, cleaned", async () => {
+    const root = project({ scope: "project", active: true });
+    fs.writeFileSync(
+      path.join(root, ".facha-ui", "live", "center.json"),
+      JSON.stringify({
+        version: 1,
+        at: NOW.toISOString(),
+        project: { score: 74 },
+        history: [
+          ...Array.from({ length: 30 }, (_, i) => ({ at: seconds(3600 * (30 - i)), score: 40 + i })),
+          { at: "nope", score: 50 },
+          { at: seconds(10), score: 300 },
+        ],
+        screens: [{ slug: "orders", file: "src/pages/Orders.tsx", score: 70, previous: 61, variants: [] }, { slug: "list", file: "x", score: 50, previous: "61" }],
+      }),
+    );
+    const body = (await core.handleGet(get(), opts(root)).json()) as any;
+    expect(body.center.history).toHaveLength(24);
+    expect(body.center.history.at(-1)).toEqual({ at: seconds(3600), score: 69 });
+    expect(body.center.screens.map((x: any) => x.previous)).toEqual([61, null]);
+  });
+});
+
 describe("palette base script", () => {
   it("prints the themes, the color tokens and the anchor from get_design_system", async () => {
     const script = path.join(REPO, "skills", "variants", "scripts", "palette-base.mjs");
@@ -444,6 +508,28 @@ describe("live watcher", () => {
     fs.writeFileSync(path.join(live, "session.json"), JSON.stringify({ slug: "orders", active: false }));
     expect(await w.exited).toBe(0);
     expect(w.lines.at(-1)).toEqual({ kind: "stopped" });
+  });
+
+  it("leaves a heartbeat while it listens, and marks it stopped when it ends (B-044)", async () => {
+    const root = project({ scope: "project", active: true });
+    const live = path.join(root, ".facha-ui", "live");
+    const w = watch(root);
+    const read = () => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(live, "listener.json"), "utf8"));
+      } catch {
+        return null;
+      }
+    };
+    await until(() => read() !== null);
+    expect(Date.now() - Date.parse(read().at)).toBeLessThan(5000);
+    expect(read().stopped).toBeUndefined();
+    fs.appendFileSync(path.join(live, "requests.jsonl"), JSON.stringify({ id: "req-9", kind: "measure", slug: "", variant: "", text: "" }) + "\n");
+    await until(() => w.lines.length >= 1);
+    expect(w.lines[0]).toMatchObject({ id: "req-9", kind: "measure" });
+    fs.writeFileSync(path.join(live, "session.json"), JSON.stringify({ scope: "project", active: false }));
+    expect(await w.exited).toBe(0);
+    expect(read().stopped).toBe(true);
   });
 
   it("exits at once when there is no active session", async () => {

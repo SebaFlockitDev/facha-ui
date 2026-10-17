@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-044 · Centro en vivo: escucha real, volver a medir, evolución y elegir
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** M
 - **Por qué:** el centro puede decir que Claude escucha cuando no es así, su estado se congela al abrirlo, no muestra cómo cambia cada pantalla y elegir una variante no lleva a ningún lado (`ux:nielsen-1`).
 - **Qué:** una señal real de escucha (del watcher), "Volver a medir", la diferencia con la medición anterior por proyecto y por pantalla, y "Elegir esta" con el comando de `apply` para copiar.

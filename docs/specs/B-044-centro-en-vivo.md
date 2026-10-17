@@ -1,6 +1,6 @@
 # B-044 · Centro en vivo: escucha real, volver a medir, evolución y elegir
 
-> **Estado:** en spec · **Rama:** `feat/center-live` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** aprobado, en curso · **Rama:** `feat/center-live` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** revisión del centro (B-042) contra el mercado, pedida por el desarrollador · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -27,7 +27,7 @@ El centro (B-042) junta todo en una pantalla, pero tiene cuatro huecos:
 - El pedido `choose` existe (desde el panel, `live.md` L4): Claude marca `chosen` y muestra
   `/facha-ui:apply <slug> <x>`; nunca aplica.
 
-## Plan propuesto
+## Plan aprobado (2026-10-16, con las cuatro decisiones recomendadas)
 
 | Archivo | Cambio |
 |---|---|
@@ -83,4 +83,4 @@ El centro (B-042) junta todo en una pantalla, pero tiene cuatro huecos:
 
 ## Cómo retomar
 
-Plan propuesto, esperando la aprobación del desarrollador.
+En curso en `feat/center-live`: seguir por la primera tarea sin marcar.
