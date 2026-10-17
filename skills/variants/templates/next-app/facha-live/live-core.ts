@@ -86,7 +86,7 @@ interface PaletteProposal {
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette" | "vote" | "run" | "measure";
+  kind: "change" | "choose" | "palette" | "vote" | "run" | "measure" | "edit";
   /** A "run" from the center: one variant instead of three. */
   quick?: boolean;
   /** A "run" from the center: a reference for the structure (an uploaded image or a URL). */
@@ -459,6 +459,17 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
     return json(202, { id: entry.id });
   }
 
+  // Edit a screen as it is, from the center (B-046): Claude copies it into variant E.
+  if (kind === "edit") {
+    if (!project) return json(400, { error: "Editing needs the facha-ui center" });
+    const screens = readCenter(opts.root)?.screens ?? [];
+    if (typeof slug !== "string" || !screens.some((s) => s.slug === slug)) return json(400, { error: "Unknown screen" });
+    const entry: LiveRequest = { id: `req-${now.getTime()}-${randomUUID().slice(0, 8)}`, at: now.toISOString(), kind, slug, variant: "e", text: "" };
+    fs.mkdirSync(liveDir(opts.root), { recursive: true });
+    fs.appendFileSync(path.join(liveDir(opts.root), "requests.jsonl"), JSON.stringify(entry) + "\n");
+    return json(202, { id: entry.id });
+  }
+
   // Propose variants of a screen, from the center.
   if (kind === "run") {
     if (!project) return json(400, { error: "Runs need the facha-ui center" });
@@ -476,7 +487,7 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
   }
 
   if (kind !== "change" && kind !== "choose" && kind !== "palette" && kind !== "vote") {
-    return json(400, { error: "kind must be change, choose, palette, vote, run, measure or upload" });
+    return json(400, { error: "kind must be change, choose, palette, vote, run, measure, edit or upload" });
   }
   const voter = kind === "vote" ? oneLine(body.voter, 40) : undefined;
   if (kind === "vote" && (!voter || text.length === 0 || text.length > 500)) {

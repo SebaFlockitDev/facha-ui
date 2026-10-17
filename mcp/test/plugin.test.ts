@@ -357,7 +357,7 @@ describe("short skills that read their parts when a step needs them", () => {
   const SKILLS = path.join(REPO, "skills");
   const VARIANTS = path.join(SKILLS, "variants");
   /** Files of the variants skill that SKILL.md must send the model to, from a concrete step. */
-  const PARTS = ["refine.md", "live.md", "lab.md", "run-state.md", "../_shared/ux-principles.md"];
+  const PARTS = ["refine.md", "live.md", "edit.md", "lab.md", "run-state.md", "../_shared/ux-principles.md"];
   /** "**Before this step, read `x`" under a "## Step" heading, or "**Before step R1, read `x`". */
   const READ = /\*\*Before (this step|step ([A-Z]?\d+[a-z]?)),? read `([^`]+)`/g;
 
@@ -859,6 +859,34 @@ describe("B-045 · how many variants, asked in the center", () => {
     const read = page.slice(page.indexOf("function readCount"), page.indexOf("function saveCount"));
     expect(read).toMatch(/try \{[\s\S]*\} catch \{\s*return 3;/);
     expect(page.slice(page.indexOf("function saveCount"))).toMatch(/^[^]*?try \{[^]*?\} catch/);
+  });
+});
+
+describe("B-046 · edit a screen as variant E", () => {
+  const read = (p: string) => fs.readFileSync(path.join(REPO, "skills", p), "utf8").replace(/\r\n/g, "\n");
+  const edit = read("variants/edit.md").replace(/\s+/g, " ");
+
+  it("E starts as a faithful copy: imports rewritten, nothing else, the screen's file never touched", () => {
+    for (const step of ["## E1 ·", "## E2 ·", "## E3 ·", "## E4 ·", "## E5 ·"]) expect(edit, step).toContain(step);
+    expect(edit).toContain("**nothing else changes**");
+    expect(edit).toContain("every relative import rewritten for the new folder");
+    expect(edit).toContain("the screen's file never changes here");
+    expect(edit).toContain("**a previous run does not stop the edit**");
+    expect(edit).toContain("never change A, B or C");
+    expect(edit).toContain("**reopen it**: do not copy again");
+  });
+
+  it("an E with the screen's own errors is a draft that apply does not take", () => {
+    expect(edit).toContain("**`draft`** with the errors it inherited");
+    expect(edit).toContain("adds **no new error** over the baseline");
+    expect(read("variants/run-state.md")).toContain('"status": "valid | failed | draft"');
+    expect(read("apply/SKILL.md")).toContain('argument-hint: "<screen-slug> <a|b|c|e>"');
+    expect(read("apply/SKILL.md")).toContain("An edit (E) in `draft` keeps errors");
+    expect(read("variants/refine.md")).toContain("`<slug> <a|b|c|e> \"<change>\"`");
+  });
+
+  it("the center processes an edit with edit.md", () => {
+    expect(read("center/SKILL.md")).toContain("- **`edit`** (\"Editar esta pantalla\"): **read `../variants/edit.md`**");
   });
 });
 

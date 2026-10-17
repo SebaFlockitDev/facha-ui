@@ -1,6 +1,6 @@
 # B-046 · Editar una pantalla sin pedir variantes
 
-> **Estado:** en spec · **Rama:** `feat/edit-screen` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** aprobado, en curso · **Rama:** `feat/edit-screen` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** el desarrollador quiso entrar a editar sin tener que pedir una variante · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -22,7 +22,7 @@ hacer eso: nada se aplica sin aprobación y el guardián valida antes (`CLAUDE.m
   (`apply/SKILL.md:70`); su `argument-hint` dice `<a|b|c>`.
 - `variants` Step 1 frena si ya hay una corrida: la edición no debe frenar por eso, porque no toca A, B ni C.
 
-## Plan propuesto
+## Plan aprobado (2026-10-16, con las cuatro decisiones recomendadas)
 
 | Archivo | Cambio |
 |---|---|
@@ -82,4 +82,4 @@ hacer eso: nada se aplica sin aprobación y el guardián valida antes (`CLAUDE.m
 
 ## Cómo retomar
 
-Plan propuesto, esperando la aprobación del desarrollador.
+En curso en `feat/edit-screen`: seguir por la primera tarea sin marcar.
