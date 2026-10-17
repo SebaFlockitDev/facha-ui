@@ -318,6 +318,12 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
   const chosen = [...(live.requests ?? [])].reverse().find((r) => r.kind === "choose" && r.slug === screen.slug)?.variant ?? null;
   const [picked, setPicked] = useState<string | null>(null);
   const choice = picked ?? chosen;
+  // The edit of this screen (B-046): variant E, a copy of the screen refined from its panel.
+  const hasEdit = screen.variants.includes("e");
+  const edits = (live.requests ?? []).filter((r) => r.kind === "edit" && r.slug === screen.slug);
+  const lastEdit = edits[edits.length - 1];
+  const preparing = !!lastEdit && (lastEdit.status.state === "queued" || lastEdit.status.state === "working");
+  const editReady = hasEdit || lastEdit?.status.state === "done";
   const choose = async (v: string) => {
     setPicked(v);
     await post({ kind: "choose", slug: screen.slug, variant: v });
@@ -360,6 +366,15 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
           {screen.score ?? "–"}
         </span>
         <Delta now={screen.score} before={screen.previous} />
+        {editReady ? (
+          <a className="btn" href={variantUrl(routes, screen.slug, "e")}>
+            {hasEdit ? "Seguir editando" : "Abrir la edición"}
+          </a>
+        ) : (
+          <button type="button" disabled={!live.active || preparing} onClick={() => void post({ kind: "edit", slug: screen.slug })}>
+            {preparing ? "Preparando la edición…" : "Editar esta pantalla"}
+          </button>
+        )}
         <button type="button" className="primary" aria-expanded={open} onClick={() => setOpen((o) => !o)} disabled={!live.active}>
           Proponer variantes
         </button>
@@ -370,7 +385,7 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
           {screen.variants.map((v) => (
             <span key={v} className="variant">
               <a className="link" href={variantUrl(routes, screen.slug, v)}>
-                {v.toUpperCase()}
+                {v === "e" ? "E (tu edición)" : v.toUpperCase()}
               </a>
               <button type="button" className="small" aria-pressed={choice === v} disabled={!live.active} onClick={() => void choose(v)}>
                 {choice === v ? "Elegida" : "Elegir esta"}
@@ -386,6 +401,12 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
       )}
       {choice && screen.variants.includes(choice) && (
         <Command why={`Elegiste la ${choice.toUpperCase()}. Para aplicarla vas a ver el plan exacto y confirmarlo; pegá en Claude Code:`} text={`/facha-ui:apply ${screen.slug} ${choice}`} />
+      )}
+      {lastEdit && lastEdit.status.state !== "done" && (
+        <p className="request" aria-live="polite">
+          <b>Edición: {STATE[lastEdit.status.state] ?? lastEdit.status.state}</b>
+          {lastEdit.status.message ? ` · ${lastEdit.status.message}` : ""}
+        </p>
       )}
       {last && (
         <p className="request" aria-live="polite">

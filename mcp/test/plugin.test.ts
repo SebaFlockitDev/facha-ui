@@ -885,6 +885,22 @@ describe("B-046 · edit a screen as variant E", () => {
     expect(read("variants/refine.md")).toContain("`<slug> <a|b|c|e> \"<change>\"`");
   });
 
+  it("the center offers to edit, then to keep editing, and never navigates on its own", () => {
+    const page = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-center.tsx"), "utf8");
+    expect(page).toContain('post({ kind: "edit", slug: screen.slug })');
+    expect(page).toContain('"Preparando la edición…" : "Editar esta pantalla"');
+    expect(page).toContain('hasEdit ? "Seguir editando" : "Abrir la edición"');
+    expect(page).not.toMatch(/location\.(href|assign|replace)\s*[=(]/);
+  });
+
+  it("the panel says it is an edit, a copy that changes nothing until applied", () => {
+    const panel = fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", "lab-panel.tsx"), "utf8");
+    expect(panel).toContain('"Edición de tu pantalla"');
+    expect(panel).toContain("Es una copia de tu pantalla: tu archivo no cambia hasta que la apliques");
+    expect(panel).toContain('label: "Arreglá lo que marca el guardián"');
+    expect(panel).toContain('here.variant === "e" ? [GUARDIAN, ...QUICK] : QUICK');
+  });
+
   it("the center processes an edit with edit.md", () => {
     expect(read("center/SKILL.md")).toContain("- **`edit`** (\"Editar esta pantalla\"): **read `../variants/edit.md`**");
   });
