@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Changed
+
+- **En el centro, "Proponer variantes" pregunta cuántas querés:** "3 para comparar" (viene elegida: tres direcciones, capturas en todos los temas y tamaños, y la revisión del crítico) o "1 rápida". Antes venía marcada una sola, sin que se viera. El botón dice cuántas se van a proponer y el centro recuerda tu última elección.
+
 ## [0.34.0] - 2026-10-16
 
 ### Added

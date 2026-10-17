@@ -1,6 +1,6 @@
 # B-045 · "¿Cuántas querés?" en el centro
 
-> **Estado:** en spec · **Rama:** `feat/center-count` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/center-count` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** el desarrollador pidió variantes desde el centro y recibió una sola sin haberlo elegido · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -21,7 +21,7 @@ negativo ("sin marcar, tres"). Pasan dos cosas:
 - El endpoint y la skill ya distinguen `quick: true` y `false` (B-042): no cambian.
 - El panel guarda preferencias en `localStorage` con lectura y escritura protegidas (`lab-panel.tsx:348`).
 
-## Plan propuesto
+## Plan aprobado (2026-10-16, con las tres decisiones recomendadas)
 
 | Archivo | Cambio |
 |---|---|
@@ -40,26 +40,35 @@ negativo ("sin marcar, tres"). Pasan dos cosas:
 
 ## Criterios de aceptación
 
-- [ ] Al proponer variantes, la cantidad es una pregunta visible con dos opciones, y 3 viene elegida.
-- [ ] Cada opción dice qué incluye; el botón dice cuántas se van a proponer.
-- [ ] La última elección se recuerda en el navegador, y sin almacenamiento disponible el formulario funciona igual.
+- [x] Al proponer variantes, la cantidad es una pregunta visible con dos opciones, y 3 viene elegida.
+- [x] Cada opción dice qué incluye; el botón dice cuántas se van a proponer.
+- [x] La última elección se recuerda en el navegador, y sin almacenamiento disponible el formulario funciona igual.
 
 ## Tareas
 
-- [ ] 1. La pregunta en el centro; contrato
-- [ ] 2. Docs
-- [ ] 3. Prueba real (proponer 3 desde el centro)
+- [x] 1. La pregunta en el centro; contrato
+- [x] 2. Docs
+- [x] 3. Prueba real (proponer 3 desde el centro)
 - [ ] 4. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **La prueba real no mandó una corrida de 3 de verdad:** habría pedido descartar la variante A recién elegida. Se
+  interceptó el envío en la página para ver lo que manda (`kind: "run"`, `quick: false`); la corrida completa ya la
+  cubren la skill y el endpoint desde B-042.
+- **Leer `localStorage` en el estado inicial no rompe la hidratación de Next:** el centro se monta en su Shadow DOM
+  recién en un efecto, así que nunca se renderiza en el servidor.
 
 ## Registro
 
 - **2026-10-16:** el desarrollador recibió una variante sin haberlo elegido y pidió poder elegir cuántas; agregado
   al backlog (B-045, junto con B-046) con su OK. Relevado; spec y plan escritos, pendientes de aprobación.
+- **2026-10-16:** plan aprobado con las tres decisiones recomendadas. Tarea 1 (`98dd343`): la pregunta y su contrato;
+  tarea 2: docs. 417 tests en verde.
+- **2026-10-16 · prueba real** en el centro de la app Vite de prueba: "¿Cuántas querés?" con "3 para comparar"
+  elegida y "Proponer 3 variantes"; al elegir "1 rápida" el botón pasó a "Proponer 1 variante" y, al recargar, seguía
+  elegida; al volver a 3, el envío salió con `quick: false`.
 
 ## Cómo retomar
 
-Plan propuesto, esperando la aprobación del desarrollador.
+En `feat/center-count`, tareas 1 a 3 hechas. Falta la 4 (release 0.35.0), solo cuando el desarrollador lo pida.

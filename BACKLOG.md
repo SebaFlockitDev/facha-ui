@@ -28,7 +28,7 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 ## Ahora
 
 ### B-045 · "¿Cuántas querés?" en el centro
-- **Estado:** en spec
+- **Estado:** en curso
 - **Prioridad:** P1 · **Tamaño:** S
 - **Por qué:** en el centro, la cantidad de variantes es una casilla marcada de entrada para una sola: quien pide variantes recibe una sin elegirlo y pierde la comparación y la revisión del crítico (`ux:nielsen-5`, `ux:nielsen-1`).
 - **Qué:** una pregunta visible con dos opciones ("3 para comparar", elegida de entrada, y "1 rápida"), cada una con lo que incluye, y un botón que dice cuántas se van a proponer; la última elección se recuerda en el navegador.
