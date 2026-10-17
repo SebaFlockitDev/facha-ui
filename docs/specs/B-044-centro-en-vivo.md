@@ -1,6 +1,6 @@
 # B-044 · Centro en vivo: escucha real, volver a medir, evolución y elegir
 
-> **Estado:** aprobado, en curso · **Rama:** `feat/center-live` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** en curso (falta el release) · **Rama:** `feat/center-live` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** revisión del centro (B-042) contra el mercado, pedida por el desarrollador · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -59,28 +59,45 @@ El centro (B-042) junta todo en una pantalla, pero tiene cuatro huecos:
 
 ## Criterios de aceptación
 
-- [ ] Con la conversación cerrada o la escucha caída, el centro y el panel lo dicen en menos de un minuto, y los pedidos quedan en cola.
-- [ ] "Volver a medir" actualiza el estado del proyecto y de cada pantalla.
-- [ ] El centro muestra la diferencia con la medición anterior, con texto y no solo color.
-- [ ] "Elegir esta" muestra el comando exacto de `apply` y nunca aplica.
+- [x] Con la conversación cerrada o la escucha caída, el centro y el panel lo dicen en menos de un minuto, y los pedidos quedan en cola.
+- [x] "Volver a medir" actualiza el estado del proyecto y de cada pantalla.
+- [x] El centro muestra la diferencia con la medición anterior, con texto y no solo color.
+- [x] "Elegir esta" muestra el comando exacto de `apply` y nunca aplica.
 
 ## Tareas
 
-- [ ] 1. Watcher y endpoint (`listening`, `measure`, `history`, `previous`); tests
-- [ ] 2. El centro y el panel; contratos
-- [ ] 3. La skill `center`, `live.md` y las docs
-- [ ] 4. Prueba real (cerrar la escucha y ver el aviso; volver a medir; elegir)
+- [x] 1. Watcher y endpoint (`listening`, `measure`, `history`, `previous`); tests
+- [x] 2. El centro y el panel; contratos
+- [x] 3. La skill `center`, `live.md` y las docs
+- [x] 4. Prueba real (cerrar la escucha y ver el aviso; volver a medir; elegir)
 - [ ] 5. Release
 
 ## Decisiones tomadas durante el trabajo
 
-(ninguna todavía)
+- **Lo que detecta la caída es la señal vieja, no `stopped`.** En Windows, cortar el Monitor mata el proceso
+  sin que corra su manejador de señales, así que `stopped` no llega a escribirse; la señal envejece y el
+  endpoint deja de decir `listening` a los 45 s. `stopped` queda para el cierre normal (la sesión termina).
+- **Sin escucha, el diseño del sistema y el pedido de variantes siguen disponibles**: lo que se pide queda en
+  cola (decisión 2); antes, el design system se ocultaba sin escucha.
+- **Regresión de 0.33.0 arreglada en este ítem** (`ec3651d`): `review_ui` no trataba como pantalla a una
+  variante del laboratorio, y en Next perdía el control de estados. La vio la corrida rápida que llegó desde el
+  centro durante el trabajo. Un test la cubre en Vite y en Next.
 
 ## Registro
 
 - **2026-10-16:** salió de comparar el centro con el mercado; el desarrollador pidió agregarlo (B-044) y
   arrancarlo. Relevado; spec y plan escritos, pendientes de aprobación.
+- **2026-10-16:** plan aprobado con las cuatro decisiones recomendadas. Tarea 1 (`17a3d2a`): watcher con señal,
+  `listening`, `measure`, `history` y `previous`. Tarea 2 (`a4e7e65`): el centro y el panel, con sus contratos.
+  Tarea 3 (`85085ef`): la skill, `live.md` y las docs. 415 tests en verde.
+- **2026-10-16 · prueba real** en la app Vite de prueba, con el servidor reiniciado (el endpoint se carga con
+  `vite.config`): el centro en verde con la señal; "Volver a medir" llegó como `measure` por el watcher, se
+  midió y el estado guardó la historia ("= sin cambios desde el 16/10/2026"); "Elegir esta" en la A mandó
+  `choose`, la tarjeta mostró "Elegida" y `/facha-ui:apply orders a`; con el Monitor cortado, a los 40 s el
+  endpoint dijo `listening: false` y el centro pasó a ámbar con el aviso; al reactivarlo volvió a verde. Durante
+  el trabajo llegó del centro un pedido real de variantes (`orders`, rápido): se preguntó antes de descartar
+  las anteriores y se hizo la variante A (0 errores).
 
 ## Cómo retomar
 
-En curso en `feat/center-live`: seguir por la primera tarea sin marcar.
+En `feat/center-live`, tareas 1 a 4 hechas. Falta la 5 (release 0.34.0, que lleva también el arreglo de `review_ui`), solo cuando el desarrollador lo pida.
