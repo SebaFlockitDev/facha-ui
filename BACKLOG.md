@@ -27,15 +27,6 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
-### B-045 · "¿Cuántas querés?" en el centro
-- **Estado:** en curso
-- **Prioridad:** P1 · **Tamaño:** S
-- **Por qué:** en el centro, la cantidad de variantes es una casilla marcada de entrada para una sola: quien pide variantes recibe una sin elegirlo y pierde la comparación y la revisión del crítico (`ux:nielsen-5`, `ux:nielsen-1`).
-- **Qué:** una pregunta visible con dos opciones ("3 para comparar", elegida de entrada, y "1 rápida"), cada una con lo que incluye, y un botón que dice cuántas se van a proponer; la última elección se recuerda en el navegador.
-- **Criterios de aceptación:** la cantidad es una pregunta visible con 3 de entrada; cada opción dice qué incluye; la última elección se recuerda y sin almacenamiento el formulario funciona igual.
-- **Spec:** [`docs/specs/B-045-cuantas-variantes.md`](docs/specs/B-045-cuantas-variantes.md)
-- **Referencias:** `skills/variants/templates/next-app/lab-center.tsx` (`ScreenCard`), `skills/variants/quick.md`
-
 ### B-046 · Editar una pantalla sin pedir variantes
 - **Estado:** listo para spec
 - **Prioridad:** P1 · **Tamaño:** M
@@ -173,6 +164,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.35.0:** B-045, «¿Cuántas querés?» en el centro («3 para comparar» de entrada o «1 rápida», recordada en el navegador); spec en [`docs/specs/B-045-cuantas-variantes.md`](docs/specs/B-045-cuantas-variantes.md).
 - **0.34.0:** B-044, el centro en vivo (escucha real con la señal del watcher, «Volver a medir», la evolución por proyecto y pantalla, y «Elegir esta»), y el arreglo de `review_ui` con las variantes del laboratorio; spec en [`docs/specs/B-044-centro-en-vivo.md`](docs/specs/B-044-centro-en-vivo.md).
 - **0.33.0:** B-043, `ux_score` y `review_ui` con pantallas de Vite (lo que monta el router, con su ruta, y las carpetas por convención; la opción `screens` de la config), y el arreglo del frontmatter de `center`; spec en [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md).
 - **0.32.0:** B-042, el centro facha-ui (`/facha-ui:center`): el proyecto y sus pantallas en una página, variantes con un objetivo y una captura subida, y el comando exacto para `init`; spec en [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md).

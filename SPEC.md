@@ -1,6 +1,6 @@
 # facha-ui — Especificación (SPEC)
 
-> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.34.0** (§7.10–§7.44). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
+> **Estado:** v0.1 aprobada como visión (2026-10-09). El plan de implementación del MVP AI Day está en [§7](#7-plan-de-implementación-mvp-ai-day). **Versión actual: 0.35.0** (§7.10–§7.45). Lo que la visión describe y todavía no existe está marcado *(roadmap)* y listado en §6.
 > **Método:** Spec-Driven Development. Nada se implementa hasta que este documento esté aprobado.
 
 **Principio rector:** *la IA cumple nuestras reglas, no las suyas.* Lo verificable lo valida código determinista; la IA solo hace lo que requiere creatividad.
@@ -729,7 +729,7 @@ facha-ui/
 ```json
 {
   "name": "facha-ui",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "description": "A senior UI designer inside Claude Code: builds or completes your design system from your code, designs screen variants with it, lets you adjust them and try palettes live with conflicts and solutions, validates with deterministic rules (incl. WCAG contrast), checks every UI file Claude writes, and applies nothing without your approval. Start with /facha-ui:start.",
   "author": { "name": "Sebastian Adrover" },
   "homepage": "https://github.com/SebaFlockitDev/facha-ui",

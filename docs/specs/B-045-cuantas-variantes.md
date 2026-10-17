@@ -1,6 +1,6 @@
 # B-045 · "¿Cuántas querés?" en el centro
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/center-count` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.35.0) · **Rama:** `feat/center-count` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** el desarrollador pidió variantes desde el centro y recibió una sola sin haberlo elegido · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -49,7 +49,7 @@ negativo ("sin marcar, tres"). Pasan dos cosas:
 - [x] 1. La pregunta en el centro; contrato
 - [x] 2. Docs
 - [x] 3. Prueba real (proponer 3 desde el centro)
-- [ ] 4. Release
+- [x] 4. Release 0.35.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -69,6 +69,9 @@ negativo ("sin marcar, tres"). Pasan dos cosas:
   elegida y "Proponer 3 variantes"; al elegir "1 rápida" el botón pasó a "Proponer 1 variante" y, al recargar, seguía
   elegida; al volver a 3, el envío salió con `quick: false`.
 
+- **2026-10-16 · release 0.35.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.45; B-045 a Hecho.
+
 ## Cómo retomar
 
-En `feat/center-count`, tareas 1 a 3 hechas. Falta la 4 (release 0.35.0), solo cuando el desarrollador lo pida.
+Terminado en 0.35.0. Sin ideas nuevas.
