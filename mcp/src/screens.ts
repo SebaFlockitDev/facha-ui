@@ -70,8 +70,14 @@ export function projectScreens(ctx: Context): Map<string, Screen> {
   return out;
 }
 
+/** A screen, or a variant of one in the lab (`<lab.dir>/<slug>/<x>/page.tsx` or `Page.tsx`). */
 export function isScreen(ctx: Context, relPath: string): boolean {
-  return projectScreens(ctx).has(relPath);
+  return projectScreens(ctx).has(relPath) || isLabVariant(ctx, relPath);
+}
+
+function isLabVariant(ctx: Context, relPath: string): boolean {
+  const prefix = ctx.project.labDir + "/";
+  return relPath.startsWith(prefix) && /^[^/]+\/[a-z]\/[pP]age\.[jt]sx$/.test(relPath.slice(prefix.length));
 }
 
 export function routeOf(ctx: Context, relPath: string): string | null {

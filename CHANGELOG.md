@@ -7,6 +7,10 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+### Fixed
+
+- `review_ui` vuelve a revisar los estados (carga, vacío, error) y el título de las variantes del laboratorio: desde 0.33.0 no las trataba como pantallas.
+
 ## [0.33.0] - 2026-10-16
 
 ### Added

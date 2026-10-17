@@ -59608,7 +59608,11 @@ function projectScreens(ctx) {
   return out;
 }
 function isScreen(ctx, relPath) {
-  return projectScreens(ctx).has(relPath);
+  return projectScreens(ctx).has(relPath) || isLabVariant(ctx, relPath);
+}
+function isLabVariant(ctx, relPath) {
+  const prefix2 = ctx.project.labDir + "/";
+  return relPath.startsWith(prefix2) && /^[^/]+\/[a-z]\/[pP]age\.[jt]sx$/.test(relPath.slice(prefix2.length));
 }
 function routeOf(ctx, relPath) {
   return projectScreens(ctx).get(relPath)?.route ?? null;
