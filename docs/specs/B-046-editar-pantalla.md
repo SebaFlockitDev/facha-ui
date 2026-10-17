@@ -1,6 +1,6 @@
 # B-046 · Editar una pantalla sin pedir variantes
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/edit-screen` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.36.0) · **Rama:** `feat/edit-screen` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** el desarrollador quiso entrar a editar sin tener que pedir una variante · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -69,7 +69,7 @@ hacer eso: nada se aplica sin aprobación y el guardián valida antes (`CLAUDE.m
 - [x] 2. El centro y el panel; contratos
 - [x] 3. Docs
 - [x] 4. Prueba real (editar `orders` desde el centro, pedir un cambio, ver la E y el comando)
-- [ ] 5. Release
+- [x] 5. Release 0.36.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -95,6 +95,9 @@ hacer eso: nada se aplica sin aprobación y el guardián valida antes (`CLAUDE.m
   como `change`, se hizo la revisión r1 (el número de pedido como enlace con `--primary`), el guardián pasó a
   0 advertencias y la página mostró 6 enlaces alcanzables con Tab. El archivo original no cambió.
 
+- **2026-10-16 · release 0.36.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.46; B-046 a Hecho.
+
 ## Cómo retomar
 
-En `feat/edit-screen`, tareas 1 a 4 hechas. Falta la 5 (release 0.36.0), solo cuando el desarrollador lo pida.
+Terminado en 0.36.0. Sin ideas nuevas.
