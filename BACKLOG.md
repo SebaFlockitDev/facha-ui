@@ -27,6 +27,23 @@ que originan ítems (de mercado, de estándares) van en `docs/research/`.
 
 ## Ahora
 
+### B-045 · "¿Cuántas querés?" en el centro
+- **Estado:** en spec
+- **Prioridad:** P1 · **Tamaño:** S
+- **Por qué:** en el centro, la cantidad de variantes es una casilla marcada de entrada para una sola: quien pide variantes recibe una sin elegirlo y pierde la comparación y la revisión del crítico (`ux:nielsen-5`, `ux:nielsen-1`).
+- **Qué:** una pregunta visible con dos opciones ("3 para comparar", elegida de entrada, y "1 rápida"), cada una con lo que incluye, y un botón que dice cuántas se van a proponer; la última elección se recuerda en el navegador.
+- **Criterios de aceptación:** la cantidad es una pregunta visible con 3 de entrada; cada opción dice qué incluye; la última elección se recuerda y sin almacenamiento el formulario funciona igual.
+- **Spec:** [`docs/specs/B-045-cuantas-variantes.md`](docs/specs/B-045-cuantas-variantes.md)
+- **Referencias:** `skills/variants/templates/next-app/lab-center.tsx` (`ScreenCard`), `skills/variants/quick.md`
+
+### B-046 · Editar una pantalla sin pedir variantes
+- **Estado:** listo para spec
+- **Prioridad:** P1 · **Tamaño:** M
+- **Por qué:** el panel en vivo solo aparece en las variantes: para ajustar la pantalla real hay que pedir variantes primero. La industria edita sobre la app corriendo (Lovable Visual Edits, Onlook, Builder.io, la barra de Vercel), pero casi siempre escribe directo en el código, sin validar ni pedir OK.
+- **Qué:** "Editar esta pantalla" en el centro abre la pantalla original en el laboratorio (el componente real, no una copia) con el mismo panel; el primer cambio crea por detrás una variante de edición validada por el guardián, que el panel muestra desde ahí; se aplica con `/facha-ui:apply` como cualquier variante. El panel sobre la app en su ruta real queda para después (en Next obliga a tocar el layout).
+- **Criterios de aceptación:** se puede marcar y pedir cambios sobre la pantalla original sin pedir variantes; el archivo original no cambia hasta `apply`; cada cambio pasa por el guardián; el centro muestra el comando para aplicarla.
+- **Referencias:** `skills/variants/live.md`, `skills/variants/templates/next-app/lab-panel.tsx`
+
 ### B-033 · Accesibilidad en ejecución sobre el laboratorio
 - **Estado:** listo para spec
 - **Prioridad:** P2 · **Tamaño:** M
