@@ -161,6 +161,8 @@ interface LiveState {
   /** "project": the facha-ui center session, for every screen (B-042). */
   scope?: "project" | "screen";
   slug?: string | null;
+  /** Claude Code's watcher is running: its heartbeat is fresh (B-044). */
+  listening?: boolean;
   requests?: LiveRequest[];
   palette?: PaletteBase | null;
 }
@@ -1190,6 +1192,11 @@ export function LabPanel() {
       <div className="section">
         <span className="label">Mejorar con un clic</span>
         {!liveHere && <LiveOff slug={here.slug} />}
+        {liveHere && live.listening === false && (
+          <p className="liveoff" role="note">
+            <b>Claude Code no está escuchando.</b> Lo que pidas queda en cola y se hace cuando vuelva a la conversación.
+          </p>
+        )}
         <div className="quick">
           {QUICK.map((q) => (
             <button key={q.id} className="act" type="button" disabled={sending || !liveHere} title={q.text} onClick={() => void quick(q.label, q.text)}>

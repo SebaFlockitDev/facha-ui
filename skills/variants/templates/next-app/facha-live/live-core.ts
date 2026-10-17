@@ -86,7 +86,7 @@ interface PaletteProposal {
 interface LiveRequest {
   id: string;
   at: string;
-  kind: "change" | "choose" | "palette" | "vote" | "run";
+  kind: "change" | "choose" | "palette" | "vote" | "run" | "measure";
   /** A "run" from the center: one variant instead of three. */
   quick?: boolean;
   /** A "run" from the center: a reference for the structure (an uploaded image or a URL). */
@@ -170,6 +170,17 @@ function activeSession(root: string, now: Date): Session | null {
   if (!session || session.active !== true || (session.scope !== "project" && typeof session.slug !== "string")) return null;
   if (session.expiresAt && Date.parse(session.expiresAt) < now.getTime()) return null;
   return session;
+}
+
+/** How old the watcher's heartbeat can be and still mean "listening" (it beats every 10 s; B-044). */
+const LISTENER_MAX_AGE = 45_000;
+
+/** Whether Claude Code's watcher is running: its heartbeat is fresh and it did not stop. */
+function listening(root: string, now: Date): boolean {
+  const beat = readJson<{ at?: unknown; stopped?: unknown }>(path.join(liveDir(root), "listener.json"));
+  if (!beat || beat.stopped === true || typeof beat.at !== "string") return false;
+  const age = now.getTime() - Date.parse(beat.at);
+  return Number.isFinite(age) && age >= -5_000 && age <= LISTENER_MAX_AGE;
 }
 
 function sameToken(a: string, b: string): boolean {
@@ -326,10 +337,16 @@ function readCenter(root: string) {
       file: oneLine(s.file, 200) ?? "",
       route: oneLine(s.route, 120) ?? null,
       score: num(s.score),
+      previous: num(s.previous),
       worst: s.worst ? { rule: oneLine(s.worst.rule, 60) ?? "", message: oneLine(s.worst.message, 240) ?? "", at: oneLine(s.worst.at, 200) ?? "" } : null,
       variants: Array.isArray(s.variants) ? s.variants.filter((v: unknown) => typeof v === "string" && VARIANT.test(v)).slice(0, 12) : [],
     }));
   const p = raw.project && typeof raw.project === "object" ? raw.project : {};
+  // The project's earlier measures, oldest first (B-044).
+  const history = (Array.isArray(raw.history) ? raw.history : [])
+    .map((h: any) => ({ at: oneLine(h?.at, 40) ?? null, score: num(h?.score) }))
+    .filter((h: { at: string | null; score: number | null }) => h.at !== null && h.score !== null && !Number.isNaN(Date.parse(h.at)))
+    .slice(-24);
   return {
     at: oneLine(raw.at, 40) ?? null,
     lab: oneLine(raw.lab, 120) ?? null,
@@ -340,6 +357,7 @@ function readCenter(root: string) {
       contrast: p.contrast ? { pairs: num(p.contrast.pairs, 10000), failing: num(p.contrast.failing, 10000) } : null,
       coverage: p.coverage ? { components: ratio(p.coverage.components ?? null), tokens: ratio(p.coverage.tokens ?? null) } : null,
     },
+    history,
     screens,
   };
 }
@@ -386,6 +404,7 @@ export function handleGet(req: Request, opts: LiveOptions): Response {
     scope: project ? "project" : "screen",
     slug: session.slug ?? null,
     expiresAt: session.expiresAt ?? null,
+    listening: listening(opts.root, now),
     requests,
     palette,
     center,
@@ -431,6 +450,15 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
     return json(201, { path: `.facha-ui/references/${name}` });
   }
 
+  // Measure the project again, from the center (B-044).
+  if (kind === "measure") {
+    if (!project) return json(400, { error: "Measuring needs the facha-ui center" });
+    const entry: LiveRequest = { id: `req-${now.getTime()}-${randomUUID().slice(0, 8)}`, at: now.toISOString(), kind, slug: "", variant: "", text: "" };
+    fs.mkdirSync(liveDir(opts.root), { recursive: true });
+    fs.appendFileSync(path.join(liveDir(opts.root), "requests.jsonl"), JSON.stringify(entry) + "\n");
+    return json(202, { id: entry.id });
+  }
+
   // Propose variants of a screen, from the center.
   if (kind === "run") {
     if (!project) return json(400, { error: "Runs need the facha-ui center" });
@@ -448,7 +476,7 @@ export async function handlePost(req: Request, opts: LiveOptions): Promise<Respo
   }
 
   if (kind !== "change" && kind !== "choose" && kind !== "palette" && kind !== "vote") {
-    return json(400, { error: "kind must be change, choose, palette, vote, run or upload" });
+    return json(400, { error: "kind must be change, choose, palette, vote, run, measure or upload" });
   }
   const voter = kind === "vote" ? oneLine(body.voter, 40) : undefined;
   if (kind === "vote" && (!voter || text.length === 0 || text.length > 500)) {

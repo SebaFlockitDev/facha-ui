@@ -59608,7 +59608,11 @@ function projectScreens(ctx) {
   return out;
 }
 function isScreen(ctx, relPath) {
-  return projectScreens(ctx).has(relPath);
+  return projectScreens(ctx).has(relPath) || isLabVariant(ctx, relPath);
+}
+function isLabVariant(ctx, relPath) {
+  const prefix2 = ctx.project.labDir + "/";
+  return relPath.startsWith(prefix2) && /^[^/]+\/[a-z]\/[pP]age\.[jt]sx$/.test(relPath.slice(prefix2.length));
 }
 function routeOf(ctx, relPath) {
   return projectScreens(ctx).get(relPath)?.route ?? null;
@@ -69101,7 +69105,7 @@ function reviewFlow(ctx, inputs) {
 }
 
 // src/server.ts
-var VERSION = "0.33.0";
+var VERSION = "0.34.0";
 var INSTRUCTIONS = `facha-ui exposes this project's design system and a deterministic UI validator.
 1. Design values (colors, font sizes, radii, shadows, spacing) must come from \`get_design_system\`. If no token fits a need, say explicitly that there is none and report it as a gap \u2014 never invent a value or present a literal as if it were a token.
 2. After writing or editing UI code, run \`check_ui\` on it. The work is compliant only when \`errors = 0\`.

@@ -156,6 +156,7 @@ Sin evaluar: entran a **Siguiente** o **Después** con su spec, o pasan a **Desc
 
 El detalle de cada versión está en `CHANGELOG.md` y en SPEC §7.
 
+- **0.34.0:** B-044, el centro en vivo (escucha real con la señal del watcher, «Volver a medir», la evolución por proyecto y pantalla, y «Elegir esta»), y el arreglo de `review_ui` con las variantes del laboratorio; spec en [`docs/specs/B-044-centro-en-vivo.md`](docs/specs/B-044-centro-en-vivo.md).
 - **0.33.0:** B-043, `ux_score` y `review_ui` con pantallas de Vite (lo que monta el router, con su ruta, y las carpetas por convención; la opción `screens` de la config), y el arreglo del frontmatter de `center`; spec en [`docs/specs/B-043-ux-score-vite.md`](docs/specs/B-043-ux-score-vite.md).
 - **0.32.0:** B-042, el centro facha-ui (`/facha-ui:center`): el proyecto y sus pantallas en una página, variantes con un objetivo y una captura subida, y el comando exacto para `init`; spec en [`docs/specs/B-042-centro-facha-ui.md`](docs/specs/B-042-centro-facha-ui.md).
 - **0.31.0:** B-040, `variants` con una captura de referencia para la estructura (la variante C la adapta y cita sus regiones); spec en [`docs/specs/B-040-variantes-desde-una-captura.md`](docs/specs/B-040-variantes-desde-una-captura.md).

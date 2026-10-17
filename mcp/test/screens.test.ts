@@ -103,6 +103,23 @@ describe("ux_score and review_ui with Vite screens", () => {
     }
   });
 
+  it("review_ui treats a lab variant as a screen, in Vite and in Next", async () => {
+    for (const [root, file] of [
+      [VITE, "facha-lab/orders/a/Page.tsx"],
+      [path.join(FIXTURES, "next-tw4-cssvars"), "app/lab/home/a/page.tsx"],
+    ] as const) {
+      const h = await connect(root);
+      try {
+        const r = (await h.call("review_ui", { path: file })).structuredContent;
+        expect(r.files[0].states, file).not.toBeNull();
+      } finally {
+        await h.close();
+      }
+    }
+    // A lab variant is reviewed as a screen, but never scored as one of the project's.
+    expect(Object.keys(screensOf(VITE))).not.toContain("facha-lab/orders/a/Page.tsx");
+  });
+
   it("the CI gate fails when a Vite screen goes down", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "facha-score-"));
     dirs.push(dir);

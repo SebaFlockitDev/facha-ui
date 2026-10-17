@@ -69,7 +69,9 @@ node "<this skill's directory>/scripts/live-watch.mjs" "<project.workspacePath>/
 (use `.facha-ui/live` when `project.workspacePath` is `.`), with the longest timeout Monitor
 allows. Each output line is one JSON request. When the monitor expires and the session is still
 active, start it again: requests sent in between are printed again, because the script replays
-those without a final status.
+those without a final status. While it runs, the script writes `.facha-ui/live/listener.json` every
+10 s (its only write): the endpoint answers `listening` while that heartbeat is under 45 s old, and the
+panel and the center say when nobody is listening (B-044).
 
 ## L3 · A change request (`"kind": "change"`)
 

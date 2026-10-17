@@ -58,8 +58,9 @@ Write `.facha-ui/live/center.json` with the Write tool, from C1 and nothing else
     "contrast": { "pairs": <contrast.summary.pairs>, "failing": <contrast.summary.failing> },
     "coverage": { "components": <ux_score.coverage.components.ratio>, "tokens": <ux_score.coverage.tokens.ratio> }
   },
+  "history": [{ "at": "<ISO of an earlier measure>", "score": <its project score> }],
   "screens": [
-    { "slug": "<as variants resolves it>", "file": "<file>", "route": "<route or null>", "score": <score>,
+    { "slug": "<as variants resolves it>", "file": "<file>", "route": "<route or null>", "score": <score>, "previous": <score of the earlier measure or null>,
       "worst": { "rule": "<rule>", "message": "<message, in the developer's language>", "at": "<file:line>" },
       "variants": ["<letters of the variants in <lab.dir>/<slug>/>"] }
   ]
@@ -71,6 +72,10 @@ Each screen comes from `ux_score.screens`: `file` is its `screen`, `route` its `
 the components the router mounts and the files of `src/pages/`, `src/routes/`, `src/views/` and
 `src/screens/`.
 
+When `center.json` already exists, keep its trend: its `project.score` and `at` become a new point at the
+end of `history` (keep the last 24), and each screen's `score` becomes its `previous`. The center shows the
+change in words ("↑ 4 desde el …").
+
 Then the palette base for the Diseño tab of every variant's panel: `live.md` L1 step 5.
 
 ## C4 · Open the session and listen
@@ -79,7 +84,8 @@ Write `.facha-ui/live/session.json`:
 `{ "scope": "project", "active": true, "startedAt": "<ISO>", "expiresAt": "<ISO, 2 hours later>" }`
 (no token: the endpoint creates it), and `.facha-ui/live/status.json` as `{ "requests": {} }` if it does
 not exist. Start listening as `live.md` L2 says. Tell the developer the center's URL (`lab`) and that the
-session lasts 2 hours, while this conversation stays open.
+session lasts 2 hours, while this conversation stays open. The watcher's heartbeat tells the center
+whether you are listening: when the Monitor expires and the session is still active, start it again at once.
 
 ## C5 · Each request
 
@@ -90,9 +96,12 @@ Write its status in `.facha-ui/live/status.json` as `live.md` says (`working`, t
   new run for that screen, with the text as its goal (empty: the diagnosis gives it). With `quick`, read
   `quick.md`. With a `reference`, read `reference.md`: a file in `.facha-ui/references/` is the image; a
   URL needs the yes of hard rule 4, so set `needs-input` with
-  `confirmInChat: "sí, abrí la referencia"` and ask here. At the end, `done` with the variants' letters.
-- **`change`, `choose`, `palette`, `vote`** (from a variant's panel or the compare page): as `live.md`
-  L3 to L6 say.
+  `confirmInChat: "sí, abrí la referencia"` and ask here. At the end, `done` with the variants' letters,
+  and measure again as for `measure`.
+- **`measure`** ("Volver a medir"): repeat C1 and C3, keeping the trend, then `done` with the new score.
+- **`choose`** ("Elegir esta", from the center or a panel): as `live.md` L4. The center already shows
+  `/facha-ui:apply <slug> <x>` to paste; never apply it.
+- **`change`, `palette`, `vote`** (from a variant's panel or the compare page): as `live.md` L3 to L6 say.
 - After each one, update `screens[].variants` (and the score, if the run measured it) in `center.json`.
 
 ## C6 · Close

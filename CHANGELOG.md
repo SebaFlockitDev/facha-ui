@@ -7,6 +7,22 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-16
+
+### Added
+
+- **El centro dice si Claude está escuchando de verdad:** en verde mientras escucha; en ámbar si la sesión sigue abierta pero nadie escucha (por ejemplo, cerraste la conversación), con el aviso de que lo que pidas queda en cola. El panel de cada variante avisa lo mismo.
+- **"Volver a medir"** en el centro, y la diferencia con la medición anterior en el puntaje del proyecto y de cada pantalla ("↑ 4 desde el …"). Después de cada corrida de variantes se vuelve a medir solo.
+- **"Elegir esta"** en cada variante del centro: muestra el comando `/facha-ui:apply` para aplicarla. Nunca aplica nada.
+
+### Changed
+
+- Si tenés el servidor de desarrollo corriendo cuando actualizás el plugin, reinicialo: el endpoint del laboratorio se carga con `vite.config` (o con la ruta de Next) y no toma los cambios en caliente.
+
+### Fixed
+
+- `review_ui` vuelve a revisar los estados (carga, vacío, error) y el título de las variantes del laboratorio: desde 0.33.0 no las trataba como pantallas.
+
 ## [0.33.0] - 2026-10-16
 
 ### Added
@@ -383,7 +399,8 @@ Todos los cambios de facha-ui que importan a quien usa el plugin. El formato sig
 - Plugin instalable desde GitHub, con Playwright MCP en versión fija para las capturas (§7.1).
 - Guía de uso con imágenes de una demo y licencia MIT.
 
-[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.33.0...HEAD
+[Unreleased]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.34.0...HEAD
+[0.34.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/SebaFlockitDev/facha-ui/compare/v0.30.0...v0.31.0

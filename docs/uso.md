@@ -12,7 +12,7 @@ Pasos para instalar facha-ui y usarlo en un proyecto React, desde la instalació
 - **las variantes en curso**, para abrirlas, compararlas y votar, con el estado de cada pedido;
 - **el design system:** si falta, cómo crearlo; y **"Como esta página"**, con una captura o una dirección.
 
-Claude escucha detrás mientras esté abierta la conversación. Lo que cambia tu código (crear tokens, aplicar una variante) lo arrancás vos: el centro te muestra el comando exacto con un botón para copiarlo. Las capturas que subís quedan en `.facha-ui/references/` (sumalo al `.gitignore`).
+Claude escucha detrás mientras esté abierta la conversación. El indicador de arriba dice la verdad: en verde, Claude está escuchando; en ámbar, la sesión sigue abierta pero nadie escucha (cerraste la conversación, por ejemplo), y lo que pidas queda en cola hasta que vuelvas y digas *"abrí facha-ui"*. **"Volver a medir"** recalcula todo, y el puntaje del proyecto y de cada pantalla muestran cuánto cambió desde la medición anterior ("↑ 4"). En cada variante, **"Elegir esta"** te da el comando `/facha-ui:apply` para aplicarla. Lo que cambia tu código (crear tokens, aplicar una variante) lo arrancás vos: el centro te muestra el comando exacto con un botón para copiarlo. Las capturas que subís quedan en `.facha-ui/references/` (sumalo al `.gitignore`).
 
 **Resumen del flujo:**
 
