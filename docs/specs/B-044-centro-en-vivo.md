@@ -1,6 +1,6 @@
 # B-044 · Centro en vivo: escucha real, volver a medir, evolución y elegir
 
-> **Estado:** en curso (falta el release) · **Rama:** `feat/center-live` · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
+> **Estado:** hecho (0.34.0) · **Rama:** `feat/center-live` (mergeada) · **Ítem:** [BACKLOG.md](../../BACKLOG.md) ·
 > **Origen:** revisión del centro (B-042) contra el mercado, pedida por el desarrollador · **Última actualización:** 2026-10-16
 
 ## Por qué
@@ -70,7 +70,7 @@ El centro (B-042) junta todo en una pantalla, pero tiene cuatro huecos:
 - [x] 2. El centro y el panel; contratos
 - [x] 3. La skill `center`, `live.md` y las docs
 - [x] 4. Prueba real (cerrar la escucha y ver el aviso; volver a medir; elegir)
-- [ ] 5. Release
+- [x] 5. Release 0.34.0
 
 ## Decisiones tomadas durante el trabajo
 
@@ -98,6 +98,9 @@ El centro (B-042) junta todo en una pantalla, pero tiene cuatro huecos:
   el trabajo llegó del centro un pedido real de variantes (`orders`, rápido): se preguntó antes de descartar
   las anteriores y se hizo la variante A (0 errores).
 
+- **2026-10-16 · release 0.34.0:** versión en `plugin.json`, `mcp/package.json`, el lockfile y el
+  server; CHANGELOG con fecha y enlaces; SPEC §7.44; B-044 a Hecho.
+
 ## Cómo retomar
 
-En `feat/center-live`, tareas 1 a 4 hechas. Falta la 5 (release 0.34.0, que lleva también el arreglo de `review_ui`), solo cuando el desarrollador lo pida.
+Terminado en 0.34.0. Sin ideas nuevas.
