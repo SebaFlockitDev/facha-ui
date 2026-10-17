@@ -25,6 +25,8 @@ interface CenterScreen {
   file: string;
   route: string | null;
   score: number | null;
+  /** The score of the measure before this one (B-044). */
+  previous: number | null;
   worst: { rule: string; message: string; at: string } | null;
   variants: string[];
 }
@@ -39,6 +41,8 @@ interface CenterData {
     contrast: { pairs: number | null; failing: number | null } | null;
     coverage: { components: number | null; tokens: number | null } | null;
   };
+  /** The project's earlier measures, oldest first (B-044). */
+  history: { at: string; score: number }[];
   screens: CenterScreen[];
 }
 
@@ -46,6 +50,7 @@ interface Request {
   id: string;
   kind: string;
   slug?: string;
+  variant?: string;
   text: string;
   status: { state: string; message?: string };
 }
@@ -53,6 +58,8 @@ interface Request {
 interface LiveState {
   active: boolean;
   scope?: "project" | "screen";
+  /** Claude Code's watcher is running: its heartbeat is fresh (B-044). */
+  listening?: boolean;
   token?: string;
   requests?: Request[];
   center?: CenterData | null;
@@ -86,6 +93,14 @@ p { margin: 0; }
 .status { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #3a4256; border-radius: 999px; padding: 6px 12px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #6d7690; }
 .dot.on { background: #4fd17f; }
+.dot.wait { background: #ffb547; }
+.notice { border: 1px solid #ffb547; border-radius: 10px; padding: 10px 12px; background: #1f1a12; display: grid; gap: 8px; }
+.delta { font-size: 13px; font-weight: 600; }
+.delta.up { color: #8af0b0; }
+.delta.down { color: #ffb38a; }
+.section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.variant { display: inline-flex; align-items: center; gap: 6px; }
+button.small { min-height: 32px; padding: 4px 10px; font-size: 13px; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .tile { border: 1px solid #2c3346; border-radius: 12px; padding: 14px 16px; background: #161a25; display: grid; gap: 4px; }
 .big { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -117,6 +132,21 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; backgrou
 .ok { color: #8af0b0; }
 .request { font-size: 13px; }
 `;
+
+/** The change against the previous measure, in words and with an arrow: never by color alone (ux:wcag-1.4.1). */
+function Delta({ now, before, when }: { now: number | null; before: number | null; when?: string | null }) {
+  if (now === null || before === null) return null;
+  const d = Math.round(now - before);
+  const since = when ? ` desde el ${new Date(when).toLocaleDateString()}` : " desde la medición anterior";
+  if (d === 0) return <span className="delta muted">= sin cambios{since}</span>;
+  const up = d > 0;
+  return (
+    <span className={`delta ${up ? "up" : "down"}`} aria-label={`${up ? "Subió" : "Bajó"} ${Math.abs(d)} puntos${since}`}>
+      {up ? "↑" : "↓"} {Math.abs(d)}
+      <span className="muted">{since}</span>
+    </span>
+  );
+}
 
 function scoreClass(score: number | null): string {
   return score === null ? "" : score < 60 ? "low" : score < 80 ? "mid" : "high";
@@ -257,6 +287,14 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
   const [error, setError] = useState<string | null>(null);
   const runs = (live.requests ?? []).filter((r) => r.kind === "run" && r.slug === screen.slug);
   const last = runs[runs.length - 1];
+  // The variant chosen last, from this page or a variant's panel (live.md, L4).
+  const chosen = [...(live.requests ?? [])].reverse().find((r) => r.kind === "choose" && r.slug === screen.slug)?.variant ?? null;
+  const [picked, setPicked] = useState<string | null>(null);
+  const choice = picked ?? chosen;
+  const choose = async (v: string) => {
+    setPicked(v);
+    await post({ kind: "choose", slug: screen.slug, variant: v });
+  };
 
   const submit = async () => {
     setSending(true);
@@ -294,6 +332,7 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
         <span className={`score ${scoreClass(screen.score)}`} aria-label={`Puntaje de UX: ${screen.score ?? "sin medir"}`}>
           {screen.score ?? "–"}
         </span>
+        <Delta now={screen.score} before={screen.previous} />
         <button type="button" className="primary" aria-expanded={open} onClick={() => setOpen((o) => !o)} disabled={!live.active}>
           Proponer variantes
         </button>
@@ -302,9 +341,14 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
         <p className="row">
           <span className="muted">Variantes:</span>
           {screen.variants.map((v) => (
-            <a key={v} className="link" href={variantUrl(routes, screen.slug, v)}>
-              {v.toUpperCase()}
-            </a>
+            <span key={v} className="variant">
+              <a className="link" href={variantUrl(routes, screen.slug, v)}>
+                {v.toUpperCase()}
+              </a>
+              <button type="button" className="small" aria-pressed={choice === v} disabled={!live.active} onClick={() => void choose(v)}>
+                {choice === v ? "Elegida" : "Elegir esta"}
+              </button>
+            </span>
           ))}
           {screen.variants.length > 1 && (
             <a className="link" href={compareUrl(routes, screen.slug)}>
@@ -312,6 +356,9 @@ function ScreenCard({ screen, live, post, upload, routes }: { screen: CenterScre
             </a>
           )}
         </p>
+      )}
+      {choice && screen.variants.includes(choice) && (
+        <Command why={`Elegiste la ${choice.toUpperCase()}. Para aplicarla vas a ver el plan exacto y confirmarlo; pegá en Claude Code:`} text={`/facha-ui:apply ${screen.slug} ${choice}`} />
       )}
       {last && (
         <p className="request" aria-live="polite">
@@ -442,7 +489,12 @@ function Center({ routes }: { routes: Routes }) {
   };
 
   const center = live.center ?? null;
-  const listening = live.active && live.scope === "project";
+  const session = live.active && live.scope === "project";
+  const listening = session && live.listening === true;
+  const measures = (live.requests ?? []).filter((r) => r.kind === "measure");
+  const measure = measures[measures.length - 1];
+  const measuring = !!measure && (measure.status.state === "queued" || measure.status.state === "working");
+  const before = center?.history?.length ? center.history[center.history.length - 1] : null;
   const screens = [...(center?.screens ?? [])].sort((a, b) => (a.score ?? 101) - (b.score ?? 101));
 
   return (
@@ -454,20 +506,36 @@ function Center({ routes }: { routes: Routes }) {
             <p className="muted">Tu UI, con tu design system. Nada cambia en tu código sin que lo confirmes en Claude Code.</p>
           </div>
           <span className="status" role="status">
-            <span className={`dot${listening ? " on" : ""}`} aria-hidden="true" />
-            {listening ? "Claude Code está escuchando" : "Sin conexión con Claude Code"}
+            <span className={`dot${listening ? " on" : session ? " wait" : ""}`} aria-hidden="true" />
+            {listening ? "Claude Code está escuchando" : session ? "Claude Code no está escuchando" : "Sin conexión con Claude Code"}
           </span>
         </header>
 
-        {!listening && loaded && <Command why="Para usar el centro, pedile a Claude Code «abrí facha-ui», o pegá:" text="/facha-ui:center" />}
+        {!session && loaded && <Command why="Para usar el centro, pedile a Claude Code «abrí facha-ui», o pegá:" text="/facha-ui:center" />}
+        {session && !listening && loaded && (
+          <div className="notice" role="note">
+            <span>
+              <b>Claude Code no está escuchando.</b> Lo que pidas queda en cola y se hace cuando vuelva. Volvé a la conversación de Claude Code
+              y decí «abrí facha-ui», o pegá:
+            </span>
+            <Command why="" text="/facha-ui:center" />
+          </div>
+        )}
 
         {center && (
           <section aria-labelledby="project">
-            <h2 id="project">Cómo está tu proyecto</h2>
+            <div className="section-head">
+              <h2 id="project">Cómo está tu proyecto</h2>
+              <button type="button" disabled={!session || measuring} onClick={() => void post({ kind: "measure" })}>
+                {measuring ? (measure!.status.state === "working" ? "Midiendo…" : "En cola…") : "Volver a medir"}
+              </button>
+            </div>
+            {measure && measure.status.state === "failed" && <p className="error">{measure.status.message ?? "No se pudo medir."}</p>}
             <div className="tiles">
               <div className="tile">
                 <span className="muted">Puntaje de UX</span>
                 <span className="big">{center.project.score ?? "–"}</span>
+                <Delta now={center.project.score} before={before?.score ?? null} when={before?.at} />
                 <span className="muted">Consistencia, accesibilidad, responsive, textos y jerarquía. Sirve para comparar con vos mismo.</span>
               </div>
               <div className="tile">
@@ -507,7 +575,7 @@ function Center({ routes }: { routes: Routes }) {
           </section>
         )}
 
-        {center && listening && <DesignSystem center={center} upload={upload} />}
+        {center && session && <DesignSystem center={center} upload={upload} />}
 
         {center?.at && <p className="muted">Estado medido: {new Date(center.at).toLocaleString()}</p>}
       </div>

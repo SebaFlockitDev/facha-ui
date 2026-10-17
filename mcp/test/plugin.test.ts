@@ -814,6 +814,34 @@ describe("B-042 · the facha-ui center", () => {
   });
 });
 
+describe("B-044 · the center, live", () => {
+  const read = (p: string) => fs.readFileSync(path.join(REPO, "skills", "variants", "templates", "next-app", p), "utf8");
+  const page = read("lab-center.tsx");
+
+  it("tells listening apart from an open session, in the center and in the panel", () => {
+    expect(page).toContain('live.listening === true');
+    expect(page).toContain("Claude Code no está escuchando");
+    expect(page).toContain("Lo que pidas queda en cola");
+    expect(read("lab-panel.tsx")).toContain("live.listening === false");
+  });
+
+  it("measures again, shows the trend in words and chooses without applying", () => {
+    expect(page).toContain('post({ kind: "measure" })');
+    expect(page).toContain('kind: "choose"');
+    expect(page).toContain("/facha-ui:apply ${screen.slug} ${choice}");
+    expect(page).not.toMatch(/kind: "(init|apply)"/);
+    // The trend never by color alone (ux:wcag-1.4.1): an arrow and words.
+    expect(page).toContain('{up ? "↑" : "↓"}');
+    expect(page).toContain('"Subió" : "Bajó"');
+  });
+
+  it("the watcher's only write is its heartbeat", () => {
+    const watcher = fs.readFileSync(path.join(REPO, "skills", "variants", "scripts", "live-watch.mjs"), "utf8");
+    expect(watcher.match(/fs\.(writeFileSync|appendFileSync|renameSync|rmSync|unlinkSync|mkdirSync)\(/g)).toEqual(["fs.writeFileSync("]);
+    expect(watcher).toContain("fs.writeFileSync(listenerFile");
+  });
+});
+
 describe("B-026 · the direction preview in the lab", () => {
   const T = path.join(REPO, "skills", "variants", "templates");
   const read = (p: string) => fs.readFileSync(path.join(T, p), "utf8").replace(/\r\n/g, "\n");
